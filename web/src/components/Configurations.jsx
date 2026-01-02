@@ -11,19 +11,19 @@ export default function Configurations() {
     depot: {
       icon: Bike,
       color: 'accent-green',
-      modules: '1-3',
+      modules: '1-8',
       ...t('configurations.depot', { returnObjects: true }),
     },
     opportunity: {
       icon: Car,
       color: 'accent-cyan',
-      modules: '5-35',
+      modules: '17-117',
       ...t('configurations.opportunity', { returnObjects: true }),
     },
     swap: {
       icon: Truck,
       color: 'accent-purple',
-      modules: '15-100',
+      modules: '167-1000',
       ...t('configurations.swap', { returnObjects: true }),
     },
   };
@@ -82,8 +82,8 @@ export default function Configurations() {
             <div className="order-2 lg:order-1">
               <div className="bg-primary-light rounded-2xl border border-border p-8">
                 {/* Module grid visualization */}
-                <div className="flex flex-wrap justify-center gap-3 mb-8">
-                  {[...Array(parseInt(activeConfig.modules) || 10)].map((_, i) => (
+                <div className="flex flex-wrap justify-center gap-2 mb-8">
+                  {[...Array(Math.min(parseInt(activeConfig.modules) || 8, 24))].map((_, i) => (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -104,7 +104,7 @@ export default function Configurations() {
                           ? 'text-accent-cyan'
                           : 'text-accent-purple'
                       }`} />
-                      <span className="text-xs text-slate-400 mt-1">{activeTab === 'depot' ? 'EK3' : 'EK30'}</span>
+                      <span className="text-xs text-slate-400 mt-1">EK3</span>
                     </motion.div>
                   ))}
                 </div>

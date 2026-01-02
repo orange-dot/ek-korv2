@@ -142,31 +142,31 @@
     "challenge": "Uptime 99% zvuči dobro. Ali samo 71% punjenja uspe iz prvog pokušaja."
   },
   "product": {
-    "title": "Naš Pristup",
-    "subtitle": "Prediktivna dijagnostika",
-    "description": "Fokus na pouzdanost. AI prati stanje komponenti i reaguje pre nego što dođe do problema.",
+    "title": "EK3 Modul",
+    "subtitle": "Jedan modul za sve - od 3 kW do 3 MW",
+    "description": "Radikalna modularnost inspirisana 3PAR storage arhitekturom. Isti modul skalira od e-bicikla do MCS stanice.",
     "phase1": {
-      "title": "EK3 - PROOF OF CONCEPT",
+      "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
-      "description": "Full-featured mini modul",
-      "specs": ["SiC MOSFET (ne IGBT)", "LLC rezonantna topologija", "AI self-tuning", "Digital twin ugrađen"]
+      "description": "Standardni modul za sve primene",
+      "specs": ["100 × 300 × 44mm (1U)", "1.8 kg - robot-ready", "SiC MOSFET, >97% efikasnost", "Blind-mate konektori"]
     },
     "phase2": {
-      "title": "EK30 - PRODUCTION",
-      "power": "30 kW",
-      "description": "Premium modul bez kompromisa",
-      "specs": ["3-level NPC topologija", "Liquid cooling", "Prediktivna dijagnostika", "V2G/V2X spreman"]
+      "title": "RACK SISTEM",
+      "power": "252 kW",
+      "description": "84 modula u standardnom 19\" rack-u",
+      "specs": ["Wide striping - load na SVE module", "Distributed sparing - nema hot-spare", "Robot swap za 40 sekundi", "Graceful degradation"]
     },
     "features": {
-      "title": "Kako postižemo 99%?",
-      "modular": "Predviđa kvarove",
-      "modularDesc": "AI zna 2 nedelje unapred šta će da otkaže",
-      "hotswap": "Zna tačno šta",
-      "hotswapDesc": "Ne \"error 47\" - već tačan uzrok i rešenje",
-      "protection": "Sam se leči",
-      "protectionDesc": "55% problema reši automatski, bez tehničara",
-      "local": "Ne degradira",
-      "localDesc": "AI kompenzuje starenje - radi kao nov i posle 10 godina"
+      "title": "Zašto jedan modul za sve?",
+      "modular": "Masovna proizvodnja",
+      "modularDesc": "Jedan dizajn, milionski tiraž = niska cena",
+      "hotswap": "Granularna pouzdanost",
+      "hotswapDesc": "1 od 334 otkaže = 0.3% gubitak, ne 10%",
+      "protection": "Robot swap",
+      "protectionDesc": "40 sekundi zamena, bez tehničara",
+      "local": "3PAR inspiracija",
+      "localDesc": "Dokazani koncepti iz storage industrije"
     }
   },
   "configurations": {
@@ -199,36 +199,36 @@
   },
   "timeline": {
     "title": "Plan Razvoja",
-    "subtitle": "Metodičan pristup",
+    "subtitle": "Od modula do self-healing infrastrukture",
     "phase1": {
-      "title": "Faza 1: EK3 Full-Featured",
+      "title": "Faza 1: EK3 Modul",
       "duration": "4 meseca",
-      "description": "3 kW sa svim premium funkcijama",
-      "items": ["SiC power stage", "LLC + PFC", "AI control firmware", "Digital twin"]
+      "description": "Blade format, robot-ready dizajn",
+      "items": ["SiC MOSFET power stage", "Blind-mate konektori", "AI edge processor", "1.8 kg, 1U format"]
     },
     "phase2": {
-      "title": "Faza 2: AI Validacija",
-      "duration": "2 meseca",
-      "description": "ML model training na realnim podacima",
-      "items": ["Predictive algorithms", "Self-tuning loops", "Anomaly detection"]
+      "title": "Faza 2: Rack Sistem",
+      "duration": "3 meseca",
+      "description": "84 modula u 19\" rack-u",
+      "items": ["Backplane dizajn", "Wide striping algoritam", "Distributed sparing", "252 kW po rack-u"]
     },
     "phase3": {
-      "title": "Faza 3: EK30 Multi-Level",
-      "duration": "5 meseci",
-      "description": "3-level NPC, liquid cooling",
-      "items": ["NPC topologija", "Thermal system", "V2G implementation"]
+      "title": "Faza 3: Robot Sistem",
+      "duration": "4 meseca",
+      "description": "Custom roboti za swap",
+      "items": ["Robot A (na busu)", "Robot B (na stanici)", "Koordinacioni protokol", "40 sec swap"]
     },
     "phase4": {
-      "title": "Faza 4: Swarm Intelligence",
+      "title": "Faza 4: Self-Healing",
       "duration": "3 meseca",
-      "description": "Multi-modul AI koordinacija",
-      "items": ["Distributed AI", "Load optimization", "Grid services"]
+      "description": "Infrastruktura koja sama sebe popravlja",
+      "items": ["AI predikcija kvarova", "Automatska zamena", "Fleet logistics", "Zero truck rolls"]
     },
     "phase5": {
       "title": "Faza 5: Certifikacija",
       "duration": "4 meseca",
-      "description": "CE + V2G sertifikati",
-      "items": ["IEC 61851", "ISO 15118-20", "Grid codes"]
+      "description": "CE + grid compliance",
+      "items": ["IEC 61851", "ISO 15118-20", "Safety certifikati"]
     }
   },
   "team": {

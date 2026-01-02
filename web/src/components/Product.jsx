@@ -77,7 +77,7 @@ export default function Product() {
             </div>
           </motion.div>
 
-          {/* Phase 2: EK30 */}
+          {/* Phase 2: Rack System */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -89,12 +89,16 @@ export default function Product() {
                 {phase2.title}
               </div>
 
-              {/* Module visualization */}
+              {/* Rack visualization - 84 modules */}
               <div className="flex justify-center mb-6 mt-4">
-                <div className="w-40 h-48 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg border border-accent-cyan/30 flex flex-col items-center justify-center">
-                  <Zap className="w-12 h-12 text-accent-cyan mb-2" />
-                  <div className="text-3xl font-bold text-white">{phase2.power}</div>
-                  <div className="text-xs text-slate-400">EK30</div>
+                <div className="w-48 h-56 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg border border-accent-cyan/30 flex flex-col items-center justify-center p-4">
+                  <div className="grid grid-cols-6 gap-1 mb-2">
+                    {[...Array(12)].map((_, i) => (
+                      <div key={i} className="w-2 h-6 bg-accent-cyan/40 rounded-sm"></div>
+                    ))}
+                  </div>
+                  <div className="text-2xl font-bold text-white">{phase2.power}</div>
+                  <div className="text-xs text-slate-400">84× EK3</div>
                 </div>
               </div>
 
@@ -117,12 +121,12 @@ export default function Product() {
         {/* Arrow between phases */}
         <div className="hidden md:flex justify-center items-center -mt-12 mb-8">
           <div className="flex items-center space-x-4 bg-primary-light px-6 py-2 rounded-full border border-border">
-            <span className="text-accent-green font-bold">EK3</span>
+            <span className="text-accent-green font-bold">1× EK3</span>
             <svg className="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
-            <span className="text-accent-cyan font-bold">EK30</span>
-            <span className="text-slate-400 text-sm ml-2">ista arhitektura, ×10 snaga</span>
+            <span className="text-accent-cyan font-bold">84× EK3</span>
+            <span className="text-slate-400 text-sm ml-2">3 kW → 252 kW</span>
           </div>
         </div>
 

@@ -142,31 +142,31 @@
     "challenge": "99% uptime sounds great. But only 71% of charges succeed on the first try."
   },
   "product": {
-    "title": "Our Approach",
-    "subtitle": "Predictive diagnostics",
-    "description": "Focus on reliability. AI monitors component status and reacts before problems occur.",
+    "title": "EK3 Module",
+    "subtitle": "One module for everything - from 3 kW to 3 MW",
+    "description": "Radical modularity inspired by 3PAR storage architecture. Same module scales from e-bike to MCS station.",
     "phase1": {
-      "title": "EK3 - PROOF OF CONCEPT",
+      "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
-      "description": "Full-featured mini module",
-      "specs": ["SiC MOSFET (not IGBT)", "LLC resonant topology", "AI self-tuning", "Built-in digital twin"]
+      "description": "Standard module for all applications",
+      "specs": ["100 × 300 × 44mm (1U)", "1.8 kg - robot-ready", "SiC MOSFET, >97% efficiency", "Blind-mate connectors"]
     },
     "phase2": {
-      "title": "EK30 - PRODUCTION",
-      "power": "30 kW",
-      "description": "Premium module, no compromises",
-      "specs": ["3-level NPC topology", "Liquid cooling", "Predictive diagnostics", "V2G/V2X ready"]
+      "title": "RACK SYSTEM",
+      "power": "252 kW",
+      "description": "84 modules in standard 19\" rack",
+      "specs": ["Wide striping - load across ALL modules", "Distributed sparing - no hot-spare", "Robot swap in 40 seconds", "Graceful degradation"]
     },
     "features": {
-      "title": "How we achieve 99%?",
-      "modular": "Predicts failures",
-      "modularDesc": "AI knows 2 weeks ahead what will fail",
-      "hotswap": "Knows exactly what",
-      "hotswapDesc": "Not \"error 47\" - exact cause and solution",
-      "protection": "Self-heals",
-      "protectionDesc": "55% of issues fixed automatically, no technician",
-      "local": "Never degrades",
-      "localDesc": "AI compensates for aging - works like new after 10 years"
+      "title": "Why one module for everything?",
+      "modular": "Mass production",
+      "modularDesc": "One design, millions of units = low cost",
+      "hotswap": "Granular reliability",
+      "hotswapDesc": "1 of 334 fails = 0.3% loss, not 10%",
+      "protection": "Robot swap",
+      "protectionDesc": "40 second replacement, no technician",
+      "local": "3PAR inspiration",
+      "localDesc": "Proven concepts from storage industry"
     }
   },
   "configurations": {
@@ -199,36 +199,36 @@
   },
   "timeline": {
     "title": "Development Plan",
-    "subtitle": "Methodical approach",
+    "subtitle": "From module to self-healing infrastructure",
     "phase1": {
-      "title": "Phase 1: EK3 Full-Featured",
+      "title": "Phase 1: EK3 Module",
       "duration": "4 months",
-      "description": "3 kW with all premium features",
-      "items": ["SiC power stage", "LLC + PFC", "AI control firmware", "Digital twin"]
+      "description": "Blade format, robot-ready design",
+      "items": ["SiC MOSFET power stage", "Blind-mate connectors", "AI edge processor", "1.8 kg, 1U format"]
     },
     "phase2": {
-      "title": "Phase 2: AI Validation",
-      "duration": "2 months",
-      "description": "ML model training on real data",
-      "items": ["Predictive algorithms", "Self-tuning loops", "Anomaly detection"]
+      "title": "Phase 2: Rack System",
+      "duration": "3 months",
+      "description": "84 modules in 19\" rack",
+      "items": ["Backplane design", "Wide striping algorithm", "Distributed sparing", "252 kW per rack"]
     },
     "phase3": {
-      "title": "Phase 3: EK30 Multi-Level",
-      "duration": "5 months",
-      "description": "3-level NPC, liquid cooling",
-      "items": ["NPC topology", "Thermal system", "V2G implementation"]
+      "title": "Phase 3: Robot System",
+      "duration": "4 months",
+      "description": "Custom robots for swap",
+      "items": ["Robot A (on bus)", "Robot B (at station)", "Coordination protocol", "40 sec swap"]
     },
     "phase4": {
-      "title": "Phase 4: Swarm Intelligence",
+      "title": "Phase 4: Self-Healing",
       "duration": "3 months",
-      "description": "Multi-module AI coordination",
-      "items": ["Distributed AI", "Load optimization", "Grid services"]
+      "description": "Infrastructure that repairs itself",
+      "items": ["AI failure prediction", "Automatic replacement", "Fleet logistics", "Zero truck rolls"]
     },
     "phase5": {
       "title": "Phase 5: Certification",
       "duration": "4 months",
-      "description": "CE + V2G certificates",
-      "items": ["IEC 61851", "ISO 15118-20", "Grid codes"]
+      "description": "CE + grid compliance",
+      "items": ["IEC 61851", "ISO 15118-20", "Safety certificates"]
     }
   },
   "team": {
