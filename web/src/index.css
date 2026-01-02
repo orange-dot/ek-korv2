@@ -69,3 +69,26 @@ body {
   background: rgba(0, 212, 255, 0.3);
   color: #ffffff;
 }
+
+/* Leaflet z-index overrides for modal to work */
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+.leaflet-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 5 !important;
+}
+
+.leaflet-control {
+  z-index: 5 !important;
+}
+
+/* Modal overlay - highest z-index */
+.decision-modal-overlay {
+  z-index: 9999 !important;
+}

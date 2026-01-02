@@ -7,7 +7,55 @@
     "robots": "Robots",
     "timeline": "Development",
     "team": "Vision",
-    "contact": "Contact"
+    "contact": "Contact",
+    "simulation": "Simulation"
+  },
+  "simulation": {
+    "title": "System Simulation",
+    "backToHome": "Back",
+    "running": "Running",
+    "paused": "Paused",
+    "route": "Route",
+    "battery": "Battery",
+    "status": "Status",
+    "fleetSize": "Fleet Size",
+    "busList": "Bus List",
+    "chargingStations": "Charging Stations",
+    "stationType": "Station Type",
+    "maxPower": "Max Power",
+    "currentPower": "Current Power",
+    "modules": "Modules",
+    "robotSystem": "Robot System",
+    "busRobot": "Bus robot",
+    "stationRobot": "Station robot",
+    "swapsToday": "Swaps today",
+    "systemStatus": "System Status",
+    "states": {
+      "driving": "Driving",
+      "charging": "Charging",
+      "waiting": "Waiting",
+      "swapping": "Swapping"
+    },
+    "stationTypes": {
+      "depot": "Depot",
+      "opportunity": "Opportunity"
+    },
+    "robotStatus": {
+      "idle": "Idle",
+      "active": "Active",
+      "swapping": "Swapping"
+    },
+    "tabs": {
+      "fleet": "Fleet",
+      "stations": "Stations",
+      "robots": "Robots"
+    },
+    "metrics": {
+      "active": "Active",
+      "charging": "Charging",
+      "avgBattery": "Avg Battery",
+      "power": "Power"
+    }
   },
   "philosophy": {
     "title": "High Modularity Design",

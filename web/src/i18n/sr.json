@@ -7,7 +7,55 @@
     "robots": "Roboti",
     "timeline": "Razvoj",
     "team": "Vizija",
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "simulation": "Simulacija"
+  },
+  "simulation": {
+    "title": "Simulacija Sistema",
+    "backToHome": "Nazad",
+    "running": "Aktivno",
+    "paused": "Pauzirano",
+    "route": "Linija",
+    "battery": "Baterija",
+    "status": "Status",
+    "fleetSize": "Veličina flote",
+    "busList": "Lista autobusa",
+    "chargingStations": "Stanice za punjenje",
+    "stationType": "Tip stanice",
+    "maxPower": "Max snaga",
+    "currentPower": "Trenutna snaga",
+    "modules": "Moduli",
+    "robotSystem": "Robotski sistem",
+    "busRobot": "Robot na autobusu",
+    "stationRobot": "Robot na stanici",
+    "swapsToday": "Zamena danas",
+    "systemStatus": "Status sistema",
+    "states": {
+      "driving": "Vozi",
+      "charging": "Puni se",
+      "waiting": "Čeka",
+      "swapping": "Zamena"
+    },
+    "stationTypes": {
+      "depot": "Depo",
+      "opportunity": "Opportunity"
+    },
+    "robotStatus": {
+      "idle": "Spreman",
+      "active": "Aktivan",
+      "swapping": "Zamena"
+    },
+    "tabs": {
+      "fleet": "Flota",
+      "stations": "Stanice",
+      "robots": "Roboti"
+    },
+    "metrics": {
+      "active": "Aktivno",
+      "charging": "Puni se",
+      "avgBattery": "Prosek bat.",
+      "power": "Snaga"
+    }
   },
   "philosophy": {
     "title": "Dizajn Visoke Modularnosti",
