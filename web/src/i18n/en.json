@@ -4,6 +4,7 @@
     "configurations": "Configurations",
     "problem": "Problem",
     "philosophy": "Approach",
+    "robots": "Robots",
     "timeline": "Development",
     "team": "Vision",
     "contact": "Contact"
@@ -256,6 +257,67 @@
       "email": "info@elektrokombinacija.rs",
       "phone": "+381 11 XXX XXXX",
       "address": "Belgrade, Serbia"
+    }
+  },
+  "robots": {
+    "title": "Coordinated Robot System",
+    "subtitle": "Two robots, one mission: self-healing infrastructure",
+    "robotA": {
+      "title": "Robot A",
+      "location": "On the bus",
+      "features": [
+        "Compact, <15 kg",
+        "Real-time diagnostics",
+        "Connector manipulation",
+        "Carries spare parts",
+        "Works independently"
+      ]
+    },
+    "robotB": {
+      "title": "Robot B",
+      "location": "At the station",
+      "features": [
+        "Battery swap",
+        "EK3 module replacement",
+        "Heavy-duty operations",
+        "Coordinates with Robot A",
+        "24/7 availability"
+      ]
+    },
+    "coordination": "Coordination",
+    "wireless": "Wireless synchronization",
+    "selfHealing": {
+      "title": "Self-Healing: Traditional vs ELEKTROKOMBINACIJA",
+      "traditional": {
+        "title": "Traditional approach",
+        "steps": [
+          "Charging FAIL",
+          "Alarm to central",
+          "Dispatcher sends technician",
+          "Technician drives 1-2 hours",
+          "Diagnosis 30 min",
+          "Repair 1 hour"
+        ],
+        "result": "Total: 3-4 hours downtime"
+      },
+      "ek": {
+        "title": "ELEKTROKOMBINACIJA",
+        "steps": [
+          "Charging FAIL",
+          "Robot A: diagnostics (30 sec)",
+          "AI identifies problem",
+          "Robot B: module swap (60 sec)",
+          "Charging OK",
+          "Bus continues"
+        ],
+        "result": "Total: 2 minutes!"
+      }
+    },
+    "stats": {
+      "robots": "coordinated robots",
+      "repairTime": "repair time",
+      "truckRolls": "truck rolls",
+      "availability": "availability"
     }
   },
   "footer": {

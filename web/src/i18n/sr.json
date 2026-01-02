@@ -4,6 +4,7 @@
     "configurations": "Konfiguracije",
     "problem": "Problem",
     "philosophy": "Pristup",
+    "robots": "Roboti",
     "timeline": "Razvoj",
     "team": "Vizija",
     "contact": "Kontakt"
@@ -256,6 +257,67 @@
       "email": "info@elektrokombinacija.rs",
       "phone": "+381 11 XXX XXXX",
       "address": "Beograd, Srbija"
+    }
+  },
+  "robots": {
+    "title": "Koordinisani Robotski Sistem",
+    "subtitle": "Dva robota, jedna misija: infrastruktura koja sama sebe popravlja",
+    "robotA": {
+      "title": "Robot A",
+      "location": "Na autobusu",
+      "features": [
+        "Kompaktan, <15 kg",
+        "Dijagnostika u realnom vremenu",
+        "Manipulacija konektorima",
+        "Nosi rezervne delove",
+        "Radi i samostalno"
+      ]
+    },
+    "robotB": {
+      "title": "Robot B",
+      "location": "Na stanici",
+      "features": [
+        "Battery swap",
+        "Zamena EK3 modula",
+        "Heavy-duty operacije",
+        "Koordinacija sa Robot A",
+        "24/7 dostupnost"
+      ]
+    },
+    "coordination": "Koordinacija",
+    "wireless": "Bežična sinhronizacija",
+    "selfHealing": {
+      "title": "Self-Healing: Tradicionalno vs ELEKTROKOMBINACIJA",
+      "traditional": {
+        "title": "Tradicionalni pristup",
+        "steps": [
+          "Punjenje FAIL",
+          "Alarm na centralu",
+          "Dispečer šalje tehničara",
+          "Tehničar vozi 1-2 sata",
+          "Dijagnostika 30 min",
+          "Popravka 1 sat"
+        ],
+        "result": "Ukupno: 3-4 sata downtime"
+      },
+      "ek": {
+        "title": "ELEKTROKOMBINACIJA",
+        "steps": [
+          "Punjenje FAIL",
+          "Robot A: dijagnostika (30 sek)",
+          "AI identifikuje problem",
+          "Robot B: zamena modula (60 sek)",
+          "Punjenje OK",
+          "Bus nastavlja"
+        ],
+        "result": "Ukupno: 2 minuta!"
+      }
+    },
+    "stats": {
+      "robots": "robota u koordinaciji",
+      "repairTime": "vreme popravke",
+      "truckRolls": "truck rolls",
+      "availability": "dostupnost"
     }
   },
   "footer": {

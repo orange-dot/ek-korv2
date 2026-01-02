@@ -15,6 +15,7 @@ export default function Navbar() {
     { href: '#problem', label: t('nav.problem') },
     { href: '#product', label: t('nav.product') },
     { href: '#philosophy', label: t('nav.philosophy') },
+    { href: '#robots', label: t('nav.robots') },
     { href: '#configurations', label: t('nav.configurations') },
     { href: '#timeline', label: t('nav.timeline') },
     { href: '#team', label: t('nav.team') },
