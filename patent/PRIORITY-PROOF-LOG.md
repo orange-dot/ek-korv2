@@ -89,6 +89,7 @@ Alternativa: OriginStamp blockchain
 | EK-2026-002 | Dual-Purpose Robotic Swap Station | ✅ Committed |
 | EK-2026-003 | Distributed Power Sparing System | ✅ Committed |
 | EK-2026-004 | Fleet-Integrated Maintenance Logistics | ✅ Committed |
+| EK-2026-005 | Coordinated Dual-Robot System | ✅ NEW |
 
 ---
 

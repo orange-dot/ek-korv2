@@ -236,8 +236,9 @@ MCS STATION (3 MW):
 ROBOT SPECIFICATIONS:
 ═══════════════════════════════════════════════════════════════
 
-Type: Collaborative robot (cobot) on linear rail
-Recommended: UR10e, KUKA LBR iiwa 14, or equivalent
+Type: Custom-designed robot system (NOT off-the-shelf UR/KUKA)
+Design: Purpose-built for EV charging maintenance
+See also: EK-2026-005 (Coordinated Dual-Robot System)
 
 Requirements:
 • Payload: ≥10 kg (module 1.8 kg + gripper)
