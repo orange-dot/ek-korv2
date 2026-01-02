@@ -13,7 +13,8 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nNEW PATENT: EK-2026-005 Coordinated Dual-Robot System\n\nKey innovation: Custom robots, NOT off-the-shelf UR/KUKA\n\n- Robot A: Vehicle-mounted \\(on bus\\)\n- Robot B: Station-based  \n- Coordinated operation\n- Self-healing infrastructure\n- Bus arrives + charging fails → robots fix it automatically\n\nInventor: Bojan Janjatović\nDate: 2026-01-02\nEOF\n\\)\")",
       "Bash(cat:*)",
       "Bash(npm run build:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }
