@@ -1,14 +1,41 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X, Zap, Globe } from 'lucide-react';
+import { Menu, X, Zap, Globe, Play } from 'lucide-react';
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language === 'sr' ? 'en' : 'sr');
+  };
+
+  const handleNavClick = (e, href) => {
+    e.preventDefault();
+    const sectionId = href.replace('#', '');
+
+    // If not on home page, navigate there first
+    if (location.pathname !== '/') {
+      navigate('/');
+      // Wait for navigation then scroll
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      // Already on home page, just scroll
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    setIsOpen(false);
   };
 
   const navItems = [
@@ -27,13 +54,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="#" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2">
             <Zap className="w-8 h-8 text-accent-cyan" />
             <span className="text-xl font-bold">
               <span className="text-white">ELEKTRO</span>
               <span className="text-accent-cyan">KOMBINACIJA</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -41,11 +68,23 @@ export default function Navbar() {
               <a
                 key={item.href}
                 href={item.href}
-                className="text-slate-300 hover:text-accent-cyan transition-colors text-sm font-medium"
+                onClick={(e) => handleNavClick(e, item.href)}
+                className="text-slate-300 hover:text-accent-cyan transition-colors text-sm font-medium cursor-pointer"
               >
                 {item.label}
               </a>
             ))}
+
+            {/* Simulation Link */}
+            <Link
+              to="/simulation"
+              className="flex items-center space-x-1 px-4 py-1.5 rounded-full bg-accent-cyan/10 border border-accent-cyan hover:bg-accent-cyan/20 transition-colors"
+            >
+              <Play className="w-4 h-4 text-accent-cyan" />
+              <span className="text-sm font-medium text-accent-cyan">
+                {t('nav.simulation')}
+              </span>
+            </Link>
 
             {/* Language Toggle */}
             <button
@@ -94,12 +133,20 @@ export default function Navbar() {
               <a
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
-                className="block text-slate-300 hover:text-accent-cyan transition-colors py-2"
+                onClick={(e) => handleNavClick(e, item.href)}
+                className="block text-slate-300 hover:text-accent-cyan transition-colors py-2 cursor-pointer"
               >
                 {item.label}
               </a>
             ))}
+            <Link
+              to="/simulation"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center space-x-2 text-accent-cyan py-2"
+            >
+              <Play className="w-4 h-4" />
+              <span>{t('nav.simulation')}</span>
+            </Link>
           </div>
         </motion.div>
       )}

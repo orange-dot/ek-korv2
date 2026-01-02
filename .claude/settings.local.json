@@ -14,7 +14,15 @@
       "Bash(cat:*)",
       "Bash(npm run build:*)",
       "Bash(git commit:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(tree:*)",
+      "Bash(npm install:*)",
+      "WebFetch(domain:www.wipo.int)",
+      "Bash(timeout 3:*)",
+      "Bash(git config:*)",
+      "Bash(gpg --list-secret-keys:*)",
+      "Bash(gpg --armor --export:*)",
+      "Bash(git log:*)"
     ]
   }
 }

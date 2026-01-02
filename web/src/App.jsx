@@ -1,35 +1,28 @@
-import { useTranslation } from 'react-i18next';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
-import Hero from './components/Hero';
-import Problem from './components/Problem';
-import Product from './components/Product';
-import Philosophy from './components/Philosophy';
-import RobotSystem from './components/RobotSystem';
-import Configurations from './components/Configurations';
-import Timeline from './components/Timeline';
-import Team from './components/Team';
-import Contact from './components/Contact';
+import HomePage from './pages/HomePage';
+import SimulationPage from './pages/SimulationPage';
+import PatentPage from './pages/PatentPage';
 
 function App() {
-  const { t } = useTranslation();
-
   return (
-    <div className="min-h-screen bg-primary">
-      <Navbar />
-      <main>
-        <Hero />
-        <Problem />
-        <Product />
-        <Philosophy />
-        <RobotSystem />
-        <Configurations />
-        <Timeline />
-        <Team />
-        <Contact />
-      </main>
-      <Footer />
-    </div>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <div className="min-h-screen bg-primary">
+            <Navbar />
+            <main>
+              <HomePage />
+            </main>
+            <Footer />
+          </div>
+        }
+      />
+      <Route path="/simulation" element={<SimulationPage />} />
+      <Route path="/patent" element={<PatentPage />} />
+    </Routes>
   );
 }
 
