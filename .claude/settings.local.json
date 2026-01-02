@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:wipoproof.wipo.int)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nPatent disclosure documents - Priority date 2026-01-02\n\nCONFIDENTIAL - Invention Disclosure Documents\n\nInventor: Bojan Janjatović\nWitness: Marija Janjatović\nDate of Conception: 2026-01-02\n\nConcepts disclosed:\n- EK-2026-001: Unified Modular Power Architecture\n- EK-2026-002: Dual-Purpose Robotic Swap Station\n- EK-2026-003: Distributed Power Sparing System\n- EK-2026-004: Fleet-Integrated Maintenance Logistics\n\nThis commit establishes priority date for patent purposes.\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "WebFetch(domain:originstamp.com)",
+      "WebFetch(domain:opentimestamps.org)"
+    ]
+  }
+}

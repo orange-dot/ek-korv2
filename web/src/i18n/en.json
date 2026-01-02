@@ -1,0 +1,265 @@
+{
+  "nav": {
+    "product": "Product",
+    "configurations": "Configurations",
+    "problem": "Problem",
+    "philosophy": "Approach",
+    "timeline": "Development",
+    "team": "Vision",
+    "contact": "Contact"
+  },
+  "philosophy": {
+    "title": "High Modularity Design",
+    "subtitle": "A lesson from electronics history",
+    "description": "The consumer electronics industry abandoned modularity for cheaper production. But infrastructure has different requirements - an EV charger must last 15+ years and be serviceable in the field. We're bringing back the modular approach, enhanced with modern technology.",
+    "history": {
+      "title": "Service Evolution: The TV Example",
+      "subtitle": "How the industry lost repairability - and why we're bringing it back"
+    },
+    "era1": {
+      "title": "Modular Systems",
+      "period": "1970-1990",
+      "description": "A TV set consisted of a chassis and replaceable modules: tuner, IF, video, audio, power supply. Each module had its function and could be independently replaced or repaired.",
+      "features": [
+        "Fault? Diagnosis in 5 minutes - which module is bad",
+        "Module swap in the field in 30 minutes",
+        "Module goes to workshop - repaired without rush",
+        "Technician doesn't need to be expert in all modules",
+        "Equipment lasts 15-20 years"
+      ],
+      "result": "Result: Long-lasting, repairable equipment"
+    },
+    "era2": {
+      "title": "Integrated Systems",
+      "period": "1990-2000s",
+      "description": "All functions in a few custom chips on one board. Cheaper to manufacture, but impossible to repair. Surface-mount components, proprietary parts, planned obsolescence.",
+      "features": [
+        "Diagnosis complex - requires expensive equipment",
+        "Field repair practically impossible",
+        "Service often more expensive than new device",
+        "Technician must be highly specialized",
+        "\"Throw away and buy new\" - 3-5 year lifespan"
+      ],
+      "result": "Result: Planned obsolescence, e-waste"
+    },
+    "transition": {
+      "from": "Consumer electronics",
+      "to": "Infrastructure requires a different approach"
+    },
+    "era3": {
+      "title": "ELEKTROKOMBINACIJA",
+      "period": "1970s Modularity + 2020s AI",
+      "description": "We combine the best of both worlds: highly modular design enabling fast field replacement, with modern AI diagnostics that predict failures and robotic automation for swap.",
+      "features": [
+        "AI predicts failure 2 weeks ahead",
+        "Robot swaps module in 60 seconds",
+        "No technician needed in the field",
+        "Module is repaired at service center - by humans"
+      ],
+      "result": "15+ year lifespan, zero downtime, circular economy"
+    },
+    "workflow": {
+      "title": "Service Process",
+      "subtitle": "From prediction to repair - automated and efficient",
+      "steps": [
+        {
+          "title": "AI Detection",
+          "description": "System detects module degradation and predicts failure",
+          "time": "14 days ahead"
+        },
+        {
+          "title": "Automatic Swap",
+          "description": "Robot at swap station replaces module without human intervention",
+          "time": "60 seconds"
+        },
+        {
+          "title": "Transport",
+          "description": "Replaced module travels to service center with the next bus",
+          "time": "Same day"
+        },
+        {
+          "title": "Human Repair",
+          "description": "Technicians at service center diagnose and repair module",
+          "time": "1-3 days"
+        }
+      ]
+    },
+    "locations": {
+      "title": "Two Places, Two Roles",
+      "field": {
+        "title": "In the Field",
+        "subtitle": "Automated, fast, no waiting",
+        "point1": "Robotic module swap - 60 seconds",
+        "point2": "AI diagnostics - knows exactly what to replace",
+        "point3": "No technician needed on location",
+        "note": "Zero truck rolls for replacement"
+      },
+      "service": {
+        "title": "At Service Center",
+        "subtitle": "Human expertise, no rush",
+        "point1": "Detailed module diagnosis and repair",
+        "point2": "Qualified technicians with proper equipment",
+        "point3": "Refurbishment to factory specifications",
+        "note": "Circular economy - modules return to service"
+      }
+    }
+  },
+  "hero": {
+    "title": "ELEKTRO",
+    "subtitle": "KOMBINACIJA",
+    "tagline": "EV charger with predictive diagnostics",
+    "description": "AI that monitors system health, predicts issues, and enables intervention before failure. Goal: maximum reliability.",
+    "cta": "Learn more",
+    "stats": {
+      "power": "99%",
+      "powerLabel": "success rate",
+      "weight": "2 wks",
+      "weightLabel": "failure prediction",
+      "price": "0",
+      "priceLabel": "surprises"
+    }
+  },
+  "problem": {
+    "title": "Industry Status",
+    "subtitle": "2025 data",
+    "stats": {
+      "success": "71%",
+      "successLabel": "FTCSR - first-time success rate",
+      "broken": "84%",
+      "brokenLabel": "overall success rate (J.D. Power)",
+      "diagnostic": "15pt",
+      "diagnosticLabel": "reliability drop after 3 years"
+    },
+    "quote": "\"Uptime tells us if a charger is available, but it doesn't tell us if a driver can actually plug in and get a charge on the first attempt.\"",
+    "quoteAuthor": "— Kameale Terry, CEO ChargerHelp",
+    "aging": {
+      "title": "Degradation is still a problem",
+      "year0": "New charger: 85% FTCSR",
+      "year3": "After 3 years: 69.9%",
+      "description": "ChargerHelp 2025: 15 point drop that uptime metrics don't capture."
+    },
+    "challenge": "99% uptime sounds great. But only 71% of charges succeed on the first try."
+  },
+  "product": {
+    "title": "Our Approach",
+    "subtitle": "Predictive diagnostics",
+    "description": "Focus on reliability. AI monitors component status and reacts before problems occur.",
+    "phase1": {
+      "title": "EK3 - PROOF OF CONCEPT",
+      "power": "3 kW",
+      "description": "Full-featured mini module",
+      "specs": ["SiC MOSFET (not IGBT)", "LLC resonant topology", "AI self-tuning", "Built-in digital twin"]
+    },
+    "phase2": {
+      "title": "EK30 - PRODUCTION",
+      "power": "30 kW",
+      "description": "Premium module, no compromises",
+      "specs": ["3-level NPC topology", "Liquid cooling", "Predictive diagnostics", "V2G/V2X ready"]
+    },
+    "features": {
+      "title": "How we achieve 99%?",
+      "modular": "Predicts failures",
+      "modularDesc": "AI knows 2 weeks ahead what will fail",
+      "hotswap": "Knows exactly what",
+      "hotswapDesc": "Not \"error 47\" - exact cause and solution",
+      "protection": "Self-heals",
+      "protectionDesc": "55% of issues fixed automatically, no technician",
+      "local": "Never degrades",
+      "localDesc": "AI compensates for aging - works like new after 10 years"
+    }
+  },
+  "configurations": {
+    "title": "One Module for Everything",
+    "subtitle": "EK3: From e-bike to MCS station",
+    "depot": {
+      "title": "Light EV",
+      "power": "3-22 kW",
+      "modules": "1-8 × EK3",
+      "price": "€150 - €1,200",
+      "description": "E-bikes, scooters, home charging. Same module as in MW station.",
+      "features": ["1-8 modules", "Plug & play", "AI diagnostics"]
+    },
+    "opportunity": {
+      "title": "DC Fast Charging",
+      "power": "50-350 kW",
+      "modules": "17-117 × EK3",
+      "price": "€2,500 - €18,000",
+      "description": "Cars, highway stations. Rack system, robot-ready module swap.",
+      "features": ["1-2 racks", "40 sec swap", "99.9% uptime"]
+    },
+    "swap": {
+      "title": "Heavy Duty + MCS",
+      "power": "500 kW - 3 MW",
+      "modules": "167-1000 × EK3",
+      "price": "Contact us",
+      "description": "Buses, trucks, MCS. Multiple racks, robotic swap, graceful degradation.",
+      "features": ["4-12 racks", "2 robots parallel", "0.1% loss per failure"]
+    }
+  },
+  "timeline": {
+    "title": "Development Plan",
+    "subtitle": "Methodical approach",
+    "phase1": {
+      "title": "Phase 1: EK3 Full-Featured",
+      "duration": "4 months",
+      "description": "3 kW with all premium features",
+      "items": ["SiC power stage", "LLC + PFC", "AI control firmware", "Digital twin"]
+    },
+    "phase2": {
+      "title": "Phase 2: AI Validation",
+      "duration": "2 months",
+      "description": "ML model training on real data",
+      "items": ["Predictive algorithms", "Self-tuning loops", "Anomaly detection"]
+    },
+    "phase3": {
+      "title": "Phase 3: EK30 Multi-Level",
+      "duration": "5 months",
+      "description": "3-level NPC, liquid cooling",
+      "items": ["NPC topology", "Thermal system", "V2G implementation"]
+    },
+    "phase4": {
+      "title": "Phase 4: Swarm Intelligence",
+      "duration": "3 months",
+      "description": "Multi-module AI coordination",
+      "items": ["Distributed AI", "Load optimization", "Grid services"]
+    },
+    "phase5": {
+      "title": "Phase 5: Certification",
+      "duration": "4 months",
+      "description": "CE + V2G certificates",
+      "items": ["IEC 61851", "ISO 15118-20", "Grid codes"]
+    }
+  },
+  "team": {
+    "title": "Our Vision",
+    "subtitle": "Return to modularity",
+    "mission": "The industry went down the integration path - everything in one chip, impossible to repair, planned obsolescence. But infrastructure isn't a phone. An EV charger should last 15+ years. We combine 1970s modularity with 2020s AI technology: module swap in the field in 60 seconds, no technician needed, and AI predicts failures two weeks ahead.",
+    "stats": {
+      "guarantee": "15+",
+      "guaranteeLabel": "years lifespan",
+      "refund": "60s",
+      "refundLabel": "module swap"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Ready for a no-compromise future?",
+    "form": {
+      "name": "Full name",
+      "email": "Email address",
+      "company": "Company (optional)",
+      "message": "Message",
+      "submit": "Send",
+      "success": "Message sent successfully!"
+    },
+    "info": {
+      "email": "info@elektrokombinacija.rs",
+      "phone": "+381 11 XXX XXXX",
+      "address": "Belgrade, Serbia"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 ELEKTROKOMBINACIJA. All rights reserved.",
+    "tagline": "Predictive diagnostics for EV chargers."
+  }
+}

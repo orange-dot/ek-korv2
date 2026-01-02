@@ -1,0 +1,265 @@
+{
+  "nav": {
+    "product": "Proizvod",
+    "configurations": "Konfiguracije",
+    "problem": "Problem",
+    "philosophy": "Pristup",
+    "timeline": "Razvoj",
+    "team": "Vizija",
+    "contact": "Kontakt"
+  },
+  "philosophy": {
+    "title": "Dizajn Visoke Modularnosti",
+    "subtitle": "Lekcija iz istorije elektronike",
+    "description": "Industrija potrošačke elektronike je napustila modularnost zarad jeftinije proizvodnje. Ali infrastruktura ima drugačije zahteve - EV punjač mora trajati 15+ godina i biti servisiran na terenu. Mi vraćamo modularni pristup, pojačan modernom tehnologijom.",
+    "history": {
+      "title": "Evolucija Servisiranja: Primer Televizora",
+      "subtitle": "Kako je industrija izgubila mogućnost popravke - i zašto to vraćamo"
+    },
+    "era1": {
+      "title": "Modularni Sistemi",
+      "period": "1970-1990",
+      "description": "TV prijemnik se sastojao od šasije i zamenljivih modula: tuner, IF, video, audio, napajanje. Svaki modul je imao svoju funkciju i mogao se nezavisno zameniti ili popraviti.",
+      "features": [
+        "Kvar? Dijagnostika za 5 minuta - koji modul ne radi",
+        "Zamena modula na terenu za 30 minuta",
+        "Modul ide u servis - popravlja se bez žurbe",
+        "Tehničar ne mora biti ekspert za sve module",
+        "Oprema traje 15-20 godina"
+      ],
+      "result": "Rezultat: Dugovečna, popravljiva oprema"
+    },
+    "era2": {
+      "title": "Integrisani Sistemi",
+      "period": "1990-2000s",
+      "description": "Sve funkcije u nekoliko custom čipova na jednoj ploči. Jeftinije za proizvodnju, ali nemoguće za popravku. Surface-mount komponente, proprietary delovi, planned obsolescence.",
+      "features": [
+        "Dijagnostika kompleksna - treba skupa oprema",
+        "Popravka na terenu praktično nemoguća",
+        "Servis često skuplji od novog uređaja",
+        "Tehničar mora biti visoko specijalizovan",
+        "\"Baci i kupi nov\" - životni vek 3-5 godina"
+      ],
+      "result": "Rezultat: Planned obsolescence, e-otpad"
+    },
+    "transition": {
+      "from": "Potrošačka elektronika",
+      "to": "Infrastruktura zahteva drugačiji pristup"
+    },
+    "era3": {
+      "title": "ELEKTROKOMBINACIJA",
+      "period": "Modularnost 1970s + AI 2020s",
+      "description": "Kombinujemo najbolje iz oba sveta: visoko modularni dizajn koji omogućava brzu zamenu na terenu, sa modernom AI dijagnostikom koja predviđa kvarove i robotskom automatizacijom zamene.",
+      "features": [
+        "AI predviđa kvar 2 nedelje unapred",
+        "Robot menja modul za 60 sekundi",
+        "Tehničar nije potreban na terenu",
+        "Modul se popravlja u servisu - od strane ljudi"
+      ],
+      "result": "Životni vek 15+ godina, zero downtime, cirkularna ekonomija"
+    },
+    "workflow": {
+      "title": "Proces Servisiranja",
+      "subtitle": "Od predikcije do popravke - automatizovano i efikasno",
+      "steps": [
+        {
+          "title": "AI Detekcija",
+          "description": "Sistem detektuje degradaciju modula i predviđa kvar",
+          "time": "14 dana unapred"
+        },
+        {
+          "title": "Automatska Zamena",
+          "description": "Robot na swap stanici zamenjuje modul bez ljudske intervencije",
+          "time": "60 sekundi"
+        },
+        {
+          "title": "Transport",
+          "description": "Zamenjeni modul putuje u servisni centar sa sledećim autobusom",
+          "time": "Isti dan"
+        },
+        {
+          "title": "Ljudska Popravka",
+          "description": "Tehničari u servisu dijagnostikuju i popravljaju modul",
+          "time": "1-3 dana"
+        }
+      ]
+    },
+    "locations": {
+      "title": "Dva Mesta, Dve Uloge",
+      "field": {
+        "title": "Na Terenu",
+        "subtitle": "Automatizovano, brzo, bez čekanja",
+        "point1": "Robotska zamena modula - 60 sekundi",
+        "point2": "AI dijagnostika - zna tačno šta treba zameniti",
+        "point3": "Bez potrebe za tehničarem na lokaciji",
+        "note": "Zero truck rolls za zamenu"
+      },
+      "service": {
+        "title": "U Servisu",
+        "subtitle": "Ljudska ekspertiza, bez žurbe",
+        "point1": "Detaljna dijagnostika i popravka modula",
+        "point2": "Kvalifikovani tehničari sa pravom opremom",
+        "point3": "Refurbishment do fabričkih specifikacija",
+        "note": "Cirkularna ekonomija - moduli se vraćaju u upotrebu"
+      }
+    }
+  },
+  "hero": {
+    "title": "ELEKTRO",
+    "subtitle": "KOMBINACIJA",
+    "tagline": "EV punjač sa prediktivnom dijagnostikom",
+    "description": "AI koji prati zdravlje sistema, predviđa probleme i omogućava intervenciju pre kvara. Cilj: maksimalna pouzdanost.",
+    "cta": "Saznaj više",
+    "stats": {
+      "power": "99%",
+      "powerLabel": "success rate",
+      "weight": "2 ned",
+      "weightLabel": "predviđanje kvara",
+      "price": "0",
+      "priceLabel": "iznenađenja"
+    }
+  },
+  "problem": {
+    "title": "Stanje u Industriji",
+    "subtitle": "Podaci iz 2025. godine",
+    "stats": {
+      "success": "71%",
+      "successLabel": "FTCSR - uspeh iz prvog pokušaja",
+      "broken": "84%",
+      "brokenLabel": "opšti success rate (J.D. Power)",
+      "diagnostic": "15pt",
+      "diagnosticLabel": "pad pouzdanosti posle 3 godine"
+    },
+    "quote": "\"Uptime nam govori da li je punjač dostupan, ali ne i da li vozač može da se uključi i napuni iz prvog pokušaja.\"",
+    "quoteAuthor": "— Kameale Terry, CEO ChargerHelp",
+    "aging": {
+      "title": "Degradacija je i dalje problem",
+      "year0": "Nov punjač: 85% FTCSR",
+      "year3": "Posle 3 godine: 69.9%",
+      "description": "ChargerHelp 2025: 15 poena pad koji uptime metrika ne hvata."
+    },
+    "challenge": "Uptime 99% zvuči dobro. Ali samo 71% punjenja uspe iz prvog pokušaja."
+  },
+  "product": {
+    "title": "Naš Pristup",
+    "subtitle": "Prediktivna dijagnostika",
+    "description": "Fokus na pouzdanost. AI prati stanje komponenti i reaguje pre nego što dođe do problema.",
+    "phase1": {
+      "title": "EK3 - PROOF OF CONCEPT",
+      "power": "3 kW",
+      "description": "Full-featured mini modul",
+      "specs": ["SiC MOSFET (ne IGBT)", "LLC rezonantna topologija", "AI self-tuning", "Digital twin ugrađen"]
+    },
+    "phase2": {
+      "title": "EK30 - PRODUCTION",
+      "power": "30 kW",
+      "description": "Premium modul bez kompromisa",
+      "specs": ["3-level NPC topologija", "Liquid cooling", "Prediktivna dijagnostika", "V2G/V2X spreman"]
+    },
+    "features": {
+      "title": "Kako postižemo 99%?",
+      "modular": "Predviđa kvarove",
+      "modularDesc": "AI zna 2 nedelje unapred šta će da otkaže",
+      "hotswap": "Zna tačno šta",
+      "hotswapDesc": "Ne \"error 47\" - već tačan uzrok i rešenje",
+      "protection": "Sam se leči",
+      "protectionDesc": "55% problema reši automatski, bez tehničara",
+      "local": "Ne degradira",
+      "localDesc": "AI kompenzuje starenje - radi kao nov i posle 10 godina"
+    }
+  },
+  "configurations": {
+    "title": "Jedan Modul za Sve",
+    "subtitle": "EK3: Od e-bicikla do MCS stanice",
+    "depot": {
+      "title": "Light EV",
+      "power": "3-22 kW",
+      "modules": "1-8 × EK3",
+      "price": "€150 - €1,200",
+      "description": "E-bicikli, skuteri, kućno punjenje. Isti modul kao u MW stanici.",
+      "features": ["1-8 modula", "Plug & play", "AI dijagnostika"]
+    },
+    "opportunity": {
+      "title": "DC Fast Charging",
+      "power": "50-350 kW",
+      "modules": "17-117 × EK3",
+      "price": "€2,500 - €18,000",
+      "description": "Automobili, highway stanice. Rack sistem, robot-ready zamena modula.",
+      "features": ["1-2 rack-a", "40 sec zamena", "99.9% uptime"]
+    },
+    "swap": {
+      "title": "Heavy Duty + MCS",
+      "power": "500 kW - 3 MW",
+      "modules": "167-1000 × EK3",
+      "price": "Po dogovoru",
+      "description": "Autobusi, kamioni, MCS. Više rack-ova, robotska zamena, graceful degradation.",
+      "features": ["4-12 rack-ova", "2 robota paralelno", "0.1% gubitak po kvaru"]
+    }
+  },
+  "timeline": {
+    "title": "Plan Razvoja",
+    "subtitle": "Metodičan pristup",
+    "phase1": {
+      "title": "Faza 1: EK3 Full-Featured",
+      "duration": "4 meseca",
+      "description": "3 kW sa svim premium funkcijama",
+      "items": ["SiC power stage", "LLC + PFC", "AI control firmware", "Digital twin"]
+    },
+    "phase2": {
+      "title": "Faza 2: AI Validacija",
+      "duration": "2 meseca",
+      "description": "ML model training na realnim podacima",
+      "items": ["Predictive algorithms", "Self-tuning loops", "Anomaly detection"]
+    },
+    "phase3": {
+      "title": "Faza 3: EK30 Multi-Level",
+      "duration": "5 meseci",
+      "description": "3-level NPC, liquid cooling",
+      "items": ["NPC topologija", "Thermal system", "V2G implementation"]
+    },
+    "phase4": {
+      "title": "Faza 4: Swarm Intelligence",
+      "duration": "3 meseca",
+      "description": "Multi-modul AI koordinacija",
+      "items": ["Distributed AI", "Load optimization", "Grid services"]
+    },
+    "phase5": {
+      "title": "Faza 5: Certifikacija",
+      "duration": "4 meseca",
+      "description": "CE + V2G sertifikati",
+      "items": ["IEC 61851", "ISO 15118-20", "Grid codes"]
+    }
+  },
+  "team": {
+    "title": "Naša Vizija",
+    "subtitle": "Povratak modularnosti",
+    "mission": "Industrija je krenula putem integracije - sve u jednom čipu, nemoguće popraviti, planirano zastarevanje. Ali infrastruktura nije telefon. EV punjač treba da traje 15+ godina. Mi kombinujemo modularnost iz 1970-ih sa AI tehnologijom 2020-ih: zamena modula na terenu za 60 sekundi, bez tehničara, a AI predvidi kvar dve nedelje unapred.",
+    "stats": {
+      "guarantee": "15+",
+      "guaranteeLabel": "godina životnog veka",
+      "refund": "60s",
+      "refundLabel": "zamena modula"
+    }
+  },
+  "contact": {
+    "title": "Kontakt",
+    "subtitle": "Spremni za budućnost bez kompromisa?",
+    "form": {
+      "name": "Ime i prezime",
+      "email": "Email adresa",
+      "company": "Kompanija (opciono)",
+      "message": "Poruka",
+      "submit": "Pošalji",
+      "success": "Poruka uspešno poslata!"
+    },
+    "info": {
+      "email": "info@elektrokombinacija.rs",
+      "phone": "+381 11 XXX XXXX",
+      "address": "Beograd, Srbija"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 ELEKTROKOMBINACIJA. Sva prava zadržana.",
+    "tagline": "Prediktivna dijagnostika za EV punjače."
+  }
+}
