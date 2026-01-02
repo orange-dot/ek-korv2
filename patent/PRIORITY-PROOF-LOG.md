@@ -37,13 +37,26 @@ This commit establishes priority date for patent purposes.
 
 ---
 
-## OriginStamp Blockchain Timestamp
+## Blockchain Timestamp - OpenTimestamps
 
 ```
-Status: PENDING
-Hash za upload: 0ef3b1c827a188ed2b917899e00284919b767156
-Website: https://originstamp.com
-Certificate: _____________ (dodati kad dobiješ)
+Status: ČEKA SE (biće još unapređenja pre finalnog submita)
+Website: https://opentimestamps.org
+Cena: BESPLATNO
+
+PLAN:
+1. Završiti sva unapređenja sistema i patent dokumentacije
+2. Napraviti finalni ZIP: patent-disclosure-YYYY-MM-DD.zip
+3. Upload na https://opentimestamps.org → STAMP sekcija
+4. Sačuvati .ots fajl (blockchain proof)
+5. Sačekati ~24h za Bitcoin confirmation
+6. Verifikovati u VERIFY sekciji
+
+TRENUTNI GIT HASH (već zabeležen na GitHub):
+0ef3b1c827a188ed2b917899e00284919b767156
+
+NAPOMENA: Git commit na GitHub JE VALIDAN DOKAZ datuma.
+OpenTimestamps je DODATNI dokaz za maksimalnu zaštitu.
 ```
 
 ---
