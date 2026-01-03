@@ -55,6 +55,32 @@
       "charging": "Puni se",
       "avgBattery": "Prosek bat.",
       "power": "Snaga"
+    },
+    "busModal": {
+      "title": "Detalji Autobusa",
+      "info": "Informacije",
+      "actions": "Akcije",
+      "history": "Istorija",
+      "currentRoute": "Trenutna Linija",
+      "batteryLevel": "Nivo Baterije",
+      "currentStatus": "Trenutni Status",
+      "robotA": "Robot A",
+      "estimatedRange": "Procenjen Domet",
+      "kmRemaining": "km preostalo",
+      "nextStation": "Sledeća Stanica",
+      "inMinutes": "za {{minutes}} min",
+      "sendToCharge": "Pošalji na Punjenje",
+      "requestSwap": "Zatraži Zamenu",
+      "diagnostics": "Pokreni Dijagnostiku",
+      "noHistory": "Nema događaja",
+      "historyEvents": {
+        "charging_started": "Počelo punjenje",
+        "charging_completed": "Punjenje završeno",
+        "swap_completed": "Zamena modula završena",
+        "route_changed": "Promenjena linija",
+        "low_battery": "Upozorenje - niska baterija",
+        "diagnostics_run": "Dijagnostika završena"
+      }
     }
   },
   "philosophy": {

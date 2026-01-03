@@ -55,6 +55,32 @@
       "charging": "Charging",
       "avgBattery": "Avg Battery",
       "power": "Power"
+    },
+    "busModal": {
+      "title": "Bus Details",
+      "info": "Information",
+      "actions": "Actions",
+      "history": "History",
+      "currentRoute": "Current Route",
+      "batteryLevel": "Battery Level",
+      "currentStatus": "Current Status",
+      "robotA": "Robot A",
+      "estimatedRange": "Estimated Range",
+      "kmRemaining": "km remaining",
+      "nextStation": "Next Station",
+      "inMinutes": "in {{minutes}} min",
+      "sendToCharge": "Send to Charge",
+      "requestSwap": "Request Swap",
+      "diagnostics": "Run Diagnostics",
+      "noHistory": "No events yet",
+      "historyEvents": {
+        "charging_started": "Started charging",
+        "charging_completed": "Charging completed",
+        "swap_completed": "Module swap completed",
+        "route_changed": "Route changed",
+        "low_battery": "Low battery warning",
+        "diagnostics_run": "Diagnostics completed"
+      }
     }
   },
   "philosophy": {
