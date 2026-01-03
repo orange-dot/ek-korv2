@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, Check } from 'lucide-react';
+import { Mail, MapPin, Send, Check } from 'lucide-react';
 
 export default function Contact() {
   const { t } = useTranslation();
@@ -28,7 +28,6 @@ export default function Contact() {
 
   const contactInfo = [
     { icon: Mail, value: t('contact.info.email') },
-    { icon: Phone, value: t('contact.info.phone') },
     { icon: MapPin, value: t('contact.info.address') },
   ];
 
