@@ -7,6 +7,8 @@
 | Disclosure ID | EK-2026-005 |
 | Date of Disclosure | 2026-01-02 |
 | Inventor(s) | Bojan Janjatović |
+| Email | bojan.janjatovic@gmail.com |
+| Address | Vojislava Ilica 8, Kikinda, Severni Banat, Serbia |
 | Date of Conception | 2026-01-02 |
 | Witnesses | Marija Janjatović |
 
@@ -73,16 +75,18 @@ SCENARIO 1: Normalan battery swap
 • Robot B (stanica) menja bateriju
 • Robot A (bus) asistira sa konektorima
 
-SCENARIO 2: Punjenje ne radi, dijagnostika
-• Autobus dođe, punjenje FAIL
+SCENARIO 2: Reaktivna detekcija (punjenje ne radi)
+• Autobus dođe, punjenje FAIL ili anomalija detektovana
 • Robot A skenira problem
 • Robot A + Robot B koordinirano popravljaju
-• Ako ne mogu → zakazuje se human tehničar
+• Distributed sparing održava punjenje ostalih slotova
+• Ako roboti ne mogu → zakazuje se human tehničar
 
-SCENARIO 3: Preventivni maintenance
-• AI predvidi problem
+SCENARIO 3: Proaktivni maintenance (rana detekcija)
+• AI detektuje degradaciju kroz trend analizu (dani/nedelje)
+• ILI: anomalija detektovana tokom punjenja prethodnog busa
 • Sledeći bus koji dođe ima Robot A koji donosi deo
-• Robot B instalira
+• Robot B instalira - zero downtime
 
 SCENARIO 4: Samo Robot A (bez stanice)
 • Bus parkiran u depotu bez robota

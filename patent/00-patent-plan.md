@@ -75,10 +75,13 @@ Prednost: Eliminacija servisnih vozila
 
 KONCEPT 5: Predictive Swap Scheduling
 ─────────────────────────────────────────────────────────────
-Opis: AI predviđa kvar 2 nedelje unapred, zakazuje swap
-      kada autobus ionako dolazi na punjenje
-Novost: Proaktivna zamena bez prekida rada
-Prednost: Zero downtime maintenance
+Opis: AI detektuje degradaciju kroz kontinuirani monitoring
+      - Rana detekcija: trend analiza → dani/nedelje unapred
+      - Tipična: anomalija tokom punjenja → sati unapred
+      - Reaktivna: iznenadni kvar → minuti (ali bez downtime-a!)
+      Swap se zakazuje za sledeći bus na toj ruti
+Novost: Automatski odgovor na SVAKI scenario detekcije
+Prednost: Zero downtime - čak i kod iznenadnog kvara
 ```
 
 **Odgovornost:** Founder + Patent Attorney (konsultacija)
@@ -297,7 +300,7 @@ NARROW CLAIMS (backup, lako dobiti):
 
 DEPENDENT CLAIMS (dodaju specifičnosti):
 • "...wherein the robot swap time is less than 60 seconds"
-• "...wherein AI predicts failure 14 days in advance"
+• "...wherein degradation detection enables proactive replacement"
 • "...wherein spare capacity is distributed across all modules"
 ```
 

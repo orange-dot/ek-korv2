@@ -7,6 +7,8 @@
 | Disclosure ID | EK-2026-002 |
 | Date of Disclosure | 2026-01-02 |
 | Inventor(s) | Bojan Janjatović |
+| Email | bojan.janjatovic@gmail.com |
+| Address | Vojislava Ilica 8, Kikinda, Severni Banat, Serbia |
 | Date of Conception | 2026-01-02 |
 | Witnesses | Marija Janjatović |
 
@@ -94,10 +96,14 @@ ELEMENT 1: Shared Robotic Infrastructure
 
 ELEMENT 2: Synchronized Scheduling
 ─────────────────────────────────────────────────────────────
-• AI predviđa kvar modula 2 nedelje unapred
+• AI detektuje degradaciju kroz kontinuirani monitoring:
+  - Rana detekcija (trend analiza): dani/nedelje unapred
+  - Tipična detekcija (anomalija tokom punjenja): sati unapred
+  - Reaktivna (iznenadni kvar): minuti - ali distributed sparing
+    održava punjenje dok robot ne zameni modul
 • AI zna raspored dolazaka autobusa
-• Swap modula se zakazuje kada autobus ionako dolazi
-• Zero dedicated maintenance visits
+• Swap modula se zakazuje za sledeći bus na toj ruti
+• Zero dedicated maintenance visits - bilo koji bus može doneti deo
 
 ELEMENT 3: Fleet as Logistics Network
 ─────────────────────────────────────────────────────────────

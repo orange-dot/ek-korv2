@@ -2,6 +2,8 @@
 
 **Datum istraživanja:** 2026-01-02
 **Autor:** Bojan Janjatović
+**Email:** bojan.janjatovic@gmail.com
+**Address:** Vojislava Ilica 8, Kikinda, Severni Banat, Serbia
 **Svrha:** Prior art analiza za patentnu prijavu
 
 ---
