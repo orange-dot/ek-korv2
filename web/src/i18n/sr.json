@@ -223,7 +223,7 @@
       "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
       "description": "Standardni modul za sve primene",
-      "specs": ["100 × 300 × 44mm (1U)", "1.8 kg - robot-ready", "SiC MOSFET, >97% efikasnost", "Blind-mate konektori"]
+      "specs": ["200 × 320 × 44mm (1U half-width)", "~3.5 kg - robot-ready", "SiC MOSFET, >97% efikasnost", "Blind-mate konektori"]
     },
     "phase2": {
       "title": "RACK SISTEM",
@@ -278,7 +278,7 @@
       "title": "Faza 1: EK3 Modul",
       "duration": "4 meseca",
       "description": "Blade format, robot-ready dizajn",
-      "items": ["SiC MOSFET power stage", "Blind-mate konektori", "AI edge processor", "1.8 kg, 1U format"]
+      "items": ["SiC MOSFET power stage", "Blind-mate konektori", "AI edge processor", "~3.5 kg, 1U half-width"]
     },
     "phase2": {
       "title": "Faza 2: Rack Sistem",

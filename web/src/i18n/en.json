@@ -223,7 +223,7 @@
       "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
       "description": "Standard module for all applications",
-      "specs": ["100 × 300 × 44mm (1U)", "1.8 kg - robot-ready", "SiC MOSFET, >97% efficiency", "Blind-mate connectors"]
+      "specs": ["200 × 320 × 44mm (1U half-width)", "~3.5 kg - robot-ready", "SiC MOSFET, >97% efficiency", "Blind-mate connectors"]
     },
     "phase2": {
       "title": "RACK SYSTEM",
@@ -278,7 +278,7 @@
       "title": "Phase 1: EK3 Module",
       "duration": "4 months",
       "description": "Blade format, robot-ready design",
-      "items": ["SiC MOSFET power stage", "Blind-mate connectors", "AI edge processor", "1.8 kg, 1U format"]
+      "items": ["SiC MOSFET power stage", "Blind-mate connectors", "AI edge processor", "~3.5 kg, 1U half-width"]
     },
     "phase2": {
       "title": "Phase 2: Rack System",
@@ -329,7 +329,7 @@
     },
     "info": {
       "email": "bojan.janjatovic@gmail.com",
-      "address": "Vojislava Ilica 8, Kikinda, Serbia"
+      "address": "Vojislava Ilica 8, Kikinda, North Banat, Serbia"
     }
   },
   "robots": {

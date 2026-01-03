@@ -3,7 +3,6 @@ import SimulationMap from '../components/simulation/SimulationMap';
 import SimulationControls from '../components/simulation/SimulationControls';
 import CitySelector from '../components/simulation/CitySelector';
 import KorHUD from '../components/simulation/KorHUD';
-import BusDetailModal from '../components/simulation/BusDetailModal';
 
 export default function SimulationPage() {
   return (
@@ -43,9 +42,6 @@ export default function SimulationPage() {
         <div className="z-40">
           <KorHUD />
         </div>
-
-        {/* Bus Detail Modal - z-index 50, above everything */}
-        <BusDetailModal />
       </div>
     </SimulationProvider>
   );

@@ -29,6 +29,8 @@ import {
   Power,
   Settings,
   BatteryCharging,
+  Search,
+  ChevronRight,
 } from 'lucide-react';
 import { useSimulation, BUS_STATES } from '../../context/SimulationContext';
 
@@ -511,6 +513,127 @@ function StatPanel({ label, value, unit, icon: Icon, color, position }) {
         </div>
         <div className="text-lg font-mono font-bold text-white">
           {value}<span className="text-[10px] text-slate-500 ml-0.5">{unit}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Bus List Panel with search
+function BusListPanel({ buses, routes, selectedItem, onSelectBus }) {
+  const [search, setSearch] = useState('');
+  const [showConfirm, setShowConfirm] = useState(null);
+
+  const filteredBuses = buses.filter(bus =>
+    bus.name.toLowerCase().includes(search.toLowerCase()) ||
+    routes.find(r => r.id === bus.routeId)?.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const getBatteryColor = (level) => {
+    if (level > 60) return 'text-emerald-400';
+    if (level > 30) return 'text-amber-400';
+    return 'text-red-400';
+  };
+
+  const getStateInfo = (state) => {
+    switch (state) {
+      case BUS_STATES.DRIVING: return { label: 'Vozi', color: 'text-cyan-400', bg: 'bg-cyan-400' };
+      case BUS_STATES.CHARGING: return { label: 'Puni', color: 'text-emerald-400', bg: 'bg-emerald-400' };
+      case BUS_STATES.WAITING: return { label: 'Čeka', color: 'text-amber-400', bg: 'bg-amber-400' };
+      case BUS_STATES.SWAPPING: return { label: 'Swap', color: 'text-purple-400', bg: 'bg-purple-400' };
+      default: return { label: '?', color: 'text-slate-400', bg: 'bg-slate-400' };
+    }
+  };
+
+  const handleBusClick = (bus) => {
+    onSelectBus(bus.id);
+    setShowConfirm(bus.id);
+  };
+
+  return (
+    <div className="absolute top-[17rem] left-4 w-48 pointer-events-auto">
+      <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
+        {/* Header */}
+        <div className="px-2.5 py-2 border-b border-white/10 bg-white/5">
+          <div className="flex items-center gap-2 mb-2">
+            <Bus className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[10px] font-mono text-white/80 uppercase">Autobusi</span>
+            <span className="ml-auto text-[9px] font-mono text-slate-500">{buses.length}</span>
+          </div>
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Pretraži..."
+              className="w-full bg-black/50 border border-white/10 rounded pl-6 pr-2 py-1 text-[10px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50"
+            />
+          </div>
+        </div>
+
+        {/* Bus list */}
+        <div className="max-h-48 overflow-y-auto">
+          {filteredBuses.length === 0 ? (
+            <div className="text-center py-4 text-slate-500 text-[10px]">
+              Nema rezultata
+            </div>
+          ) : (
+            filteredBuses.map(bus => {
+              const route = routes.find(r => r.id === bus.routeId);
+              const stateInfo = getStateInfo(bus.state);
+              const isSelected = selectedItem?.type === 'bus' && selectedItem?.id === bus.id;
+
+              return (
+                <div key={bus.id}>
+                  <button
+                    onClick={() => handleBusClick(bus)}
+                    className={`w-full px-2.5 py-2 text-left hover:bg-white/5 border-b border-white/5 transition-colors ${
+                      isSelected ? 'bg-amber-500/10 border-l-2 border-l-amber-500' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full ${stateInfo.bg}`} />
+                      <span className="text-[11px] font-medium text-white">{bus.name}</span>
+                      <span className={`ml-auto text-[10px] font-mono ${getBatteryColor(bus.batteryLevel)}`}>
+                        {Math.round(bus.batteryLevel)}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5 ml-3.5">
+                      <span className="text-[9px] text-slate-500 truncate">{route?.name || '-'}</span>
+                      <span className={`text-[8px] ${stateInfo.color}`}>{stateInfo.label}</span>
+                    </div>
+                  </button>
+
+                  {/* Confirm modal */}
+                  <AnimatePresence>
+                    {showConfirm === bus.id && isSelected && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="bg-cyan-500/10 border-t border-cyan-500/20 px-2.5 py-2"
+                      >
+                        <div className="text-[9px] text-slate-400 mb-1.5">Selektovan na mapi</div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Keep selection, modal will open via KorHUD
+                            setShowConfirm(null);
+                          }}
+                          className="w-full flex items-center justify-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded py-1.5 text-[10px] text-cyan-400 transition-colors"
+                        >
+                          <span>Otvori detalje</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
@@ -2106,7 +2229,7 @@ function StationDetailModal({ station, buses, onClose }) {
 
 // KorHUD - Main HUD
 export default function KorHUD() {
-  const { buses, routes, city, isRunning, setSpeed, selectedItem, clearSelection, chargingStations } = useSimulation();
+  const { buses, routes, city, isRunning, setSpeed, selectedItem, selectItem, clearSelection, chargingStations } = useSimulation();
   const [decisions, setDecisions] = useState([]);
   const [activeModal, setActiveModal] = useState(null);
   const [activeFlow, setActiveFlow] = useState(null);
@@ -2232,6 +2355,14 @@ export default function KorHUD() {
       <StatPanel label="Aktivno" value={activeBuses} unit={`/${buses.length}`} icon={Activity} color="text-cyan-400" position="top-20 left-4" />
       <StatPanel label="Punjenje" value={chargingBuses} unit="bus" icon={Zap} color="text-emerald-400" position="top-36 left-4" />
       <StatPanel label="Baterija" value={avgBattery} unit="%" icon={Battery} color={avgBattery > 50 ? "text-emerald-400" : "text-amber-400"} position="top-52 left-4" />
+
+      {/* Bus list panel */}
+      <BusListPanel
+        buses={buses}
+        routes={routes}
+        selectedItem={selectedItem}
+        onSelectBus={(busId) => selectItem('bus', busId)}
+      />
 
       {/* Right panel - decisions queue */}
       <motion.div
