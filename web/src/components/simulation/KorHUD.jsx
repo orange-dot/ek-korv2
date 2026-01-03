@@ -43,6 +43,7 @@ import {
   LayoutGrid,
 } from 'lucide-react';
 import { useSimulation, BUS_STATES } from '../../context/SimulationContext';
+import FocusedMiniMap from './FocusedMiniMap';
 
 // Scenario types
 const SCENARIO_TYPES = {
@@ -144,12 +145,18 @@ function generateRandomScenario(buses, routes) {
       return {
         id: `traffic-${now}`,
         type: SCENARIO_TYPES.TRAFFIC_JAM,
+        busId: bus.id,
         busName: bus.name,
         message: `Gužva: ${street}`,
         detail: `Kašnjenje ~${Math.floor(Math.random() * 15) + 5} min`,
         suggestion: `${Math.floor(Math.random() * 4) + 2} autobusa pogođeno`,
         urgency: 'SREDNJE',
         timeToDecide: 45,
+        analysis: {
+          reason: 'Senzori detektovali usporenje >70%. Alternativna ruta ima 40% manje saobraćaja.',
+          ifAccepted: 'Ušteda 8-12 min po autobusu. Održavanje reda vožnje.',
+          ifRejected: 'Kašnjenje se akumulira. Moguće prekoračenje smene vozača.',
+        },
         options: [
           { id: 'reroute', label: 'Preusmeri autobuse', description: 'Alternativna ruta bez gužve', recommended: true },
           { id: 'wait', label: 'Sačekaj prolaz', description: 'Nastavi kroz gužvu' },
@@ -163,11 +170,17 @@ function generateRandomScenario(buses, routes) {
       return {
         id: `reroute-${now}`,
         type: SCENARIO_TYPES.REROUTE,
+        busId: bus.id,
         busName: bus.name,
         message: `Optimizacija: ${route?.name || 'Linija ' + bus.routeId}`,
         detail: `Ušteda ${(Math.random() * 15 + 5).toFixed(1)}% energije`,
         suggestion: 'AI predlog baziran na real-time podacima',
         timeToDecide: 60,
+        analysis: {
+          reason: 'ML model analizirao 24h podatke. Nova ruta kraća za 2.3km sa manjim usponima.',
+          ifAccepted: 'Smanjenje potrošnje energije. Produženje dometa za 15km.',
+          ifRejected: 'Nastavak trenutne rute. Bez optimizacije troškova.',
+        },
         options: [
           { id: 'apply', label: 'Primeni novu rutu', description: 'Kraća ruta, manja potrošnja', recommended: true },
           { id: 'ignore', label: 'Zadrži postojeću', description: 'Bez promene' },
@@ -182,12 +195,18 @@ function generateRandomScenario(buses, routes) {
       return {
         id: `maint-${now}`,
         type: SCENARIO_TYPES.MAINTENANCE,
+        busId: bus.id,
         busName: bus.name,
         message: `Anomalija: Modul ${modules[Math.floor(Math.random() * modules.length)]}`,
         detail: 'Temperatura iznad normale',
         suggestion: 'Robot A preporučuje inspekciju',
         urgency: 'SREDNJE',
         timeToDecide: 60,
+        analysis: {
+          reason: 'Termalni senzor pokazuje +12°C iznad baseline. Pattern sličan pre-failure stanju.',
+          ifAccepted: 'Preventivna zamena modula. Downtime 15min. Izbegnuta havarija.',
+          ifRejected: 'Rizik od thermal runaway. Potencijalna šteta €5,000-15,000.',
+        },
         options: [
           { id: 'inspect', label: 'Pošalji na pregled', description: 'Preventivna inspekcija', recommended: true },
           { id: 'monitor', label: 'Nastavi monitoring', description: 'Prati parametre' },
@@ -200,23 +219,30 @@ function generateRandomScenario(buses, routes) {
 
     case 3: // Force majeure
       const events = [
-        { event: 'Severe weather reported', impact: 'Reduced visibility' },
-        { event: 'Traffic accident', impact: 'Road blocked' },
-        { event: 'Power outage', impact: 'Station offline' },
+        { event: 'Loše vreme prijavljeno', impact: 'Smanjena vidljivost', reason: 'Meteo podaci + senzori na vozilima.', accept: 'Aktivira se protokol bezbednosti. Brzina smanjena 20%.', reject: 'Nastavak bez prilagođavanja. Povećan rizik.' },
+        { event: 'Saobraćajna nesreća', impact: 'Put blokiran', reason: 'Policijski izveštaj + GPS zastoj detektovan.', accept: 'Automatsko preusmeravanje. ETA ažuriran.', reject: 'Čekanje u koloni. Nepoznato trajanje.' },
+        { event: 'Nestanak struje', impact: 'Stanica offline', reason: 'Grid monitoring detektovao pad napona.', accept: 'Preusmeravanje na backup stanicu. V2G aktiviran.', reject: 'Autobusi bez punjenja. Rizik za red vožnje.' },
       ];
       const evt = events[Math.floor(Math.random() * events.length)];
       return {
         id: `force-${now}`,
         type: SCENARIO_TYPES.FORCE_MAJEURE,
+        busId: bus.id,
+        busName: bus.name,
         message: evt.event,
         detail: evt.impact,
-        suggestion: 'Urgent response required',
-        urgency: 'URGENT',
+        suggestion: 'Potrebna hitna reakcija',
+        urgency: 'HITNO',
         timeToDecide: 25,
-        compensation: `Compensation: +${Math.floor(Math.random() * 15) + 5} min`,
+        compensation: `Kompenzacija: +${Math.floor(Math.random() * 15) + 5} min`,
+        analysis: {
+          reason: evt.reason,
+          ifAccepted: evt.accept,
+          ifRejected: evt.reject,
+        },
         options: [
-          { id: 'protocol', label: 'Activate protocol', description: 'Automatic measures', recommended: true },
-          { id: 'manual', label: 'Manual control', description: 'Take control', danger: true },
+          { id: 'protocol', label: 'Aktiviraj protokol', description: 'Automatske mere', recommended: true },
+          { id: 'manual', label: 'Ručna kontrola', description: 'Preuzmi kontrolu', danger: true },
         ],
         requiresApproval: true,
         showModal: true,
@@ -224,19 +250,26 @@ function generateRandomScenario(buses, routes) {
       };
 
     case 4: // Low battery warning
+      const batteryPct = Math.floor(Math.random() * 15) + 5;
       return {
         id: `battery-${now}`,
         type: SCENARIO_TYPES.CRITICAL_BATTERY,
+        busId: bus.id,
         busName: bus.name,
-        message: `Critical battery: ${Math.floor(Math.random() * 15) + 5}%`,
-        detail: `Remaining ~${Math.floor(Math.random() * 20) + 5} min`,
-        suggestion: 'Urgent charging required',
-        urgency: 'CRITICAL',
+        message: `Kritična baterija: ${batteryPct}%`,
+        detail: `Preostalo ~${Math.floor(Math.random() * 20) + 5} min`,
+        suggestion: 'Hitno punjenje potrebno',
+        urgency: 'KRITIČNO',
         timeToDecide: 30,
+        analysis: {
+          reason: `BMS prijavio ${batteryPct}% kapaciteta. Bazni potrošnja 2.1kWh/km pri trenutnoj brzini.`,
+          ifAccepted: 'Punjenje za 25min do 80%. Nastavak linije sa minimalnim kašnjenjem.',
+          ifRejected: 'Rizik od zaustavljanja na ruti. Potrebna pomoć. Kašnjenje 45+ min.',
+        },
         options: [
-          { id: 'charge', label: 'Send to charging', description: 'Nearest station', recommended: true },
-          { id: 'swap', label: 'Activate swap', description: 'Robot B intervention' },
-          { id: 'continue', label: 'Continue driving', description: 'Risk!', danger: true },
+          { id: 'charge', label: 'Pošalji na punjenje', description: 'Najbliža stanica', recommended: true },
+          { id: 'swap', label: 'Aktiviraj swap', description: 'Robot B intervencija' },
+          { id: 'continue', label: 'Nastavi vožnju', description: 'Rizično!', danger: true },
         ],
         requiresApproval: true,
         showModal: true,
@@ -244,16 +277,24 @@ function generateRandomScenario(buses, routes) {
       };
 
     case 5: // Charging queue
+      const queueSize = Math.floor(Math.random() * 4) + 3;
       return {
         id: `queue-${now}`,
         type: SCENARIO_TYPES.CHARGING_QUEUE,
-        message: `Charging queue: ${Math.floor(Math.random() * 4) + 3} buses`,
-        detail: 'Queue optimization',
-        suggestion: `Priority: ${bus.name}`,
+        busId: bus.id,
+        busName: bus.name,
+        message: `Red za punjenje: ${queueSize} autobusa`,
+        detail: 'Optimizacija reda',
+        suggestion: `Prioritet: ${bus.name}`,
         timeToDecide: 45,
+        analysis: {
+          reason: `${queueSize} autobusa čeka. AI analizirao SoC, raspored i hitnost svakog.`,
+          ifAccepted: 'Ukupno čekanje flote smanjeno 35%. Kritični autobusi prvi.',
+          ifRejected: 'FIFO red. Moguće da kritičan autobus čeka predugo.',
+        },
         options: [
-          { id: 'ai', label: 'AI optimization', description: 'Minimize wait time', recommended: true },
-          { id: 'fifo', label: 'FIFO order', description: 'First come first served' },
+          { id: 'ai', label: 'AI optimizacija', description: 'Minimizuj čekanje', recommended: true },
+          { id: 'fifo', label: 'FIFO redosled', description: 'Ko prvi dođe, prvi se puni' },
         ],
         requiresApproval: true,
         showModal: true,
@@ -261,17 +302,24 @@ function generateRandomScenario(buses, routes) {
       };
 
     case 6: // Swap module
+      const currentSoc = Math.floor(Math.random() * 30) + 50;
       return {
         id: `swap-${now}`,
         type: SCENARIO_TYPES.SWAP_MODULE,
+        busId: bus.id,
         busName: bus.name,
-        message: `Swap available: ${bus.name}`,
-        detail: `${Math.floor(Math.random() * 30) + 50}% → 100% in 3 min`,
-        suggestion: 'Robot B ready',
+        message: `Swap dostupan: ${bus.name}`,
+        detail: `${currentSoc}% → 100% za 3 min`,
+        suggestion: 'Robot B spreman',
         timeToDecide: 45,
+        analysis: {
+          reason: `Autobus na ${currentSoc}%. Swap stanica slobodna. Puna baterija čeka.`,
+          ifAccepted: 'Zamena za 3 min. Autobus odmah spreman za punu smenu.',
+          ifRejected: 'Standardno punjenje ~45min do 100%. Moguće kašnjenje rasporeda.',
+        },
         options: [
-          { id: 'swap', label: 'Execute swap', description: '3 min to 100%', recommended: true },
-          { id: 'charge', label: 'Continue charging', description: 'Standard charging' },
+          { id: 'swap', label: 'Izvrši swap', description: '3 min do 100%', recommended: true },
+          { id: 'charge', label: 'Nastavi punjenje', description: 'Standardno punjenje' },
         ],
         requiresApproval: true,
         showModal: true,
@@ -279,17 +327,26 @@ function generateRandomScenario(buses, routes) {
       };
 
     case 7: // Fleet warning
+      const fleetPct = Math.floor(Math.random() * 20) + 15;
+      const criticalCount = Math.floor(Math.random() * 5) + 3;
       return {
         id: `fleet-${now}`,
         type: SCENARIO_TYPES.FLEET_EMPTY,
-        message: `Fleet at ${Math.floor(Math.random() * 20) + 15}%`,
-        detail: `${Math.floor(Math.random() * 5) + 3} buses critical`,
-        suggestion: 'System intervention',
-        urgency: 'CRITICAL',
+        busId: bus.id,
+        busName: bus.name,
+        message: `Flota na ${fleetPct}%`,
+        detail: `${criticalCount} autobusa kritično`,
+        suggestion: 'Sistemska intervencija',
+        urgency: 'KRITIČNO',
         timeToDecide: 30,
+        analysis: {
+          reason: `Prosečan SoC flote ${fleetPct}%. ${criticalCount} autobusa ispod 20%. Peak saobraćaj za 2h.`,
+          ifAccepted: 'Sve stanice na max snagu. V2G deaktiviran. Prioritetno punjenje.',
+          ifRejected: 'Rizik od masovnog zastoja flote. Mogući prekid linija.',
+        },
         options: [
-          { id: 'emergency', label: 'Emergency mode', description: 'All stations max', recommended: true },
-          { id: 'reduce', label: 'Reduce frequency', description: 'Pull 30% of fleet' },
+          { id: 'emergency', label: 'Hitni režim', description: 'Sve stanice max', recommended: true },
+          { id: 'reduce', label: 'Smanji frekvenciju', description: 'Povuci 30% flote' },
         ],
         requiresApproval: true,
         showModal: true,
@@ -302,12 +359,41 @@ function generateRandomScenario(buses, routes) {
 }
 
 // Full screen decision modal
-function DecisionModal({ decision, onAction, onTimeout }) {
+function DecisionModal({ decision, onAction, onTimeout, onFlowComplete }) {
   const [timeLeft, setTimeLeft] = useState(decision.timeToDecide || 30);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [flowStep, setFlowStep] = useState(0);
+  const [flowProgress, setFlowProgress] = useState(0);
   const config = SCENARIOS[decision.type];
   const Icon = config?.icon || AlertTriangle;
 
+  // Flow animation when option is selected
   useEffect(() => {
+    if (!selectedOption) return;
+
+    const stepDuration = 800;
+    const progressInterval = setInterval(() => {
+      setFlowProgress(p => {
+        if (p >= 100) {
+          if (flowStep < FLOW_STEPS.length - 1) {
+            setFlowStep(s => s + 1);
+            return 0;
+          } else {
+            clearInterval(progressInterval);
+            setTimeout(() => onFlowComplete(selectedOption), 500);
+            return 100;
+          }
+        }
+        return p + 5;
+      });
+    }, stepDuration / 20);
+
+    return () => clearInterval(progressInterval);
+  }, [selectedOption, flowStep, onFlowComplete]);
+
+  useEffect(() => {
+    if (selectedOption) return; // Stop timer when option is selected
+
     const timer = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 1) {
@@ -319,7 +405,7 @@ function DecisionModal({ decision, onAction, onTimeout }) {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [decision, onTimeout]);
+  }, [decision, onTimeout, selectedOption]);
 
   const colorClasses = {
     red: { border: 'border-red-500', bg: 'bg-red-500', text: 'text-red-400', glow: 'shadow-red-500/30' },
@@ -345,13 +431,28 @@ function DecisionModal({ decision, onAction, onTimeout }) {
       {/* Pulsing borders - visual only */}
       <div className={`absolute inset-4 border-2 ${colors.border} rounded-2xl opacity-30 animate-pulse pointer-events-none`} />
 
-      {/* Main modal */}
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        className={`relative z-10 max-w-xl w-full mx-4 bg-black/95 backdrop-blur-md rounded-2xl border-2 ${colors.border} shadow-2xl ${colors.glow}`}
-        style={{ pointerEvents: 'auto' }}
-      >
+      {/* Two-column layout - Map left, Modal+Info right */}
+      <div className="relative z-10 flex items-stretch gap-4 mx-4 max-w-6xl w-full max-h-[80vh]">
+        {/* Left - Focused Mini Map */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="hidden lg:block w-96 h-[500px] flex-shrink-0"
+        >
+          <FocusedMiniMap busId={decision.busId} scenarioType={decision.type} />
+        </motion.div>
+
+        {/* Right - Modal + Visualizations stacked */}
+        <div className="flex flex-col gap-3 flex-1 max-w-xl">
+
+        {/* Main modal */}
+        <motion.div
+          initial={{ scale: 0.9, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          className={`relative max-w-lg w-full bg-black/95 backdrop-blur-md rounded-2xl border-2 ${colors.border} shadow-2xl ${colors.glow}`}
+          style={{ pointerEvents: 'auto' }}
+        >
         {/* Progress bar */}
         <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl overflow-hidden bg-white/10">
           <motion.div
@@ -365,41 +466,52 @@ function DecisionModal({ decision, onAction, onTimeout }) {
         {/* Header */}
         <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl ${colors.bg}/20 flex items-center justify-center ${config?.color === 'red' ? 'animate-pulse' : ''}`}>
-              <Icon className={`w-6 h-6 ${colors.text}`} />
+            <div className={`w-12 h-12 rounded-xl ${selectedOption ? 'bg-cyan-500/20' : `${colors.bg}/20`} flex items-center justify-center ${selectedOption ? '' : config?.color === 'red' ? 'animate-pulse' : ''}`}>
+              {selectedOption ? (
+                <Cpu className="w-6 h-6 text-cyan-400 animate-pulse" />
+              ) : (
+                <Icon className={`w-6 h-6 ${colors.text}`} />
+              )}
             </div>
             <div>
-              <div className={`text-xs font-mono uppercase tracking-wider ${colors.text} mb-1`}>
-                {decision.urgency || 'ODLUKA POTREBNA'}
+              <div className={`text-xs font-mono uppercase tracking-wider ${selectedOption ? 'text-cyan-400' : colors.text} mb-1`}>
+                {selectedOption ? 'AI PROCESIRANJE' : (decision.urgency || 'ODLUKA POTREBNA')}
               </div>
               <h2 className="text-lg font-bold text-white">
-                {config?.modalTitle || 'HUMAN-IN-THE-LOOP'}
+                {selectedOption ? 'IZVRŠAVANJE AKCIJE' : (config?.modalTitle || 'HUMAN-IN-THE-LOOP')}
               </h2>
             </div>
           </div>
 
-          {/* Timer */}
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-[10px] text-slate-500">PREOSTALO</div>
-              <div className={`text-3xl font-mono font-bold ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : colors.text}`}>
-                {timeLeft}s
+          {/* Timer or Processing indicator */}
+          {!selectedOption ? (
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-[10px] text-slate-500">PREOSTALO</div>
+                <div className={`text-3xl font-mono font-bold ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : colors.text}`}>
+                  {timeLeft}s
+                </div>
+              </div>
+              <div className="relative w-14 h-14">
+                <svg className="w-14 h-14 -rotate-90">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+                  <circle
+                    cx="28" cy="28" r="24" fill="none"
+                    className={timeLeft <= 10 ? 'stroke-red-500' : `stroke-current ${colors.text}`}
+                    strokeWidth="4"
+                    strokeDasharray={`${urgencyPercent * 1.508} 150.8`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <Timer className={`absolute inset-0 m-auto w-6 h-6 ${timeLeft <= 10 ? 'text-red-500' : 'text-slate-400'}`} />
               </div>
             </div>
-            <div className="relative w-14 h-14">
-              <svg className="w-14 h-14 -rotate-90">
-                <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
-                <circle
-                  cx="28" cy="28" r="24" fill="none"
-                  className={timeLeft <= 10 ? 'stroke-red-500' : `stroke-current ${colors.text}`}
-                  strokeWidth="4"
-                  strokeDasharray={`${urgencyPercent * 1.508} 150.8`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <Timer className={`absolute inset-0 m-auto w-6 h-6 ${timeLeft <= 10 ? 'text-red-500' : 'text-slate-400'}`} />
+          ) : (
+            <div className="flex items-center gap-2 text-cyan-400">
+              <div className="w-3 h-3 rounded-full bg-cyan-500 animate-ping" />
+              <span className="text-sm font-mono">{flowStep + 1}/{FLOW_STEPS.length}</span>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Content */}
@@ -423,46 +535,125 @@ function DecisionModal({ decision, onAction, onTimeout }) {
             </div>
           )}
 
-          {/* Options */}
-          <div className="space-y-2 mt-5">
-            <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">IZABERITE AKCIJU:</div>
-            {decision.options?.map((opt, i) => (
-              <button
-                key={opt.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAction(decision, opt.id);
-                }}
-                style={{ pointerEvents: 'auto', cursor: 'pointer' }}
-                className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                  opt.recommended
-                    ? 'bg-emerald-500/10 border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-500'
-                    : opt.danger
-                    ? 'bg-red-500/5 border-red-500/30 hover:bg-red-500/10 hover:border-red-500/50'
-                    : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {opt.recommended && <CheckCircle className="w-5 h-5 text-emerald-400" />}
-                    {opt.danger && <AlertTriangle className="w-5 h-5 text-red-400" />}
-                    {!opt.recommended && !opt.danger && <div className="w-5 h-5 rounded-full border-2 border-slate-500" />}
-                    <div>
-                      <div className={`font-semibold ${opt.recommended ? 'text-emerald-400' : opt.danger ? 'text-red-400' : 'text-white'}`}>
-                        {opt.label}
-                      </div>
-                      <div className="text-sm text-slate-500">{opt.description}</div>
-                    </div>
-                  </div>
-                  {opt.recommended && (
-                    <span className="text-[10px] px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-full font-bold">
-                      PREPORUČENO
-                    </span>
-                  )}
+          {/* AI Reason - stays in modal */}
+          {decision.analysis && (
+            <div className="mt-3 mb-4 p-3 bg-cyan-500/5 rounded-lg border border-cyan-500/20">
+              <div className="flex items-start gap-2">
+                <Zap className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="text-[10px] text-cyan-500 uppercase mb-1">AI Analiza</div>
+                  <div className="text-sm text-slate-300">{decision.analysis.reason}</div>
                 </div>
-              </button>
-            ))}
-          </div>
+              </div>
+            </div>
+          )}
+
+          {/* Options OR Flow Visualization */}
+          {!selectedOption ? (
+            <div className="space-y-2 mt-5">
+              <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">IZABERITE AKCIJU:</div>
+              {decision.options?.map((opt, i) => (
+                <button
+                  key={opt.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!selectedOption) setSelectedOption(opt);
+                  }}
+                  style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                    opt.recommended
+                      ? 'bg-emerald-500/10 border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-500'
+                      : opt.danger
+                      ? 'bg-red-500/5 border-red-500/30 hover:bg-red-500/10 hover:border-red-500/50'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {opt.recommended && <CheckCircle className="w-5 h-5 text-emerald-400" />}
+                      {opt.danger && <AlertTriangle className="w-5 h-5 text-red-400" />}
+                      {!opt.recommended && !opt.danger && <div className="w-5 h-5 rounded-full border-2 border-slate-500" />}
+                      <div>
+                        <div className={`font-semibold ${opt.recommended ? 'text-emerald-400' : opt.danger ? 'text-red-400' : 'text-white'}`}>
+                          {opt.label}
+                        </div>
+                        <div className="text-sm text-slate-500">{opt.description}</div>
+                      </div>
+                    </div>
+                    {opt.recommended && (
+                      <span className="text-[10px] px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-full font-bold">
+                        PREPORUČENO
+                      </span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            /* Flow Visualization - shown after option is selected */
+            <div className="mt-5">
+              <div className="text-center mb-4">
+                <div className="text-[10px] font-mono text-cyan-500 mb-1">AI OPTIMIZACIJA U TOKU</div>
+                <div className="text-lg font-bold text-white">{selectedOption.label}</div>
+              </div>
+
+              {/* Flow steps */}
+              <div className="space-y-2">
+                {FLOW_STEPS.map((step, index) => {
+                  const StepIcon = step.icon;
+                  const isActive = index === flowStep;
+                  const isComplete = index < flowStep;
+                  const isPending = index > flowStep;
+
+                  return (
+                    <motion.div
+                      key={step.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`relative flex items-center gap-3 p-2.5 rounded-lg border transition-all ${
+                        isActive
+                          ? 'bg-cyan-500/20 border-cyan-500/50'
+                          : isComplete
+                          ? 'bg-emerald-500/10 border-emerald-500/30'
+                          : 'bg-white/5 border-white/10'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        isActive ? 'bg-cyan-500/30' : isComplete ? 'bg-emerald-500/30' : 'bg-white/10'
+                      }`}>
+                        <StepIcon className={`w-4 h-4 ${
+                          isActive ? 'text-cyan-400' : isComplete ? 'text-emerald-400' : 'text-slate-500'
+                        }`} />
+                      </div>
+
+                      <div className="flex-1">
+                        <div className={`text-sm font-mono ${
+                          isActive ? 'text-cyan-400' : isComplete ? 'text-emerald-400' : 'text-slate-500'
+                        }`}>
+                          {step.label}
+                        </div>
+                        {isActive && (
+                          <div className="mt-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div
+                              className="h-full bg-cyan-500"
+                              style={{ width: `${flowProgress}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-right text-[10px] font-mono">
+                        {isComplete && <span className="text-emerald-400">✓</span>}
+                        {isActive && <span className="text-cyan-400 animate-pulse">{flowProgress}%</span>}
+                        {isPending && <span className="text-slate-600">•••</span>}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -475,7 +666,69 @@ function DecisionModal({ decision, onAction, onTimeout }) {
             <span className="font-mono">AI CONFIDENCE: {85 + Math.floor(Math.random() * 10)}%</span>
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+
+          {/* Analysis panels below modal - only show when decision not made */}
+          {decision.analysis && !selectedOption && (
+            <div className="flex gap-3">
+              {/* If Accepted */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex-1 bg-emerald-500/10 backdrop-blur-md rounded-xl border border-emerald-500/30 p-3"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase">Ako prihvatiš</span>
+                </div>
+                <p className="text-xs text-emerald-200/90 leading-relaxed">{decision.analysis.ifAccepted}</p>
+              </motion.div>
+
+              {/* If Rejected */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="flex-1 bg-red-500/10 backdrop-blur-md rounded-xl border border-red-500/30 p-3"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400" />
+                  <span className="text-[10px] font-bold text-red-400 uppercase">Ako odbiješ</span>
+                </div>
+                <p className="text-xs text-red-200/90 leading-relaxed">{decision.analysis.ifRejected}</p>
+              </motion.div>
+            </div>
+          )}
+
+          {/* Processing status during flow */}
+          {selectedOption && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-cyan-500/10 backdrop-blur-md rounded-xl border border-cyan-500/30 p-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-cyan-400 uppercase">Izabrana akcija</div>
+                    <div className="text-sm font-bold text-white">{selectedOption.label}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] text-slate-500">PROGRES</div>
+                  <div className="text-lg font-mono font-bold text-cyan-400">
+                    {Math.round((flowStep / FLOW_STEPS.length) * 100 + (flowProgress / FLOW_STEPS.length))}%
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -647,6 +900,108 @@ function BusListPanel({ buses, routes, selectedItem, onSelectBus, onOpenModal })
         </div>
       </div>
     </div>
+  );
+}
+
+// Quick Bus Info Panel - shows when bus is selected
+function BusQuickInfo({ bus, route, onClose, onOpenDetails }) {
+  if (!bus) return null;
+
+  const getBatteryColor = (level) => {
+    if (level > 60) return 'text-emerald-400';
+    if (level > 30) return 'text-amber-400';
+    return 'text-red-400';
+  };
+
+  const getStateInfo = (state) => {
+    switch (state) {
+      case BUS_STATES.DRIVING: return { label: 'Vozi', color: 'text-cyan-400', bg: 'bg-cyan-500/20' };
+      case BUS_STATES.CHARGING: return { label: 'Puni se', color: 'text-emerald-400', bg: 'bg-emerald-500/20' };
+      case BUS_STATES.WAITING: return { label: 'Čeka', color: 'text-amber-400', bg: 'bg-amber-500/20' };
+      case BUS_STATES.SWAPPING: return { label: 'Swap', color: 'text-purple-400', bg: 'bg-purple-500/20' };
+      default: return { label: '?', color: 'text-slate-400', bg: 'bg-slate-500/20' };
+    }
+  };
+
+  const stateInfo = getStateInfo(bus.state);
+  const estimatedRange = Math.round(bus.batteryLevel * 2.5); // ~250km at 100%
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20, scale: 0.95 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: -20, scale: 0.95 }}
+      className="absolute top-1/2 left-[17rem] -translate-y-1/2 w-56 pointer-events-auto z-20"
+    >
+      <div className="bg-black/80 backdrop-blur-md border border-cyan-500/30 rounded-lg overflow-hidden shadow-lg shadow-cyan-500/10">
+        {/* Header */}
+        <div className="px-2.5 py-2 border-b border-cyan-500/20 bg-cyan-500/10 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bus className="w-4 h-4 text-cyan-400" />
+            <span className="text-sm font-bold text-white">{bus.name}</span>
+          </div>
+          <button onClick={onClose} className="p-0.5 hover:bg-white/10 rounded">
+            <X className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-2.5 space-y-2">
+          {/* Status badge */}
+          <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full ${stateInfo.bg}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${stateInfo.color.replace('text-', 'bg-')}`} />
+            <span className={`text-[10px] font-medium ${stateInfo.color}`}>{stateInfo.label}</span>
+          </div>
+
+          {/* Battery */}
+          <div className="bg-white/5 rounded p-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-slate-500">Baterija</span>
+              <span className={`text-lg font-mono font-bold ${getBatteryColor(bus.batteryLevel)}`}>
+                {Math.round(bus.batteryLevel)}%
+              </span>
+            </div>
+            <div className="h-1.5 bg-black/50 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${bus.batteryLevel}%` }}
+                className={`h-full rounded-full ${bus.batteryLevel > 60 ? 'bg-emerald-500' : bus.batteryLevel > 30 ? 'bg-amber-500' : 'bg-red-500'}`}
+              />
+            </div>
+            <div className="text-[9px] text-slate-500 mt-1">
+              Domet: ~{estimatedRange} km
+            </div>
+          </div>
+
+          {/* Route */}
+          <div className="flex items-center gap-2 text-[10px]">
+            <Route className="w-3 h-3 text-slate-500" />
+            <span className="text-slate-400">{route?.name || 'Nepoznata linija'}</span>
+          </div>
+
+          {/* Quick stats */}
+          <div className="grid grid-cols-2 gap-2 text-[10px]">
+            <div className="bg-white/5 rounded p-1.5 text-center">
+              <div className="text-slate-500">Brzina</div>
+              <div className="text-white font-mono">{bus.state === BUS_STATES.DRIVING ? Math.floor(Math.random() * 30 + 20) : 0} km/h</div>
+            </div>
+            <div className="bg-white/5 rounded p-1.5 text-center">
+              <div className="text-slate-500">Temp</div>
+              <div className="text-white font-mono">{Math.floor(Math.random() * 15 + 25)}°C</div>
+            </div>
+          </div>
+
+          {/* Action button */}
+          <button
+            onClick={onOpenDetails}
+            className="w-full flex items-center justify-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded py-2 text-[11px] text-cyan-400 font-medium transition-colors"
+          >
+            <span>Više detalja</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -3951,7 +4306,7 @@ function StationDetailModal({ station, buses, onClose }) {
 
 // KorHUD - Main HUD
 export default function KorHUD() {
-  const { buses, routes, city, isRunning, setSpeed, selectedItem, selectItem, clearSelection, chargingStations } = useSimulation();
+  const { buses, routes, city, isRunning, speed, setSpeed, selectedItem, selectItem, clearSelection, chargingStations, pendingDecision, setPendingDecision, clearPendingDecision } = useSimulation();
   const [decisions, setDecisions] = useState([]);
   const [activeModal, setActiveModal] = useState(null);
   const [activeFlow, setActiveFlow] = useState(null);
@@ -3961,6 +4316,9 @@ export default function KorHUD() {
   const [showBusModal, setShowBusModal] = useState(false);
   const [showStationModal, setShowStationModal] = useState(false);
   const modalOpenRef = useRef(false);
+  const lastMouseMoveRef = useRef(Date.now());
+  const isMouseIdleRef = useRef(true);
+  const simTimeRef = useRef(Date.now()); // Simulation time that advances with speed
 
   // Track modal/flow state in ref - only block on actual modals, not item selection
   useEffect(() => {
@@ -3974,37 +4332,96 @@ export default function KorHUD() {
     }
   }, [selectedItem]);
 
-  // Update clock
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Generate scenarios every 12 seconds
+  // Update clock - advances faster with higher speed
   useEffect(() => {
     if (!isRunning) return;
 
+    let lastRealTime = Date.now();
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const realDelta = now - lastRealTime;
+      lastRealTime = now;
+
+      // Advance simulation time by realDelta * speed
+      simTimeRef.current += realDelta * speed;
+      setCurrentTime(new Date(simTimeRef.current));
+    }, 100); // Update more frequently for smoother display
+
+    return () => clearInterval(interval);
+  }, [isRunning, speed]);
+
+  // Track mouse movement for idle detection
+  useEffect(() => {
+    const handleMouseMove = () => {
+      lastMouseMoveRef.current = Date.now();
+      isMouseIdleRef.current = false;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Track activeModal/activeFlow in refs to avoid effect re-triggering
+  const activeModalRef = useRef(activeModal);
+  const activeFlowRef = useRef(activeFlow);
+  const busesRef = useRef(buses);
+  const routesRef = useRef(routes);
+
+  useEffect(() => { activeModalRef.current = activeModal; }, [activeModal]);
+  useEffect(() => { activeFlowRef.current = activeFlow; }, [activeFlow]);
+  useEffect(() => { busesRef.current = buses; }, [buses]);
+  useEffect(() => { routesRef.current = routes; }, [routes]);
+
+  // Generate scenarios - simple fixed interval (uses refs to avoid restarting)
+  useEffect(() => {
+    console.log('🔄 Scenario effect started');
+
     const triggerScenario = () => {
-      if (modalOpenRef.current) return;
-      if (buses.length === 0) return;
-      const scenario = generateRandomScenario(buses, routes);
+      console.log('⏰ Trigger check - modal:', !!activeModalRef.current, 'flow:', !!activeFlowRef.current);
+
+      // Don't trigger if modal is already open
+      if (activeModalRef.current || activeFlowRef.current) {
+        console.log('⏸️ Skipping - modal or flow active');
+        return;
+      }
+
+      const currentBuses = busesRef.current;
+      const currentRoutes = routesRef.current;
+
+      if (currentBuses.length === 0) {
+        console.log('⏸️ Skipping - no buses');
+        return;
+      }
+
+      const scenario = generateRandomScenario(currentBuses, currentRoutes);
       if (scenario) {
+        console.log('🚀 Triggering scenario:', scenario.type, 'for bus:', scenario.busId);
         setSpeed(1);
         setActiveModal(scenario);
+        if (scenario.busId) {
+          setPendingDecision({
+            busId: scenario.busId,
+            type: scenario.type,
+            message: scenario.message,
+          });
+          console.log('📍 Set pendingDecision for:', scenario.busId);
+        }
       }
     };
 
-    // First scenario after 2 seconds
-    const initialTimeout = setTimeout(triggerScenario, 2000);
+    // First scenario after 1.5 seconds (quick start)
+    const initialTimeout = setTimeout(triggerScenario, 1500);
 
-    // Then every 8 seconds
-    const interval = setInterval(triggerScenario, 8000);
+    // Then every 5 seconds
+    const interval = setInterval(triggerScenario, 5000);
 
     return () => {
+      console.log('🧹 Scenario effect cleanup');
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
-  }, [isRunning, buses, routes, setSpeed]);
+  }, [setSpeed, setPendingDecision]); // Only stable dependencies
 
   const handleAction = useCallback((decision, actionId) => {
     const option = decision.options?.find(o => o.id === actionId);
@@ -4023,7 +4440,9 @@ export default function KorHUD() {
       setStats(s => ({ ...s, approved: s.approved + 1 }));
     }
     setActiveFlow(null);
-  }, [activeFlow]);
+    // Clear bus highlighting when decision flow is complete
+    clearPendingDecision();
+  }, [activeFlow, clearPendingDecision]);
 
   const handleTimeout = useCallback((decision) => {
     const recommended = decision.options?.find(o => o.recommended);
@@ -4099,6 +4518,18 @@ export default function KorHUD() {
         }}
       />
 
+      {/* Quick bus info - shows when bus is selected */}
+      <AnimatePresence>
+        {selectedItem?.type === 'bus' && (
+          <BusQuickInfo
+            bus={buses.find(b => b.id === selectedItem.id)}
+            route={routes.find(r => r.id === buses.find(b => b.id === selectedItem.id)?.routeId)}
+            onClose={clearSelection}
+            onOpenDetails={() => setShowBusModal(true)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Right panel - decisions queue */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
@@ -4110,6 +4541,11 @@ export default function KorHUD() {
             <div className="flex items-center gap-2">
               <Cpu className="w-4 h-4 text-cyan-400" />
               <span className="text-xs font-mono text-white/80">AI KONTROLA</span>
+              {pendingDecision && (
+                <span className="ml-2 px-1.5 py-0.5 bg-orange-500/20 border border-orange-500/50 rounded text-[9px] text-orange-400 animate-pulse">
+                  {pendingDecision.busId}
+                </span>
+              )}
             </div>
             <div className="text-[10px] font-mono">
               <span className="text-emerald-400">{stats.approved}</span>
@@ -4129,6 +4565,11 @@ export default function KorHUD() {
               <div className="text-center py-6 text-slate-500">
                 <Eye className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 <p className="text-xs">Čekam scenarij...</p>
+                {pendingDecision && (
+                  <p className="text-[10px] text-orange-400 mt-2">
+                    🔶 {pendingDecision.busId} čeka odluku
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -4412,6 +4853,16 @@ export default function KorHUD() {
             decision={activeModal}
             onAction={handleAction}
             onTimeout={handleTimeout}
+            onFlowComplete={(option) => {
+              setActivityLog(prev => [{
+                timestamp: Date.now(),
+                action: option.label,
+                type: 'approved'
+              }, ...prev].slice(0, 6));
+              setStats(s => ({ ...s, approved: s.approved + 1 }));
+              setActiveModal(null);
+              clearPendingDecision();
+            }}
           />
         )}
       </AnimatePresence>
