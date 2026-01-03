@@ -22,9 +22,10 @@ function getStateColor(state) {
 
 export default function BusMarker({ bus }) {
   const markerRef = useRef(null);
-  const { routes, selectItem } = useSimulation();
+  const { routes, selectItem, selectedItem } = useSimulation();
 
   const route = routes.find(r => r.id === bus.routeId);
+  const isSelected = selectedItem?.type === 'bus' && selectedItem?.id === bus.id;
   const position = route ? interpolatePosition(route, bus.progress) : [44.815, 20.46];
 
   // Update marker position
@@ -44,6 +45,9 @@ export default function BusMarker({ bus }) {
     // Robot A indicator - always on bus, active when charging or diagnosing
     const robotAActive = isCharging || bus.batteryLevel < 20;
 
+    // Selection ring color
+    const selectionColor = '#fbbf24'; // amber/gold for selection
+
     return L.divIcon({
       className: 'bus-marker-icon',
       html: `
@@ -54,8 +58,18 @@ export default function BusMarker({ bus }) {
         ">
           <!-- Main bus marker -->
           <svg viewBox="0 0 48 48" width="48" height="48">
+            <!-- Selection ring -->
+            ${isSelected ? `
+              <circle cx="24" cy="24" r="23" fill="none" stroke="${selectionColor}" stroke-width="3" opacity="1">
+                <animate attributeName="stroke-opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="24" cy="24" r="26" fill="none" stroke="${selectionColor}" stroke-width="1" opacity="0.5">
+                <animate attributeName="r" values="24;28;24" dur="1.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.5;0.1;0.5" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+            ` : ''}
             <!-- Glow effect for low battery -->
-            ${isLowBattery ? `
+            ${isLowBattery && !isSelected ? `
               <circle cx="24" cy="24" r="22" fill="none" stroke="${batteryColor}" stroke-width="1" opacity="0.5">
                 <animate attributeName="r" values="20;24;20" dur="1s" repeatCount="indefinite"/>
                 <animate attributeName="opacity" values="0.5;0.2;0.5" dur="1s" repeatCount="indefinite"/>
@@ -143,7 +157,7 @@ export default function BusMarker({ bus }) {
       iconAnchor: [24, 48],
       popupAnchor: [0, -48],
     });
-  }, [bus.batteryLevel, bus.state, bus.name]);
+  }, [bus.batteryLevel, bus.state, bus.name, isSelected]);
 
   // Update icon
   useEffect(() => {
