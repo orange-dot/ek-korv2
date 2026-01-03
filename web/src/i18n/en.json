@@ -81,6 +81,76 @@
         "low_battery": "Low battery warning",
         "diagnostics_run": "Diagnostics completed"
       }
+    },
+    "hud": {
+      "aiControl": "AI CONTROL",
+      "waitingScenario": "Waiting for scenario...",
+      "fleetStats": "FLEET STATS",
+      "aiPredictions": "AI PREDICTIONS",
+      "robotSystem": "ROBOT SYSTEM",
+      "charging": "CHARGING",
+      "ek3Modules": "EK3 MODULES",
+      "routes": "ROUTES",
+      "aiFlow": "AI FLOW",
+      "grid": "Grid",
+      "energy": "Energy",
+      "alarms": "Alarms",
+      "maintenance": "Maintenance",
+      "online": "ONLINE",
+      "standby": "STANDBY",
+      "load": "Load",
+      "voltage": "Voltage",
+      "frequency": "Frequency",
+      "available": "Available",
+      "powerFactor": "Power factor",
+      "today": "Today",
+      "co2Savings": "CO₂ savings",
+      "efficiency": "Efficiency",
+      "critical": "Critical",
+      "warnings": "Warnings",
+      "resolved": "Resolved",
+      "fleetHealth": "Fleet health",
+      "nextSwap": "Next swap",
+      "noWarnings": "No warnings",
+      "chargingFor": "Charging for",
+      "activeBuses": "Active",
+      "chargingBuses": "Charging",
+      "inQueue": "In queue",
+      "totalPower": "Total power",
+      "chargedToday": "Charged today",
+      "health": "Health",
+      "busesPerRoute": "buses"
+    },
+    "scenarios": {
+      "trafficJam": "Traffic Jam",
+      "reroute": "Route Change",
+      "lowBattery": "Low Battery",
+      "criticalBattery": "Critical Battery",
+      "maintenance": "Maintenance Required",
+      "forceMajeure": "Force Majeure",
+      "fleetEmpty": "Fleet Low Battery",
+      "robotDispatch": "Robot Dispatch",
+      "chargingQueue": "Charging Queue",
+      "swapModule": "Module Swap"
+    },
+    "decisions": {
+      "humanInTheLoop": "HUMAN-IN-THE-LOOP",
+      "decisionRequired": "Decision required",
+      "approve": "Approve",
+      "reject": "Reject",
+      "modify": "Modify"
+    },
+    "gridSchematic": {
+      "title": "Electrical System Schematic",
+      "subtitle": "Interactive single-line diagram • Click component for details",
+      "cityGrid": "City Grid",
+      "solarPV": "Solar PV",
+      "dieselGenerator": "Diesel Generator",
+      "transformer": "Transformer TR1",
+      "mainPanel": "Main Distribution GRO",
+      "ek3Rack": "EK3 Rack",
+      "upsSystem": "UPS System",
+      "capacity": "Capacity"
     }
   },
   "philosophy": {
@@ -394,7 +464,7 @@
     }
   },
   "footer": {
-    "copyright": "© 2025 ELEKTROKOMBINACIJA. All rights reserved.",
+    "copyright": "© 2026 ELEKTROKOMBINACIJA. All rights reserved.",
     "tagline": "Predictive diagnostics for EV chargers."
   }
 }

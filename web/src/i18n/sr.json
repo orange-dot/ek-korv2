@@ -38,7 +38,7 @@
     },
     "stationTypes": {
       "depot": "Depo",
-      "opportunity": "Opportunity"
+      "opportunity": "Usputna"
     },
     "robotStatus": {
       "idle": "Spreman",
@@ -167,7 +167,7 @@
         "point1": "Robotska zamena modula - 60 sekundi",
         "point2": "AI dijagnostika - zna tačno šta treba zameniti",
         "point3": "Bez potrebe za tehničarem na lokaciji",
-        "note": "Zero truck rolls za zamenu"
+        "note": "Bez izlazaka tehničara na teren"
       },
       "service": {
         "title": "U Servisu",
@@ -187,7 +187,7 @@
     "cta": "Saznaj više",
     "stats": {
       "power": "99%",
-      "powerLabel": "success rate",
+      "powerLabel": "stopa uspešnosti",
       "weight": "2 ned",
       "weightLabel": "predviđanje kvara",
       "price": "0",
@@ -223,24 +223,24 @@
       "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
       "description": "Standardni modul za sve primene",
-      "specs": ["200 × 320 × 44mm (1U half-width)", "~3.5 kg - robot-ready", "SiC MOSFET, >97% efikasnost", "Blind-mate konektori"]
+      "specs": ["200 × 320 × 44mm (1U pola širine)", "~3.5 kg - za robotsku zamenu", "SiC MOSFET, >97% efikasnost", "Samopozicionirajući konektori"]
     },
     "phase2": {
-      "title": "RACK SISTEM",
+      "title": "SISTEM ORMARA",
       "power": "252 kW",
-      "description": "84 modula u standardnom 19\" rack-u",
-      "specs": ["Wide striping - load na SVE module", "Distributed sparing - nema hot-spare", "Robot swap za 40 sekundi", "Graceful degradation"]
+      "description": "84 modula u standardnom 19\" ormaru",
+      "specs": ["Široko raspoređivanje - opterećenje na SVE module", "Bez rezervnih modula - svi rade", "Robotska zamena za 40 sekundi", "Postepena degradacija"]
     },
     "features": {
       "title": "Zašto jedan modul za sve?",
       "modular": "Masovna proizvodnja",
       "modularDesc": "Jedan dizajn, milionski tiraž = niska cena",
-      "hotswap": "Granularna pouzdanost",
+      "hotswap": "Fino granulisana pouzdanost",
       "hotswapDesc": "1 od 334 otkaže = 0.3% gubitak, ne 10%",
-      "protection": "Robot swap",
+      "protection": "Robotska zamena",
       "protectionDesc": "40 sekundi zamena, bez tehničara",
       "local": "3PAR inspiracija",
-      "localDesc": "Dokazani koncepti iz storage industrije"
+      "localDesc": "Dokazani koncepti iz industrije skladištenja podataka"
     }
   },
   "configurations": {
@@ -255,54 +255,54 @@
       "features": ["1-8 modula", "Plug & play", "AI dijagnostika"]
     },
     "opportunity": {
-      "title": "DC Fast Charging",
+      "title": "Brzo DC Punjenje",
       "power": "50-350 kW",
       "modules": "17-117 × EK3",
       "price": "€2,500 - €18,000",
-      "description": "Automobili, highway stanice. Rack sistem, robot-ready zamena modula.",
-      "features": ["1-2 rack-a", "40 sec zamena", "99.9% uptime"]
+      "description": "Automobili, autoputne stanice. Ormar sistem, robotska zamena modula.",
+      "features": ["1-2 ormara", "40 sek zamena", "99.9% dostupnost"]
     },
     "swap": {
-      "title": "Heavy Duty + MCS",
+      "title": "Teška vozila + MCS",
       "power": "500 kW - 3 MW",
       "modules": "167-1000 × EK3",
       "price": "Po dogovoru",
-      "description": "Autobusi, kamioni, MCS. Više rack-ova, robotska zamena, graceful degradation.",
-      "features": ["4-12 rack-ova", "2 robota paralelno", "0.1% gubitak po kvaru"]
+      "description": "Autobusi, kamioni, MCS. Više ormara, robotska zamena, postepena degradacija.",
+      "features": ["4-12 ormara", "2 robota paralelno", "0.1% gubitak po kvaru"]
     }
   },
   "timeline": {
     "title": "Plan Razvoja",
-    "subtitle": "Od modula do self-healing infrastrukture",
+    "subtitle": "Od modula do samoizlečive infrastrukture",
     "phase1": {
       "title": "Faza 1: EK3 Modul",
       "duration": "4 meseca",
-      "description": "Blade format, robot-ready dizajn",
-      "items": ["SiC MOSFET power stage", "Blind-mate konektori", "AI edge processor", "~3.5 kg, 1U half-width"]
+      "description": "Format kartice, dizajn za robotsku zamenu",
+      "items": ["SiC MOSFET naponski stepen", "Samopozicionirajući konektori", "AI procesor na ivici", "~3.5 kg, 1U pola širine"]
     },
     "phase2": {
-      "title": "Faza 2: Rack Sistem",
+      "title": "Faza 2: Sistem Ormara",
       "duration": "3 meseca",
-      "description": "84 modula u 19\" rack-u",
-      "items": ["Backplane dizajn", "Wide striping algoritam", "Distributed sparing", "252 kW po rack-u"]
+      "description": "84 modula u 19\" ormaru",
+      "items": ["Dizajn zadnje ploče", "Algoritam širokog raspoređivanja", "Raspodeljeni rezervni kapacitet", "252 kW po ormaru"]
     },
     "phase3": {
       "title": "Faza 3: Robot Sistem",
       "duration": "4 meseca",
-      "description": "Custom roboti za swap",
-      "items": ["Robot A (na busu)", "Robot B (na stanici)", "Koordinacioni protokol", "40 sec swap"]
+      "description": "Namenski roboti za zamenu",
+      "items": ["Robot A (na autobusu)", "Robot B (na stanici)", "Koordinacioni protokol", "40 sek zamena"]
     },
     "phase4": {
-      "title": "Faza 4: Self-Healing",
+      "title": "Faza 4: Samoizlečenje",
       "duration": "3 meseca",
       "description": "Infrastruktura koja sama sebe popravlja",
-      "items": ["AI predikcija kvarova", "Automatska zamena", "Fleet logistics", "Zero truck rolls"]
+      "items": ["AI predikcija kvarova", "Automatska zamena", "Logistika flote", "Bez izlazaka tehničara"]
     },
     "phase5": {
-      "title": "Faza 5: Certifikacija",
+      "title": "Faza 5: Sertifikacija",
       "duration": "4 meseca",
-      "description": "CE + grid compliance",
-      "items": ["IEC 61851", "ISO 15118-20", "Safety certifikati"]
+      "description": "CE + usklađenost sa mrežom",
+      "items": ["IEC 61851", "ISO 15118-20", "Bezbednosni sertifikati"]
     }
   },
   "team": {
@@ -360,7 +360,7 @@
     "coordination": "Koordinacija",
     "wireless": "Bežična sinhronizacija",
     "selfHealing": {
-      "title": "Self-Healing: Tradicionalno vs ELEKTROKOMBINACIJA",
+      "title": "Samoizlečenje: Tradicionalno vs ELEKTROKOMBINACIJA",
       "traditional": {
         "title": "Tradicionalni pristup",
         "steps": [
@@ -389,12 +389,12 @@
     "stats": {
       "robots": "robota u koordinaciji",
       "repairTime": "vreme popravke",
-      "truckRolls": "truck rolls",
+      "truckRolls": "izlazaka tehničara",
       "availability": "dostupnost"
     }
   },
   "footer": {
-    "copyright": "© 2025 ELEKTROKOMBINACIJA. Sva prava zadržana.",
+    "copyright": "© 2026 ELEKTROKOMBINACIJA. Sva prava zadržana.",
     "tagline": "Prediktivna dijagnostika za EV punjače."
   }
 }

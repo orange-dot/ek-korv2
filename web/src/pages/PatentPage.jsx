@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -16,101 +15,99 @@ import {
   Check,
 } from 'lucide-react';
 
-// Patent disclosure documents
+// Patent disclosure documents - Updated with latest specs from documentation
 const patents = [
   {
     id: 'EK-2026-001',
-    title: 'Unified Modular Power Architecture',
-    titleSr: 'Jedinstvena Modularna Arhitektura Napajanja',
-    description: 'EK3 blade module design - standardized 3kW power module with blind-mate connectors, enabling scalable charging infrastructure from 3kW to 3MW.',
-    descriptionSr: 'EK3 blade modul dizajn - standardizovani 3kW modul napajanja sa blind-mate konektorima, omogućava skalabilnu infrastrukturu punjenja od 3kW do 3MW.',
+    title: 'Unified Modular Power Architecture (EK3)',
+    description: 'EK3 blade module: 3kW DC/DC converter with SiC MOSFETs, LLC resonant topology, 200×320×44mm (1U half-width telecom format), ~3.5kg, >96% efficiency. Blind-mate connectors enable hot-swap in <1 second. Scalable from 3kW (single module) to 3MW (1000 modules).',
     inventor: 'Bojan Janjatović',
-    witness: 'Marija Janjatović',
     dateOfConception: '2026-01-02',
     priorityDate: '2026-01-02',
     status: 'disclosed',
     category: 'hardware',
     claims: [
-      'Standardized blade-format power module (100×300×44mm)',
-      'Blind-mate connector system for hot-swap capability',
-      'Wide striping load distribution across all modules',
-      'Distributed sparing without dedicated hot-spare',
+      'Standardized blade-format power module (200×320×44mm, 1U half-width)',
+      'LLC resonant DC/DC topology with SiC MOSFETs for >96% efficiency',
+      'Blind-mate connector system with sequenced power/signal contacts',
+      'Planar transformer design for manufacturing repeatability',
+      'Integrated current sensing (Infineon TLI4971) and thermal monitoring',
+      'STM32G474 control MCU with CAN-FD communication',
+      'Film capacitors (no electrolytics) for 50,000+ hour lifespan',
     ],
   },
   {
     id: 'EK-2026-002',
     title: 'Dual-Purpose Robotic Swap Station',
-    titleSr: 'Dvonamenska Robotska Swap Stanica',
-    description: 'Charging station with integrated robotic system for automated module replacement and battery swap operations.',
-    descriptionSr: 'Stanica za punjenje sa integrisanim robotskim sistemom za automatizovanu zamenu modula i swap operacije baterija.',
+    description: 'Charging station with Robot B (station-based, 30-50kg, 50-100kg payload) on linear rail. Performs battery swap and EK3 module replacement. Estimated cost €10,000-20,000 vs €30,000-100,000 for industrial robots.',
     inventor: 'Bojan Janjatović',
-    witness: 'Marija Janjatović',
     dateOfConception: '2026-01-02',
     priorityDate: '2026-01-02',
     status: 'disclosed',
     category: 'robotics',
     claims: [
-      'Station-mounted robot (Robot B) for module manipulation',
-      'Automated module extraction and insertion mechanism',
-      'Real-time health monitoring integration',
+      'Station-mounted robot (Robot B) on linear rail system',
+      'Purpose-built design vs general-purpose industrial robots',
+      '60 second module swap time (vs 3-4 hours traditional repair)',
+      'Fresh module/battery storage and defective bins',
       'Queue management for multiple vehicles',
+      'Integration with AI failure prediction system',
     ],
   },
   {
     id: 'EK-2026-003',
     title: 'Distributed Power Sparing System',
-    titleSr: 'Distribuirani Sistem Rezervnog Napajanja',
-    description: 'Power distribution algorithm inspired by 3PAR storage architecture - graceful degradation with minimal capacity loss per module failure.',
-    descriptionSr: 'Algoritam distribucije snage inspirisan 3PAR storage arhitekturom - graceful degradation sa minimalnim gubitkom kapaciteta po kvaru modula.',
+    description: 'Power distribution inspired by 3PAR storage architecture. Wide striping spreads load across ALL modules. Distributed sparing eliminates dedicated hot-spare. 84 modules in 19" rack = 252kW. Single module failure = 0.3% capacity loss (vs 10% in traditional systems).',
     inventor: 'Bojan Janjatović',
-    witness: 'Marija Janjatović',
     dateOfConception: '2026-01-02',
     priorityDate: '2026-01-02',
     status: 'disclosed',
     category: 'software',
     claims: [
-      'Wide striping algorithm for load distribution',
-      'Distributed sparing across all modules (no hot-spare)',
-      '0.3% capacity loss per module failure (vs 10% traditional)',
-      'Automatic load rebalancing on failure detection',
+      'Wide striping algorithm spreading load across all N modules',
+      'Distributed sparing - no dedicated hot-spare, all modules active',
+      'Graceful degradation: 1/84 = 1.2% (not 10%) capacity loss per failure',
+      'Automatic load rebalancing within milliseconds of failure detection',
+      'Backplane design for 84 modules per 19" rack (252kW)',
+      'CAN bus communication protocol for module coordination',
     ],
   },
   {
     id: 'EK-2026-004',
     title: 'Fleet-Integrated Maintenance Logistics',
-    titleSr: 'Logistika Održavanja Integrisana sa Flotom',
-    description: 'System for using regular bus fleet operations to transport failed modules to service centers - zero dedicated truck rolls.',
-    descriptionSr: 'Sistem za korišćenje redovnih operacija flote autobusa za transport neispravnih modula do servisnih centara - nula posebnih truck roll-ova.',
+    description: 'Zero truck rolls: failed modules travel to service center on regular bus routes. AI predicts failures 2 weeks ahead. Module tracking throughout repair lifecycle. Circular economy: refurbished modules return to service.',
     inventor: 'Bojan Janjatović',
-    witness: 'Marija Janjatović',
     dateOfConception: '2026-01-02',
     priorityDate: '2026-01-02',
     status: 'disclosed',
     category: 'logistics',
     claims: [
-      'Piggyback logistics using existing fleet routes',
-      'Module tracking throughout repair lifecycle',
-      'Circular economy integration - refurbishment workflow',
-      'Predictive scheduling based on fleet patterns',
+      'Piggyback logistics using existing fleet routes for module transport',
+      'Tiered failure detection: trend analysis (days/weeks), anomaly detection (hours), reactive (minutes)',
+      'Module tracking with unique ID throughout repair lifecycle',
+      'Circular economy workflow: field→service→refurbish→field',
+      'Predictive maintenance scheduling based on fleet patterns',
+      'Zero dedicated service truck rolls for routine maintenance',
     ],
   },
   {
     id: 'EK-2026-005',
-    title: 'Coordinated Dual-Robot System',
-    titleSr: 'Koordinisani Sistem Dva Robota',
-    description: 'Custom robot pair (Robot A on vehicle, Robot B at station) for self-healing charging infrastructure with wireless coordination.',
-    descriptionSr: 'Par custom robota (Robot A na vozilu, Robot B na stanici) za self-healing infrastrukturu punjenja sa bežičnom koordinacijom.',
+    title: 'Coordinated Dual-Robot Maintenance System',
+    description: 'Robot A (on bus, <15kg, 5-10kg payload, 48V) + Robot B (at station, 30-50kg, 50-100kg payload, 400V AC). Wireless coordination protocol. Self-healing infrastructure: 2 minute repair vs 3-4 hours. 100 buses = 100 mobile maintenance robots!',
     inventor: 'Bojan Janjatović',
-    witness: 'Marija Janjatović',
     dateOfConception: '2026-01-02',
     priorityDate: '2026-01-02',
     status: 'disclosed',
     category: 'robotics',
     claims: [
-      'Vehicle-mounted diagnostic robot (Robot A)',
-      'Station-based manipulation robot (Robot B)',
-      'Wireless coordination protocol between robots',
-      'Self-healing infrastructure - 2 minute repair vs 3-4 hours',
+      'Vehicle-mounted Robot A (<15kg, 0.5-1m reach, connector manipulation)',
+      'Station-based Robot B (30-50kg, 1.5-2m reach, heavy-duty swap)',
+      'Wireless coordination protocol with <10ms latency',
+      'Spare parts storage on bus (fuses, connectors, small modules)',
+      'Self-healing scenarios: Robot A diagnoses, Robot B repairs',
+      'Fleet multiplier effect: N buses = N mobile maintenance robots',
+      'Redundancy: Robot A can perform basic ops if Robot B fails',
+      'Cost advantage: €15,000-25,000 for both vs €50,000+ industrial robot',
     ],
   },
 ];
@@ -118,28 +115,24 @@ const patents = [
 const statusConfig = {
   disclosed: {
     label: 'Disclosed',
-    labelSr: 'Prijavljen',
     color: 'text-accent-cyan',
     bgColor: 'bg-accent-cyan/20',
     icon: FileText,
   },
   filed: {
     label: 'Filed',
-    labelSr: 'Podnet',
     color: 'text-accent-green',
     bgColor: 'bg-accent-green/20',
     icon: CheckCircle,
   },
   pending: {
     label: 'Pending',
-    labelSr: 'Na čekanju',
     color: 'text-yellow-500',
     bgColor: 'bg-yellow-500/20',
     icon: Clock,
   },
   granted: {
     label: 'Granted',
-    labelSr: 'Odobren',
     color: 'text-accent-green',
     bgColor: 'bg-accent-green/20',
     icon: Shield,
@@ -177,15 +170,11 @@ function CopyButton({ text }) {
   );
 }
 
-function PatentCard({ patent, lang }) {
+function PatentCard({ patent }) {
   const [expanded, setExpanded] = useState(false);
   const status = statusConfig[patent.status];
   const category = categoryConfig[patent.category];
   const StatusIcon = status.icon;
-
-  const title = lang === 'sr' ? patent.titleSr : patent.title;
-  const description = lang === 'sr' ? patent.descriptionSr : patent.description;
-  const statusLabel = lang === 'sr' ? status.labelSr : status.label;
 
   return (
     <motion.div
@@ -207,12 +196,12 @@ function PatentCard({ patent, lang }) {
                 {category.label}
               </span>
             </div>
-            <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
-            <p className="text-sm text-slate-400 line-clamp-2">{description}</p>
+            <h3 className="text-lg font-semibold text-white mb-1">{patent.title}</h3>
+            <p className="text-sm text-slate-400 line-clamp-2">{patent.description}</p>
           </div>
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${status.bgColor}`}>
             <StatusIcon className={`w-4 h-4 ${status.color}`} />
-            <span className={`text-sm font-medium ${status.color}`}>{statusLabel}</span>
+            <span className={`text-sm font-medium ${status.color}`}>{status.label}</span>
           </div>
         </div>
 
@@ -251,9 +240,8 @@ function PatentCard({ patent, lang }) {
               </ul>
             </div>
 
-            {/* Witness info */}
+            {/* Date info */}
             <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-border">
-              <span>Witness: {patent.witness}</span>
               <span>Date of Conception: {patent.dateOfConception}</span>
             </div>
           </div>
@@ -264,8 +252,6 @@ function PatentCard({ patent, lang }) {
 }
 
 export default function PatentPage() {
-  const { i18n } = useTranslation();
-  const lang = i18n.language;
   const [filter, setFilter] = useState('all');
 
   const filteredPatents = filter === 'all'
@@ -289,7 +275,7 @@ export default function PatentPage() {
             className="flex items-center gap-2 text-slate-300 hover:text-accent-cyan transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">Nazad</span>
+            <span className="text-sm font-medium">Back</span>
           </Link>
           <h1 className="text-lg font-bold text-white">Patent Portfolio</h1>
           <div className="w-20" />
@@ -301,7 +287,7 @@ export default function PatentPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="p-4 rounded-xl bg-primary-light border border-border">
             <div className="text-3xl font-bold text-white">{stats.total}</div>
-            <div className="text-sm text-slate-400">Ukupno</div>
+            <div className="text-sm text-slate-400">Total</div>
           </div>
           <div className="p-4 rounded-xl bg-primary-light border border-border">
             <div className="text-3xl font-bold text-accent-cyan">{stats.disclosed}</div>
@@ -337,7 +323,7 @@ export default function PatentPage() {
         {/* Patent list */}
         <div className="space-y-4">
           {filteredPatents.map((patent) => (
-            <PatentCard key={patent.id} patent={patent} lang={lang} />
+            <PatentCard key={patent.id} patent={patent} />
           ))}
         </div>
 
@@ -348,9 +334,9 @@ export default function PatentPage() {
             <div className="text-sm text-slate-400">
               <p className="font-medium text-white mb-1">Confidential - Internal Use Only</p>
               <p>
-                Ovi dokumenti predstavljaju intelektualnu svojinu ELEKTROKOMBINACIJA.
-                Priority date je uspostavljen kroz git commit history i blockchain timestamping.
-                Za pitanja kontaktirajte patent tim.
+                These documents represent intellectual property of ELEKTROKOMBINACIJA.
+                Priority date established through GPG-signed git commits and blockchain timestamping.
+                All commits are cryptographically signed to ensure authenticity and non-repudiation.
               </p>
             </div>
           </div>

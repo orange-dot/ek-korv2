@@ -22,7 +22,10 @@
       "Bash(git config:*)",
       "Bash(gpg --list-secret-keys:*)",
       "Bash(gpg --armor --export:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "WebFetch(domain:www.planplus.rs)",
+      "WebFetch(domain:www.openstreetmap.org)",
+      "WebFetch(domain:router.project-osrm.org)"
     ]
   }
 }

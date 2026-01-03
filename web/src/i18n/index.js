@@ -10,8 +10,8 @@ i18n
       sr: { translation: sr },
       en: { translation: en },
     },
-    lng: 'sr',
-    fallbackLng: 'sr',
+    lng: 'en',
+    fallbackLng: 'en',
     interpolation: {
       escapeValue: false,
     },

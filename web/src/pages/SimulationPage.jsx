@@ -8,9 +8,9 @@ export default function SimulationPage() {
   return (
     <SimulationProvider>
       <div className="h-screen w-screen bg-[#050508] overflow-hidden relative">
-        {/* Map Container - z-index 0, lowest layer */}
-        <div className="absolute inset-0 z-0 flex items-center justify-center p-4 pt-20 pb-24 pl-36 pr-80">
-          <div className="relative w-full h-full max-w-5xl max-h-[700px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-cyan-500/10">
+        {/* Map Container - z-index 0, centered for ultrawide with side panels */}
+        <div className="absolute inset-0 z-0 flex items-center justify-center p-4 pt-16 pb-24 pl-64 pr-80">
+          <div className="relative w-full h-full max-w-4xl max-h-[600px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-cyan-500/10">
             {/* Map glow effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-xl opacity-50" />
 

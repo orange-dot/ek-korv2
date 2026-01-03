@@ -31,6 +31,16 @@ import {
   BatteryCharging,
   Search,
   ChevronRight,
+  Plug,
+  BarChart3,
+  History,
+  Calendar,
+  TrendingUp,
+  ChevronDown,
+  Sun,
+  Fuel,
+  Shield,
+  LayoutGrid,
 } from 'lucide-react';
 import { useSimulation, BUS_STATES } from '../../context/SimulationContext';
 
@@ -190,9 +200,9 @@ function generateRandomScenario(buses, routes) {
 
     case 3: // Force majeure
       const events = [
-        { event: 'Nevreme prijavljeno', impact: 'Smanjena vidljivost' },
-        { event: 'Saobraćajna nesreća', impact: 'Blokada puta' },
-        { event: 'Prekid napajanja', impact: 'Stanica offline' },
+        { event: 'Severe weather reported', impact: 'Reduced visibility' },
+        { event: 'Traffic accident', impact: 'Road blocked' },
+        { event: 'Power outage', impact: 'Station offline' },
       ];
       const evt = events[Math.floor(Math.random() * events.length)];
       return {
@@ -200,13 +210,13 @@ function generateRandomScenario(buses, routes) {
         type: SCENARIO_TYPES.FORCE_MAJEURE,
         message: evt.event,
         detail: evt.impact,
-        suggestion: 'Potrebna hitna reakcija',
-        urgency: 'HITNO',
+        suggestion: 'Urgent response required',
+        urgency: 'URGENT',
         timeToDecide: 25,
-        compensation: `Kompenzacija: +${Math.floor(Math.random() * 15) + 5} min`,
+        compensation: `Compensation: +${Math.floor(Math.random() * 15) + 5} min`,
         options: [
-          { id: 'protocol', label: 'Aktiviraj protokol', description: 'Automatske mere', recommended: true },
-          { id: 'manual', label: 'Ručna kontrola', description: 'Preuzmi kontrolu', danger: true },
+          { id: 'protocol', label: 'Activate protocol', description: 'Automatic measures', recommended: true },
+          { id: 'manual', label: 'Manual control', description: 'Take control', danger: true },
         ],
         requiresApproval: true,
         showModal: true,
@@ -218,15 +228,15 @@ function generateRandomScenario(buses, routes) {
         id: `battery-${now}`,
         type: SCENARIO_TYPES.CRITICAL_BATTERY,
         busName: bus.name,
-        message: `Kritična baterija: ${Math.floor(Math.random() * 15) + 5}%`,
-        detail: `Preostalo ~${Math.floor(Math.random() * 20) + 5} min`,
-        suggestion: 'Hitno punjenje potrebno',
-        urgency: 'KRITIČNO',
+        message: `Critical battery: ${Math.floor(Math.random() * 15) + 5}%`,
+        detail: `Remaining ~${Math.floor(Math.random() * 20) + 5} min`,
+        suggestion: 'Urgent charging required',
+        urgency: 'CRITICAL',
         timeToDecide: 30,
         options: [
-          { id: 'charge', label: 'Pošalji na punjenje', description: 'Najbliža stanica', recommended: true },
-          { id: 'swap', label: 'Aktiviraj swap', description: 'Robot B intervencija' },
-          { id: 'continue', label: 'Nastavi vožnju', description: 'Rizik!', danger: true },
+          { id: 'charge', label: 'Send to charging', description: 'Nearest station', recommended: true },
+          { id: 'swap', label: 'Activate swap', description: 'Robot B intervention' },
+          { id: 'continue', label: 'Continue driving', description: 'Risk!', danger: true },
         ],
         requiresApproval: true,
         showModal: true,
@@ -237,13 +247,13 @@ function generateRandomScenario(buses, routes) {
       return {
         id: `queue-${now}`,
         type: SCENARIO_TYPES.CHARGING_QUEUE,
-        message: `Red za punjenje: ${Math.floor(Math.random() * 4) + 3} autobusa`,
-        detail: 'Optimizacija redosleda',
-        suggestion: `Prioritet: ${bus.name}`,
+        message: `Charging queue: ${Math.floor(Math.random() * 4) + 3} buses`,
+        detail: 'Queue optimization',
+        suggestion: `Priority: ${bus.name}`,
         timeToDecide: 45,
         options: [
-          { id: 'ai', label: 'AI optimizacija', description: 'Minimizuj čekanje', recommended: true },
-          { id: 'fifo', label: 'FIFO redosled', description: 'Ko prvi dođe' },
+          { id: 'ai', label: 'AI optimization', description: 'Minimize wait time', recommended: true },
+          { id: 'fifo', label: 'FIFO order', description: 'First come first served' },
         ],
         requiresApproval: true,
         showModal: true,
@@ -255,13 +265,13 @@ function generateRandomScenario(buses, routes) {
         id: `swap-${now}`,
         type: SCENARIO_TYPES.SWAP_MODULE,
         busName: bus.name,
-        message: `Swap moguć: ${bus.name}`,
-        detail: `${Math.floor(Math.random() * 30) + 50}% → 100% za 3 min`,
-        suggestion: 'Robot B spreman',
+        message: `Swap available: ${bus.name}`,
+        detail: `${Math.floor(Math.random() * 30) + 50}% → 100% in 3 min`,
+        suggestion: 'Robot B ready',
         timeToDecide: 45,
         options: [
-          { id: 'swap', label: 'Izvrši swap', description: '3 min do 100%', recommended: true },
-          { id: 'charge', label: 'Nastavi punjenje', description: 'Standardno punjenje' },
+          { id: 'swap', label: 'Execute swap', description: '3 min to 100%', recommended: true },
+          { id: 'charge', label: 'Continue charging', description: 'Standard charging' },
         ],
         requiresApproval: true,
         showModal: true,
@@ -272,14 +282,14 @@ function generateRandomScenario(buses, routes) {
       return {
         id: `fleet-${now}`,
         type: SCENARIO_TYPES.FLEET_EMPTY,
-        message: `Flota na ${Math.floor(Math.random() * 20) + 15}%`,
-        detail: `${Math.floor(Math.random() * 5) + 3} autobusa kritično`,
-        suggestion: 'Sistemska intervencija',
-        urgency: 'KRITIČNO',
+        message: `Fleet at ${Math.floor(Math.random() * 20) + 15}%`,
+        detail: `${Math.floor(Math.random() * 5) + 3} buses critical`,
+        suggestion: 'System intervention',
+        urgency: 'CRITICAL',
         timeToDecide: 30,
         options: [
-          { id: 'emergency', label: 'Hitni režim', description: 'Sve stanice max', recommended: true },
-          { id: 'reduce', label: 'Smanji frekvenciju', description: 'Povuci 30% flote' },
+          { id: 'emergency', label: 'Emergency mode', description: 'All stations max', recommended: true },
+          { id: 'reduce', label: 'Reduce frequency', description: 'Pull 30% of fleet' },
         ],
         requiresApproval: true,
         showModal: true,
@@ -520,7 +530,7 @@ function StatPanel({ label, value, unit, icon: Icon, color, position }) {
 }
 
 // Bus List Panel with search
-function BusListPanel({ buses, routes, selectedItem, onSelectBus }) {
+function BusListPanel({ buses, routes, selectedItem, onSelectBus, onOpenModal }) {
   const [search, setSearch] = useState('');
   const [showConfirm, setShowConfirm] = useState(null);
 
@@ -551,13 +561,13 @@ function BusListPanel({ buses, routes, selectedItem, onSelectBus }) {
   };
 
   return (
-    <div className="absolute top-[17rem] left-4 w-48 pointer-events-auto">
+    <div className="absolute top-[17rem] left-6 w-52 pointer-events-auto">
       <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
         {/* Header */}
         <div className="px-2.5 py-2 border-b border-white/10 bg-white/5">
           <div className="flex items-center gap-2 mb-2">
             <Bus className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="text-[10px] font-mono text-white/80 uppercase">Autobusi</span>
+            <span className="text-[10px] font-mono text-white/80 uppercase">Buses</span>
             <span className="ml-auto text-[9px] font-mono text-slate-500">{buses.length}</span>
           </div>
           {/* Search */}
@@ -619,7 +629,7 @@ function BusListPanel({ buses, routes, selectedItem, onSelectBus }) {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            // Keep selection, modal will open via KorHUD
+                            onOpenModal(bus.id);
                             setShowConfirm(null);
                           }}
                           className="w-full flex items-center justify-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded py-1.5 text-[10px] text-cyan-400 transition-colors"
@@ -947,6 +957,1718 @@ function BusDetailModal({ bus, routes, onClose }) {
         </div>
       </motion.div>
     </motion.div>
+  );
+}
+
+// AI Live Flow Panel - shows real-time process visualization with expansion on activity
+function AILiveFlowPanel({ decisions, activeModal, activityLog, buses, chargingStations }) {
+  const [activeNodes, setActiveNodes] = useState([]);
+  const [flowLines, setFlowLines] = useState([]);
+  const [currentProcess, setCurrentProcess] = useState(null);
+  const [processSteps, setProcessSteps] = useState([]);
+
+  const isExpanded = decisions.length > 0 || activeModal || processSteps.length > 0;
+
+  // Simulate active processes based on system state
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const processes = [];
+      const lines = [];
+      const steps = [];
+
+      // Check for charging buses
+      const chargingBuses = buses.filter(b => b.state === 'charging');
+      if (chargingBuses.length > 0) {
+        processes.push({ id: 'charging', node: 'station' });
+        lines.push({ from: 'bus', to: 'station', active: true });
+        steps.push({ id: 'charge', label: 'Punjenje aktivno', status: 'active', icon: 'zap' });
+      }
+
+      // Check for pending decisions
+      if (decisions.length > 0 || activeModal) {
+        processes.push({ id: 'decision', node: 'ai' });
+        lines.push({ from: 'sensor', to: 'ai', active: true });
+        lines.push({ from: 'ai', to: 'decision', active: true });
+        steps.push({ id: 'analyze', label: 'AI analiza', status: 'complete', icon: 'cpu' });
+        steps.push({ id: 'decide', label: 'Čeka odluku', status: 'active', icon: 'alert' });
+      }
+
+      // Check for low battery buses
+      const lowBattery = buses.filter(b => b.batteryLevel < 30);
+      if (lowBattery.length > 0) {
+        processes.push({ id: 'alert', node: 'monitor' });
+        lines.push({ from: 'bus', to: 'monitor', active: true });
+        if (!steps.find(s => s.id === 'monitor')) {
+          steps.push({ id: 'monitor', label: `${lowBattery.length} bus < 30%`, status: 'warning', icon: 'battery' });
+        }
+      }
+
+      // Check for swapping
+      const swappingBuses = buses.filter(b => b.state === 'swapping');
+      if (swappingBuses.length > 0) {
+        processes.push({ id: 'swap', node: 'station' });
+        steps.push({ id: 'swap', label: 'Swap u toku', status: 'active', icon: 'refresh' });
+      }
+
+      setActiveNodes(processes.map(p => p.node));
+      setFlowLines(lines);
+      setProcessSteps(steps);
+
+      // Set current process description
+      if (activeModal) {
+        setCurrentProcess({ type: 'decision', label: 'HUMAN-IN-THE-LOOP', sublabel: 'Čeka odluku operatera' });
+      } else if (decisions.length > 0) {
+        setCurrentProcess({ type: 'analyzing', label: 'AI PROCESIRA', sublabel: 'Analizira situaciju' });
+      } else if (swappingBuses.length > 0) {
+        setCurrentProcess({ type: 'swap', label: 'SWAP AKTIVAN', sublabel: `${swappingBuses.length} bus` });
+      } else if (chargingBuses.length > 0) {
+        setCurrentProcess({ type: 'charging', label: 'CHARGING', sublabel: `${chargingBuses.length} bus active` });
+      } else if (lowBattery.length > 0) {
+        setCurrentProcess({ type: 'monitoring', label: 'MONITORING', sublabel: `${lowBattery.length} bus low battery` });
+      } else {
+        setCurrentProcess({ type: 'idle', label: 'STANDBY', sublabel: 'System stable' });
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [decisions, activeModal, buses]);
+
+  const nodes = [
+    { id: 'bus', label: 'FLOTA', x: 15, y: 25, color: 'cyan' },
+    { id: 'sensor', label: 'SENZORI', x: 15, y: 75, color: 'purple' },
+    { id: 'monitor', label: 'MONITOR', x: 90, y: 25, color: 'amber' },
+    { id: 'ai', label: 'AI', x: 90, y: 75, color: 'cyan' },
+    { id: 'station', label: 'STANICA', x: 165, y: 25, color: 'emerald' },
+    { id: 'decision', label: 'ODLUKA', x: 165, y: 75, color: 'emerald' },
+  ];
+
+  const connections = [
+    { from: 'bus', to: 'sensor' },
+    { from: 'bus', to: 'monitor' },
+    { from: 'sensor', to: 'ai' },
+    { from: 'monitor', to: 'ai' },
+    { from: 'ai', to: 'decision' },
+    { from: 'ai', to: 'station' },
+    { from: 'bus', to: 'station' },
+  ];
+
+  const getNodePos = (id) => nodes.find(n => n.id === id);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'complete': return { bg: 'bg-emerald-500/20', border: 'border-emerald-500/50', text: 'text-emerald-400', dot: 'bg-emerald-500' };
+      case 'active': return { bg: 'bg-cyan-500/20', border: 'border-cyan-500/50', text: 'text-cyan-400', dot: 'bg-cyan-500' };
+      case 'warning': return { bg: 'bg-amber-500/20', border: 'border-amber-500/50', text: 'text-amber-400', dot: 'bg-amber-500' };
+      default: return { bg: 'bg-white/5', border: 'border-white/10', text: 'text-slate-500', dot: 'bg-slate-500' };
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ width: 256 }}
+      animate={{ width: isExpanded ? 320 : 256 }}
+      className="absolute top-[22rem] right-[18rem] pointer-events-auto"
+    >
+      <motion.div
+        className={`bg-black/80 backdrop-blur-md rounded-lg overflow-hidden transition-all ${
+          isExpanded ? 'border-2 border-cyan-500/50 shadow-lg shadow-cyan-500/20' : 'border border-white/10'
+        }`}
+      >
+        {/* Header */}
+        <div className={`px-3 py-2 border-b ${isExpanded ? 'border-cyan-500/30 bg-cyan-500/10' : 'border-white/10 bg-white/5'}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Cpu className={`w-4 h-4 ${isExpanded ? 'text-cyan-400' : 'text-slate-400'}`} />
+                {isExpanded && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-500 rounded-full animate-ping" />
+                )}
+              </div>
+              <span className={`text-[11px] font-mono uppercase ${isExpanded ? 'text-cyan-400' : 'text-white/80'}`}>
+                {isExpanded ? 'AI PROCES AKTIVAN' : 'AI Flow'}
+              </span>
+            </div>
+            <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+              isExpanded ? 'bg-cyan-500/30 text-cyan-400' : 'bg-white/10 text-slate-500'
+            }`}>
+              {currentProcess?.type === 'idle' ? 'IDLE' : 'LIVE'}
+            </span>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="p-3">
+          {/* Current Process Banner */}
+          {isExpanded && currentProcess && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-3 p-3 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-lg border border-cyan-500/30"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-cyan-400 animate-pulse" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white">{currentProcess.label}</div>
+                  <div className="text-xs text-slate-400">{currentProcess.sublabel}</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Flow Visualization */}
+          <svg width="100%" height={isExpanded ? 120 : 100} viewBox="0 0 220 110" className="w-full">
+            {/* Connection lines */}
+            {connections.map((conn, i) => {
+              const from = getNodePos(conn.from);
+              const to = getNodePos(conn.to);
+              const isActive = flowLines.some(l => l.from === conn.from && l.to === conn.to && l.active);
+
+              return (
+                <g key={i}>
+                  <line
+                    x1={from.x + 22}
+                    y1={from.y + 12}
+                    x2={to.x + 22}
+                    y2={to.y + 12}
+                    stroke={isActive ? '#00d4ff' : 'rgba(255,255,255,0.1)'}
+                    strokeWidth={isActive ? 2 : 1}
+                    strokeDasharray={isActive ? '6 3' : 'none'}
+                  >
+                    {isActive && (
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        from="0"
+                        to="-18"
+                        dur="0.8s"
+                        repeatCount="indefinite"
+                      />
+                    )}
+                  </line>
+                  {isActive && (
+                    <circle r="4" fill="#00d4ff" opacity="0.8">
+                      <animateMotion
+                        dur="1.2s"
+                        repeatCount="indefinite"
+                        path={`M${from.x + 22},${from.y + 12} L${to.x + 22},${to.y + 12}`}
+                      />
+                    </circle>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* Nodes */}
+            {nodes.map((node) => {
+              const isActive = activeNodes.includes(node.id);
+              const colorMap = {
+                cyan: { bg: 'rgba(0,212,255,0.3)', border: '#00d4ff', text: '#00d4ff' },
+                emerald: { bg: 'rgba(16,185,129,0.3)', border: '#10b981', text: '#10b981' },
+                amber: { bg: 'rgba(245,158,11,0.3)', border: '#f59e0b', text: '#f59e0b' },
+                purple: { bg: 'rgba(168,85,247,0.3)', border: '#a855f7', text: '#a855f7' },
+              };
+              const colors = colorMap[node.color];
+
+              return (
+                <g key={node.id}>
+                  {/* Glow effect for active nodes */}
+                  {isActive && (
+                    <rect
+                      x={node.x - 2}
+                      y={node.y - 2}
+                      width="48"
+                      height="28"
+                      rx="6"
+                      fill="none"
+                      stroke={colors.border}
+                      strokeWidth="2"
+                      opacity="0.3"
+                    >
+                      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="1s" repeatCount="indefinite" />
+                    </rect>
+                  )}
+                  <rect
+                    x={node.x}
+                    y={node.y}
+                    width="44"
+                    height="24"
+                    rx="4"
+                    fill={isActive ? colors.bg : 'rgba(255,255,255,0.05)'}
+                    stroke={isActive ? colors.border : 'rgba(255,255,255,0.15)'}
+                    strokeWidth={isActive ? 2 : 1}
+                  />
+                  <text
+                    x={node.x + 22}
+                    y={node.y + 16}
+                    textAnchor="middle"
+                    fill={isActive ? colors.text : 'rgba(255,255,255,0.5)'}
+                    fontSize="8"
+                    fontFamily="monospace"
+                    fontWeight="bold"
+                  >
+                    {node.label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Process Steps - shows when expanded */}
+          <AnimatePresence>
+            {isExpanded && processSteps.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 pt-3 border-t border-white/10 space-y-2"
+              >
+                <div className="text-[9px] text-slate-600 uppercase font-mono">Aktivni procesi</div>
+                {processSteps.map((step, i) => {
+                  const colors = getStatusColor(step.status);
+                  return (
+                    <motion.div
+                      key={step.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className={`flex items-center gap-2 p-2 rounded ${colors.bg} border ${colors.border}`}
+                    >
+                      <div className={`w-2 h-2 rounded-full ${colors.dot} ${step.status === 'active' ? 'animate-pulse' : ''}`} />
+                      <span className={`text-[10px] font-medium ${colors.text}`}>{step.label}</span>
+                      {step.status === 'active' && (
+                        <span className="ml-auto text-[8px] text-cyan-400 font-mono animate-pulse">LIVE</span>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Status Footer */}
+          <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                currentProcess?.type === 'idle' ? 'bg-slate-500' : 'bg-cyan-500 animate-pulse'
+              }`} />
+              <span className="text-[10px] text-slate-500">{currentProcess?.sublabel}</span>
+            </div>
+            <span className="text-[9px] font-mono text-slate-600">AI v2.1</span>
+          </div>
+
+          {/* Activity Log */}
+          {activityLog.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-white/10 space-y-1">
+              <div className="text-[8px] text-slate-600 uppercase">Log</div>
+              {activityLog.slice(0, 3).map((log, i) => (
+                <div key={i} className="flex items-center gap-1.5 text-[9px]">
+                  <span className={log.type === 'approved' ? 'text-emerald-400' : 'text-amber-400'}>●</span>
+                  <span className="text-slate-500 truncate">{log.action}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// Mini Widget with expandable modal
+function MiniWidget({ title, icon: Icon, color, children, modalContent, modalTitle }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <div
+        onClick={() => setIsOpen(true)}
+        className={`bg-black/70 backdrop-blur-md border border-white/10 rounded-lg p-2 cursor-pointer hover:border-${color}-500/50 hover:bg-${color}-500/5 transition-all group`}
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <Icon className={`w-3 h-3 text-${color}-400`} />
+          <span className="text-[9px] font-mono text-white/70 uppercase">{title}</span>
+          <ChevronRight className="w-3 h-3 text-slate-600 ml-auto group-hover:text-white/50 transition-colors" />
+        </div>
+        {children}
+      </div>
+
+      {/* Full screen modal */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center"
+            onClick={() => setIsOpen(false)}
+          >
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className={`relative z-10 bg-black/95 border-2 border-${color}-500/50 rounded-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-auto shadow-2xl shadow-${color}-500/20`}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl bg-${color}-500/20 flex items-center justify-center`}>
+                    <Icon className={`w-5 h-5 text-${color}-400`} />
+                  </div>
+                  <h2 className="text-xl font-bold text-white">{modalTitle || title}</h2>
+                </div>
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 rounded-lg">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
+              {modalContent}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+// Grid Component Detail Modal
+function GridComponentModal({ component, onClose }) {
+  if (!component) return null;
+
+  const getComponentDetails = () => {
+    switch (component.type) {
+      case 'grid':
+        return {
+          title: 'Priključak na Mrežu',
+          subtitle: '10kV Srednjenaponski Vod',
+          color: 'amber',
+          stats: [
+            { label: 'Napon', value: '10 kV', color: 'amber' },
+            { label: 'Max snaga', value: '2 MVA', color: 'cyan' },
+            { label: 'Cos φ', value: '0.95', color: 'emerald' },
+            { label: 'THD', value: '< 3%', color: 'purple' },
+          ],
+          parameters: [
+            { label: 'Distributer', value: 'EPS Distribucija' },
+            { label: 'Tarifni broj', value: 'ED-2024-78542' },
+            { label: 'Priključna snaga', value: '1.5 MW' },
+            { label: 'Merenje', value: 'AMR daljinsko' },
+            { label: 'Ugovor', value: 'Aktivan do 2028' },
+          ],
+          status: 'online',
+        };
+      case 'transformer':
+        return {
+          title: 'Energetski Transformator',
+          subtitle: 'TR1 - 10/0.4 kV',
+          color: 'purple',
+          stats: [
+            { label: 'Snaga', value: '1000 kVA', color: 'purple' },
+            { label: 'Opterećenje', value: '67%', color: 'emerald' },
+            { label: 'Temp. namotaja', value: '58°C', color: 'amber' },
+            { label: 'Efikasnost', value: '98.5%', color: 'cyan' },
+          ],
+          parameters: [
+            { label: 'Proizvođač', value: 'Minel Transformatori' },
+            { label: 'Serijski broj', value: 'MT-2023-4521' },
+            { label: 'Godina proizvodnje', value: '2023' },
+            { label: 'Grupa spoja', value: 'Dyn5' },
+            { label: 'Ulje', value: 'Mineralno, 450L' },
+            { label: 'Hlađenje', value: 'ONAN' },
+          ],
+          status: 'normal',
+        };
+      case 'mainPanel':
+        return {
+          title: 'Glavni Razvodni Orman',
+          subtitle: 'GRO-01 - 400V',
+          color: 'cyan',
+          stats: [
+            { label: 'Ulazna struja', value: '1450 A', color: 'cyan' },
+            { label: 'Izlaznih polja', value: '12', color: 'purple' },
+            { label: 'Aktivnih', value: '10', color: 'emerald' },
+            { label: 'Rezerva', value: '2', color: 'slate' },
+          ],
+          parameters: [
+            { label: 'Proizvođač', value: 'Schneider Electric' },
+            { label: 'Tip', value: 'Prisma P' },
+            { label: 'In glavne sklopke', value: '2000 A' },
+            { label: 'Ik max', value: '50 kA' },
+            { label: 'IP zaštita', value: 'IP54' },
+            { label: 'Sabirnice', value: 'Cu 100x10mm' },
+          ],
+          circuits: [
+            { name: 'Punjač 1-4', power: '300 kW', status: 'active' },
+            { name: 'Punjač 5-8', power: '300 kW', status: 'active' },
+            { name: 'Punjač 9-12', power: '300 kW', status: 'active' },
+            { name: 'Solar Inverter', power: '150 kW', status: 'active' },
+            { name: 'Rasveta', power: '15 kW', status: 'active' },
+            { name: 'HVAC', power: '45 kW', status: 'active' },
+            { name: 'Rezerva 1', power: '-', status: 'off' },
+            { name: 'Rezerva 2', power: '-', status: 'off' },
+          ],
+          status: 'normal',
+        };
+      case 'solar':
+        return {
+          title: 'Solarni Sistem',
+          subtitle: 'FN Elektrana 150 kWp',
+          color: 'amber',
+          stats: [
+            { label: 'Trenutna snaga', value: '142 kW', color: 'amber' },
+            { label: 'Danas', value: '876 kWh', color: 'emerald' },
+            { label: 'Ovaj mesec', value: '24.5 MWh', color: 'cyan' },
+            { label: 'Efikasnost', value: '94.7%', color: 'purple' },
+          ],
+          parameters: [
+            { label: 'Instalisana snaga', value: '150 kWp' },
+            { label: 'Broj panela', value: '375 × 400W' },
+            { label: 'Inverteri', value: '3 × SMA 50kW' },
+            { label: 'Orijentacija', value: 'Jug, 15°' },
+            { label: 'Puštanje u rad', value: 'Mart 2024' },
+            { label: 'Garancija', value: '25 godina' },
+          ],
+          status: 'producing',
+        };
+      case 'generator':
+        return {
+          title: 'Diesel Agregat',
+          subtitle: 'Backup Generator 500 kVA',
+          color: 'red',
+          stats: [
+            { label: 'Status', value: 'STANDBY', color: 'amber' },
+            { label: 'Gorivo', value: '85%', color: 'emerald' },
+            { label: 'Sati rada', value: '127h', color: 'cyan' },
+            { label: 'Poslednji test', value: '3 dana', color: 'purple' },
+          ],
+          parameters: [
+            { label: 'Proizvođač', value: 'Caterpillar' },
+            { label: 'Model', value: 'C15 ACERT' },
+            { label: 'Snaga', value: '500 kVA / 400 kW' },
+            { label: 'Rezervoar', value: '1000L' },
+            { label: 'Autonomija', value: '~8h @ 75%' },
+            { label: 'Auto-start', value: 'Da, < 10s' },
+          ],
+          status: 'standby',
+        };
+      case 'ups':
+        return {
+          title: 'UPS Sistem',
+          subtitle: 'Besprekidno Napajanje',
+          color: 'emerald',
+          stats: [
+            { label: 'Opterećenje', value: '34%', color: 'emerald' },
+            { label: 'Autonomija', value: '15 min', color: 'cyan' },
+            { label: 'Baterije', value: '100%', color: 'emerald' },
+            { label: 'Temp.', value: '24°C', color: 'amber' },
+          ],
+          parameters: [
+            { label: 'Proizvođač', value: 'Eaton' },
+            { label: 'Model', value: '9PX 20kVA' },
+            { label: 'Topologija', value: 'Double conversion' },
+            { label: 'Baterije', value: '40 × 12V/9Ah' },
+            { label: 'Bypass', value: 'Automatski' },
+            { label: 'Kritični potrošači', value: 'Kontrola, IT' },
+          ],
+          status: 'online',
+        };
+      case 'charger':
+        return {
+          title: 'EK3 Punjački Rack',
+          subtitle: '84 × EK3 Modula = 252 kW',
+          color: 'cyan',
+          stats: [
+            { label: 'Aktivnih modula', value: '82/84', color: 'emerald' },
+            { label: 'Trenutna snaga', value: '187 kW', color: 'cyan' },
+            { label: 'Efikasnost', value: '97.2%', color: 'purple' },
+            { label: 'Temp. avg', value: '42°C', color: 'amber' },
+          ],
+          parameters: [
+            { label: 'Konfiguracija', value: '84 × 3kW modula' },
+            { label: 'Wide striping', value: 'Aktivno' },
+            { label: 'Distributed sparing', value: '2 modula' },
+            { label: 'Hot-swap', value: 'Podržan' },
+            { label: 'Robot spreman', value: 'Da' },
+            { label: 'Health score', value: '98.7%' },
+          ],
+          modules: [
+            { id: 'M01-M21', status: 'active', power: 63, temp: 41 },
+            { id: 'M22-M42', status: 'active', power: 62, temp: 43 },
+            { id: 'M43-M63', status: 'active', power: 60, temp: 42 },
+            { id: 'M64-M84', status: 'partial', power: 58, temp: 44 },
+          ],
+          status: 'charging',
+        };
+      default:
+        return null;
+    }
+  };
+
+  const details = getComponentDetails();
+  if (!details) return null;
+
+  const colorClasses = {
+    amber: { bg: 'bg-amber-500/20', border: 'border-amber-500/30', text: 'text-amber-400' },
+    purple: { bg: 'bg-purple-500/20', border: 'border-purple-500/30', text: 'text-purple-400' },
+    cyan: { bg: 'bg-cyan-500/20', border: 'border-cyan-500/30', text: 'text-cyan-400' },
+    emerald: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-400' },
+    red: { bg: 'bg-red-500/20', border: 'border-red-500/30', text: 'text-red-400' },
+    slate: { bg: 'bg-slate-500/20', border: 'border-slate-500/30', text: 'text-slate-400' },
+  };
+
+  const c = colorClasses[details.color];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-8"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-[#0a0a12] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className={`${c.bg} border-b ${c.border} px-6 py-4`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className={`text-xl font-bold ${c.text}`}>{details.title}</h2>
+              <p className="text-sm text-slate-400">{details.subtitle}</p>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-slate-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(85vh-80px)]">
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-3">
+            {details.stats.map((stat, i) => {
+              const sc = colorClasses[stat.color];
+              return (
+                <div key={i} className={`${sc.bg} border ${sc.border} rounded-xl p-4 text-center`}>
+                  <div className={`text-2xl font-mono font-bold ${sc.text}`}>{stat.value}</div>
+                  <div className="text-xs text-slate-500 mt-1">{stat.label}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Parameters */}
+          <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+            <div className="px-4 py-3 border-b border-white/10 bg-white/5">
+              <h3 className="text-sm font-bold text-white">Tehnički Podaci</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-2 gap-3">
+                {details.parameters.map((param, i) => (
+                  <div key={i} className="flex justify-between items-center p-2 bg-black/30 rounded-lg">
+                    <span className="text-sm text-slate-400">{param.label}</span>
+                    <span className="text-sm font-mono text-white">{param.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Circuits for main panel */}
+          {details.circuits && (
+            <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+              <div className="px-4 py-3 border-b border-white/10 bg-white/5">
+                <h3 className="text-sm font-bold text-white">Izlazna Polja</h3>
+              </div>
+              <div className="p-4 grid grid-cols-2 gap-2">
+                {details.circuits.map((circuit, i) => (
+                  <div key={i} className={`flex items-center justify-between p-3 rounded-lg border ${circuit.status === 'active' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-500/10 border-slate-500/20'}`}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${circuit.status === 'active' ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+                      <span className="text-sm text-white">{circuit.name}</span>
+                    </div>
+                    <span className={`text-sm font-mono ${circuit.status === 'active' ? 'text-cyan-400' : 'text-slate-500'}`}>{circuit.power}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Modules for charger */}
+          {details.modules && (
+            <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+              <div className="px-4 py-3 border-b border-white/10 bg-white/5">
+                <h3 className="text-sm font-bold text-white">Grupe Modula</h3>
+              </div>
+              <div className="p-4 grid grid-cols-2 gap-3">
+                {details.modules.map((mod, i) => (
+                  <div key={i} className={`p-4 rounded-lg border ${mod.status === 'active' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-white">{mod.id}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded ${mod.status === 'active' ? 'bg-emerald-500/30 text-emerald-400' : 'bg-amber-500/30 text-amber-400'}`}>
+                        {mod.status === 'active' ? 'OK' : '1 FAULT'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-400">Snaga: <span className="text-cyan-400 font-mono">{mod.power} kW</span></span>
+                      <span className="text-slate-400">Temp: <span className="text-amber-400 font-mono">{mod.temp}°C</span></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Status footer */}
+          <div className={`${c.bg} border ${c.border} rounded-xl p-4 flex items-center justify-between`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${details.status === 'standby' ? 'bg-amber-500' : 'bg-emerald-500'} animate-pulse`} />
+              <span className="text-sm text-white">Status: <span className={c.text}>{details.status.toUpperCase()}</span></span>
+            </div>
+            <span className="text-xs text-slate-500 font-mono">ID: {component.type.toUpperCase()}-001</span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// Interactive Grid Schematic Component
+function GridSchematicComponent({ type, label, sublabel, icon: Icon, color, status, onClick, className = '' }) {
+  const colorClasses = {
+    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400', glow: 'hover:shadow-amber-500/20' },
+    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400', glow: 'hover:shadow-purple-500/20' },
+    cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400', glow: 'hover:shadow-cyan-500/20' },
+    emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', glow: 'hover:shadow-emerald-500/20' },
+    red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400', glow: 'hover:shadow-red-500/20' },
+  };
+  const c = colorClasses[color];
+
+  return (
+    <button
+      onClick={() => onClick({ type })}
+      className={`${c.bg} border-2 ${c.border} rounded-xl p-4 transition-all hover:scale-105 hover:shadow-lg ${c.glow} cursor-pointer group ${className}`}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <div className={`w-10 h-10 rounded-lg ${c.bg} border ${c.border} flex items-center justify-center`}>
+          <Icon className={`w-5 h-5 ${c.text}`} />
+        </div>
+        <div className="text-left">
+          <div className="text-sm font-bold text-white group-hover:text-white/90">{label}</div>
+          <div className="text-xs text-slate-500">{sublabel}</div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <div className={`w-2 h-2 rounded-full ${status === 'active' || status === 'online' ? 'bg-emerald-500 animate-pulse' : status === 'standby' ? 'bg-amber-500' : 'bg-slate-500'}`} />
+          <span className="text-[10px] text-slate-400 uppercase">{status}</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-white/50 group-hover:translate-x-1 transition-all" />
+      </div>
+    </button>
+  );
+}
+
+// Power flow line component
+function PowerFlowLine({ direction = 'horizontal', active = true, className = '' }) {
+  return (
+    <div className={`relative ${direction === 'horizontal' ? 'h-1 w-full' : 'w-1 h-full'} ${className}`}>
+      <div className={`absolute inset-0 ${active ? 'bg-cyan-500/30' : 'bg-slate-700'} rounded-full`} />
+      {active && (
+        <motion.div
+          className={`absolute ${direction === 'horizontal' ? 'h-full w-4' : 'w-full h-4'} bg-gradient-to-r from-transparent via-cyan-400 to-transparent rounded-full`}
+          animate={direction === 'horizontal' ? { x: ['-100%', '400%'] } : { y: ['-100%', '400%'] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        />
+      )}
+    </div>
+  );
+}
+
+// Grid Status Widget with Interactive Schematic
+function GridStatusWidget() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedComponent, setSelectedComponent] = useState(null);
+  const [gridData] = useState({
+    status: 'online',
+    load: 67,
+    available: 850,
+    total: 1200,
+  });
+
+  const handleComponentClick = (component) => {
+    setSelectedComponent(component);
+  };
+
+  return (
+    <>
+      <div
+        onClick={() => setIsOpen(true)}
+        className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-colors"
+      >
+        <div className="px-2 py-1.5 border-b border-white/10 bg-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Plug className="w-3 h-3 text-emerald-400" />
+            <span className="text-[9px] font-mono text-white/80 uppercase">Grid</span>
+          </div>
+          <ChevronRight className="w-3 h-3 text-slate-600" />
+        </div>
+        <div className="p-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[10px] text-emerald-400">ONLINE</span>
+            </div>
+            <span className="text-sm font-mono font-bold text-white">{gridData.load}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Full Screen Schematic Modal */}
+      <AnimatePresence>
+        {isOpen && !selectedComponent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl"
+            onClick={() => setIsOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="h-full flex flex-col p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Elektro Šema Sistema</h2>
+                  <p className="text-slate-400">Interaktivna jednopolna šema • Klikni na komponentu za detalje</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-slate-400">Aktivno</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-amber-500" />
+                      <span className="text-slate-400">Standby</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-slate-500" />
+                      <span className="text-slate-400">Offline</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-6 h-6 text-slate-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Schematic Content */}
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-full max-w-6xl">
+                  {/* Top Row - Power Sources */}
+                  <div className="flex justify-center gap-8 mb-4">
+                    <GridSchematicComponent
+                      type="grid"
+                      label="Gradska Mreža"
+                      sublabel="10kV / 600kW"
+                      icon={Zap}
+                      color="amber"
+                      status="active"
+                      onClick={handleComponentClick}
+                      className="w-48"
+                    />
+                    <GridSchematicComponent
+                      type="solar"
+                      label="Solar FN"
+                      sublabel="150 kWp"
+                      icon={Sun}
+                      color="amber"
+                      status="active"
+                      onClick={handleComponentClick}
+                      className="w-48"
+                    />
+                    <GridSchematicComponent
+                      type="generator"
+                      label="Diesel Agregat"
+                      sublabel="500 kVA"
+                      icon={Fuel}
+                      color="red"
+                      status="standby"
+                      onClick={handleComponentClick}
+                      className="w-48"
+                    />
+                  </div>
+
+                  {/* Power Flow Lines Down */}
+                  <div className="flex justify-center gap-8 h-8">
+                    <div className="w-48 flex justify-center"><PowerFlowLine direction="vertical" active={true} /></div>
+                    <div className="w-48 flex justify-center"><PowerFlowLine direction="vertical" active={true} /></div>
+                    <div className="w-48 flex justify-center"><PowerFlowLine direction="vertical" active={false} /></div>
+                  </div>
+
+                  {/* Transformer */}
+                  <div className="flex justify-center mb-4">
+                    <GridSchematicComponent
+                      type="transformer"
+                      label="Transformator TR1"
+                      sublabel="10/0.4 kV • 1000 kVA"
+                      icon={Cpu}
+                      color="purple"
+                      status="active"
+                      onClick={handleComponentClick}
+                      className="w-64"
+                    />
+                  </div>
+
+                  {/* Power Flow Line Down */}
+                  <div className="flex justify-center h-8">
+                    <PowerFlowLine direction="vertical" active={true} />
+                  </div>
+
+                  {/* Main Panel */}
+                  <div className="flex justify-center mb-4">
+                    <GridSchematicComponent
+                      type="mainPanel"
+                      label="Glavni Razvod GRO"
+                      sublabel="400V • 2000A • 12 polja"
+                      icon={LayoutGrid}
+                      color="cyan"
+                      status="active"
+                      onClick={handleComponentClick}
+                      className="w-72"
+                    />
+                  </div>
+
+                  {/* Power Flow Lines to outputs */}
+                  <div className="flex justify-center h-8">
+                    <div className="flex items-center gap-0 w-full max-w-4xl">
+                      <div className="flex-1" />
+                      <PowerFlowLine direction="vertical" active={true} className="w-1" />
+                      <div className="flex-1 flex items-center">
+                        <PowerFlowLine direction="horizontal" active={true} />
+                      </div>
+                      <PowerFlowLine direction="vertical" active={true} className="w-1" />
+                      <div className="flex-1 flex items-center">
+                        <PowerFlowLine direction="horizontal" active={true} />
+                      </div>
+                      <PowerFlowLine direction="vertical" active={true} className="w-1" />
+                      <div className="flex-1" />
+                    </div>
+                  </div>
+
+                  {/* Bottom Row - Outputs */}
+                  <div className="flex justify-center gap-6">
+                    <GridSchematicComponent
+                      type="charger"
+                      label="EK3 Rack #1"
+                      sublabel="84 modula • 252 kW"
+                      icon={BatteryCharging}
+                      color="cyan"
+                      status="active"
+                      onClick={handleComponentClick}
+                      className="w-44"
+                    />
+                    <GridSchematicComponent
+                      type="charger"
+                      label="EK3 Rack #2"
+                      sublabel="84 modula • 252 kW"
+                      icon={BatteryCharging}
+                      color="cyan"
+                      status="active"
+                      onClick={handleComponentClick}
+                      className="w-44"
+                    />
+                    <GridSchematicComponent
+                      type="ups"
+                      label="UPS Sistem"
+                      sublabel="20 kVA • 15 min"
+                      icon={Shield}
+                      color="emerald"
+                      status="online"
+                      onClick={handleComponentClick}
+                      className="w-44"
+                    />
+                  </div>
+
+                  {/* Stats Bar */}
+                  <div className="mt-8 flex justify-center">
+                    <div className="bg-black/50 border border-white/10 rounded-xl px-8 py-4 flex items-center gap-12">
+                      <div className="text-center">
+                        <div className="text-3xl font-mono font-bold text-emerald-400">{gridData.load}%</div>
+                        <div className="text-xs text-slate-500">Opterećenje</div>
+                      </div>
+                      <div className="w-px h-10 bg-white/10" />
+                      <div className="text-center">
+                        <div className="text-3xl font-mono font-bold text-cyan-400">{gridData.available} kW</div>
+                        <div className="text-xs text-slate-500">Dostupno</div>
+                      </div>
+                      <div className="w-px h-10 bg-white/10" />
+                      <div className="text-center">
+                        <div className="text-3xl font-mono font-bold text-purple-400">{gridData.total} kW</div>
+                        <div className="text-xs text-slate-500">Kapacitet</div>
+                      </div>
+                      <div className="w-px h-10 bg-white/10" />
+                      <div className="text-center">
+                        <div className="text-3xl font-mono font-bold text-amber-400">98.5%</div>
+                        <div className="text-xs text-slate-500">Efikasnost</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-4 flex items-center justify-between text-xs text-slate-600">
+                <span>ELEKTROKOMBINACIJA • Jednopolna šema napajanja</span>
+                <span className="font-mono">Poslednje ažuriranje: {new Date().toLocaleTimeString('sr-RS')}</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Component Detail Modal */}
+      <AnimatePresence>
+        {selectedComponent && (
+          <GridComponentModal
+            component={selectedComponent}
+            onClose={() => setSelectedComponent(null)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+// Energy Sparkline Widget
+function EnergySparklineWidget({ buses }) {
+  const [hourlyData] = useState(() =>
+    Array.from({ length: 12 }, (_, i) => ({
+      hour: i + 6,
+      consumption: Math.floor(Math.random() * 200) + 100,
+      production: Math.floor(Math.random() * 80) + 20,
+    }))
+  );
+  const maxVal = Math.max(...hourlyData.map(d => d.consumption));
+  const currentConsumption = Math.floor(buses.length * 12.8);
+
+  return (
+    <MiniWidget
+      title="Energija"
+      icon={BarChart3}
+      color="cyan"
+      modalTitle="Potrošnja Energije"
+      modalContent={
+        <div className="space-y-4">
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-cyan-500/10 rounded-xl p-4 border border-cyan-500/30">
+              <div className="text-2xl font-bold text-cyan-400">{currentConsumption} kWh</div>
+              <div className="text-sm text-slate-400">Trenutno</div>
+            </div>
+            <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/30">
+              <div className="text-2xl font-bold text-emerald-400">{Math.floor(buses.length * 34.7)} kWh</div>
+              <div className="text-sm text-slate-400">Danas ukupno</div>
+            </div>
+            <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30">
+              <div className="text-2xl font-bold text-amber-400">94.2%</div>
+              <div className="text-sm text-slate-400">Efikasnost</div>
+            </div>
+            <div className="bg-purple-500/10 rounded-xl p-4 border border-purple-500/30">
+              <div className="text-2xl font-bold text-purple-400">{Math.floor(buses.length * 8.2)} kg</div>
+              <div className="text-sm text-slate-400">CO₂ ušteda</div>
+            </div>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h3 className="text-sm font-bold text-white mb-3">Potrošnja po satima</h3>
+            <div className="h-48 flex items-end gap-1">
+              {hourlyData.map((d, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex flex-col gap-0.5">
+                    <div
+                      className="w-full bg-cyan-500/60 rounded-t"
+                      style={{ height: `${(d.consumption / maxVal) * 150}px` }}
+                    />
+                  </div>
+                  <span className="text-[9px] text-slate-500">{d.hour}h</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <div className="flex items-center gap-1 h-6">
+        {hourlyData.slice(-8).map((d, i) => (
+          <div
+            key={i}
+            className="flex-1 bg-cyan-500/60 rounded-sm"
+            style={{ height: `${(d.consumption / maxVal) * 100}%` }}
+          />
+        ))}
+      </div>
+    </MiniWidget>
+  );
+}
+
+// Alarm Log Widget
+function AlarmLogWidget({ activityLog }) {
+  const [alarmHistory] = useState([
+    { time: '14:32', type: 'warning', message: 'Bus 3 - niska baterija', resolved: true },
+    { time: '14:15', type: 'info', message: 'Swap završen - Bus 7', resolved: true },
+    { time: '13:58', type: 'warning', message: 'Gužva - Bulevar Oslobođenja', resolved: true },
+    { time: '13:42', type: 'error', message: 'Stanica 2 - kratak prekid', resolved: true },
+    { time: '13:30', type: 'info', message: 'AI optimizacija rute', resolved: true },
+    { time: '12:55', type: 'warning', message: 'Bus 12 - temperatura modula', resolved: true },
+  ]);
+
+  const getTypeColor = (type) => {
+    switch (type) {
+      case 'error': return 'red';
+      case 'warning': return 'amber';
+      default: return 'cyan';
+    }
+  };
+
+  return (
+    <MiniWidget
+      title="Alarmi"
+      icon={History}
+      color="amber"
+      modalTitle="Istorija Alarma"
+      modalContent={
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-red-500/10 rounded-xl p-4 border border-red-500/30">
+              <div className="text-2xl font-bold text-red-400">0</div>
+              <div className="text-sm text-slate-400">Kritičnih</div>
+            </div>
+            <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30">
+              <div className="text-2xl font-bold text-amber-400">2</div>
+              <div className="text-sm text-slate-400">Upozorenja</div>
+            </div>
+            <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/30">
+              <div className="text-2xl font-bold text-emerald-400">{alarmHistory.length}</div>
+              <div className="text-sm text-slate-400">Rešenih danas</div>
+            </div>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10 max-h-80 overflow-auto">
+            <h3 className="text-sm font-bold text-white mb-3">Poslednji događaji</h3>
+            <div className="space-y-2">
+              {alarmHistory.map((alarm, i) => {
+                const color = getTypeColor(alarm.type);
+                return (
+                  <div key={i} className={`flex items-center gap-3 p-3 bg-${color}-500/10 rounded-lg border border-${color}-500/20`}>
+                    <div className={`w-2 h-2 rounded-full bg-${color}-500`} />
+                    <span className="text-xs font-mono text-slate-500">{alarm.time}</span>
+                    <span className="text-sm text-white flex-1">{alarm.message}</span>
+                    {alarm.resolved && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] text-slate-400">{alarmHistory.length} danas</span>
+        <div className="flex items-center gap-1">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span className="text-[10px] text-emerald-400">OK</span>
+        </div>
+      </div>
+    </MiniWidget>
+  );
+}
+
+// Maintenance Widget
+function MaintenanceWidget({ buses, chargingStations }) {
+  const [schedule] = useState([
+    { id: 1, type: 'Bus', name: 'Bus 5', task: 'Servis EK3 modula', date: 'Danas 16:00', priority: 'normal' },
+    { id: 2, type: 'Station', name: 'Stanica Centar', task: 'Kalibracija robota', date: 'Sutra 09:00', priority: 'low' },
+    { id: 3, type: 'Bus', name: 'Bus 12', task: 'Zamena filtera', date: '05.01.', priority: 'normal' },
+    { id: 4, type: 'Station', name: 'Depo Novi Sad', task: 'Inspekcija mreže', date: '07.01.', priority: 'low' },
+  ]);
+
+  const todayCount = schedule.filter(s => s.date.includes('Danas')).length;
+
+  return (
+    <MiniWidget
+      title="Održavanje"
+      icon={Calendar}
+      color="purple"
+      modalTitle="Raspored Održavanja"
+      modalContent={
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30">
+              <div className="text-2xl font-bold text-amber-400">{todayCount}</div>
+              <div className="text-sm text-slate-400">Danas</div>
+            </div>
+            <div className="bg-cyan-500/10 rounded-xl p-4 border border-cyan-500/30">
+              <div className="text-2xl font-bold text-cyan-400">{schedule.length}</div>
+              <div className="text-sm text-slate-400">Ova nedelja</div>
+            </div>
+            <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/30">
+              <div className="text-2xl font-bold text-emerald-400">98.5%</div>
+              <div className="text-sm text-slate-400">Fleet health</div>
+            </div>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h3 className="text-sm font-bold text-white mb-3">Zakazano</h3>
+            <div className="space-y-2">
+              {schedule.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 p-3 bg-black/30 rounded-lg border border-white/10">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.type === 'Bus' ? 'bg-cyan-500/20' : 'bg-purple-500/20'}`}>
+                    {item.type === 'Bus' ? <Bus className="w-4 h-4 text-cyan-400" /> : <Zap className="w-4 h-4 text-purple-400" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-white">{item.name}</div>
+                    <div className="text-xs text-slate-400">{item.task}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-xs font-mono ${item.date.includes('Danas') ? 'text-amber-400' : 'text-slate-500'}`}>{item.date}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] text-slate-400">Sledeće: danas</span>
+        <span className="text-sm font-mono font-bold text-purple-400">{todayCount}</span>
+      </div>
+    </MiniWidget>
+  );
+}
+
+// ============ EXPANDED WIDGETS ============
+
+// Grid Status Widget Expanded
+function GridStatusWidgetExpanded() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedComponent, setSelectedComponent] = useState(null);
+  const [gridData] = useState({
+    status: 'online',
+    load: 67,
+    available: 850,
+    total: 1200,
+    voltage: 398,
+    frequency: 50.01,
+    powerFactor: 0.95,
+  });
+
+  return (
+    <>
+      <div
+        onClick={() => setIsOpen(true)}
+        className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-colors"
+      >
+        <div className="px-2.5 py-1.5 border-b border-white/10 bg-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Plug className="w-3 h-3 text-emerald-400" />
+            <span className="text-[9px] font-mono text-white/80 uppercase">Grid</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[9px] text-emerald-400">ONLINE</span>
+          </div>
+        </div>
+        <div className="p-2.5 space-y-2">
+          {/* Load bar */}
+          <div>
+            <div className="flex justify-between text-[9px] mb-1">
+              <span className="text-slate-500">Opterećenje</span>
+              <span className="text-white font-mono">{gridData.load}%</span>
+            </div>
+            <div className="h-1.5 bg-black/50 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${gridData.load}%` }}
+              />
+            </div>
+          </div>
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="bg-white/5 rounded p-1.5">
+              <div className="text-[8px] text-slate-500">Napon</div>
+              <div className="text-xs font-mono text-cyan-400">{gridData.voltage}V</div>
+            </div>
+            <div className="bg-white/5 rounded p-1.5">
+              <div className="text-[8px] text-slate-500">Frekvencija</div>
+              <div className="text-xs font-mono text-emerald-400">{gridData.frequency}Hz</div>
+            </div>
+            <div className="bg-white/5 rounded p-1.5">
+              <div className="text-[8px] text-slate-500">Dostupno</div>
+              <div className="text-xs font-mono text-white">{gridData.available}kW</div>
+            </div>
+            <div className="bg-white/5 rounded p-1.5">
+              <div className="text-[8px] text-slate-500">Cos φ</div>
+              <div className="text-xs font-mono text-purple-400">{gridData.powerFactor}</div>
+            </div>
+          </div>
+          {/* Sources mini */}
+          <div className="flex items-center gap-1 pt-1 border-t border-white/5">
+            <div className="flex items-center gap-1 flex-1">
+              <Zap className="w-2.5 h-2.5 text-amber-400" />
+              <span className="text-[8px] text-slate-400">600kW</span>
+            </div>
+            <div className="flex items-center gap-1 flex-1">
+              <Sun className="w-2.5 h-2.5 text-amber-400" />
+              <span className="text-[8px] text-slate-400">150kW</span>
+            </div>
+            <div className="flex items-center gap-1 flex-1">
+              <Fuel className="w-2.5 h-2.5 text-slate-500" />
+              <span className="text-[8px] text-slate-500">STBY</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Reuse existing schematic modal */}
+      <AnimatePresence>
+        {isOpen && !selectedComponent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl"
+            onClick={() => setIsOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="h-full flex flex-col p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Elektro Šema Sistema</h2>
+                  <p className="text-slate-400">Interaktivna jednopolna šema • Klikni na komponentu za detalje</p>
+                </div>
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 rounded-lg">
+                  <X className="w-6 h-6 text-slate-400" />
+                </button>
+              </div>
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-full max-w-6xl">
+                  <div className="flex justify-center gap-8 mb-4">
+                    <GridSchematicComponent type="grid" label="Gradska Mreža" sublabel="10kV / 600kW" icon={Zap} color="amber" status="active" onClick={setSelectedComponent} className="w-48" />
+                    <GridSchematicComponent type="solar" label="Solar FN" sublabel="150 kWp" icon={Sun} color="amber" status="active" onClick={setSelectedComponent} className="w-48" />
+                    <GridSchematicComponent type="generator" label="Diesel Agregat" sublabel="500 kVA" icon={Fuel} color="red" status="standby" onClick={setSelectedComponent} className="w-48" />
+                  </div>
+                  <div className="flex justify-center gap-8 h-8">
+                    <div className="w-48 flex justify-center"><PowerFlowLine direction="vertical" active={true} /></div>
+                    <div className="w-48 flex justify-center"><PowerFlowLine direction="vertical" active={true} /></div>
+                    <div className="w-48 flex justify-center"><PowerFlowLine direction="vertical" active={false} /></div>
+                  </div>
+                  <div className="flex justify-center mb-4">
+                    <GridSchematicComponent type="transformer" label="Transformator TR1" sublabel="10/0.4 kV • 1000 kVA" icon={Cpu} color="purple" status="active" onClick={setSelectedComponent} className="w-64" />
+                  </div>
+                  <div className="flex justify-center h-8"><PowerFlowLine direction="vertical" active={true} /></div>
+                  <div className="flex justify-center mb-4">
+                    <GridSchematicComponent type="mainPanel" label="Glavni Razvod GRO" sublabel="400V • 2000A • 12 polja" icon={LayoutGrid} color="cyan" status="active" onClick={setSelectedComponent} className="w-72" />
+                  </div>
+                  <div className="flex justify-center h-8">
+                    <div className="flex items-center w-full max-w-4xl">
+                      <div className="flex-1" />
+                      <PowerFlowLine direction="vertical" active={true} className="w-1" />
+                      <div className="flex-1 flex items-center"><PowerFlowLine direction="horizontal" active={true} /></div>
+                      <PowerFlowLine direction="vertical" active={true} className="w-1" />
+                      <div className="flex-1 flex items-center"><PowerFlowLine direction="horizontal" active={true} /></div>
+                      <PowerFlowLine direction="vertical" active={true} className="w-1" />
+                      <div className="flex-1" />
+                    </div>
+                  </div>
+                  <div className="flex justify-center gap-6">
+                    <GridSchematicComponent type="charger" label="EK3 Rack #1" sublabel="84 modula • 252 kW" icon={BatteryCharging} color="cyan" status="active" onClick={setSelectedComponent} className="w-44" />
+                    <GridSchematicComponent type="charger" label="EK3 Rack #2" sublabel="84 modula • 252 kW" icon={BatteryCharging} color="cyan" status="active" onClick={setSelectedComponent} className="w-44" />
+                    <GridSchematicComponent type="ups" label="UPS Sistem" sublabel="20 kVA • 15 min" icon={Shield} color="emerald" status="online" onClick={setSelectedComponent} className="w-44" />
+                  </div>
+                  <div className="mt-8 flex justify-center">
+                    <div className="bg-black/50 border border-white/10 rounded-xl px-8 py-4 flex items-center gap-12">
+                      <div className="text-center">
+                        <div className="text-3xl font-mono font-bold text-emerald-400">{gridData.load}%</div>
+                        <div className="text-xs text-slate-500">Opterećenje</div>
+                      </div>
+                      <div className="w-px h-10 bg-white/10" />
+                      <div className="text-center">
+                        <div className="text-3xl font-mono font-bold text-cyan-400">{gridData.available} kW</div>
+                        <div className="text-xs text-slate-500">Dostupno</div>
+                      </div>
+                      <div className="w-px h-10 bg-white/10" />
+                      <div className="text-center">
+                        <div className="text-3xl font-mono font-bold text-purple-400">{gridData.total} kW</div>
+                        <div className="text-xs text-slate-500">Kapacitet</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {selectedComponent && <GridComponentModal component={selectedComponent} onClose={() => setSelectedComponent(null)} />}
+      </AnimatePresence>
+    </>
+  );
+}
+
+// Energy Sparkline Widget Expanded
+function EnergySparklineWidgetExpanded({ buses }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [hourlyData] = useState(() =>
+    Array.from({ length: 12 }, (_, i) => ({
+      hour: i + 6,
+      consumption: Math.floor(Math.random() * 200) + 100,
+    }))
+  );
+  const maxVal = Math.max(...hourlyData.map(d => d.consumption));
+  const currentConsumption = Math.floor(buses.length * 12.8);
+  const todayTotal = Math.floor(buses.length * 34.7);
+
+  return (
+    <>
+      <div
+        onClick={() => setIsOpen(true)}
+        className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:border-cyan-500/30 transition-colors"
+      >
+        <div className="px-2.5 py-1.5 border-b border-white/10 bg-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <BarChart3 className="w-3 h-3 text-cyan-400" />
+            <span className="text-[9px] font-mono text-white/80 uppercase">Energija</span>
+          </div>
+          <span className="text-[9px] font-mono text-cyan-400">{currentConsumption} kW</span>
+        </div>
+        <div className="p-2.5 space-y-2">
+          {/* Sparkline chart */}
+          <div className="flex items-end gap-0.5 h-10">
+            {hourlyData.map((d, i) => (
+              <div
+                key={i}
+                className="flex-1 bg-cyan-500/60 rounded-t transition-all hover:bg-cyan-400"
+                style={{ height: `${(d.consumption / maxVal) * 100}%` }}
+              />
+            ))}
+          </div>
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="bg-white/5 rounded p-1.5">
+              <div className="text-[8px] text-slate-500">Danas</div>
+              <div className="text-xs font-mono text-emerald-400">{todayTotal} kWh</div>
+            </div>
+            <div className="bg-white/5 rounded p-1.5">
+              <div className="text-[8px] text-slate-500">CO₂ ušteda</div>
+              <div className="text-xs font-mono text-emerald-400">{Math.floor(buses.length * 8.2)} kg</div>
+            </div>
+          </div>
+          {/* Efficiency indicator */}
+          <div className="flex items-center justify-between pt-1 border-t border-white/5">
+            <span className="text-[8px] text-slate-500">Efikasnost</span>
+            <div className="flex items-center gap-1">
+              <TrendingUp className="w-2.5 h-2.5 text-emerald-400" />
+              <span className="text-[10px] font-mono text-emerald-400">94.2%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-8"
+            onClick={() => setIsOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-[#0a0a12] border border-white/10 rounded-2xl w-full max-w-4xl p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">Potrošnja Energije</h2>
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 rounded-lg">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="bg-cyan-500/10 rounded-xl p-4 border border-cyan-500/30 text-center">
+                  <div className="text-2xl font-mono font-bold text-cyan-400">{currentConsumption} kW</div>
+                  <div className="text-sm text-slate-400">Trenutno</div>
+                </div>
+                <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/30 text-center">
+                  <div className="text-2xl font-mono font-bold text-emerald-400">{todayTotal} kWh</div>
+                  <div className="text-sm text-slate-400">Danas ukupno</div>
+                </div>
+                <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30 text-center">
+                  <div className="text-2xl font-mono font-bold text-amber-400">94.2%</div>
+                  <div className="text-sm text-slate-400">Efikasnost</div>
+                </div>
+                <div className="bg-purple-500/10 rounded-xl p-4 border border-purple-500/30 text-center">
+                  <div className="text-2xl font-mono font-bold text-purple-400">{Math.floor(buses.length * 8.2)} kg</div>
+                  <div className="text-sm text-slate-400">CO₂ ušteda</div>
+                </div>
+              </div>
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="text-sm font-bold text-white mb-4">Potrošnja po satima</h3>
+                <div className="h-48 flex items-end gap-2">
+                  {hourlyData.map((d, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div className="w-full bg-cyan-500/60 rounded-t" style={{ height: `${(d.consumption / maxVal) * 150}px` }} />
+                      <span className="text-[10px] text-slate-500">{d.hour}h</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+// Alarm Log Widget Expanded
+function AlarmLogWidgetExpanded({ activityLog }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [alarms] = useState([
+    { time: '15:02', type: 'info', msg: 'Swap OK - Bus 7' },
+    { time: '14:45', type: 'warning', msg: 'Niska baterija Bus 3' },
+    { time: '14:32', type: 'info', msg: 'Ruta optimizovana' },
+  ]);
+
+  return (
+    <>
+      <div
+        onClick={() => setIsOpen(true)}
+        className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:border-amber-500/30 transition-colors"
+      >
+        <div className="px-2.5 py-1.5 border-b border-white/10 bg-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <History className="w-3 h-3 text-amber-400" />
+            <span className="text-[9px] font-mono text-white/80 uppercase">Alarmi</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-[9px] text-emerald-400">OK</span>
+          </div>
+        </div>
+        <div className="p-2.5 space-y-1.5">
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-1">
+            <div className="bg-red-500/10 rounded p-1 text-center">
+              <div className="text-sm font-mono font-bold text-red-400">0</div>
+              <div className="text-[7px] text-slate-500">Kritično</div>
+            </div>
+            <div className="bg-amber-500/10 rounded p-1 text-center">
+              <div className="text-sm font-mono font-bold text-amber-400">2</div>
+              <div className="text-[7px] text-slate-500">Upozor.</div>
+            </div>
+            <div className="bg-emerald-500/10 rounded p-1 text-center">
+              <div className="text-sm font-mono font-bold text-emerald-400">12</div>
+              <div className="text-[7px] text-slate-500">Rešeno</div>
+            </div>
+          </div>
+          {/* Recent alarms */}
+          <div className="space-y-1 pt-1 border-t border-white/5">
+            {alarms.slice(0, 3).map((a, i) => (
+              <div key={i} className="flex items-center gap-1.5 text-[9px]">
+                <div className={`w-1.5 h-1.5 rounded-full ${a.type === 'warning' ? 'bg-amber-500' : a.type === 'error' ? 'bg-red-500' : 'bg-cyan-500'}`} />
+                <span className="text-slate-500 font-mono">{a.time}</span>
+                <span className="text-slate-400 truncate">{a.msg}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-8"
+            onClick={() => setIsOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-[#0a0a12] border border-white/10 rounded-2xl w-full max-w-3xl p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">Istorija Alarma</h2>
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 rounded-lg">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-red-500/10 rounded-xl p-4 border border-red-500/30 text-center">
+                  <div className="text-3xl font-mono font-bold text-red-400">0</div>
+                  <div className="text-sm text-slate-400">Kritičnih</div>
+                </div>
+                <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30 text-center">
+                  <div className="text-3xl font-mono font-bold text-amber-400">2</div>
+                  <div className="text-sm text-slate-400">Upozorenja</div>
+                </div>
+                <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/30 text-center">
+                  <div className="text-3xl font-mono font-bold text-emerald-400">12</div>
+                  <div className="text-sm text-slate-400">Rešenih danas</div>
+                </div>
+              </div>
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10 max-h-80 overflow-auto">
+                <h3 className="text-sm font-bold text-white mb-3">Poslednji događaji</h3>
+                <div className="space-y-2">
+                  {[...alarms,
+                    { time: '14:15', type: 'info', msg: 'Dijagnostika završena' },
+                    { time: '13:58', type: 'warning', msg: 'Gužva - Bulevar Oslobođenja' },
+                    { time: '13:42', type: 'info', msg: 'Swap završen - Bus 12' },
+                  ].map((a, i) => (
+                    <div key={i} className={`flex items-center gap-3 p-3 rounded-lg border ${a.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : a.type === 'error' ? 'bg-red-500/10 border-red-500/20' : 'bg-cyan-500/10 border-cyan-500/20'}`}>
+                      <div className={`w-2 h-2 rounded-full ${a.type === 'warning' ? 'bg-amber-500' : a.type === 'error' ? 'bg-red-500' : 'bg-cyan-500'}`} />
+                      <span className="text-xs font-mono text-slate-500">{a.time}</span>
+                      <span className="text-sm text-white flex-1">{a.msg}</span>
+                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+// Maintenance Widget Expanded
+function MaintenanceWidgetExpanded({ buses, chargingStations }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [schedule] = useState([
+    { type: 'Bus', name: 'Bus 5', task: 'EK3 servis', date: 'Danas 16:00' },
+    { type: 'Station', name: 'Centar', task: 'Kalibracija', date: 'Sutra 09:00' },
+  ]);
+  const todayCount = 1;
+
+  return (
+    <>
+      <div
+        onClick={() => setIsOpen(true)}
+        className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:border-purple-500/30 transition-colors"
+      >
+        <div className="px-2.5 py-1.5 border-b border-white/10 bg-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-3 h-3 text-purple-400" />
+            <span className="text-[9px] font-mono text-white/80 uppercase">Održavanje</span>
+          </div>
+          <span className="text-[9px] font-mono text-purple-400">{todayCount} danas</span>
+        </div>
+        <div className="p-2.5 space-y-1.5">
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="bg-amber-500/10 rounded p-1.5">
+              <div className="text-[8px] text-slate-500">Danas</div>
+              <div className="text-sm font-mono font-bold text-amber-400">{todayCount}</div>
+            </div>
+            <div className="bg-emerald-500/10 rounded p-1.5">
+              <div className="text-[8px] text-slate-500">Fleet health</div>
+              <div className="text-sm font-mono font-bold text-emerald-400">98.5%</div>
+            </div>
+          </div>
+          {/* Upcoming */}
+          <div className="space-y-1 pt-1 border-t border-white/5">
+            {schedule.slice(0, 2).map((s, i) => (
+              <div key={i} className="flex items-center gap-1.5 text-[9px]">
+                {s.type === 'Bus' ? <Bus className="w-2.5 h-2.5 text-cyan-400" /> : <Zap className="w-2.5 h-2.5 text-purple-400" />}
+                <span className="text-white truncate flex-1">{s.name}</span>
+                <span className={`font-mono ${s.date.includes('Danas') ? 'text-amber-400' : 'text-slate-500'}`}>{s.date.split(' ')[0]}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-8"
+            onClick={() => setIsOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-[#0a0a12] border border-white/10 rounded-2xl w-full max-w-3xl p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">Raspored Održavanja</h2>
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 rounded-lg">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30 text-center">
+                  <div className="text-3xl font-mono font-bold text-amber-400">{todayCount}</div>
+                  <div className="text-sm text-slate-400">Danas</div>
+                </div>
+                <div className="bg-cyan-500/10 rounded-xl p-4 border border-cyan-500/30 text-center">
+                  <div className="text-3xl font-mono font-bold text-cyan-400">4</div>
+                  <div className="text-sm text-slate-400">Ova nedelja</div>
+                </div>
+                <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/30 text-center">
+                  <div className="text-3xl font-mono font-bold text-emerald-400">98.5%</div>
+                  <div className="text-sm text-slate-400">Fleet health</div>
+                </div>
+              </div>
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="text-sm font-bold text-white mb-3">Zakazano</h3>
+                <div className="space-y-2">
+                  {[...schedule,
+                    { type: 'Bus', name: 'Bus 12', task: 'Zamena filtera', date: '05.01.' },
+                    { type: 'Station', name: 'Depo NS', task: 'Inspekcija mreže', date: '07.01.' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-black/30 rounded-lg border border-white/10">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.type === 'Bus' ? 'bg-cyan-500/20' : 'bg-purple-500/20'}`}>
+                        {item.type === 'Bus' ? <Bus className="w-4 h-4 text-cyan-400" /> : <Zap className="w-4 h-4 text-purple-400" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-white">{item.name}</div>
+                        <div className="text-xs text-slate-400">{item.task}</div>
+                      </div>
+                      <div className={`text-xs font-mono ${item.date.includes('Danas') ? 'text-amber-400' : 'text-slate-500'}`}>{item.date}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -2236,12 +3958,21 @@ export default function KorHUD() {
   const [activityLog, setActivityLog] = useState([]);
   const [stats, setStats] = useState({ approved: 0, timeout: 0 });
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showBusModal, setShowBusModal] = useState(false);
+  const [showStationModal, setShowStationModal] = useState(false);
   const modalOpenRef = useRef(false);
 
-  // Track modal/flow state in ref
+  // Track modal/flow state in ref - only block on actual modals, not item selection
   useEffect(() => {
-    modalOpenRef.current = activeModal !== null || activeFlow !== null || selectedItem !== null;
-  }, [activeModal, activeFlow, selectedItem]);
+    modalOpenRef.current = activeModal !== null || activeFlow !== null;
+  }, [activeModal, activeFlow]);
+
+  // Open station modal when station is selected from map
+  useEffect(() => {
+    if (selectedItem?.type === 'station' && !showStationModal) {
+      setShowStationModal(true);
+    }
+  }, [selectedItem]);
 
   // Update clock
   useEffect(() => {
@@ -2263,11 +3994,11 @@ export default function KorHUD() {
       }
     };
 
-    // First scenario after 3 seconds
-    const initialTimeout = setTimeout(triggerScenario, 3000);
+    // First scenario after 2 seconds
+    const initialTimeout = setTimeout(triggerScenario, 2000);
 
-    // Then every 12 seconds
-    const interval = setInterval(triggerScenario, 12000);
+    // Then every 8 seconds
+    const interval = setInterval(triggerScenario, 8000);
 
     return () => {
       clearTimeout(initialTimeout);
@@ -2312,7 +4043,7 @@ export default function KorHUD() {
   const criticalBuses = buses.filter(b => b.batteryLevel < 20).length;
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    <div className="absolute inset-0 pointer-events-none">
       {/* Corner brackets */}
       <svg className="absolute top-0 left-0 w-16 h-16" viewBox="0 0 64 64">
         <path d="M0 20 L0 0 L20 0" fill="none" stroke="rgba(0,212,255,0.5)" strokeWidth="2" />
@@ -2352,9 +4083,9 @@ export default function KorHUD() {
       </div>
 
       {/* Left stats */}
-      <StatPanel label="Aktivno" value={activeBuses} unit={`/${buses.length}`} icon={Activity} color="text-cyan-400" position="top-20 left-4" />
-      <StatPanel label="Punjenje" value={chargingBuses} unit="bus" icon={Zap} color="text-emerald-400" position="top-36 left-4" />
-      <StatPanel label="Baterija" value={avgBattery} unit="%" icon={Battery} color={avgBattery > 50 ? "text-emerald-400" : "text-amber-400"} position="top-52 left-4" />
+      <StatPanel label="Aktivno" value={activeBuses} unit={`/${buses.length}`} icon={Activity} color="text-cyan-400" position="top-20 left-6" />
+      <StatPanel label="Punjenje" value={chargingBuses} unit="bus" icon={Zap} color="text-emerald-400" position="top-36 left-6" />
+      <StatPanel label="Baterija" value={avgBattery} unit="%" icon={Battery} color={avgBattery > 50 ? "text-emerald-400" : "text-amber-400"} position="top-52 left-6" />
 
       {/* Bus list panel */}
       <BusListPanel
@@ -2362,13 +4093,17 @@ export default function KorHUD() {
         routes={routes}
         selectedItem={selectedItem}
         onSelectBus={(busId) => selectItem('bus', busId)}
+        onOpenModal={(busId) => {
+          selectItem('bus', busId);
+          setShowBusModal(true);
+        }}
       />
 
       {/* Right panel - decisions queue */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="absolute top-20 right-4 w-64 pointer-events-auto"
+        className="absolute top-20 right-6 w-64 pointer-events-auto"
       >
         <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
           <div className="px-3 py-2 border-b border-white/10 bg-white/5 flex items-center justify-between">
@@ -2411,18 +4146,260 @@ export default function KorHUD() {
         </div>
       </motion.div>
 
-      {/* Bottom robot info */}
-      <div className="absolute bottom-20 left-4">
-        <div className="bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg p-2.5">
-          <div className="text-[9px] font-mono text-slate-500 mb-2">ROBOTI</div>
-          <div className="flex gap-3">
-            <div className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-500/50 flex items-center justify-center text-[9px] font-bold text-cyan-400">A</div>
-              <span className="text-[9px] text-slate-400">Bus</span>
+      {/* Fleet Statistics Panel - left side */}
+      <div className="absolute top-[30rem] left-6 w-52 pointer-events-auto">
+        <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
+          <div className="px-2.5 py-2 border-b border-white/10 bg-white/5">
+            <div className="flex items-center gap-2">
+              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-[10px] font-mono text-white/80 uppercase">Fleet Stats</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-purple-500/20 border border-purple-500/50 flex items-center justify-center text-[9px] font-bold text-purple-400">B</div>
-              <span className="text-[9px] text-slate-400">Stanica</span>
+          </div>
+          <div className="p-2.5 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-slate-500">Pređeno danas</span>
+              <span className="text-sm font-mono font-bold text-white">{Math.floor(buses.length * 47.3)} <span className="text-[9px] text-slate-500">km</span></span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-slate-500">Energija</span>
+              <span className="text-sm font-mono font-bold text-cyan-400">{Math.floor(buses.length * 12.8)} <span className="text-[9px] text-slate-500">kWh</span></span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-slate-500">CO₂ ušteda</span>
+              <span className="text-sm font-mono font-bold text-emerald-400">{Math.floor(buses.length * 8.2)} <span className="text-[9px] text-slate-500">kg</span></span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-slate-500">Efikasnost</span>
+              <span className="text-sm font-mono font-bold text-amber-400">94.2<span className="text-[9px] text-slate-500">%</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Predictions Panel - left side */}
+      <div className="absolute top-[36rem] left-6 w-52 pointer-events-auto">
+        <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
+          <div className="px-2.5 py-2 border-b border-white/10 bg-white/5">
+            <div className="flex items-center gap-2">
+              <Eye className="w-3.5 h-3.5 text-purple-400" />
+              <span className="text-[10px] font-mono text-white/80 uppercase">AI Predikcije</span>
+            </div>
+          </div>
+          <div className="p-2.5 space-y-2">
+            {buses.filter(b => b.batteryLevel < 40).slice(0, 3).map((bus, i) => {
+              const timeToEmpty = Math.floor((bus.batteryLevel / 100) * 180);
+              return (
+                <div key={bus.id} className="flex items-center gap-2 p-1.5 bg-amber-500/10 rounded border border-amber-500/20">
+                  <AlertTriangle className="w-3 h-3 text-amber-400" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] text-white truncate">{bus.name}</div>
+                    <div className="text-[9px] text-amber-400">Punjenje za ~{timeToEmpty} min</div>
+                  </div>
+                </div>
+              );
+            })}
+            {buses.filter(b => b.batteryLevel < 40).length === 0 && (
+              <div className="text-center py-2">
+                <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
+                <div className="text-[10px] text-slate-500">Nema upozorenja</div>
+              </div>
+            )}
+            <div className="pt-2 border-t border-white/10 flex justify-between text-[9px]">
+              <span className="text-slate-500">Sledeći swap</span>
+              <span className="text-purple-400 font-mono">~{Math.floor(Math.random() * 30) + 15} min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mini Widgets - left side, second column - expanded */}
+      <div className="absolute top-20 left-[14.5rem] w-56 space-y-2 pointer-events-auto">
+        <GridStatusWidgetExpanded />
+        <EnergySparklineWidgetExpanded buses={buses} />
+        <AlarmLogWidgetExpanded activityLog={activityLog} />
+        <MaintenanceWidgetExpanded buses={buses} chargingStations={chargingStations} />
+      </div>
+
+      {/* Robot & Swap Panel - left bottom */}
+      <div className="absolute bottom-20 left-6 w-52 pointer-events-auto">
+        <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
+          <div className="px-2.5 py-2 border-b border-white/10 bg-white/5">
+            <div className="flex items-center gap-2">
+              <Bot className="w-3.5 h-3.5 text-purple-400" />
+              <span className="text-[10px] font-mono text-white/80 uppercase">Robot Sistem</span>
+            </div>
+          </div>
+          <div className="p-2.5">
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="bg-cyan-500/10 border border-cyan-500/20 rounded p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-4 h-4 rounded-full bg-cyan-500/30 flex items-center justify-center text-[8px] font-bold text-cyan-400">A</div>
+                  <span className="text-[9px] text-slate-400">Bus Robot</span>
+                </div>
+                <div className="text-[10px] text-cyan-400 font-medium">AKTIVAN</div>
+              </div>
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-4 h-4 rounded-full bg-purple-500/30 flex items-center justify-center text-[8px] font-bold text-purple-400">B</div>
+                  <span className="text-[9px] text-slate-400">Station</span>
+                </div>
+                <div className="text-[10px] text-purple-400 font-medium">STANDBY</div>
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+              <span className="text-[10px] text-slate-500">Swapovi danas</span>
+              <span className="text-sm font-mono font-bold text-white">{Math.floor(Math.random() * 8) + 3}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Charging Statistics - right side */}
+      <div className="absolute top-[22rem] right-6 w-64 pointer-events-auto">
+        <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
+          <div className="px-3 py-2 border-b border-white/10 bg-white/5">
+            <div className="flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-[10px] font-mono text-white/80 uppercase">Punjenje</span>
+            </div>
+          </div>
+          <div className="p-3 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-white/5 rounded p-2">
+                <div className="text-[9px] text-slate-500 mb-0.5">Aktivno</div>
+                <div className="text-lg font-mono font-bold text-emerald-400">{chargingBuses}</div>
+              </div>
+              <div className="bg-white/5 rounded p-2">
+                <div className="text-[9px] text-slate-500 mb-0.5">U redu</div>
+                <div className="text-lg font-mono font-bold text-amber-400">{Math.max(0, buses.filter(b => b.batteryLevel < 30).length - chargingBuses)}</div>
+              </div>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-slate-500">Ukupna snaga</span>
+              <span className="text-sm font-mono font-bold text-white">{chargingStations.reduce((s, st) => s + st.currentPower, 0)} <span className="text-[9px] text-slate-500">kW</span></span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-slate-500">Napunjeno danas</span>
+              <span className="text-sm font-mono font-bold text-cyan-400">{Math.floor(buses.length * 34.7)} <span className="text-[9px] text-slate-500">kWh</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Route Performance - right side */}
+      <div className="absolute top-[34rem] right-[18rem] w-56 pointer-events-auto">
+        <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
+          <div className="px-3 py-2 border-b border-white/10 bg-white/5">
+            <div className="flex items-center gap-2">
+              <Route className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-[10px] font-mono text-white/80 uppercase">Rute</span>
+            </div>
+          </div>
+          <div className="p-2.5 space-y-1.5">
+            {routes.slice(0, 4).map((route, i) => {
+              const busesOnRoute = buses.filter(b => b.routeId === route.id).length;
+              const avgBattery = buses.filter(b => b.routeId === route.id).reduce((sum, b) => sum + b.batteryLevel, 0) / Math.max(1, busesOnRoute);
+              return (
+                <div key={route.id} className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: route.color }} />
+                  <span className="text-[10px] text-slate-400 flex-1 truncate">{route.name}</span>
+                  <span className="text-[9px] font-mono text-white">{busesOnRoute} bus</span>
+                  <span className={`text-[9px] font-mono ${avgBattery > 50 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {Math.round(avgBattery)}%
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* AI Live Flow Panel - right side */}
+      <AILiveFlowPanel
+        decisions={decisions}
+        activeModal={activeModal}
+        activityLog={activityLog}
+        buses={buses}
+        chargingStations={chargingStations}
+      />
+
+      {/* EK3 Module Health - right side */}
+      <div className="absolute top-[34rem] right-6 w-64 pointer-events-auto">
+        <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
+          <div className="px-3 py-2 border-b border-white/10 bg-white/5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="text-[10px] font-mono text-white/80 uppercase">EK3 Moduli</span>
+              </div>
+              <span className="text-[9px] font-mono text-emerald-400">98.7% HEALTH</span>
+            </div>
+          </div>
+          <div className="p-3">
+            <div className="space-y-1.5">
+              {chargingStations.slice(0, 3).map((station, i) => (
+                <div key={station.id} className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-emerald-500' : i === 1 ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <span className="text-[10px] text-slate-400 flex-1 truncate">{station.name}</span>
+                  <span className="text-[10px] font-mono text-white">{84 - i * 2} modula</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 pt-2 border-t border-white/10 flex justify-between">
+              <span className="text-[9px] text-slate-500">Sledeći swap</span>
+              <span className="text-[10px] font-mono text-amber-400">~{Math.floor(Math.random() * 20) + 10} min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Activity Bar */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-auto">
+        <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-xl px-6 py-3">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <Bus className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div>
+                <div className="text-[9px] text-slate-500 uppercase">Flota</div>
+                <div className="text-sm font-mono font-bold text-white">{activeBuses}/{buses.length}</div>
+              </div>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <Battery className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <div className="text-[9px] text-slate-500 uppercase">Prosek</div>
+                <div className="text-sm font-mono font-bold text-emerald-400">{avgBattery}%</div>
+              </div>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                <Zap className="w-4 h-4 text-purple-400" />
+              </div>
+              <div>
+                <div className="text-[9px] text-slate-500 uppercase">Snaga</div>
+                <div className="text-sm font-mono font-bold text-purple-400">{chargingStations.reduce((s, st) => s + st.currentPower, 0)} kW</div>
+              </div>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${criticalBuses > 0 ? 'bg-red-500/20' : 'bg-slate-500/20'}`}>
+                <AlertTriangle className={`w-4 h-4 ${criticalBuses > 0 ? 'text-red-400' : 'text-slate-500'}`} />
+              </div>
+              <div>
+                <div className="text-[9px] text-slate-500 uppercase">Kritično</div>
+                <div className={`text-sm font-mono font-bold ${criticalBuses > 0 ? 'text-red-400' : 'text-slate-500'}`}>{criticalBuses}</div>
+              </div>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-mono text-slate-400">SISTEM OK</span>
             </div>
           </div>
         </div>
@@ -2451,22 +4428,28 @@ export default function KorHUD() {
 
       {/* Bus detail modal */}
       <AnimatePresence>
-        {selectedItem?.type === 'bus' && (
+        {showBusModal && selectedItem?.type === 'bus' && (
           <BusDetailModal
             bus={buses.find(b => b.id === selectedItem.id)}
             routes={routes}
-            onClose={clearSelection}
+            onClose={() => {
+              setShowBusModal(false);
+              clearSelection();
+            }}
           />
         )}
       </AnimatePresence>
 
       {/* Station detail modal */}
       <AnimatePresence>
-        {selectedItem?.type === 'station' && (
+        {showStationModal && selectedItem?.type === 'station' && (
           <StationDetailModal
             station={chargingStations.find(s => s.id === selectedItem.id)}
             buses={buses}
-            onClose={clearSelection}
+            onClose={() => {
+              setShowStationModal(false);
+              clearSelection();
+            }}
           />
         )}
       </AnimatePresence>
