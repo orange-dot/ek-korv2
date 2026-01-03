@@ -7,6 +7,8 @@
 | Disclosure ID | EK-2026-004 |
 | Date of Disclosure | 2026-01-02 |
 | Inventor(s) | Bojan Janjatović |
+| Email | bojan.janjatovic@gmail.com |
+| Address | Vojislava Ilica 8, Kikinda, Severni Banat, Serbia |
 | Date of Conception | 2026-01-02 |
 | Witnesses | Marija Janjatović |
 
@@ -289,10 +291,14 @@ WHAT IS NEW:
    • No human intervention at station
    • Seamless integration with existing workflow
 
-3. PREDICTIVE + LOGISTICS COMBO
-   • AI predicts failures days ahead
+3. DETECTION + LOGISTICS COMBO
+   • AI detects degradation through continuous monitoring:
+     - Early detection (trend analysis): days/weeks ahead
+     - Typical (anomaly during charging): hours ahead
+     - Reactive (sudden failure): minutes - but no downtime!
    • Scheduling algorithm matches to bus routes
-   • Parts "arrive" before technician would be called
+   • Parts arrive via next scheduled bus on that route
+   • Even reactive scenarios avoid truck rolls
 
 4. CIRCULAR ECONOMY ENABLER
    • Modules return to depot for repair

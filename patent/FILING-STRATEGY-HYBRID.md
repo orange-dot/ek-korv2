@@ -2,6 +2,8 @@
 
 **Datum:** 2026-01-02
 **Inventor:** Bojan Janjatović
+**Email:** bojan.janjatovic@gmail.com
+**Address:** Vojislava Ilica 8, Kikinda, Severni Banat, Serbia
 **Status:** DRAFT - Za pregled sa patent advokatom
 
 ---

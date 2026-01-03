@@ -1,5 +1,9 @@
 # Priority Proof Log - ELEKTROKOMBINACIJA
 
+**Inventor:** Bojan Janjatović
+**Email:** bojan.janjatovic@gmail.com
+**Address:** Vojislava Ilica 8, Kikinda, Severni Banat, Serbia
+
 ## Datum Uspostavljanja Prioriteta: 2026-01-02
 
 ---

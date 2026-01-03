@@ -7,6 +7,8 @@
 | Disclosure ID | EK-2026-003 |
 | Date of Disclosure | 2026-01-02 |
 | Inventor(s) | Bojan Janjatović |
+| Email | bojan.janjatovic@gmail.com |
+| Address | Vojislava Ilica 8, Kikinda, Severni Banat, Serbia |
 | Date of Conception | 2026-01-02 |
 | Witnesses | Marija Janjatović |
 
