@@ -1,4 +1,5 @@
 // City configurations for simulation
+// Routes follow actual streets using detailed waypoints
 
 export const cities = {
   noviSad: {
@@ -11,20 +12,45 @@ export const cities = {
       {
         id: 'ns-4',
         name: 'Linija 4',
-        fullName: 'Liman - Centar - Detelinara',
+        fullName: 'Liman IV - Centar - Detelinara',
         color: '#00d4ff',
+        // Liman IV → Bulevar Oslobođenja → Bulevar Mihajla Pupina → Centar → Futoski Put → Detelinara
         coordinates: [
-          [45.2425, 19.8285], // Liman IV
-          [45.2445, 19.8320],
-          [45.2470, 19.8355],
-          [45.2495, 19.8385],
-          [45.2520, 19.8405], // Bulevar Oslobođenja
-          [45.2545, 19.8420],
-          [45.2565, 19.8435], // Centar
-          [45.2585, 19.8455],
-          [45.2610, 19.8480],
-          [45.2640, 19.8510],
-          [45.2675, 19.8545], // Detelinara
+          // Liman IV - početak kod Merkatora
+          [45.2368, 19.8242],
+          [45.2375, 19.8258],
+          [45.2382, 19.8272],
+          // Bulevar Cara Lazara
+          [45.2395, 19.8285],
+          [45.2408, 19.8298],
+          [45.2422, 19.8312],
+          // Skretanje na Bulevar Oslobođenja
+          [45.2438, 19.8328],
+          [45.2452, 19.8342],
+          [45.2465, 19.8355],
+          [45.2478, 19.8368],
+          [45.2490, 19.8378],
+          // Bulevar Oslobođenja - nastavak
+          [45.2502, 19.8388],
+          [45.2515, 19.8398],
+          [45.2528, 19.8408],
+          // Centar - Trg Slobode
+          [45.2542, 19.8415],
+          [45.2551, 19.8419],
+          [45.2560, 19.8422],
+          // Bulevar Mihajla Pupina ka severu
+          [45.2572, 19.8428],
+          [45.2585, 19.8435],
+          [45.2598, 19.8442],
+          // Futoski put
+          [45.2612, 19.8452],
+          [45.2628, 19.8465],
+          [45.2645, 19.8480],
+          [45.2662, 19.8498],
+          [45.2680, 19.8518],
+          // Detelinara
+          [45.2698, 19.8538],
+          [45.2715, 19.8555],
         ],
         stations: ['ns-station-1'],
       },
@@ -33,35 +59,69 @@ export const cities = {
         name: 'Linija 7',
         fullName: 'Novo Naselje - Centar - Klisa',
         color: '#7c3aed',
+        // Novo Naselje → Bulevar Vojvode Stepe → Centar → Kisačka → Klisa
         coordinates: [
-          [45.2680, 19.8120], // Novo Naselje
-          [45.2650, 19.8180],
-          [45.2620, 19.8250],
-          [45.2590, 19.8320],
-          [45.2565, 19.8380],
-          [45.2551, 19.8419], // Centar
-          [45.2540, 19.8480],
-          [45.2525, 19.8550],
-          [45.2505, 19.8620],
-          [45.2480, 19.8690], // Klisa
+          // Novo Naselje - Bulevar Vojvode Stepe početak
+          [45.2712, 19.8085],
+          [45.2702, 19.8105],
+          [45.2692, 19.8128],
+          [45.2680, 19.8152],
+          // Bulevar Vojvode Stepe nastavak
+          [45.2668, 19.8178],
+          [45.2655, 19.8205],
+          [45.2642, 19.8232],
+          [45.2628, 19.8260],
+          // Skretanje ka centru
+          [45.2615, 19.8288],
+          [45.2602, 19.8318],
+          [45.2588, 19.8348],
+          [45.2575, 19.8378],
+          // Centar
+          [45.2562, 19.8402],
+          [45.2551, 19.8419],
+          // Kisačka ulica ka istoku
+          [45.2545, 19.8445],
+          [45.2538, 19.8472],
+          [45.2530, 19.8502],
+          [45.2522, 19.8535],
+          // Prema Klisi
+          [45.2512, 19.8570],
+          [45.2502, 19.8608],
+          [45.2492, 19.8648],
+          [45.2480, 19.8690],
         ],
         stations: ['ns-station-2'],
       },
       {
         id: 'ns-11a',
         name: 'Linija 11A',
-        fullName: 'Železnička - Telep',
+        fullName: 'Železnička Stanica - Telep',
         color: '#22c55e',
+        // Železnička → Bulevar Oslobođenja → Centar → Futoška → Telep
         coordinates: [
-          [45.2670, 19.8330], // Železnička stanica
-          [45.2640, 19.8350],
-          [45.2610, 19.8380],
-          [45.2580, 19.8400],
-          [45.2551, 19.8419], // Centar
-          [45.2520, 19.8440],
-          [45.2485, 19.8460],
-          [45.2450, 19.8480],
-          [45.2410, 19.8500], // Telep
+          // Železnička stanica
+          [45.2672, 19.8328],
+          [45.2665, 19.8338],
+          [45.2655, 19.8352],
+          // Bulevar Jaše Tomića
+          [45.2642, 19.8365],
+          [45.2628, 19.8378],
+          [45.2612, 19.8392],
+          // Centar
+          [45.2598, 19.8405],
+          [45.2582, 19.8412],
+          [45.2568, 19.8418],
+          [45.2551, 19.8419],
+          // Futoška ulica ka jugu
+          [45.2535, 19.8425],
+          [45.2518, 19.8432],
+          [45.2500, 19.8440],
+          [45.2482, 19.8448],
+          // Telep
+          [45.2462, 19.8458],
+          [45.2442, 19.8468],
+          [45.2420, 19.8480],
+          [45.2398, 19.8492],
         ],
         stations: ['ns-station-1', 'ns-station-3'],
       },
@@ -70,18 +130,39 @@ export const cities = {
         name: 'Linija 3',
         fullName: 'Satelit - Centar - Petrovaradin',
         color: '#f59e0b',
+        // Satelit → Rumenačka → Centar → Most Slobode → Petrovaradin
         coordinates: [
-          [45.2750, 19.7980], // Satelit
-          [45.2710, 19.8050],
-          [45.2670, 19.8130],
-          [45.2630, 19.8210],
-          [45.2590, 19.8310],
-          [45.2551, 19.8419], // Centar
-          [45.2510, 19.8490],
-          [45.2470, 19.8530],
-          [45.2430, 19.8570],
-          [45.2390, 19.8620],
-          [45.2520, 19.8710], // Petrovaradin (preko mosta)
+          // Satelit
+          [45.2768, 19.7945],
+          [45.2758, 19.7972],
+          [45.2748, 19.8002],
+          // Rumenačka ulica
+          [45.2735, 19.8032],
+          [45.2722, 19.8065],
+          [45.2708, 19.8098],
+          [45.2692, 19.8132],
+          [45.2678, 19.8168],
+          // Prema centru
+          [45.2662, 19.8205],
+          [45.2645, 19.8245],
+          [45.2628, 19.8285],
+          [45.2610, 19.8325],
+          [45.2592, 19.8365],
+          [45.2572, 19.8398],
+          // Centar
+          [45.2551, 19.8419],
+          // Kej žrtava racije ka mostu
+          [45.2538, 19.8455],
+          [45.2525, 19.8495],
+          [45.2512, 19.8538],
+          // Most Slobode
+          [45.2498, 19.8580],
+          [45.2488, 19.8625],
+          [45.2482, 19.8668],
+          // Petrovaradin
+          [45.2492, 19.8708],
+          [45.2508, 19.8742],
+          [45.2525, 19.8768],
         ],
         stations: ['ns-station-2', 'ns-station-3'],
       },
@@ -92,19 +173,19 @@ export const cities = {
         name: 'Trg Slobode',
         position: [45.2551, 19.8419],
         maxPower: 252,
-        chargingPoints: 6, // koliko buseva može istovremeno da se puni
-        batteryStorage: 12, // rezervne EK3 baterije za swap
+        chargingPoints: 6,
+        batteryStorage: 12,
         type: 'depot',
         hasRobotA: true,
-        hasRobotB: true, // može swap
+        hasRobotB: true,
       },
       {
         id: 'ns-station-2',
         name: 'Železnička Stanica',
-        position: [45.2670, 19.8330],
+        position: [45.2672, 19.8328],
         maxPower: 150,
         chargingPoints: 4,
-        batteryStorage: 0, // nema swap
+        batteryStorage: 0,
         type: 'opportunity',
         hasRobotA: false,
         hasRobotB: false,
@@ -112,10 +193,10 @@ export const cities = {
       {
         id: 'ns-station-3',
         name: 'Liman',
-        position: [45.2425, 19.8285],
+        position: [45.2368, 19.8242],
         maxPower: 180,
         chargingPoints: 4,
-        batteryStorage: 8, // ima swap
+        batteryStorage: 8,
         type: 'opportunity',
         hasRobotA: true,
         hasRobotB: true,
@@ -133,37 +214,64 @@ export const cities = {
       {
         id: 'bg-26',
         name: 'Linija 26',
-        fullName: 'Studentski trg - Vukov Spomenik',
+        fullName: 'Studentski Trg - Vukov Spomenik',
         color: '#00d4ff',
+        // Studentski Trg → Vasina → Kneza Miloša → Nemanjina → Vukov Spomenik
         coordinates: [
-          [44.8176, 20.4569],
-          [44.8165, 20.4545],
-          [44.8154, 20.4523],
-          [44.8138, 20.4508],
-          [44.8125, 20.4535],
-          [44.8108, 20.4568],
-          [44.8095, 20.4602],
-          [44.8078, 20.4645],
-          [44.8062, 20.4689],
+          // Studentski trg
+          [44.8182, 20.4565],
+          [44.8175, 20.4558],
+          [44.8168, 20.4548],
+          // Vasina ulica
+          [44.8160, 20.4538],
+          [44.8152, 20.4525],
+          // Kneza Miloša
+          [44.8142, 20.4512],
+          [44.8132, 20.4518],
+          [44.8120, 20.4532],
+          [44.8108, 20.4548],
+          // Nemanjina
+          [44.8095, 20.4565],
+          [44.8082, 20.4585],
+          [44.8068, 20.4608],
+          [44.8055, 20.4632],
+          // Ruzveltova
+          [44.8042, 20.4658],
+          [44.8030, 20.4685],
+          // Vukov Spomenik
+          [44.8018, 20.4712],
+          [44.8008, 20.4738],
         ],
         stations: ['bg-station-1'],
       },
       {
         id: 'bg-31',
         name: 'Linija 31',
-        fullName: 'Studentski trg - Banjica',
+        fullName: 'Studentski Trg - Banjica',
         color: '#7c3aed',
+        // Studentski Trg → Kralja Milana → Slavija → Bulevar Oslobođenja → Banjica
         coordinates: [
-          [44.8176, 20.4569],
-          [44.8198, 20.4512],
-          [44.8215, 20.4478],
-          [44.8195, 20.4432],
-          [44.8168, 20.4398],
-          [44.8142, 20.4365],
-          [44.8108, 20.4328],
-          [44.8065, 20.4295],
-          [44.8022, 20.4258],
-          [44.7985, 20.4225],
+          // Studentski trg
+          [44.8182, 20.4565],
+          [44.8190, 20.4545],
+          [44.8198, 20.4522],
+          // Kralja Milana
+          [44.8192, 20.4498],
+          [44.8185, 20.4472],
+          [44.8178, 20.4445],
+          // Slavija
+          [44.8168, 20.4420],
+          [44.8155, 20.4398],
+          // Bulevar Oslobođenja
+          [44.8140, 20.4378],
+          [44.8122, 20.4355],
+          [44.8102, 20.4332],
+          [44.8080, 20.4308],
+          [44.8058, 20.4282],
+          // Banjica
+          [44.8035, 20.4258],
+          [44.8012, 20.4235],
+          [44.7988, 20.4212],
         ],
         stations: ['bg-station-1'],
       },
@@ -172,20 +280,34 @@ export const cities = {
         name: 'Linija 78',
         fullName: 'Zeleni Venac - Zemun',
         color: '#22c55e',
+        // Zeleni Venac → Brankova → Most na Savi → Novi Beograd → Zemun
         coordinates: [
-          [44.8138, 20.4508],
-          [44.8152, 20.4425],
-          [44.8168, 20.4342],
-          [44.8185, 20.4258],
-          [44.8205, 20.4175],
-          [44.8225, 20.4092],
-          [44.8248, 20.4008],
-          [44.8275, 20.3925],
-          [44.8305, 20.3842],
-          [44.8342, 20.3758],
-          [44.8385, 20.3675],
-          [44.8428, 20.3592],
-          [44.8472, 20.3508],
+          // Zeleni Venac
+          [44.8155, 20.4498],
+          [44.8162, 20.4472],
+          [44.8168, 20.4445],
+          // Brankova
+          [44.8175, 20.4418],
+          [44.8180, 20.4388],
+          [44.8185, 20.4355],
+          // Brankov most
+          [44.8192, 20.4318],
+          [44.8198, 20.4278],
+          [44.8205, 20.4238],
+          // Novi Beograd - Bulevar Mihajla Pupina
+          [44.8215, 20.4195],
+          [44.8228, 20.4148],
+          [44.8242, 20.4098],
+          [44.8258, 20.4045],
+          [44.8278, 20.3988],
+          // Stari Merkator
+          [44.8302, 20.3928],
+          [44.8328, 20.3868],
+          [44.8358, 20.3808],
+          // Zemun
+          [44.8392, 20.3745],
+          [44.8428, 20.3682],
+          [44.8465, 20.3618],
         ],
         stations: ['bg-station-1'],
       },
@@ -194,70 +316,26 @@ export const cities = {
         name: 'Linija 65',
         fullName: 'Zeleni Venac - Medaković',
         color: '#f59e0b',
+        // Zeleni Venac → Terazije → Takovska → Cvijićeva → Medaković
         coordinates: [
-          [44.8138, 20.4508],
-          [44.8120, 20.4550],
-          [44.8095, 20.4595],
-          [44.8070, 20.4650],
-          [44.8045, 20.4710],
-          [44.8020, 20.4780],
-          [44.7995, 20.4850],
-          [44.7970, 20.4920],
-        ],
-        stations: ['bg-station-1'],
-      },
-      {
-        id: 'bg-46',
-        name: 'Linija 46',
-        fullName: 'Kalemegdan - Miljakovac',
-        color: '#ef4444',
-        coordinates: [
-          [44.8225, 20.4490],
-          [44.8198, 20.4512],
-          [44.8176, 20.4569],
-          [44.8150, 20.4600],
-          [44.8120, 20.4630],
-          [44.8085, 20.4660],
-          [44.8045, 20.4690],
-          [44.8000, 20.4720],
-          [44.7950, 20.4750],
-        ],
-        stations: ['bg-station-1'],
-      },
-      {
-        id: 'bg-18',
-        name: 'Linija 18',
-        fullName: 'Zemun - Konjarnik',
-        color: '#ec4899',
-        coordinates: [
-          [44.8472, 20.3508],
-          [44.8420, 20.3620],
-          [44.8360, 20.3750],
-          [44.8300, 20.3890],
-          [44.8240, 20.4040],
-          [44.8180, 20.4200],
-          [44.8138, 20.4350],
-          [44.8100, 20.4500],
-          [44.8060, 20.4650],
-          [44.8020, 20.4800],
-        ],
-        stations: ['bg-station-1'],
-      },
-      {
-        id: 'bg-95',
-        name: 'Linija 95',
-        fullName: 'Novi Beograd - Karaburma',
-        color: '#06b6d4',
-        coordinates: [
-          [44.8180, 20.4100],
-          [44.8160, 20.4200],
-          [44.8145, 20.4300],
-          [44.8138, 20.4400],
-          [44.8140, 20.4500],
-          [44.8145, 20.4600],
-          [44.8155, 20.4700],
-          [44.8170, 20.4800],
-          [44.8190, 20.4900],
+          // Zeleni Venac
+          [44.8155, 20.4498],
+          [44.8148, 20.4518],
+          // Terazije
+          [44.8140, 20.4542],
+          [44.8130, 20.4568],
+          // Takovska
+          [44.8118, 20.4595],
+          [44.8105, 20.4625],
+          [44.8090, 20.4658],
+          // Cvijićeva
+          [44.8075, 20.4692],
+          [44.8058, 20.4728],
+          [44.8040, 20.4768],
+          // Medaković
+          [44.8020, 20.4810],
+          [44.7998, 20.4855],
+          [44.7975, 20.4902],
         ],
         stations: ['bg-station-1'],
       },
@@ -266,10 +344,10 @@ export const cities = {
       {
         id: 'bg-station-1',
         name: 'Zeleni Venac Depo',
-        position: [44.8138, 20.4508],
+        position: [44.8155, 20.4498],
         maxPower: 500,
         chargingPoints: 10,
-        batteryStorage: 20, // veliki depo - puno rezervnih baterija
+        batteryStorage: 20,
         type: 'depot',
         hasRobotA: true,
         hasRobotB: true,
@@ -289,14 +367,23 @@ export const cities = {
         name: 'Linija 1',
         fullName: 'Centar - Aerodrom',
         color: '#00d4ff',
+        // Centar → Lepenički bulevar → Aerodrom
         coordinates: [
-          [44.0128, 20.9114], // Centar
-          [44.0150, 20.9080],
-          [44.0175, 20.9045],
-          [44.0200, 20.9010],
-          [44.0230, 20.8970],
-          [44.0260, 20.8930],
-          [44.0295, 20.8885], // Aerodrom
+          // Centar - Trg Radomira Putnika
+          [44.0128, 20.9114],
+          [44.0138, 20.9095],
+          [44.0148, 20.9075],
+          // Lepenički bulevar
+          [44.0160, 20.9052],
+          [44.0172, 20.9028],
+          [44.0185, 20.9002],
+          [44.0200, 20.8975],
+          [44.0215, 20.8948],
+          // Prema aerodromu
+          [44.0232, 20.8920],
+          [44.0250, 20.8892],
+          [44.0270, 20.8865],
+          [44.0292, 20.8838],
         ],
         stations: ['kg-station-1'],
       },
@@ -305,13 +392,21 @@ export const cities = {
         name: 'Linija 2',
         fullName: 'Centar - Stanovo',
         color: '#7c3aed',
+        // Centar → Kralja Petra I → Stanovo
         coordinates: [
-          [44.0128, 20.9114], // Centar
-          [44.0100, 20.9150],
-          [44.0070, 20.9190],
-          [44.0040, 20.9235],
-          [44.0010, 20.9280],
-          [43.9980, 20.9330], // Stanovo
+          // Centar
+          [44.0128, 20.9114],
+          [44.0118, 20.9135],
+          [44.0108, 20.9158],
+          // Kralja Petra I
+          [44.0095, 20.9182],
+          [44.0082, 20.9208],
+          [44.0068, 20.9235],
+          [44.0052, 20.9265],
+          // Stanovo
+          [44.0035, 20.9298],
+          [44.0018, 20.9332],
+          [44.0000, 20.9368],
         ],
         stations: ['kg-station-2'],
       },
@@ -320,13 +415,21 @@ export const cities = {
         name: 'Linija 3',
         fullName: 'Centar - Bresnica',
         color: '#22c55e',
+        // Centar → Kneza Mihaila → Bresnica
         coordinates: [
-          [44.0128, 20.9114], // Centar
-          [44.0155, 20.9160],
-          [44.0185, 20.9210],
-          [44.0215, 20.9260],
-          [44.0250, 20.9310],
-          [44.0290, 20.9365], // Bresnica
+          // Centar
+          [44.0128, 20.9114],
+          [44.0140, 20.9138],
+          [44.0152, 20.9165],
+          // Kneza Mihaila
+          [44.0168, 20.9192],
+          [44.0185, 20.9222],
+          [44.0202, 20.9255],
+          [44.0222, 20.9288],
+          // Bresnica
+          [44.0245, 20.9322],
+          [44.0270, 20.9358],
+          [44.0298, 20.9395],
         ],
         stations: ['kg-station-1', 'kg-station-3'],
       },
@@ -335,13 +438,21 @@ export const cities = {
         name: 'Linija 4',
         fullName: 'Centar - Pivara',
         color: '#f59e0b',
+        // Centar → Nikole Pašića → Pivara
         coordinates: [
-          [44.0128, 20.9114], // Centar
-          [44.0100, 20.9070],
-          [44.0070, 20.9025],
-          [44.0040, 20.8980],
-          [44.0010, 20.8930],
-          [43.9975, 20.8880], // Pivara
+          // Centar
+          [44.0128, 20.9114],
+          [44.0115, 20.9088],
+          [44.0102, 20.9060],
+          // Nikole Pašića
+          [44.0088, 20.9032],
+          [44.0072, 20.9002],
+          [44.0055, 20.8972],
+          [44.0038, 20.8940],
+          // Pivara
+          [44.0020, 20.8908],
+          [44.0000, 20.8875],
+          [43.9978, 20.8842],
         ],
         stations: ['kg-station-2', 'kg-station-3'],
       },
@@ -361,10 +472,10 @@ export const cities = {
       {
         id: 'kg-station-2',
         name: 'Autobuska Stanica',
-        position: [44.0070, 20.9190],
+        position: [44.0095, 20.9182],
         maxPower: 150,
         chargingPoints: 4,
-        batteryStorage: 0, // samo punjenje
+        batteryStorage: 0,
         type: 'opportunity',
         hasRobotA: false,
         hasRobotB: false,
@@ -372,7 +483,7 @@ export const cities = {
       {
         id: 'kg-station-3',
         name: 'Zastava',
-        position: [44.0200, 20.9010],
+        position: [44.0200, 20.8975],
         maxPower: 180,
         chargingPoints: 4,
         batteryStorage: 6,
