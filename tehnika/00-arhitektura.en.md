@@ -1,61 +1,61 @@
-# ELEKTROKOMBINACIJA - Tehnički Koncept
+# ELEKTROKOMBINACIJA - Technical Concept
 
-## Filozofija: Povratak Modularnosti + AI
+## Philosophy: Return to Modularity + AI
 
-### Lekcija iz Prošlosti: Primer TV Servisa
+### Lesson from the Past: TV Service Example
 
 ```
-EVOLUCIJA SERVISIRANJA TELEVIZORA:
+EVOLUTION OF TV SERVICING:
 ════════════════════════════════════════════════════════════════
 
-1970-1990: MODULARNI SISTEMI          1990-2000s: INTEGRISANI SISTEMI
-─────────────────────────────         ─────────────────────────────
-TV = šasija + moduli                  TV = jedna ploča + ASIC
-Kvar? Zameni modul (30 min)           Kvar? Baci uređaj (ili skupo)
-Modul → servis na popravku            Popravka nemoguća
-Tehničar ne mora biti ekspert         Treba skupa oprema
-Traje 15-20 godina                    Planned obsolescence
+1970-1990: MODULAR SYSTEMS          1990-2000s: INTEGRATED SYSTEMS
+─────────────────────────────       ─────────────────────────────
+TV = chassis + modules              TV = single board + ASIC
+Fault? Replace module (30 min)      Fault? Throw away (or expensive)
+Module → service for repair         Repair impossible
+Technician doesn't need expertise   Expensive equipment needed
+Lasts 15-20 years                   Planned obsolescence
 ```
 
-### Infrastruktura ≠ Potrošačka Elektronika
+### Infrastructure ≠ Consumer Electronics
 
 ```
-EV PUNJAČ NIJE TELEFON:
-• Cena zamene: €20,000+, ne €500
-• Downtime: Izgubljen prihod svaki sat
-• Lokacija: Na autoputu, ne u prodavnici
-• Očekivani vek: 15 godina, ne 2 godine
+EV CHARGER IS NOT A PHONE:
+• Replacement cost: €20,000+, not €500
+• Downtime: Lost revenue every hour
+• Location: On highway, not in store
+• Expected life: 15 years, not 2 years
 
-ZAKLJUČAK: Za infrastrukturu, MODULARNOST je pravilna arhitektura.
+CONCLUSION: For infrastructure, MODULARITY is the right architecture.
 ```
 
-### ELEKTROKOMBINACIJA = Modularnost 1970s + AI 2020s
+### ELEKTROKOMBINACIJA = 1970s Modularity + 2020s AI
 
 ```
-STARO                              NOVO
+OLD                                NEW
 ────────────────────────────────────────────────────────────
-Tehničar menja modul (30 min)  →   Robot menja modul (60 sec)
-Dijagnostika na licu mesta     →   AI predvidi kvar 2 ned ranije
-Modul u servis na popravku     →   Modul u hub na refurbishment
-Iskusan tehničar potreban      →   Tehničar nije potreban
+Technician swaps module (30 min) → Robot swaps module (60 sec)
+On-site diagnostics            →   AI predicts fault 2 weeks ahead
+Module to service for repair   →   Module to hub for refurbishment
+Experienced technician needed  →   Technician not needed
 ```
 
 ---
 
-## Dodatna Filozofija: AI-Powered
+## Additional Philosophy: AI-Powered
 
 ```
-TRADICIONALNI PRISTUP              ELEKTROKOMBINACIJA
+TRADITIONAL APPROACH               ELEKTROKOMBINACIJA
 ─────────────────────────────────────────────────────────────────
-"Jednostavnije je bolje"     →    "AI upravlja kompleksnošću"
-"IGBT jer je jeftiniji"      →    "SiC jer je efikasniji"
-"Air cooling jer je lakše"   →    "Liquid jer je gušće"
-"2-level jer je poznat"      →    "3-level jer je bolji THD"
-"Reaktivni alarmi"           →    "Prediktivna dijagnostika"
-"Nezavisni moduli"           →    "Swarm intelligence"
+"Simpler is better"          →    "AI manages complexity"
+"IGBT because cheaper"       →    "SiC because more efficient"
+"Air cooling because easier" →    "Liquid because denser"
+"2-level because known"      →    "3-level for better THD"
+"Reactive alarms"            →    "Predictive diagnostics"
+"Independent modules"        →    "Swarm intelligence"
 ```
 
-## Arhitektura Sistema
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -114,83 +114,83 @@ TRADICIONALNI PRISTUP              ELEKTROKOMBINACIJA
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Moduli
+## Modules
 
-### EK3 - Univerzalni Modul (3.3 kW)
+### EK3 - Universal Module (3.3 kW)
 ```
-Svrha: Jedan modul za SVE primene - od 3kW do 3MW
+Purpose: One module for ALL applications - from 3kW to 3MW
 ─────────────────────────────────────────────────
 • SiC MOSFET 900V (Wolfspeed C3M0065090D)
-• LLC rezonantna topologija (DC/DC)
-• CAN-FD komunikacija @ 5 Mbps
+• LLC resonant topology (DC/DC)
+• CAN-FD communication @ 5 Mbps
 • AI self-tuning control
 • Digital twin embedded
-• Dimenzije: 200 × 320 × 44 mm (1U half-width)
-• Težina: ~3.5 kg
-• Efikasnost: >96% peak, >94% @ 50% load
+• Dimensions: 200 × 320 × 44 mm (1U half-width)
+• Weight: ~3.5 kg
+• Efficiency: >96% peak, >94% @ 50% load
 ```
 
 ### EK30 - Production (30 kW)
 ```
-Svrha: Skalirana verzija za komercijalne primene
+Purpose: Scaled version for commercial applications
 ─────────────────────────────────────────────────
 • SiC MOSFET (1200V, 100A class)
-• 3-level NPC topologija
+• 3-level NPC topology
 • Liquid cooling
-• V2G bidirekcioni
+• V2G bidirectional
 • Swarm-ready
-• Dimenzije: ~400 × 300 × 150 mm
-• Težina: ~12 kg
+• Dimensions: ~400 × 300 × 150 mm
+• Weight: ~12 kg
 ```
 
-## Dokumenti u ovom folderu
+## Documents in This Folder
 
-1. **01-power-electronics.md** - SiC MOSFET selekcija, 3-level NPC topologija, LLC rezonantni konverter, gate driver dizajn, EMI/EMC, zaštita, BOM power stage
-2. **02-ai-ml-sistem.md** - Edge AI hardver (STM32N6 NPU), digital twin arhitektura, predictive maintenance, self-tuning kontrola, anomaly detection, fleet learning
-3. **03-thermal-management.md** - Liquid cooling sistem, coldplate dizajn, junction temperature estimacija, AI thermal control, safety features
-4. **04-v2g-grid.md** - ISO 15118-20 implementacija, bidirekciona topologija, grid services (frequency/voltage regulation), grid codes compliance
-5. **05-swarm-intelligence.md** - Distribuirana arhitektura, CAN-FD komunikacija, load balancing algoritmi, fault tolerance, scalability
-6. **06-bom-cost.md** - Kompletni BOM za EK3 i EK30, cost breakdown, pricing strategija, TCO analiza, R&D investment
-7. **07-konkurencija.md** - Analiza konkurencije, reliability kriza u industriji (podaci 2025), konkurentska prednost
-8. **08-swap-station.md** - Robotska zamena EK modula + battery swap za autobuse, fleet-integrated maintenance, patentabilni koncept
-9. **09-ek3-rack-sistem.md** - **KLJUČNA INOVACIJA**: Jedan modul (EK3) za SVE - od 3kW do 3MW, rack sistem, robot swap, radikalna modularnost, **3PAR storage inspiracija** (chunklets, wide striping, distributed sparing)
+1. **01-power-electronics.md** - SiC MOSFET selection, 3-level NPC topology, LLC resonant converter, gate driver design, EMI/EMC, protection, power stage BOM
+2. **02-ai-ml-sistem.md** - Edge AI hardware (STM32N6 NPU), digital twin architecture, predictive maintenance, self-tuning control, anomaly detection, fleet learning
+3. **03-thermal-management.md** - Liquid cooling system, coldplate design, junction temperature estimation, AI thermal control, safety features
+4. **04-v2g-grid.md** - ISO 15118-20 implementation, bidirectional topology, grid services (frequency/voltage regulation), grid codes compliance
+5. **05-swarm-intelligence.md** - Distributed architecture, CAN-FD communication, load balancing algorithms, fault tolerance, scalability
+6. **06-bom-cost.md** - Complete BOM for EK3 and EK30, cost breakdown, pricing strategy, TCO analysis, R&D investment
+7. **07-konkurencija.md** - Competition analysis, reliability crisis in industry (2025 data), competitive advantage
+8. **08-swap-station.md** - Robotic EK module swap + battery swap for buses, fleet-integrated maintenance, patentable concept
+9. **09-ek3-rack-sistem.md** - **KEY INNOVATION**: One module (EK3) for ALL - from 3kW to 3MW, rack system, robot swap, radical modularity, **3PAR storage inspiration** (chunklets, wide striping, distributed sparing)
 
-## Ključne Inovacije
+## Key Innovations
 
-### 1. Svaki Modul je Pametan
+### 1. Every Module is Smart
 ```
-Tradicionalno: "Glup" power modul + centralni kontroler
-ELEKTROKOMBINACIJA: Svaki modul ima AI edge processor
+Traditional: "Dumb" power module + central controller
+ELEKTROKOMBINACIJA: Every module has AI edge processor
 
-Prednosti:
-• Distribuirana inteligencija
-• Nema single point of failure
-• Self-healing sistem
-• Plug & play dodavanje modula
+Benefits:
+• Distributed intelligence
+• No single point of failure
+• Self-healing system
+• Plug & play module addition
 ```
 
-### 2. Digital Twin za Svaki Modul
+### 2. Digital Twin for Every Module
 ```
-Svaki fizički modul ima virtualnu kopiju u cloud-u:
-• Real-time sinhronizacija stanja
-• Simulacija "what-if" scenarija
+Every physical module has a virtual copy in the cloud:
+• Real-time state synchronization
+• "What-if" scenario simulation
 • Predictive maintenance
 • Remote diagnostics
 ```
 
 ### 3. Swarm Intelligence
 ```
-Moduli komuniciraju peer-to-peer:
-• Autonomna redistribucija opterećenja
-• Kolektivna optimizacija efikasnosti
-• Fault tolerance bez centralnog arbitra
-• Emergent behavior za grid services
+Modules communicate peer-to-peer:
+• Autonomous load redistribution
+• Collective efficiency optimization
+• Fault tolerance without central arbiter
+• Emergent behavior for grid services
 ```
 
 ### 4. V2G Native
 ```
-Nije dodatak, već core feature:
-• Bidirekciona topologija od početka
+Not an add-on, but a core feature:
+• Bidirectional topology from the start
 • ISO 15118-20 Plug & Charge
 • Grid frequency support
 • Demand response ready
@@ -198,62 +198,62 @@ Nije dodatak, već core feature:
 
 ### 5. Robotic Swap Station
 ```
-Kombinacija battery swap za autobuse + module swap za punjače:
+Combination of battery swap for buses + module swap for chargers:
 
-AUTOBUS DOLAZI → Robot menja bateriju autobusa
-              → Istovremeno robot menja EK modul ako treba
-              → AI je predvideo zamenu unapred
-              → Zero downtime, zero truck rolls
+BUS ARRIVES → Robot swaps bus battery
+           → Simultaneously robot swaps EK module if needed
+           → AI predicted the swap in advance
+           → Zero downtime, zero truck rolls
 ```
 
-### 6. JEDAN MODUL ZA SVE (RADIKALNA MODULARNOST!)
+### 6. ONE MODULE FOR ALL (RADICAL MODULARITY!)
 ```
-TRADICIONALNO:                    ELEKTROKOMBINACIJA:
+TRADITIONAL:                      ELEKTROKOMBINACIJA:
 ─────────────────────────────────────────────────────────────
-Mali punjač = mali modul          Mali punjač = 1 × EK3
-Srednji = srednji modul           Srednji = 10 × EK3
-Veliki = veliki modul             Veliki = 100 × EK3
-MCS = ogroman modul               MCS = 1000 × EK3
+Small charger = small module      Small charger = 1 × EK3
+Medium = medium module            Medium = 10 × EK3
+Large = large module              Large = 100 × EK3
+MCS = huge module                 MCS = 1000 × EK3
 
-4+ različita dizajna              JEDAN dizajn za SVE
+4+ different designs              ONE design for ALL
 
-PREDNOSTI:
-• Masovna proizvodnja = niska cena
-• 1 kvar = 0.3% gubitak (ne 10%)
-• Jedan tip rezervnog dela
-• Robot menja za 40 sekundi
-• Graceful degradation - nikad "pao"
+BENEFITS:
+• Mass production = low cost
+• 1 fault = 0.3% loss (not 10%)
+• One type of spare part
+• Robot swaps in 40 seconds
+• Graceful degradation - never "down"
 ```
 
-### 7. 3PAR Storage Inspiracija
+### 7. 3PAR Storage Inspiration
 ```
-Isti principi koji su revolucionisali storage industriju:
+Same principles that revolutionized the storage industry:
 
 STORAGE (3PAR)                    POWER (EK3)
 ─────────────────────────────────────────────────────────────
-Chunklets (1GB blokovi)      →    EK3 (3kW moduli)
-Wide striping (svi diskovi)  →    Load preko SVIH modula
-Distributed sparing          →    Nema hot-spare, rezerva distribuirana
-Thin provisioning            →    Sleep mode za neaktivne module
-Mesh-active kontroleri       →    Swarm intelligence
+Chunklets (1GB blocks)       →    EK3 (3kW modules)
+Wide striping (all disks)    →    Load across ALL modules
+Distributed sparing          →    No hot-spare, reserve distributed
+Thin provisioning            →    Sleep mode for inactive modules
+Mesh-active controllers      →    Swarm intelligence
 
-HP kupio 3PAR za $2.35B (2010) - DOKAZAN KONCEPT!
+HP bought 3PAR for $2.35B (2010) - PROVEN CONCEPT!
 ```
 
-## Target Specifikacije
+## Target Specifications
 
-| Parametar | EK3 | EK30 (referentni) |
-|-----------|-----|-------------------|
-| Snaga | 3.3 kW (3.6 kW peak) | 30 kW |
-| Efikasnost | >96% peak, >94% @ 50% | >97% |
-| THD struje | <3% | <2% |
+| Parameter | EK3 | EK30 (reference) |
+|-----------|-----|------------------|
+| Power | 3.3 kW (3.6 kW peak) | 30 kW |
+| Efficiency | >96% peak, >94% @ 50% | >97% |
+| Current THD | <3% | <2% |
 | Power factor | >0.99 | >0.995 |
-| Izlazni napon | 50-500V DC | 200-1000V DC |
-| V2G | Da | Da |
+| Output voltage | 50-500V DC | 200-1000V DC |
+| V2G | Yes | Yes |
 | SiC MOSFET | 900V (Wolfspeed) | 1200V |
 | MCU | STM32G474 (Cortex-M4) | ARM Cortex-A + NPU |
-| Komunikacija | CAN-FD @ 5 Mbps | CAN-FD @ 5 Mbps |
-| Hlađenje | Forced air (shared plenum) | Liquid |
-| Dimenzije | 200×320×44 mm | ~400×300×150 mm |
-| Težina | ~3.5 kg | ~12 kg |
+| Communication | CAN-FD @ 5 Mbps | CAN-FD @ 5 Mbps |
+| Cooling | Forced air (shared plenum) | Liquid |
+| Dimensions | 200×320×44 mm | ~400×300×150 mm |
+| Weight | ~3.5 kg | ~12 kg |
 | MTBF | >100,000h | >150,000h |

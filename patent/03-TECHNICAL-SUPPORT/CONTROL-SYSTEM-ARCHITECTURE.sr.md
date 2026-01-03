@@ -1,14 +1,14 @@
-# Control System Architecture
+# Arhitektura Kontrolnog Sistema
 
-**Document Version:** 1.0
-**Date:** 2026-01-03
-**Author:** Bojan Janjatović
+**Verzija Dokumenta:** 1.0
+**Datum:** 2026-01-03
+**Autor:** Bojan Janjatovic
 **Email:** bojan.janjatovic@gmail.com
-**Address:** Vojislava Ilica 8, Kikinda, Severni Banat, Serbia
+**Adresa:** Vojislava Ilica 8, Kikinda, Severni Banat, Srbija
 
 ---
 
-## 1. System Overview
+## 1. Pregled Sistema
 
 ```
 HIJERARHIJA KONTROLNOG SISTEMA
@@ -16,158 +16,159 @@ HIJERARHIJA KONTROLNOG SISTEMA
 
                     ┌─────────────────────────────────────┐
                     │         CLOUD / BACKEND             │
-     LEVEL 4        │  Fleet Management & Analytics       │
-                    │  (Optional - sistem radi i offline) │
+     NIVO 4         │  Upravljanje Flotom i Analitika     │
+                    │  (Opciono - sistem radi i offline)  │
                     └──────────────────┬──────────────────┘
                                        │ HTTPS/MQTT
-                                       │ (cellular/fiber)
+                                       │ (mobilna/optika)
                     ┌──────────────────┴──────────────────┐
-                    │         DEPOT CONTROLLER            │
-     LEVEL 3        │  Koordinacija svih stanica u depou  │
-                    │  + inventory + scheduling           │
+                    │         KONTROLER DEPOA             │
+     NIVO 3         │  Koordinacija svih stanica u depou  │
+                    │  + inventar + zakazivanje           │
                     └──────────────────┬──────────────────┘
                                        │ Ethernet
                          ┌─────────────┴─────────────┐
                          ▼                           ▼
               ┌─────────────────────┐     ┌─────────────────────┐
-              │  STATION CTRL #1   │     │  STATION CTRL #N   │
-   LEVEL 2    │  • Charging mgmt   │     │                     │
-              │  • Robot control   │     │                     │
-              │  • Module health   │     │                     │
+              │  KONTROLER STA #1  │     │  KONTROLER STA #N  │
+   NIVO 2     │  • Upravljanje     │     │                     │
+              │    punjenjem       │     │                     │
+              │  • Kontrola robota │     │                     │
+              │  • Zdravlje modula │     │                     │
               └─────────┬──────────┘     └─────────────────────┘
                         │ CAN bus
           ┌─────────────┼─────────────┬─────────────┐
           ▼             ▼             ▼             ▼
       ┌───────┐    ┌───────┐    ┌───────┐    ┌───────┐
       │ EK3   │    │ EK3   │    │ EK3   │    │ Robot │
-   L1 │ #1    │    │ #2    │    │ #N    │    │ Ctrl  │
+   N1 │ #1    │    │ #2    │    │ #N    │    │ Ctrl  │
       │       │    │       │    │       │    │       │
       └───────┘    └───────┘    └───────┘    └───────┘
 
 ═══════════════════════════════════════════════════════════════
-PRINCIP: Svaki nivo može raditi AUTONOMNO ako viši nivo otkaže
+PRINCIP: Svaki nivo moze raditi AUTONOMNO ako visi nivo otkaze
 ═══════════════════════════════════════════════════════════════
 ```
 
 ---
 
-## 2. Level 1: Module Controller (EK3)
+## 2. Nivo 1: Kontroler Modula (EK3)
 
 > Detaljno pokriveno u SENSOR-ARCHITECTURE.md
 
 ```
-SAŽETAK - MODULE CONTROLLER
+SAZETAK - KONTROLER MODULA
 ═══════════════════════════════════════════════════════════════
 
-Hardware: STM32G474 (Cortex-M4 @ 170MHz, integrated CAN-FD)
+Hardver: STM32G474 (Cortex-M4 @ 170MHz, integrisani CAN-FD)
 
 Funkcije:
-• DC-DC power conversion control (LLC resonant)
-• Senzor monitoring (I, V, T, ESR)
-• Health assessment (rule-based + ML)
-• CAN-FD communication @ 5 Mbps
+• Kontrola DC-DC konverzije snage (LLC rezonantni)
+• Nadgledanje senzora (I, V, T, ESR)
+• Procena zdravlja (rule-based + ML)
+• CAN-FD komunikacija @ 5 Mbps
 
 Autonomija:
-• Može raditi samostalno za osnovno punjenje
-• Self-protection (OCP, OTP, OVP)
-• Degraded mode ako komunikacija otkaže
+• Moze raditi samostalno za osnovno punjenje
+• Samozastita (OCP, OTP, OVP)
+• Degradirani rezim ako komunikacija otkaze
 
-Interfejs prema LEVEL 2:
+Interfejs prema NIVOU 2:
 • CAN-FD @ 5 Mbps (64-byte payload)
-• Status reporting svake sekunde
+• Izvestavanje o statusu svake sekunde
 • Event-driven alarmi odmah
 ```
 
 ---
 
-## 3. Level 2: Station Controller
+## 3. Nivo 2: Kontroler Stanice
 
-### 3.1 Hardware Platform
+### 3.1 Hardverska Platforma
 
 ```
-STATION CONTROLLER HARDWARE
+HARDVER KONTROLERA STANICE
 ═══════════════════════════════════════════════════════════════
 
-OPCIJA A: Industrial PC (Preporučeno)
+OPCIJA A: Industrijski PC (Preporuceno)
 ─────────────────────────────────────
-• Advantech UNO-2271G ili slično
+• Advantech UNO-2271G ili slicno
 • Intel Atom/Celeron
 • 4GB RAM, 64GB SSD
-• Wide temp: -20 to +60°C
-• Dual Ethernet, 2x RS485, GPIO
-• DIN rail mount
+• Sirok temperaturni opseg: -20 do +60°C
+• Dupli Ethernet, 2x RS485, GPIO
+• DIN rail montaza
 • Cena: ~$400-600
 
-OPCIJA B: Raspberry Pi CM4 + Industrial Carrier
+OPCIJA B: Raspberry Pi CM4 + Industrijski Nosac
 ─────────────────────────────────────
 • Compute Module 4
-• Industrial carrier board (Waveshare, Seeed)
+• Industrijska noseca ploca (Waveshare, Seeed)
 • CAN HAT
 • Cena: ~$150-250
 • Manje robustan, OK za prototip
 
 OPCIJA C: PLC
 ─────────────────────────────────────
-• Siemens S7-1200, Beckhoff CX series
+• Siemens S7-1200, Beckhoff CX serija
 • Overkill za ovu aplikaciju
 • Skupo, ali industrijski dokazano
 
 
-PREPORUČENI I/O:
+PREPORUCENI I/O:
 ─────────────────────────────────────
 • 2x CAN bus (moduli + robot)
-• 1x Ethernet (uplink ka Depot Controller)
-• 1x RS485 (legacy uređaji ako treba)
-• 8x DI (emergency stops, door sensors)
-• 4x DO (status lights, locks)
-• 1x USB (maintenance laptop)
+• 1x Ethernet (uplink ka Kontroleru Depoa)
+• 1x RS485 (legacy uredaji ako treba)
+• 8x DI (emergency stops, senzori vrata)
+• 4x DO (statusne lampice, brave)
+• 1x USB (laptop za odrzavanje)
 ```
 
-### 3.2 Software Stack
+### 3.2 Softverski Stek
 
 ```
-OPERATING SYSTEM
+OPERATIVNI SISTEM
 ═══════════════════════════════════════════════════════════════
 
 Linux-based (Debian/Ubuntu LTS ili Yocto custom)
 
-Zašto Linux:
+Zasto Linux:
 • Fleksibilnost
-• Bogat ecosystem
+• Bogat ekosistem
 • Real-time capable (PREEMPT_RT patch)
 • OTA updates
 • Containerization (Docker) za izolaciju
 
 Alternativa:
-• Windows IoT (ako treba .NET compatibility)
+• Windows IoT (ako treba .NET kompatibilnost)
 • RTOS (FreeRTOS, Zephyr) ako treba hard real-time
   → Verovatno nepotrebno za ovaj nivo
 ```
 
 ```
-SOFTWARE ARCHITECTURE
+SOFTVERSKA ARHITEKTURA
 ═══════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────┐
-│                     STATION CONTROLLER                       │
+│                     KONTROLER STANICE                        │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐    │
-│  │   CHARGING  │ │   MODULE    │ │       ROBOT         │    │
-│  │   MANAGER   │ │   HEALTH    │ │     CONTROLLER      │    │
-│  │             │ │   MONITOR   │ │                     │    │
-│  │ • Session   │ │ • Aggregate │ │ • Swap sequencing   │    │
-│  │   handling  │ │   module    │ │ • Safety interlock  │    │
-│  │ • Power     │ │   status    │ │ • Gripper control   │    │
-│  │   allocation│ │ • Predict   │ │ • Position control  │    │
-│  │ • Vehicle   │ │   failures  │ │                     │    │
-│  │   comms     │ │ • Schedule  │ │                     │    │
-│  │             │ │   swaps     │ │                     │    │
+│  │  MENADZER   │ │   MONITOR   │ │      KONTROLER      │    │
+│  │  PUNJENJA   │ │  ZDRAVLJA   │ │       ROBOTA        │    │
+│  │             │ │   MODULA    │ │                     │    │
+│  │ • Upravlj.  │ │ • Agregacija│ │ • Sekvenca zamene   │    │
+│  │   sesijama  │ │   statusa   │ │ • Sigurnosna blok.  │    │
+│  │ • Alokacija │ │   modula    │ │ • Kontrola hvataca  │    │
+│  │   snage     │ │ • Predvidj. │ │ • Kontrola pozicije │    │
+│  │ • Komunik.  │ │   otkaza    │ │                     │    │
+│  │   sa vozil. │ │ • Zakaziv.  │ │                     │    │
+│  │             │ │   zamena    │ │                     │    │
 │  └──────┬──────┘ └──────┬──────┘ └──────────┬──────────┘    │
 │         │               │                    │               │
 │         └───────────────┼────────────────────┘               │
 │                         ▼                                    │
 │              ┌─────────────────────┐                        │
-│              │    ORCHESTRATOR     │                        │
+│              │    ORKESTRATOR      │                        │
 │              │  (State Machine)    │                        │
 │              └──────────┬──────────┘                        │
 │                         │                                    │
@@ -182,32 +183,32 @@ SOFTWARE ARCHITECTURE
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 3.3 Key Services
+### 3.3 Kljucni Servisi
 
 ```
-SERVICE: CHARGING MANAGER
+SERVIS: MENADZER PUNJENJA
 ═══════════════════════════════════════════════════════════════
 
 Odgovornosti:
-1. Vehicle identification (RFID, plate recognition, ili API)
-2. Session management (start, stop, pause)
-3. Power allocation across modules
-4. Energy metering (za billing)
-5. Vehicle communication (ako ima V2G/ISO 15118)
+1. Identifikacija vozila (RFID, prepoznavanje tablica, ili API)
+2. Upravljanje sesijama (start, stop, pauza)
+3. Alokacija snage preko modula
+4. Merenje energije (za naplatu)
+5. Komunikacija sa vozilom (ako ima V2G/ISO 15118)
 
 State Machine:
-┌─────────┐    vehicle    ┌─────────────┐   auth ok   ┌──────────┐
-│  IDLE   │──────────────▶│ IDENTIFYING │────────────▶│ STARTING │
-└─────────┘   detected    └─────────────┘             └────┬─────┘
+┌─────────┐    vozilo     ┌─────────────┐  auth ok    ┌──────────┐
+│  IDLE   │──────────────▶│ IDENTIFIKAC │────────────▶│ POKRETANJ│
+└─────────┘   detektov.   └─────────────┘             └────┬─────┘
      ▲                                                      │
-     │                    ┌─────────────┐    plug ok       │
-     │                    │  CHARGING   │◀─────────────────┘
+     │                    ┌─────────────┐    prikljucak ok  │
+     │                    │   PUNJENJE  │◀─────────────────┘
      │                    └──────┬──────┘
      │                           │
      │         ┌─────────────────┼─────────────────┐
      │         ▼                 ▼                 ▼
      │    ┌─────────┐      ┌──────────┐     ┌───────────┐
-     │    │COMPLETED│      │ PAUSED   │     │  FAULTED  │
+     │    │ZAVRSENO │      │ PAUZIRANO│     │  GRESKA   │
      │    └────┬────┘      └──────────┘     └─────┬─────┘
      │         │                                   │
      └─────────┴───────────────────────────────────┘
@@ -215,120 +216,120 @@ State Machine:
 
 Punjenje sa degradiranim modulima:
 ─────────────────────────────────
-• Ako modul X kaže "degraded" → redistribuuj load
-• Ako modul X kaže "replace" → isključi iz rotacije
-• Charging continues at reduced power ako treba
-• User notification: "Charging at reduced speed"
+• Ako modul X kaze "degraded" → redistribuuj opterecenje
+• Ako modul X kaze "replace" → iskljuci iz rotacije
+• Punjenje nastavlja sa smanjenom snagom ako treba
+• Obavestenje korisniku: "Punjenje smanjenom brzinom"
 ```
 
 ```
-SERVICE: MODULE HEALTH MONITOR
+SERVIS: MONITOR ZDRAVLJA MODULA
 ═══════════════════════════════════════════════════════════════
 
 Odgovornosti:
 1. Agregacija statusa svih modula
-2. Fleet-level trend analysis
-3. Swap scheduling decisions
-4. Integration sa Fleet Management
+2. Analiza trendova na nivou flote
+3. Odluke o zakazivanju zamena
+4. Integracija sa Upravljanjem Flotom
 
 Logika zakazivanja zamene:
 ─────────────────────────────────
 
 FOR each module:
     IF status == CRITICAL:
-        → Swap IMMEDIATELY (sledeći slobodan slot)
+        → Zamena ODMAH (sledeci slobodan slot)
 
     IF status == REPLACE_NEXT_BUS:
-        → Dodaj u "urgent swap" queue
-        → Obavesti Fleet Management
+        → Dodaj u "hitna zamena" red
+        → Obavesti Upravljanje Flotom
 
     IF status == SCHEDULE_REPLACEMENT:
-        → Dodaj u "planned swap" queue
-        → Optimizuj: grupiši više zamena
-        → Čekaj bus koji već nosi spare module
+        → Dodaj u "planirana zamena" red
+        → Optimizuj: grupisi vise zamena
+        → Cekaj bus koji vec nosi rezervni modul
 
-PRIORITIZATION:
+PRIORITIZACIJA:
 1. Critical → odmah
 2. Urgent → u roku od 4 sata
 3. Planned → u roku od 7 dana
 
-BATCHING:
-• Ako 3+ modula treba zamenu → zakaži "maintenance window"
-• Obavesti depot da pripremi više spare modula
+GRUPNO ZAKAZIVANJE:
+• Ako 3+ modula treba zamenu → zakazi "prozor za odrzavanje"
+• Obavesti depo da pripremi vise rezervnih modula
 ```
 
 ```
-SERVICE: ROBOT CONTROLLER
+SERVIS: KONTROLER ROBOTA
 ═══════════════════════════════════════════════════════════════
 
 Odgovornosti:
-1. Swap sequence execution
-2. Safety interlock management
-3. Gripper control
-4. Error handling & recovery
+1. Izvrsavanje sekvence zamene
+2. Upravljanje sigurnosnom blokadom
+3. Kontrola hvataca
+4. Obrada gresaka i oporavak
 
-Swap Sequence (pojednostavljen):
+Sekvenca Zamene (pojednostavljena):
 ─────────────────────────────────
 
-1. PRE-CONDITIONS
-   □ No vehicle in charging bay
-   □ Module power OFF
-   □ Safety door locked
-   □ Robot homed
+1. PREDUSLOVI
+   □ Nema vozila u punjackom mestu
+   □ Napajanje modula ISKLJUCENO
+   □ Sigurnosna vrata zakljucana
+   □ Robot u pocetnoj poziciji
 
-2. REMOVAL SEQUENCE
-   □ Move to module slot X
-   □ Verify position (camera/sensor)
-   □ Engage gripper
-   □ Verify grip
-   □ Unlock module latch
-   □ Extract module
-   □ Move to buffer position
-   □ Release to "removed" rack
+2. SEKVENCA UKLANJANJA
+   □ Pomeri se do slota modula X
+   □ Verifikuj poziciju (kamera/senzor)
+   □ Aktiviraj hvatac
+   □ Verifikuj hvatanje
+   □ Otkljucaj rezu modula
+   □ Izvuci modul
+   □ Pomeri se na buffer poziciju
+   □ Otpusti na "uklonjeni" nosac
 
-3. INSTALLATION SEQUENCE
-   □ Move to "spare" rack
-   □ Pick new module
-   □ Move to slot X
-   □ Align (camera-guided)
-   □ Insert module
-   □ Lock latch
-   □ Release gripper
-   □ Retract
+3. SEKVENCA INSTALACIJE
+   □ Pomeri se do "rezervni" nosaca
+   □ Uzmi novi modul
+   □ Pomeri se do slota X
+   □ Poravnaj (vodjeno kamerom)
+   □ Ubaci modul
+   □ Zakljucaj rezu
+   □ Otpusti hvatac
+   □ Povuci se
 
-4. POST-CONDITIONS
-   □ Module power ON
-   □ CAN communication verify
-   □ Quick health check
-   □ Report complete
+4. POSTUSLOVI
+   □ Napajanje modula UKLJUCENO
+   □ CAN komunikacija verifikacija
+   □ Brza provera zdravlja
+   □ Izvestaj o zavrsetku
 
-Error Handling:
+Obrada Gresaka:
 ─────────────────────────────────
-• Gripper fail → retry 2x, then abort
-• Position error → re-home, retry
-• Module stuck → human intervention flag
-• Power during swap → EMERGENCY STOP
+• Greska hvataca → ponovi 2x, zatim odustani
+• Greska pozicije → re-home, ponovi
+• Modul zaglavljen → oznaka za ljudsku intervenciju
+• Napajanje tokom zamene → HITNO ZAUSTAVLJANJE
 ```
 
-### 3.4 Communication Interfaces
+### 3.4 Komunikacioni Interfejsi
 
 ```
-CAN-FD BUS NETWORK (Interni)
+CAN-FD BUS MREZA (Interna)
 ═══════════════════════════════════════════════════════════════
 
-Topology: Single bus, multi-drop
-Speed: CAN-FD @ 5 Mbps (data phase) / 1 Mbps (arbitration)
-Payload: 64 bytes (vs 8 bytes CAN 2.0)
-Termination: 120Ω na oba kraja
-Latency: <1ms per message
+Topologija: Single bus, multi-drop
+Brzina: CAN-FD @ 5 Mbps (data faza) / 1 Mbps (arbitracija)
+Payload: 64 bajta (vs 8 bajta CAN 2.0)
+Terminacija: 120Ω na oba kraja
+Kasnjenje: <1ms po poruci
 
-Node Addresses:
-• 0x100-0x1FF: EK3 Modules (slot 1-255)
-• 0x200-0x2FF: Robot controller
-• 0x300-0x3FF: Auxiliary (fans, locks, sensors)
-• 0x700-0x7FF: Station controller (master)
+Adrese Cvorova:
+• 0x100-0x1FF: EK3 Moduli (slot 1-255)
+• 0x200-0x2FF: Robot kontroler
+• 0x300-0x3FF: Pomocni (ventilatori, brave, senzori)
+• 0x700-0x7FF: Kontroler stanice (master)
 
-Message Types:
+Tipovi Poruka:
 ─────────────────────────────────
 
 # Heartbeat (svake sekunde)
@@ -339,56 +340,56 @@ DATA: [
   power_out_H, power_out_L, voltage_H, voltage_L,
   current_H, current_L, ESR_H, ESR_L, RUL, fan_speed,
   anomaly_score, fault_code, uptime_H, uptime_M, uptime_L,
-  ... (extended telemetry)
+  ... (prosirena telemetrija)
 ]
 
-# Command (od Station Controller)
+# Komanda (od Kontrolera Stanice)
 ID: 0x700
 LEN: 64 (CAN-FD)
 DATA: [cmd_type, target_slot, params[0-61]]
 
-Commands:
-  0x01 = Power ON
-  0x02 = Power OFF
-  0x03 = Set power limit (params: power_H, power_L)
-  0x04 = Enter standby
-  0x05 = Prepare for swap (safe shutdown)
-  0x10 = Request detailed diagnostics
-  0x20 = Firmware update (params: chunk data)
+Komande:
+  0x01 = Napajanje UKLJUCI
+  0x02 = Napajanje ISKLJUCI
+  0x03 = Postavi limit snage (params: power_H, power_L)
+  0x04 = Udji u standby
+  0x05 = Priprema za zamenu (bezbedno gasenje)
+  0x10 = Zahtev za detaljnu dijagnostiku
+  0x20 = Azuriranje firmware-a (params: chunk data)
 
-# Alarm (event-driven, high priority)
-ID: 0x080 + slot_number (high priority ID range)
+# Alarm (event-driven, visok prioritet)
+ID: 0x080 + slot_number (opseg ID-ova visokog prioriteta)
 LEN: 64 (CAN-FD)
 DATA: [alarm_code, severity, timestamp[4], values[58]]
 ```
 
 ```
-UPLINK KA DEPOT CONTROLLER (Ethernet)
+UPLINK KA KONTROLERU DEPOA (Ethernet)
 ═══════════════════════════════════════════════════════════════
 
-Protocol: MQTT 5.0 over TLS
-Broker: Depot Controller (local) + Cloud (backup)
+Protokol: MQTT 5.0 over TLS
+Broker: Kontroler Depoa (lokalni) + Cloud (backup)
 
-Topic Structure:
+Struktura Topika:
 ─────────────────────────────────
 
-# Station status
+# Status stanice
 depot/{depot_id}/station/{station_id}/status
   → JSON: {state, active_sessions, available_power, module_health}
 
-# Per-module telemetry (periodic, 1/min)
+# Telemetrija po modulu (periodicno, 1/min)
 depot/{depot_id}/station/{station_id}/module/{slot}/telemetry
   → JSON: {temp, current, voltage, efficiency, esr, anomaly_score}
 
-# Events (immediate)
+# Dogadjaji (odmah)
 depot/{depot_id}/station/{station_id}/events
   → JSON: {event_type, slot, severity, message, timestamp}
 
-# Commands (from Depot Controller)
+# Komande (od Kontrolera Depoa)
 depot/{depot_id}/station/{station_id}/commands
   → JSON: {command, parameters}
 
-# Swap requests
+# Zahtevi za zamenu
 depot/{depot_id}/station/{station_id}/swap/request
   → JSON: {slot, urgency, reason, estimated_rul}
 
@@ -396,123 +397,123 @@ depot/{depot_id}/station/{station_id}/swap/complete
   → JSON: {slot, old_module_sn, new_module_sn, result}
 ```
 
-### 3.5 Local Storage & Persistence
+### 3.5 Lokalno Skladistenje i Perzistencija
 
 ```
-DATA STORAGE
+SKLADISTENJE PODATAKA
 ═══════════════════════════════════════════════════════════════
 
-SQLite Database (lokalno):
+SQLite Baza (lokalno):
 ─────────────────────────────────
 
-Tables:
+Tabele:
 • charging_sessions - istorija punjenja
-• module_telemetry - agregirani podaci (1min resolution)
-• module_events - svi alarmi i događaji
+• module_telemetry - agregirani podaci (1min rezolucija)
+• module_events - svi alarmi i dogadjaji
 • swap_history - sve zamene modula
 • config - konfiguracija sistema
 
-Retention:
-• Telemetry: 90 dana lokalno, zatim upload + delete
-• Events: 1 godina
-• Sessions: trajno (billing relevantno)
+Zadrzavanje:
+• Telemetrija: 90 dana lokalno, zatim upload + brisanje
+• Dogadjaji: 1 godina
+• Sesije: trajno (relevantno za naplatu)
 
-Sync:
-• Background sync ka Depot/Cloud
+Sinhronizacija:
+• Background sync ka Depou/Cloudu
 • Offline-first: sve radi i bez uplink-a
 ```
 
 ---
 
-## 4. Level 3: Depot Controller
+## 4. Nivo 3: Kontroler Depoa
 
-### 4.1 Role & Responsibilities
+### 4.1 Uloga i Odgovornosti
 
 ```
-DEPOT CONTROLLER - FUNKCIJE
+KONTROLER DEPOA - FUNKCIJE
 ═══════════════════════════════════════════════════════════════
 
-1. INVENTORY MANAGEMENT
-   • Tracking svih modula (po serijskom broju)
-   • Lokacija: u stanici / u skladištu / na busu / u servisu
-   • Status: aktivan / degradiran / na čekanju / u popravci
+1. UPRAVLJANJE INVENTAROM
+   • Pracenje svih modula (po serijskom broju)
+   • Lokacija: u stanici / u skladistu / na busu / u servisu
+   • Status: aktivan / degradiran / na cekanju / u popravci
 
-2. SWAP COORDINATION
-   • Prima swap requests od svih stanica
+2. KOORDINACIJA ZAMENA
+   • Prima zahteve za zamenu od svih stanica
    • Optimizuje: koji bus nosi koji modul gde
    • Koordinira sa voznim redom autobusa
 
-3. SPARE POOL MANAGEMENT
-   • Koliko spare modula treba u depou?
-   • Kada naručiti nove?
-   • Koji moduli idu na refurbishment?
+3. UPRAVLJANJE REZERVNIM FONDOM
+   • Koliko rezervnih modula treba u depou?
+   • Kada naruciti nove?
+   • Koji moduli idu na renoviranje?
 
-4. FLEET LOGISTICS INTEGRATION
+4. INTEGRACIJA SA LOGISTIKOM FLOTE
    • API ka fleet management sistemu
    • Zna raspored autobusa
-   • Može zakazati "service bus" ako treba
+   • Moze zakazati "servisni bus" ako treba
 
-5. LOCAL ANALYTICS
+5. LOKALNA ANALITIKA
    • Agregacija podataka sa svih stanica
-   • Trend analysis za ceo depot
-   • Predictive: "za 2 nedelje će trebati 5 zamena"
+   • Analiza trendova za ceo depo
+   • Predikcija: "za 2 nedelje ce trebati 5 zamena"
 
-6. UPLINK TO CLOUD
-   • Sync sa centralnim sistemom (ako postoji)
+6. UPLINK KA CLOUD-u
+   • Sinhronizacija sa centralnim sistemom (ako postoji)
    • Backup za sve podatke
 ```
 
-### 4.2 Hardware
+### 4.2 Hardver
 
 ```
-DEPOT CONTROLLER HARDWARE
+HARDVER KONTROLERA DEPOA
 ═══════════════════════════════════════════════════════════════
 
-Opcija: Standard server ili VM
+Opcija: Standardni server ili VM
 
-Preporučeno:
+Preporuceno:
 • Intel NUC ili mini server
 • 8GB+ RAM
 • 256GB+ SSD
 • UPS backup (min 30 min)
-• Dual Ethernet (redundancy)
+• Dupli Ethernet (redundantnost)
 
-Software:
+Softver:
 • Linux server (Ubuntu LTS)
 • Docker za sve servise
 • PostgreSQL za bazu
 • Mosquitto MQTT broker
 • Nginx reverse proxy
 
-Može biti i VM na postojećoj depot IT infrastrukturi.
+Moze biti i VM na postojecoj depot IT infrastrukturi.
 ```
 
-### 4.3 Software Architecture
+### 4.3 Softverska Arhitektura
 
 ```
-DEPOT CONTROLLER SOFTWARE STACK
+SOFTVERSKI STEK KONTROLERA DEPOA
 ═══════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────┐
-│                      DEPOT CONTROLLER                        │
+│                      KONTROLER DEPOA                         │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌────────────────┐  ┌────────────────┐  ┌──────────────┐  │
-│  │   INVENTORY    │  │     SWAP       │  │   FLEET      │  │
-│  │   SERVICE      │  │   OPTIMIZER    │  │ INTEGRATION  │  │
+│  │    INVENTAR    │  │   OPTIMIZATOR  │  │  INTEGRACIJA │  │
+│  │    SERVIS      │  │     ZAMENA     │  │    FLOTE     │  │
 │  │                │  │                │  │              │  │
-│  │ • Module       │  │ • Queue mgmt   │  │ • Bus        │  │
-│  │   tracking     │  │ • Route        │  │   schedules  │  │
-│  │ • Serial #     │  │   optimization │  │ • Driver     │  │
-│  │   management   │  │ • Batching     │  │   comms      │  │
-│  │ • Lifecycle    │  │               │  │ • Service    │  │
-│  │   status       │  │                │  │   requests   │  │
+│  │ • Pracenje     │  │ • Upravlj.     │  │ • Raspored   │  │
+│  │   modula       │  │   redom        │  │   buseva     │  │
+│  │ • Serijski     │  │ • Optimizac.   │  │ • Komunik.   │  │
+│  │   brojevi      │  │   ruta         │  │   sa vozac.  │  │
+│  │ • Zivotni      │  │ • Grupno       │  │ • Servisni   │  │
+│  │   ciklus       │  │   zakazivanje  │  │   zahtevi    │  │
 │  └───────┬────────┘  └───────┬────────┘  └──────┬───────┘  │
 │          │                   │                   │          │
 │          └───────────────────┼───────────────────┘          │
 │                              ▼                              │
 │                    ┌─────────────────┐                      │
-│                    │  ORCHESTRATOR   │                      │
+│                    │   ORKESTRATOR   │                      │
 │                    └────────┬────────┘                      │
 │                             │                               │
 │         ┌───────────────────┼───────────────────┐          │
@@ -529,165 +530,165 @@ DEPOT CONTROLLER SOFTWARE STACK
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 4.4 Swap Optimization Algorithm
+### 4.4 Algoritam Optimizacije Zamene
 
 ```
-SWAP OPTIMIZER - LOGIKA
+OPTIMIZATOR ZAMENE - LOGIKA
 ═══════════════════════════════════════════════════════════════
 
-Input:
-• Lista swap requests (station, slot, urgency, reason)
-• Trenutni inventory spare modula
-• Raspored autobusa (sledećih 24h)
+Ulaz:
+• Lista zahteva za zamenu (stanica, slot, hitnost, razlog)
+• Trenutni inventar rezervnih modula
+• Raspored autobusa (sledecih 24h)
 • Kapacitet autobusa za transport modula
 
-Output:
+Izlaz:
 • Optimalan plan: koji bus → koje module → koja stanica
 
-ALGORITAM (Greedy + Heuristics):
+ALGORITAM (Greedy + Heuristike):
 ─────────────────────────────────
 
-1. PRIORITIZE REQUESTS
-   Sort by: urgency DESC, station_distance ASC
+1. PRIORITIZACIJA ZAHTEVA
+   Sortiraj po: hitnost DESC, udaljenost_stanice ASC
 
-   Critical → mora u sledećih 30 min
-   Urgent → mora u sledećih 4h
-   Planned → u sledećih 7 dana
+   Critical → mora u sledecih 30 min
+   Urgent → mora u sledecih 4h
+   Planned → u sledecih 7 dana
 
-2. FOR EACH CRITICAL/URGENT:
-   Find soonest bus passing that station
-   IF bus has capacity:
-       Assign module to bus
-       Reserve spare from inventory
-   ELSE:
-       Flag for dedicated service vehicle
+2. ZA SVAKI CRITICAL/URGENT:
+   Nadji najraniji bus koji prolazi tom stanicom
+   AKO bus ima kapacitet:
+       Dodeli modul busu
+       Rezervisi rezervni iz inventara
+   INACE:
+       Oznaci za namenska servisna vozila
 
-3. FOR PLANNED REQUESTS:
-   Group by route
-   Find bus that passes multiple stations
-   Batch replacements (minimize trips)
+3. ZA PLANIRANE ZAHTEVE:
+   Grupisi po ruti
+   Nadji bus koji prolazi vise stanica
+   Grupisi zamene (minimiziraj putovanja)
 
-4. CONSTRAINT CHECK:
-   • Bus max capacity: 4 modules (example)
-   • Driver nije maintenance tehničar → samo drop-off
-   • Ako robot nije dostupan → skip
+4. PROVERA OGRANICENJA:
+   • Maksimalni kapacitet busa: 4 modula (primer)
+   • Vozac nije tehnicar za odrzavanje → samo dostava
+   • Ako robot nije dostupan → preskoci
 
-5. OUTPUT PLAN:
+5. IZLAZNI PLAN:
    {
      bus_id: "BUS-042",
-     departure: "14:30",
-     tasks: [
-       {station: "S-01", action: "deliver", modules: ["M-1234"]},
-       {station: "S-01", action: "pickup", modules: ["M-0987"]},
-       {station: "S-03", action: "deliver", modules: ["M-5678"]}
+     polazak: "14:30",
+     zadaci: [
+       {stanica: "S-01", akcija: "dostavi", moduli: ["M-1234"]},
+       {stanica: "S-01", akcija: "pokupi", moduli: ["M-0987"]},
+       {stanica: "S-03", akcija: "dostavi", moduli: ["M-5678"]}
      ]
    }
 ```
 
-### 4.5 Dashboard UI
+### 4.5 Kontrolna Tabla (Dashboard)
 
 ```
-DEPOT DASHBOARD (Web)
+KONTROLNA TABLA DEPOA (Web)
 ═══════════════════════════════════════════════════════════════
 
-Tech: React + TypeScript + TailwindCSS
-Real-time: WebSocket za live updates
+Tehnologija: React + TypeScript + TailwindCSS
+Real-time: WebSocket za azuriranja uzivo
 
-VIEWS:
+PRIKAZI:
 ─────────────────────────────────
 
-1. OVERVIEW
+1. PREGLED
    ┌─────────────────────────────────────────────────────────┐
-   │  DEPOT: Beograd Centar                                  │
+   │  DEPO: Beograd Centar                                   │
    │                                                          │
-   │  Stations: 12      Modules: 156     Spare: 18          │
-   │  Online: 12        Healthy: 142     In Transit: 4      │
-   │                    Warning: 11      In Repair: 8       │
-   │                    Critical: 3                          │
+   │  Stanice: 12     Moduli: 156      Rezervni: 18         │
+   │  Online: 12      Zdravi: 142      U tranzitu: 4        │
+   │                  Upozorenje: 11   U popravci: 8        │
+   │                  Kriticno: 3                            │
    │                                                          │
-   │  [!] 3 modules need replacement in next 24h            │
+   │  [!] 3 modula treba zamenu u sledecih 24h              │
    └─────────────────────────────────────────────────────────┘
 
-2. STATION MAP
+2. MAPA STANICA
    • Interaktivna mapa depoa
-   • Svaka stanica: zeleno/žuto/crveno
-   • Click → detalji stanice
+   • Svaka stanica: zeleno/zuto/crveno
+   • Klik → detalji stanice
 
-3. MODULE LIST
+3. LISTA MODULA
    • Tabela svih modula
-   • Filter by status, station, age
-   • Sort by health score
-   • Click → modul istorija
+   • Filter po statusu, stanici, starosti
+   • Sortiranje po oceni zdravlja
+   • Klik → istorija modula
 
-4. SWAP QUEUE
-   • Pending swaps
-   • Assigned bus
-   • ETA
-   • Manual override opcije
+4. RED ZAMENA
+   • Zamene na cekanju
+   • Dodeljen bus
+   • Procenjeno vreme dolaska
+   • Opcije za rucnu izmenu
 
-5. ANALYTICS
-   • Failure trends
-   • MTBF per module batch
-   • Seasonal patterns
-   • Cost analysis
+5. ANALITIKA
+   • Trendovi otkaza
+   • MTBF po seriji modula
+   • Sezonski obrasci
+   • Analiza troskova
 ```
 
 ---
 
-## 5. Level 4: Cloud / Central Management
+## 5. Nivo 4: Cloud / Centralno Upravljanje
 
-### 5.1 Optional but Recommended
+### 5.1 Opciono ali Preporuceno
 
 ```
 CLOUD FUNKCIJE
 ═══════════════════════════════════════════════════════════════
 
-1. MULTI-DEPOT MANAGEMENT
+1. UPRAVLJANJE VISE DEPOA
    • Centralni pregled svih depoa
-   • Cross-depot spare sharing
-   • Global inventory optimization
+   • Deljenje rezervnih delova izmedju depoa
+   • Globalna optimizacija inventara
 
-2. ADVANCED ANALYTICS
-   • ML models trenirani na podacima cele flote
-   • Failure prediction improvements
-   • Benchmark between depots
+2. NAPREDNA ANALITIKA
+   • ML modeli trenirani na podacima cele flote
+   • Poboljsanje predikcije otkaza
+   • Poredjenje izmedju depoa
 
-3. OTA UPDATES
+3. OTA AZURIRANJA
    • Firmware updates za module
-   • Software updates za Station/Depot controllers
-   • Staged rollout (10% → 50% → 100%)
+   • Software updates za kontrolere Stanice/Depoa
+   • Fazno uvodjenje (10% → 50% → 100%)
 
-4. BILLING & REPORTING
-   • Energy consumption reports
-   • Maintenance cost tracking
-   • SLA compliance
+4. NAPLATA I IZVESTAVANJE
+   • Izvestaji o potrosnji energije
+   • Pracenje troskova odrzavanja
+   • SLA usaglasenost
 
-5. REMOTE SUPPORT
-   • Secure access za dijagnostiku
-   • Remote configuration
-   • Troubleshooting assistance
+5. UDALJENA PODRSKA
+   • Bezbedni pristup za dijagnostiku
+   • Udaljena konfiguracija
+   • Pomoc pri resavanju problema
 ```
 
-### 5.2 Cloud Architecture (Sketch)
+### 5.2 Cloud Arhitektura (Skica)
 
 ```
-CLOUD INFRASTRUCTURE
+CLOUD INFRASTRUKTURA
 ═══════════════════════════════════════════════════════════════
 
-Provider: AWS / Azure / GCP (bilo koji)
+Provajder: AWS / Azure / GCP (bilo koji)
 
 ┌─────────────────────────────────────────────────────────────┐
 │                         CLOUD                                │
 │                                                              │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐   │
-│  │   API         │  │   Analytics   │  │   ML          │   │
-│  │   Gateway     │  │   Service     │  │   Training    │   │
+│  │   API         │  │   Analitika   │  │   ML          │   │
+│  │   Gateway     │  │   Servis      │  │   Trening     │   │
 │  └───────┬───────┘  └───────────────┘  └───────────────┘   │
 │          │                                                   │
 │          ▼                                                   │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐   │
 │  │   IoT Hub     │  │   Time Series │  │   Blob        │   │
-│  │   (MQTT)      │  │   Database    │  │   Storage     │   │
+│  │   (MQTT)      │  │   Baza        │  │   Storage     │   │
 │  └───────────────┘  └───────────────┘  └───────────────┘   │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
@@ -695,148 +696,148 @@ Provider: AWS / Azure / GCP (bilo koji)
           │ TLS/MQTT
           ▼
     ┌───────────┐
-    │  DEPOT    │
-    │ Controller│
+    │ KONTROLER │
+    │   DEPOA   │
     └───────────┘
 ```
 
 ---
 
-## 6. Security Considerations
+## 6. Bezbednosna Razmatranja
 
 ```
-SECURITY LAYERS
+SLOJEVI BEZBEDNOSTI
 ═══════════════════════════════════════════════════════════════
 
-1. NETWORK SEGMENTATION
-   • Separate VLAN za charging infrastructure
-   • Firewall između IT i OT mreže
-   • No direct internet access za Station Controllers
+1. SEGMENTACIJA MREZE
+   • Poseban VLAN za infrastrukturu punjenja
+   • Firewall izmedju IT i OT mreze
+   • Nema direktnog pristupa internetu za Kontrolere Stanica
 
-2. AUTHENTICATION
+2. AUTENTIFIKACIJA
    • Mutual TLS za MQTT
    • API keys za REST
    • Role-based access control (RBAC)
 
-3. ENCRYPTION
+3. ENKRIPCIJA
    • TLS 1.3 za sve eksterne komunikacije
-   • AES-256 za stored credentials
-   • Signed firmware updates
+   • AES-256 za sacuvane kredencijale
+   • Potpisana azuriranja firmware-a
 
-4. PHYSICAL SECURITY
-   • Locked cabinets za controllers
-   • Tamper detection
-   • Secure boot na embedded uređajima
+4. FIZICKA BEZBEDNOST
+   • Zakljucani ormani za kontrolere
+   • Detekcija neovlascenog pristupa
+   • Secure boot na embedded uredajima
 
-5. MONITORING
+5. NADGLEDANJE
    • Audit log svih komandi
-   • Anomaly detection na network traffic
-   • Alerting za unauthorized access attempts
+   • Detekcija anomalija na mreznom saobracaju
+   • Upozorenja za pokusaje neovlascenog pristupa
 ```
 
 ---
 
-## 7. Failure Modes & Resilience
+## 7. Rezimi Otkaza i Otpornost
 
 ```
-FAILURE SCENARIOS I ODGOVOR
+SCENARIJI OTKAZA I ODGOVOR
 ═══════════════════════════════════════════════════════════════
 
-SCENARIO: Station Controller offline
+SCENARIO: Kontroler Stanice offline
 ─────────────────────────────────────
 • Moduli nastavljaju da rade autonomno
-• Basic charging OK
+• Osnovno punjenje OK
 • Nema novih swap operacija
-• Alert ka Depot Controller
-• Recovery: automatski reconnect
+• Alert ka Kontroleru Depoa
+• Oporavak: automatski reconnect
 
-SCENARIO: Depot Controller offline
+SCENARIO: Kontroler Depoa offline
 ─────────────────────────────────────
 • Stanice rade normalno
-• Swap zahtevi se queue-uju lokalno
-• Manual swap i dalje moguć
-• Recovery: sync backlog
+• Zahtevi za zamenu se queue-uju lokalno
+• Rucna zamena i dalje moguca
+• Oporavak: sinhronizacija backlog-a
 
 SCENARIO: Cloud offline
 ─────────────────────────────────────
 • Potpuno normalan rad
 • Lokalni podaci se akumuliraju
-• Sync kad se uspostavi veza
+• Sinhronizacija kad se uspostavi veza
 • Nema uticaja na operacije
 
-SCENARIO: CAN bus fault
+SCENARIO: CAN bus kvar
 ─────────────────────────────────────
-• Moduli prelaze u safe mode
-• Charging stops
-• Physical intervention required
-• Critical alert
+• Moduli prelaze u bezbedni rezim
+• Punjenje se zaustavlja
+• Potrebna fizicka intervencija
+• Kritican alert
 
-SCENARIO: Power outage
+SCENARIO: Nestanak struje
 ─────────────────────────────────────
-• Station Controller na UPS (30 min)
-• Graceful shutdown svih modula
-• State saved to persistent storage
-• Auto-recovery on power restore
+• Kontroler Stanice na UPS-u (30 min)
+• Elegantno gasenje svih modula
+• Stanje sacuvano u perzistentno skladiste
+• Auto-oporavak po povratku struje
 ```
 
 ---
 
-## 8. Development Roadmap
+## 8. Razvojna Mapa
 
 ```
-PHASE 1: Single Station MVP (Month 1-3)
+FAZA 1: MVP Jedne Stanice (Mesec 1-3)
 ═══════════════════════════════════════════════════════════════
-□ Station Controller basic (Raspberry Pi)
-□ CAN communication sa 4 EK3 modula
-□ Basic charging session management
-□ Local web dashboard (read-only)
-□ Manual swap (no robot)
+□ Kontroler Stanice osnovni (Raspberry Pi)
+□ CAN komunikacija sa 4 EK3 modula
+□ Osnovno upravljanje sesijama punjenja
+□ Lokalna web kontrolna tabla (samo citanje)
+□ Rucna zamena (bez robota)
 
-PHASE 2: Robot Integration (Month 4-5)
+FAZA 2: Integracija Robota (Mesec 4-5)
 ═══════════════════════════════════════════════════════════════
-□ Robot controller integration
-□ Swap sequence implementation
-□ Safety interlock system
-□ Swap request/complete flow
+□ Integracija kontrolera robota
+□ Implementacija sekvence zamene
+□ Sistem sigurnosne blokade
+□ Tok zahtev/zavrsetak zamene
 
-PHASE 3: Multi-Station (Month 6-7)
+FAZA 3: Vise Stanica (Mesec 6-7)
 ═══════════════════════════════════════════════════════════════
-□ Depot Controller MVP
-□ Multi-station management
-□ Inventory tracking
-□ Basic swap optimization
+□ MVP Kontrolera Depoa
+□ Upravljanje vise stanica
+□ Pracenje inventara
+□ Osnovna optimizacija zamene
 
-PHASE 4: Fleet Integration (Month 8-9)
+FAZA 4: Integracija Flote (Mesec 8-9)
 ═══════════════════════════════════════════════════════════════
-□ Bus schedule integration
-□ Transport logistics
-□ Driver notifications
-□ End-to-end swap workflow
+□ Integracija rasporeda buseva
+□ Transportna logistika
+□ Obavestenja vozacima
+□ End-to-end tok zamene
 
-PHASE 5: Cloud & Scale (Month 10-12)
+FAZA 5: Cloud i Skaliranje (Mesec 10-12)
 ═══════════════════════════════════════════════════════════════
 □ Cloud backend
-□ Multi-depot support
-□ Advanced analytics
-□ OTA update system
+□ Podrska za vise depoa
+□ Napredna analitika
+□ Sistem OTA azuriranja
 ```
 
 ---
 
-## 9. Open Questions
+## 9. Otvorena Pitanja
 
 1. **Fleet management sistem klijenta** - API ili custom integracija?
-2. **Vehicle communication** - ISO 15118, OCPP, proprietary?
-3. **Billing integration** - direktno ili preko postojećeg sistema?
-4. **Robot vendor** - off-the-shelf ili custom?
-5. **Multi-tenant** - jedan sistem za više operatora?
+2. **Komunikacija sa vozilom** - ISO 15118, OCPP, proprietary?
+3. **Integracija naplate** - direktno ili preko postojeceg sistema?
+4. **Proizvodjac robota** - gotov proizvod ili custom?
+5. **Multi-tenant** - jedan sistem za vise operatora?
 
 ---
 
-## References
+## Reference
 
-- OCPP 2.0.1 Specification (Open Charge Point Protocol)
-- ISO 15118 (Vehicle-to-Grid Communication)
-- IEC 61851 (EV Charging Standards)
+- OCPP 2.0.1 Specifikacija (Open Charge Point Protocol)
+- ISO 15118 (Komunikacija Vozilo-Mreza)
+- IEC 61851 (Standardi za Punjenje EV)
 - CANopen CiA 301/401
-- MQTT 5.0 Specification
+- MQTT 5.0 Specifikacija

@@ -53,6 +53,7 @@ function getInitialStateForCity(cityId) {
     routes: city.routes,
     chargingStations: initializeStations(city),
     selectedItem: null, // { type: 'bus' | 'station', id: string }
+    pendingDecision: null, // { busId, type, message } - for human-in-the-loop
   };
 }
 
@@ -69,6 +70,8 @@ const ACTIONS = {
   CHANGE_CITY: 'CHANGE_CITY',
   SELECT_ITEM: 'SELECT_ITEM',
   CLEAR_SELECTION: 'CLEAR_SELECTION',
+  SET_PENDING_DECISION: 'SET_PENDING_DECISION',
+  CLEAR_PENDING_DECISION: 'CLEAR_PENDING_DECISION',
 };
 
 // Reducer
@@ -110,6 +113,12 @@ function simulationReducer(state, action) {
     case ACTIONS.CLEAR_SELECTION:
       return { ...state, selectedItem: null };
 
+    case ACTIONS.SET_PENDING_DECISION:
+      return { ...state, pendingDecision: action.payload };
+
+    case ACTIONS.CLEAR_PENDING_DECISION:
+      return { ...state, pendingDecision: null };
+
     default:
       return state;
   }
@@ -127,6 +136,8 @@ export function SimulationProvider({ children }) {
   const changeCity = useCallback((cityId) => dispatch({ type: ACTIONS.CHANGE_CITY, payload: cityId }), []);
   const selectItem = useCallback((type, id) => dispatch({ type: ACTIONS.SELECT_ITEM, payload: { type, id } }), []);
   const clearSelection = useCallback(() => dispatch({ type: ACTIONS.CLEAR_SELECTION }), []);
+  const setPendingDecision = useCallback((decision) => dispatch({ type: ACTIONS.SET_PENDING_DECISION, payload: decision }), []);
+  const clearPendingDecision = useCallback(() => dispatch({ type: ACTIONS.CLEAR_PENDING_DECISION }), []);
 
   const value = {
     ...state,
@@ -138,6 +149,8 @@ export function SimulationProvider({ children }) {
     changeCity,
     selectItem,
     clearSelection,
+    setPendingDecision,
+    clearPendingDecision,
   };
 
   return (

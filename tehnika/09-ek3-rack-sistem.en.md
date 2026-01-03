@@ -1,80 +1,80 @@
-# EK3 Rack Sistem: Jedan Modul za Sve
+# EK3 Rack System: One Module for Everything
 
-## Filozofija: Radikalna Modularnost
+## Philosophy: Radical Modularity
 
 ```
-TRADICIONALNI PRISTUP:              ELEKTROKOMBINACIJA:
+TRADITIONAL APPROACH:                ELEKTROKOMBINACIJA:
 ════════════════════════════════════════════════════════════════
-Mali punjač = mali modul            Mali punjač = 1 × EK3
-Srednji punjač = srednji modul      Srednji punjač = 10 × EK3
-Veliki punjač = veliki modul        Veliki punjač = 100 × EK3
-MCS punjač = ogroman modul          MCS punjač = 1000 × EK3
+Small charger = small module         Small charger = 1 × EK3
+Medium charger = medium module       Medium charger = 10 × EK3
+Large charger = large module         Large charger = 100 × EK3
+MCS charger = huge module            MCS charger = 1000 × EK3
 
-Rezultat: 4+ različita dizajna      Rezultat: JEDAN dizajn za sve
+Result: 4+ different designs         Result: ONE design for all
 ```
 
-### Zašto je Ovo Revolucionarno?
+### Why Is This Revolutionary?
 
 ```
-1. MASOVNA PROIZVODNJA
-   • Jedan modul, milionski tiraž
-   • Cena pada eksponencijalno
-   • Kvalitet raste (više iteracija)
+1. MASS PRODUCTION
+   • One module, million-unit production runs
+   • Price drops exponentially
+   • Quality increases (more iterations)
 
-2. UNIVERZALNI INVENTORY
-   • Jedna SKU za sve primene
-   • Swap stanica: 20 modula pokriva SVE
-   • Logistics: jedan tip kutije
+2. UNIVERSAL INVENTORY
+   • One SKU for all applications
+   • Swap station: 20 modules cover EVERYTHING
+   • Logistics: one type of box
 
-3. GRANULARNA POUZDANOST
-   • 1000 modula, 1 otkaže = 0.1% gubitak
-   • vs tradicionalno: 1 od 10 otkaže = 10% gubitak
-   • "Graceful degradation" umesto "total failure"
+3. GRANULAR RELIABILITY
+   • 1000 modules, 1 fails = 0.1% loss
+   • vs traditional: 1 of 10 fails = 10% loss
+   • "Graceful degradation" instead of "total failure"
 
-4. DEMOKRATIZACIJA SNAGE
-   • Isti modul u skuteru i u MCS stanici
-   • Vlasnik skutera i fleet operator koriste ISTU tehnologiju
+4. DEMOCRATIZATION OF POWER
+   • Same module in scooter and MCS station
+   • Scooter owner and fleet operator use the SAME technology
 ```
 
 ---
 
-## EK3 Modul: Fizički Dizajn za Rack Mounting
+## EK3 Module: Physical Design for Rack Mounting
 
-### Dimenzije i Form Factor
+### Dimensions and Form Factor
 
 ```
-EK3 MODUL - 1U HALF-WIDTH (telecom stil)
+EK3 MODULE - 1U HALF-WIDTH (telecom style)
 ════════════════════════════════════════════════════════════════
 
-POGLED ODOZGO:
+TOP VIEW:
 ┌─────────────────────────────────────────────────────┐
 │  ○ GRIP    ┌─────────────┐              GRIP ○     │
-│            │    FAN      │                         │  Širina: 200mm (1U half-width)
-│  ┌──────┐  └─────────────┘  ┌────────┐            │  Dubina: 320mm
-│  │ SiC  │                   │  CTRL  │            │  Visina: 44mm (1U)
+│            │    FAN      │                         │  Width: 200mm (1U half-width)
+│  ┌──────┐  └─────────────┘  ┌────────┐            │  Depth: 320mm
+│  │ SiC  │                   │  CTRL  │            │  Height: 44mm (1U)
 │  │POWER │  ┌─────────────┐  │STM32G4 │            │
-│  │STAGE │  │  HEATSINK   │  │        │            │  Masa: 3.5 kg
+│  │STAGE │  │  HEATSINK   │  │        │            │  Mass: 3.5 kg
 │  │ LLC  │  │  + VAPOR    │  │ CAN-FD │            │
-│  │ 900V │  │   CHAMBER   │  └────────┘            │  Snaga: 3.3 kW (3.6 kW peak)
+│  │ 900V │  │   CHAMBER   │  └────────┘            │  Power: 3.3 kW (3.6 kW peak)
 │  └──────┘  └─────────────┘  ┌────────┐            │
-│                             │  DC    │            │  Efikasnost: >96% peak
+│                             │  DC    │            │  Efficiency: >96% peak
 │  ┌────────────────────────┐ │  FUSE  │            │               >94% @ 50%
 │  │   PLANAR TRANSFORMER   │ └────────┘            │
 │  └────────────────────────┘                       │
 │  [============= RAIL GUIDES ===============]      │
 └─────────────────────────────────────────────────────┘
 
-POGLED SA STRANE:
+SIDE VIEW:
 ┌────────────────────────────────────────────┐
 │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│ 44mm (1U)
 └────────────────────────────────────────────┘
-          320mm dubina
+          320mm depth
 ```
 
-### Konektor Panel (Zadnja Strana)
+### Connector Panel (Rear Side)
 
 ```
-BACKPLANE KONEKTOR - BLIND-MATE DESIGN
+BACKPLANE CONNECTOR - BLIND-MATE DESIGN
 ════════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────┐
@@ -111,10 +111,10 @@ HOT-SWAP TIME: <1 second electrical disconnect
 
 ## Rack Layout
 
-> **NAPOMENA:** Razmatramo custom rack dizajn umesto standardnog 19" formata
-> zbog termalnih izazova pri visokoj gustini snage. Videti sekciju "Custom Rack Koncept" ispod.
+> **NOTE:** We are considering a custom rack design instead of standard 19" format
+> due to thermal challenges at high power density. See "Custom Rack Concept" section below.
 
-### Referentna konfiguracija: 84 Modula = 277 kW
+### Reference Configuration: 84 Modules = 277 kW
 
 ```
 CUSTOM RACK - FRONT VIEW (84 × EK3 = 277 kW)
@@ -161,45 +161,45 @@ CUSTOM RACK - FRONT VIEW (84 × EK3 = 277 kW)
 │  └────────────────────────────┘  │                         │
 └─────────────────────────────────────────────────────────────┘
 
-UKUPNO: Custom rack (ne 19" standard)
+TOTAL: Custom rack (not 19" standard)
 • Module section: 84 × EK3 @ 3.3kW = 277 kW
-• Kontroler + CAN-FD hub
-• Centralni PFC (AC/DC)
-• Integrisano hlađenje (plenum)
+• Controller + CAN-FD hub
+• Central PFC (AC/DC)
+• Integrated cooling (plenum)
 
-DIMENZIJE RACK-a (TBD nakon termalnog modelovanja):
-• Širina: ~900mm (za 4× 200mm modula + spacing)
-• Dubina: ~500mm (modul 320mm + airflow)
-• Visina: ~1200mm
-• Masa (pun): ~350 kg
+RACK DIMENSIONS (TBD after thermal modeling):
+• Width: ~900mm (for 4× 200mm modules + spacing)
+• Depth: ~500mm (module 320mm + airflow)
+• Height: ~1200mm
+• Mass (full): ~350 kg
 ```
 
 ---
 
-## Skaliranje: Od 3.3 kW do 3 MW
+## Scaling: From 3.3 kW to 3 MW
 
 ```
-KONFIGURACIJE (EK3 @ 3.3 kW):
+CONFIGURATIONS (EK3 @ 3.3 kW):
 ════════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────┐
-│  USE CASE          │ MODULA │ RACK-OVA │  SNAGA  │ FOOTPRINT│
-├────────────────────┼────────┼──────────┼─────────┼──────────┤
-│  E-bike charger    │    1   │    -     │  3.3 kW │  0.01 m² │
-│  Home charger      │   3-7  │    -     │ 10-23kW │  0.05 m² │
-│  Destination 22kW  │    7   │  Mini    │  23 kW  │  0.2 m²  │
-│  DC Fast 50kW      │   16   │  Half    │  53 kW  │  0.3 m²  │
-│  DC Fast 150kW     │   46   │    1     │ 152 kW  │  0.6 m²  │
-│  Highway 350kW     │  106   │    2     │ 350 kW  │  1.2 m²  │
-│  Bus Depot 500kW   │  152   │    2     │ 502 kW  │  1.2 m²  │
-│  Bus Opp. 750kW    │  228   │    3     │ 752 kW  │  1.8 m²  │
-│  Truck Depot 1MW   │  303   │    4     │   1 MW  │  2.4 m²  │
-│  MCS Station 2MW   │  606   │    8     │   2 MW  │  4.8 m²  │
-│  MCS Station 3MW   │  909   │   12     │   3 MW  │  7.2 m²  │
+│  USE CASE          │ MODULES │ RACKS    │  POWER  │ FOOTPRINT│
+├────────────────────┼─────────┼──────────┼─────────┼──────────┤
+│  E-bike charger    │    1    │    -     │  3.3 kW │  0.01 m² │
+│  Home charger      │   3-7   │    -     │ 10-23kW │  0.05 m² │
+│  Destination 22kW  │    7    │  Mini    │  23 kW  │  0.2 m²  │
+│  DC Fast 50kW      │   16    │  Half    │  53 kW  │  0.3 m²  │
+│  DC Fast 150kW     │   46    │    1     │ 152 kW  │  0.6 m²  │
+│  Highway 350kW     │  106    │    2     │ 350 kW  │  1.2 m²  │
+│  Bus Depot 500kW   │  152    │    2     │ 502 kW  │  1.2 m²  │
+│  Bus Opp. 750kW    │  228    │    3     │ 752 kW  │  1.8 m²  │
+│  Truck Depot 1MW   │  303    │    4     │   1 MW  │  2.4 m²  │
+│  MCS Station 2MW   │  606    │    8     │   2 MW  │  4.8 m²  │
+│  MCS Station 3MW   │  909    │   12     │   3 MW  │  7.2 m²  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Vizualizacija: 1 MW Stanica (4 Rack-a)
+### Visualization: 1 MW Station (4 Racks)
 
 ```
 1 MW CHARGING STATION - TOP VIEW
@@ -209,98 +209,98 @@ KONFIGURACIJE (EK3 @ 3.3 kW):
     ┌─────────────────────┐
     │                     │
     │  ┌─────┐  ┌─────┐  │
-    │  │RACK │  │RACK │  │      RACK 1-2: 152 modula = 502 kW
-    │  │  1  │  │  2  │  │      (76 modula po rack-u)
+    │  │RACK │  │RACK │  │      RACK 1-2: 152 modules = 502 kW
+    │  │  1  │  │  2  │  │      (76 modules per rack)
     │  │     │  │     │  │
     │  └─────┘  └─────┘  │
     │                     │      1m
     │  ┌─────┐  ┌─────┐  │
-    │  │RACK │  │RACK │  │      RACK 3-4: 152 modula = 502 kW
+    │  │RACK │  │RACK │  │      RACK 3-4: 152 modules = 502 kW
     │  │  3  │  │  4  │  │
     │  │     │  │     │  │
     │  └─────┘  └─────┘  │
     │                     │
     │  ┌───────────────┐  │
-    │  │   ROBOT ARM   │  │      Custom robot na šini
+    │  │   ROBOT ARM   │  │      Custom robot on rail
     │  │   ═══════════ │  │
     │  └───────────────┘  │
     │                     │
     └─────────────────────┘
 
-    TOTAL: 304 modula × 3.3 kW = 1,003 kW
+    TOTAL: 304 modules × 3.3 kW = 1,003 kW
     FOOTPRINT: 2.4 × 2.5m = 6 m²
 ```
 
 ---
 
-## Robot Swap Sistem
+## Robot Swap System
 
-### Robot Specifikacije
+### Robot Specifications
 
 ```
-ROBOT ZA EK3 SWAP
+ROBOT FOR EK3 SWAP
 ════════════════════════════════════════════════════════════════
 
-TIP: Purpose-built robot (Robot B) na linearnoj šini
-(NE off-the-shelf UR/KUKA - videti patent EK-2026-002)
+TYPE: Purpose-built robot (Robot B) on linear rail
+(NOT off-the-shelf UR/KUKA - see patent EK-2026-002)
 
-SPECIFIKACIJE:
+SPECIFICATIONS:
 • Payload: 10-15 kg (EK3 = 3.5 kg, plus gripper)
 • Reach: 1.5-2m
 • Repeatability: ±0.1mm
-• Speed: Do 0.5 m/s (bezbedno)
-• Masa robota: 30-50 kg
-• Napajanje: 400V AC
+• Speed: Up to 0.5 m/s (safe)
+• Robot mass: 30-50 kg
+• Power supply: 400V AC
 
 LINEAR RAIL:
-• Dužina: Po potrebi (2-10m za velike instalacije)
-• Tip: Igus DryLin ili Bosch Rexroth
-• Pozicioniranje: ±0.1mm
+• Length: As needed (2-10m for large installations)
+• Type: Igus DryLin or Bosch Rexroth
+• Positioning: ±0.1mm
 
 GRIPPER:
-• Tip: Custom električni (ne pneumatski)
-• Hvata EK3 za robot grip points
-• Senzori: Force feedback + proximity
-• Alignment pins za precizno pozicioniranje
+• Type: Custom electric (not pneumatic)
+• Grabs EK3 by robot grip points
+• Sensors: Force feedback + proximity
+• Alignment pins for precise positioning
 
-PROCENJENA CENA:
+ESTIMATED PRICE:
 • Robot B: €10,000-20,000
 • (vs industrial cobot: €30,000-100,000)
 ```
 
-### Swap Sekvenca
+### Swap Sequence
 
 ```
-ROBOT SWAP WORKFLOW (1 modul)
+ROBOT SWAP WORKFLOW (1 module)
 ════════════════════════════════════════════════════════════════
 
-VREME    AKCIJA
+TIME     ACTION
 ─────────────────────────────────────────────────────────────
-T+0s     AI identifikuje modul za zamenu: Rack 2, Row 15, Slot 3
-T+2s     Robot prima komandu, planira putanju
-T+5s     Robot se pozicionira ispred rack-a
-T+8s     Robot hvata modul (grip engagement)
-T+10s    Robot izvlači modul (300mm izvlačenje)
-T+15s    Robot se okreće ka "OUT" poziciji
-T+18s    Robot odlaže modul u "defective" bin
-T+22s    Robot se pozicionira kod "fresh module" storage
-T+25s    Robot hvata novi modul
-T+28s    Robot se vraća na Rack 2, Row 15, Slot 3
-T+32s    Robot insertuje modul (alignment + push)
-T+35s    Modul se zaključava (cam lock engagement)
-T+38s    Backplane handshake - modul ONLINE
-T+40s    Robot se vraća u home poziciju
+T+0s     AI identifies module for replacement: Rack 2, Row 15, Slot 3
+T+2s     Robot receives command, plans path
+T+5s     Robot positions in front of rack
+T+8s     Robot grabs module (grip engagement)
+T+10s    Robot extracts module (300mm extraction)
+T+15s    Robot turns toward "OUT" position
+T+18s    Robot places module in "defective" bin
+T+22s    Robot positions at "fresh module" storage
+T+25s    Robot grabs new module
+T+28s    Robot returns to Rack 2, Row 15, Slot 3
+T+32s    Robot inserts module (alignment + push)
+T+35s    Module locks in (cam lock engagement)
+T+38s    Backplane handshake - module ONLINE
+T+40s    Robot returns to home position
 ─────────────────────────────────────────────────────────────
-TOTAL: 40 sekundi za kompletan swap
+TOTAL: 40 seconds for complete swap
 
-ZA 10 MODULA (batch replacement): ~5 minuta
-ZA 50 MODULA (major service): ~25 minuta
+FOR 10 MODULES (batch replacement): ~5 minutes
+FOR 50 MODULES (major service): ~25 minutes
 ```
 
-### Multi-Robot za Velike Instalacije
+### Multi-Robot for Large Installations
 
 ```
-3 MW STANICA (1000 modula, 12 rack-ova)
+3 MW STATION (1000 modules, 12 racks)
 ════════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -318,7 +318,7 @@ ZA 50 MODULA (major service): ~25 minuta
 │              └───────────┘                                  │
 │                                                             │
 │   ═══════════════════════════════════════════════════════  │
-│              LINEAR RAIL (10m) - druga strana              │
+│              LINEAR RAIL (10m) - other side                │
 │                    │                                        │
 │              ┌─────┴─────┐                                  │
 │              │  ROBOT 2  │                                  │
@@ -326,279 +326,279 @@ ZA 50 MODULA (major service): ~25 minuta
 │                                                             │
 │   MODULE STORAGE:                                           │
 │   ┌──────────────────────────────────────────────────────┐ │
-│   │  FRESH: 50 modula    │    DEFECTIVE: 20 slots       │ │
+│   │  FRESH: 50 modules    │    DEFECTIVE: 20 slots       │ │
 │   └──────────────────────────────────────────────────────┘ │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 
-2 ROBOTA RADE PARALELNO:
-• Robot 1: Rack 1-6 (gornja šina)
-• Robot 2: Rack 7-12 (donja šina)
-• Kapacitet: 100+ swap-ova po satu
+2 ROBOTS WORK IN PARALLEL:
+• Robot 1: Rack 1-6 (upper rail)
+• Robot 2: Rack 7-12 (lower rail)
+• Capacity: 100+ swaps per hour
 ```
 
 ---
 
-## Pouzdanost: Matematika Modularnosti
+## Reliability: The Mathematics of Modularity
 
-### Uporedba: 10 velikih vs 303 malih modula
+### Comparison: 10 Large vs 303 Small Modules
 
 ```
-SCENARIO: 1 MW punjač, 10 godina rada
+SCENARIO: 1 MW charger, 10 years of operation
 ════════════════════════════════════════════════════════════════
 
-TRADICIONALNO (10 × 100kW modula):
+TRADITIONAL (10 × 100kW modules):
 ─────────────────────────────────────────────────
-• MTBF po modulu: 100,000 h
-• Verovatnoća kvara jednog modula/god: ~8%
-• Kada 1 otkaže: GUBITAK 10% KAPACITETA
-• Popravka: Tehničar, 2-5 dana
+• MTBF per module: 100,000 h
+• Probability of one module failure/year: ~8%
+• When 1 fails: 10% CAPACITY LOSS
+• Repair: Technician, 2-5 days
 
-ELEKTROKOMBINACIJA (303 × 3.3kW modula):
+ELEKTROKOMBINACIJA (303 × 3.3kW modules):
 ─────────────────────────────────────────────────
-• MTBF po modulu: 100,000 h
-• Verovatnoća kvara jednog modula/god: ~8%
-• Ali: Očekivanih ~24 kvarova/god (statistički)
-• Kada 1 otkaže: GUBITAK 0.33% KAPACITETA
-• Popravka: Robot, 40 sekundi
+• MTBF per module: 100,000 h
+• Probability of one module failure/year: ~8%
+• But: Expected ~24 failures/year (statistically)
+• When 1 fails: 0.33% CAPACITY LOSS
+• Repair: Robot, 40 seconds
 
-MATEMATIKA DOSTUPNOSTI:
+AVAILABILITY MATHEMATICS:
 ─────────────────────────────────────────────────
-Tradicionalno:
-• 1 kvar = 10% degradacija dok ne dođe tehničar
-• Očekivano 1-2 kvara godišnje
-• Svaki kvar = 2-5 dana na 90% kapaciteta
-• Godišnja dostupnost: ~98%
+Traditional:
+• 1 failure = 10% degradation until technician arrives
+• Expected 1-2 failures per year
+• Each failure = 2-5 days at 90% capacity
+• Annual availability: ~98%
 
 ELEKTROKOMBINACIJA:
-• 24 kvarova godišnje, ali svaki = 0.33% gubitak
-• Robot zameni za 40 sec
-• Sistem NIKAD ispod 99% kapaciteta
-• Godišnja dostupnost: >99.9%
+• 24 failures per year, but each = 0.33% loss
+• Robot replaces in 40 sec
+• System NEVER below 99% capacity
+• Annual availability: >99.9%
 ```
 
-### Graceful Degradation Vizualizacija
+### Graceful Degradation Visualization
 
 ```
-KAPACITET TOKOM VREMENA:
+CAPACITY OVER TIME:
 ════════════════════════════════════════════════════════════════
 
-TRADICIONALNO (10 modula):
+TRADITIONAL (10 modules):
 100%|████████████████████████████████████████
- 90%|                    ████████████████████ ← 1 modul otkaže
- 80%|                                     ████ ← 2 modula
-    └────────────────────────────────────────→ vreme
-           ↑ kvar            ↑ kvar
+ 90%|                    ████████████████████ ← 1 module fails
+ 80%|                                     ████ ← 2 modules
+    └────────────────────────────────────────→ time
+           ↑ failure          ↑ failure
 
-ELEKTROKOMBINACIJA (303 modula @ 3.3 kW):
+ELEKTROKOMBINACIJA (303 modules @ 3.3 kW):
 100% |████████████████████████████████████████
-99.67|█████████████████████████████████████▓▓▓ ← 1 otkaže
-99.34|█████████████████████████████████████▓▓▓ ← 2 otkaže
-99%  |█████████████████████████████████████▓▓▓ ← 3 otkaže
-     └────────────────────────────────────────→ vreme
-     Praktično NEMA VIDLJIVOG PADA jer robot stalno menja!
+99.67|█████████████████████████████████████▓▓▓ ← 1 fails
+99.34|█████████████████████████████████████▓▓▓ ← 2 fail
+99%  |█████████████████████████████████████▓▓▓ ← 3 fail
+     └────────────────────────────────────────→ time
+     Practically NO VISIBLE DROP because robot continuously replaces!
 ```
 
 ---
 
-## Inspiracija: 3PAR Storage Arhitektura
+## Inspiration: 3PAR Storage Architecture
 
-### Šta je 3PAR?
-
-```
-3PAR (sada HPE Primera/Alletra) je revolucionisao storage industriju
-sličnim pristupom - radikalnom modularnosti na nivou najmanje jedinice.
-
-Umesto da koristi cele diskove kao gradivne elemente, 3PAR deli
-diskove na "chunklete" od 1GB i distribuira podatke preko SVIH diskova.
-
-Isti princip primenjujemo na power electronics!
-```
-
-### Mapiranje Koncepata: Storage → Punjači
+### What is 3PAR?
 
 ```
-3PAR KONCEPT           STORAGE                 EK3 PRIMENA
+3PAR (now HPE Primera/Alletra) revolutionized the storage industry
+with a similar approach - radical modularity at the smallest unit level.
+
+Instead of using whole disks as building blocks, 3PAR divides
+disks into 1GB "chunklets" and distributes data across ALL disks.
+
+We apply the same principle to power electronics!
+```
+
+### Concept Mapping: Storage → Chargers
+
+```
+3PAR CONCEPT           STORAGE                 EK3 APPLICATION
 ═══════════════════════════════════════════════════════════════════
 
-CHUNKLETS              1GB blokovi umesto      EK3 = 3kW "chunklet"
-                       celih diskova           snage
+CHUNKLETS              1GB blocks instead      EK3 = 3kW power
+                       of whole disks          "chunklet"
 
-WIDE STRIPING          Podaci preko SVIH       Opterećenje preko SVIH
-                       diskova, ne samo 2-3    modula, ne samo potrebnih
+WIDE STRIPING          Data across ALL         Load across ALL
+                       disks, not just 2-3     modules, not just needed ones
 
-THIN PROVISIONING      Kapacitet se alocira    Moduli "spavaju" dok
-                       tek kad treba           nisu potrebni
+THIN PROVISIONING      Capacity allocated      Modules "sleep" until
+                       only when needed        needed
 
-AUTONOMIC              Dodaj/ukloni disk →     Dodaj/ukloni modul →
-REBALANCING            auto redistribucija     auto redistribucija
+AUTONOMIC              Add/remove disk →       Add/remove module →
+REBALANCING            auto redistribution     auto redistribution
 
-DISTRIBUTED            Spare kapacitet         Nema "hot spare" modula
-SPARING                raspoređen, ne          - spare je distribuiran
-                       dedicirani hot-spare    u svakom modulu
+DISTRIBUTED            Spare capacity          No "hot spare" modules
+SPARING                distributed, not        - spare is distributed
+                       dedicated hot-spare     in each module
 
-MESH-ACTIVE            Svi kontroleri          Swarm - svi moduli
-                       aktivni, nema mastera   ravnopravni, nema mastera
+MESH-ACTIVE            All controllers         Swarm - all modules
+                       active, no master       equal, no master
 
-RAPID REBUILD          Rebuild sa SVIH         Recovery load sa SVIH
-                       diskova paralelno       modula paralelno
+RAPID REBUILD          Rebuild from ALL        Recovery load from ALL
+                       disks in parallel       modules in parallel
 ```
 
-### Distributed Sparing: Ključna Inovacija
+### Distributed Sparing: Key Innovation
 
 ```
-TRADICIONALNI "HOT SPARE":
+TRADITIONAL "HOT SPARE":
 ═══════════════════════════════════════════════════════════════════
 
 ┌─────┬─────┬─────┬─────┬─────┬─────┐
-│100% │100% │100% │100% │100% │  0% │  ← Spare sedi, ne radi ništa
+│100% │100% │100% │100% │100% │  0% │  ← Spare sits idle, does nothing
 └─────┴─────┴─────┴─────┴─────┴─────┘
   M1    M2    M3    M4    M5   SPARE
 
-• Spare modul: Hladan, netestiran, troši prostor
-• Kvar M3 → SPARE preuzima 100% odmah
-• Ali: Spare je bio neaktivan - možda i on ima problem?
-• Posle jednog kvara: Nema više spare-a!
+• Spare module: Cold, untested, takes up space
+• M3 fails → SPARE takes over 100% immediately
+• But: Spare was inactive - maybe it has a problem too?
+• After one failure: No more spare!
 
 
 3PAR / EK3 DISTRIBUTED SPARING:
 ═══════════════════════════════════════════════════════════════════
 
 ┌─────┬─────┬─────┬─────┬─────┬─────┐
-│ 83% │ 83% │ 83% │ 83% │ 83% │ 83% │  ← Svi rade, svi imaju rezervu
+│ 83% │ 83% │ 83% │ 83% │ 83% │ 83% │  ← All work, all have reserve
 └─────┴─────┴─────┴─────┴─────┴─────┘
   M1    M2    M3    M4    M5    M6
 
-• Nema "spare" modula - SPARE KAPACITET je distribuiran
-• Svi moduli aktivni = svi testirani u produkciji
-• Kvar M3 → Preostalih 5 ide sa 83% na 100%
-• Posle jednog kvara: JOŠ UVEK ima rezerve za sledeći!
+• No "spare" module - SPARE CAPACITY is distributed
+• All modules active = all tested in production
+• M3 fails → Remaining 5 go from 83% to 100%
+• After one failure: STILL has reserve for the next one!
 ```
 
-### Praktičan Primer: 100kW Sistem
+### Practical Example: 100kW System
 
 ```
-100kW SISTEM SA 10% REZERVE:
+100kW SYSTEM WITH 10% RESERVE:
 ═══════════════════════════════════════════════════════════════════
 
-TRADICIONALNO (Hot Spare):
+TRADITIONAL (Hot Spare):
 ────────────────────────────────────────
-34 modula × 3kW = 102kW aktivno
- + 4 spare modula × 3kW = 12kW neaktivno (čeka)
+34 modules × 3kW = 102kW active
+ + 4 spare modules × 3kW = 12kW inactive (waiting)
 ═══════════════════════════════════════
-38 modula ukupno, ali 4 NE RADE
+38 modules total, but 4 DON'T WORK
 
-• Spare troši prostor, struju za standby, ali ne doprinosi
-• Posle 4 kvara: NEMA VIŠE REZERVE
+• Spare uses space, standby power, but doesn't contribute
+• After 4 failures: NO MORE RESERVE
 
 
 EK3/3PAR (Distributed Sparing):
 ────────────────────────────────────────
-38 modula × 3kW = 114kW potencijal
-Rade na 88% = 100kW isporučeno
+38 modules × 3kW = 114kW potential
+Operating at 88% = 100kW delivered
 ═══════════════════════════════════════
-38 modula ukupno, SVI RADE
+38 modules total, ALL WORK
 
-Kvar 1 modula → 37 × 3kW × 92% = 102kW ✓
-Kvar 2 modula → 36 × 3kW × 95% = 102kW ✓
-Kvar 3 modula → 35 × 3kW × 97% = 102kW ✓
-Kvar 4 modula → 34 × 3kW × 100% = 102kW ✓
+1 module fails → 37 × 3kW × 92% = 102kW ✓
+2 modules fail → 36 × 3kW × 95% = 102kW ✓
+3 modules fail → 35 × 3kW × 97% = 102kW ✓
+4 modules fail → 34 × 3kW × 100% = 102kW ✓
 
-GRACEFUL DEGRADATION do 34 modula pre nego što padne ispod 100kW!
+GRACEFUL DEGRADATION down to 34 modules before dropping below 100kW!
 ```
 
-### Wide Striping: Ravnomerno Starenje
+### Wide Striping: Uniform Aging
 
 ```
-TRADICIONALNO - Koncentrisano Opterećenje:
+TRADITIONAL - Concentrated Load:
 ═══════════════════════════════════════════════════════════════════
 
-Potrebno 100kW od 300kW sistema:
+Need 100kW from 300kW system:
 
 ┌─────┬─────┬─────┬─────┬─────┬─────┐
-│100% │100% │100% │100% │ 0%  │ 0%  │  ← 4 rade na max, 2 spavaju
+│100% │100% │100% │100% │ 0%  │ 0%  │  ← 4 work at max, 2 sleep
 └─────┴─────┴─────┴─────┴─────┴─────┘
   M1    M2    M3    M4    M5    M6
 
-Problem: M1-M4 stare brže, M5-M6 uopšte ne rade
-Posle 5 godina: M1-M4 pred kraj života, M5-M6 kao novi
+Problem: M1-M4 age faster, M5-M6 don't work at all
+After 5 years: M1-M4 near end of life, M5-M6 like new
 
 
 EK3/3PAR - Wide Striping:
 ═══════════════════════════════════════════════════════════════════
 
-Potrebno 100kW od 300kW sistema:
+Need 100kW from 300kW system:
 
 ┌─────┬─────┬─────┬─────┬─────┬─────┐
-│ 33% │ 33% │ 33% │ 33% │ 33% │ 33% │  ← Svi rade podjednako
+│ 33% │ 33% │ 33% │ 33% │ 33% │ 33% │  ← All work equally
 └─────┴─────┴─────┴─────┴─────┴─────┘
   M1    M2    M3    M4    M5    M6
 
-Prednosti:
-• Ravnomerno starenje svih modula
-• Niža temperatura (manje opterećenje po modulu)
-• Duži životni vek sistema
-• Predvidljiviji maintenance
+Benefits:
+• Uniform aging of all modules
+• Lower temperature (less load per module)
+• Longer system lifespan
+• More predictable maintenance
 ```
 
-### Thin Provisioning: Dinamička Alokacija
+### Thin Provisioning: Dynamic Allocation
 
 ```
-THIN PROVISIONING ZA POWER:
+THIN PROVISIONING FOR POWER:
 ═══════════════════════════════════════════════════════════════════
 
-USE CASE: Punjač koji podržava 350kW ali retko treba toliko
+USE CASE: Charger that supports 350kW but rarely needs that much
 
-TRADICIONALNO:
-• Sve komponente dimenzionisane za 350kW
-• 90% vremena koristi se 50kW
-• Efikasnost pada pri malom opterećenju
+TRADITIONAL:
+• All components sized for 350kW
+• 90% of time uses 50kW
+• Efficiency drops at low load
 
 EK3/3PAR:
-• 117 modula instalirana (351kW potencijal)
-• Pri 50kW: Samo 17 modula aktivno, ostali u sleep
-• Pri 200kW: 67 modula aktivno
-• Pri 350kW: Svih 117 aktivno
+• 117 modules installed (351kW potential)
+• At 50kW: Only 17 modules active, rest in sleep
+• At 200kW: 67 modules active
+• At 350kW: All 117 active
 
-Prednosti:
-• Svaki aktivan modul radi na optimalnom opterećenju
-• Neaktivni moduli: Minimalna potrošnja
-• Efikasnost >97% bez obzira na load
+Benefits:
+• Each active module operates at optimal load
+• Inactive modules: Minimal consumption
+• Efficiency >97% regardless of load
 ```
 
-### Zaključak: Dokazani Koncept
+### Conclusion: Proven Concept
 
 ```
-3PAR JE DOKAZAO DA OVO RADI:
+3PAR PROVED THIS WORKS:
 ═══════════════════════════════════════════════════════════════════
 
-• 2002: 3PAR uvodi chunklet arhitekturu
-• Storage industrija: "Nemoguće, previše kompleksno"
-• 2010: HP kupuje 3PAR za $2.35 milijarde
-• 2024: HPE Primera/Alletra - industrijski standard
+• 2002: 3PAR introduces chunklet architecture
+• Storage industry: "Impossible, too complex"
+• 2010: HP buys 3PAR for $2.35 billion
+• 2024: HPE Primera/Alletra - industry standard
 
-ISTA LOGIKA ZA EV PUNJAČE:
-• Umesto chunklet-a: EK3 modul (3kW)
-• Umesto wide striping: Load distribution preko svih modula
-• Umesto thin provisioning: Sleep mode za neaktivne module
-• Umesto distributed sparing: Rezerva u svakom modulu, ne hot-spare
+SAME LOGIC FOR EV CHARGERS:
+• Instead of chunklets: EK3 module (3kW)
+• Instead of wide striping: Load distribution across all modules
+• Instead of thin provisioning: Sleep mode for inactive modules
+• Instead of distributed sparing: Reserve in each module, not hot-spare
 
-AKO RADI ZA STORAGE, RADI I ZA POWER ELECTRONICS!
+IF IT WORKS FOR STORAGE, IT WORKS FOR POWER ELECTRONICS!
 ```
 
 ---
 
-## Ekonomija: Zašto je Jeftinije
+## Economics: Why It's Cheaper
 
 ### Cost Breakdown
 
 ```
-COST ANALYSIS: 1 MW SISTEM
+COST ANALYSIS: 1 MW SYSTEM
 ════════════════════════════════════════════════════════════════
 
-TRADICIONALNO (10 × 100kW specijalizovanih modula):
+TRADITIONAL (10 × 100kW specialized modules):
 ─────────────────────────────────────────────────
-100kW modul (custom dizajn):     €8,000 × 10 = €80,000
+100kW module (custom design):     €8,000 × 10 = €80,000
 Rack/enclosure (custom):                       €15,000
 Control system:                                €10,000
 Installation:                                  €10,000
@@ -607,48 +607,48 @@ TOTAL:                                        €115,000
 
 ELEKTROKOMBINACIJA (303 × EK3 @ 3.3kW, mass-produced):
 ─────────────────────────────────────────────────
-EK3 modul (@10k volume):           €150 × 303 = €45,450
+EK3 module (@10k volume):           €150 × 303 = €45,450
 Custom racks (4×):                  €3,000 × 4 = €12,000
 Backplanes + PFC (4×):              €2,000 × 4 = €8,000
 Control system (CAN-FD):                       = €5,000
-Robot B (amortizovan):              €15,000/10 = €1,500
+Robot B (amortized):                €15,000/10 = €1,500
 Installation:                                  = €5,000
 ─────────────────────────────────────────────────
 TOTAL:                                         €76,950
 
-UŠTEDA: 33%!
+SAVINGS: 33%!
 
 PLUS:
-• Maintenance cost: -70% (robot vs tehničar)
-• Spare parts inventory: -80% (jedan tip modula)
-• Downtime cost: -90% (40 sec vs 2-5 dana)
+• Maintenance cost: -70% (robot vs technician)
+• Spare parts inventory: -80% (one module type)
+• Downtime cost: -90% (40 sec vs 2-5 days)
 ```
 
 ### Economies of Scale
 
 ```
-EK3 CENA vs KOLIČINA:
+EK3 PRICE vs QUANTITY:
 ════════════════════════════════════════════════════════════════
 
-GODIŠNJA PROIZVODNJA     CENA PO MODULU     NAPOMENA
+ANNUAL PRODUCTION         PRICE PER MODULE     NOTE
 ─────────────────────────────────────────────────────────────
-1,000 modula             €300               Prototip/pilot
-10,000 modula            €150               Mala serija
-100,000 modula           €80                Srednja serija
-1,000,000 modula         €50                Masovna proizvodnja
+1,000 modules             €300               Prototype/pilot
+10,000 modules            €150               Small series
+100,000 modules           €80                Medium series
+1,000,000 modules         €50                Mass production
 
-SA 1M MODULA GODIŠNJE:
-• 1 MW stanica = 303 × €50 = €15,150 za module!
-• Plus rack/control = ~€35,000 TOTAL za 1 MW sistem
-• To je €35/kW (industrija: €100-150/kW)
+WITH 1M MODULES PER YEAR:
+• 1 MW station = 303 × €50 = €15,150 for modules!
+• Plus rack/control = ~€35,000 TOTAL for 1 MW system
+• That's €35/kW (industry: €100-150/kW)
 ```
 
 ---
 
-## Integracija sa Swap Station
+## Integration with Swap Station
 
 ```
-SWAP STATION + RACK SISTEM
+SWAP STATION + RACK SYSTEM
 ════════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -675,153 +675,153 @@ SWAP STATION + RACK SISTEM
 │   └─────────────────────────────────────────────────────┘  │
 │                                                             │
 │   WORKFLOW:                                                 │
-│   1. Bus dolazi → Battery swap robot menja bateriju        │
-│   2. ISTOVREMENO: EK3 robot menja module koji treba        │
-│   3. Bus odlazi, charging sistem 100%                      │
+│   1. Bus arrives → Battery swap robot changes battery      │
+│   2. SIMULTANEOUSLY: EK3 robot swaps modules as needed     │
+│   3. Bus departs, charging system at 100%                  │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Custom Rack Koncept
+## Custom Rack Concept
 
-### Zašto ne standardni 19" rack?
+### Why Not Standard 19" Rack?
 
 ```
-IZAZOVI SA 19" TELECOM RACK-OM:
+CHALLENGES WITH 19" TELECOM RACK:
 ════════════════════════════════════════════════════════════════
 
-1. TERMALNO UPRAVLJANJE
-   • 84 modula × 3.3kW = 277 kW u jednom rack-u
-   • ~11 kW disipacije toplote (pri 96% efikasnosti)
-   • Standardni 19" rack NIJE dizajniran za ovakvu gustinu
-   • Potreban optimizovan airflow path
+1. THERMAL MANAGEMENT
+   • 84 modules × 3.3kW = 277 kW in one rack
+   • ~11 kW heat dissipation (at 96% efficiency)
+   • Standard 19" rack NOT designed for such density
+   • Need optimized airflow path
 
 2. FORM FACTOR MISMATCH
-   • EK3 modul: 200×320×44mm (1U half-width)
-   • 19" rack: 482mm širina
-   • Samo 2 modula po redu (ne 4)
-   • Gubimo gustinu
+   • EK3 module: 200×320×44mm (1U half-width)
+   • 19" rack: 482mm width
+   • Only 2 modules per row (not 4)
+   • Lose density
 
-3. ROBOT PRISTUP
-   • 19" rack je dizajniran za ljudski pristup
-   • Robot treba drugačije clearance i alignment
+3. ROBOT ACCESS
+   • 19" rack is designed for human access
+   • Robot needs different clearance and alignment
 
-4. BACKPLANE DIZAJN
-   • Custom blind-mate konektori
+4. BACKPLANE DESIGN
+   • Custom blind-mate connectors
    • Sequenced power mating
-   • Ne uklapa se u standardni 19" format
+   • Doesn't fit standard 19" format
 ```
 
-### Predloženi Custom Rack
+### Proposed Custom Rack
 
 ```
 ELEKTROKOMBINACIJA CUSTOM RACK:
 ════════════════════════════════════════════════════════════════
 
-DIMENZIJE (TBD nakon termalnog modelovanja):
-• Širina: ~900mm (za 4× 200mm modula + spacing)
-• Dubina: ~500mm (modul 320mm + airflow plenum)
-• Visina: ~1200mm (kompaktniji od 42U)
+DIMENSIONS (TBD after thermal modeling):
+• Width: ~900mm (for 4× 200mm modules + spacing)
+• Depth: ~500mm (module 320mm + airflow plenum)
+• Height: ~1200mm (more compact than 42U)
 
-TERMALNI DIZAJN:
+THERMAL DESIGN:
 • Front-to-back airflow
-• Integrisani fans u plenumu
-• Filter sa lakim pristupom
-• Optional: Liquid cooling za DC bus
+• Integrated fans in plenum
+• Filter with easy access
+• Optional: Liquid cooling for DC bus
 
-ROBOT OPTIMIZACIJA:
-• Širi horizontalni spacing za gripper
-• Vertikalni alignment rails
-• Standardizovane pozicije za sve module
-• LED markeri za vizuelnu navigaciju
+ROBOT OPTIMIZATION:
+• Wider horizontal spacing for gripper
+• Vertical alignment rails
+• Standardized positions for all modules
+• LED markers for visual navigation
 
-MODULARNI BACKPLANE:
+MODULAR BACKPLANE:
 • Custom PCB backplane
-• 20-pin blind-mate data konektori
+• 20-pin blind-mate data connectors
 • Sequenced power mating (GND first)
-• CAN-FD hub integrisan
+• CAN-FD hub integrated
 
-CENTRALNI PFC:
-• Modularan PFC (za redundanciju)
+CENTRAL PFC:
+• Modular PFC (for redundancy)
 • AC input: 400V 3-phase
 • DC bus: 650V
-• Može biti u istom ili odvojenom rack-u
+• Can be in same or separate rack
 ```
 
-### Faze Razvoja Custom Rack-a
+### Custom Rack Development Phases
 
 ```
-FAZA 1: Termalno Modelovanje
+PHASE 1: Thermal Modeling
 ─────────────────────────────────────────────────
-• CFD simulacija airflow-a
-• Definisanje max thermal density
-• Optimizacija fan placement-a
+• CFD simulation of airflow
+• Define max thermal density
+• Optimize fan placement
 
-FAZA 2: Mehanički Dizajn
+PHASE 2: Mechanical Design
 ─────────────────────────────────────────────────
-• CAD modelovanje
-• Robot gripper clearance analiza
-• Prototip frame strukture
+• CAD modeling
+• Robot gripper clearance analysis
+• Prototype frame structure
 
-FAZA 3: Električki Dizajn
+PHASE 3: Electrical Design
 ─────────────────────────────────────────────────
 • Backplane PCB
 • DC bus distribution
 • CAN-FD wiring
 
-FAZA 4: Integracija
+PHASE 4: Integration
 ─────────────────────────────────────────────────
-• Pilot rack sa 12-24 modula
-• Robot swap testiranje
-• Termalno testiranje pod loadom
+• Pilot rack with 12-24 modules
+• Robot swap testing
+• Thermal testing under load
 ```
 
 ---
 
-## Zaključak: Zašto EK3-Only Arhitektura Pobeđuje
+## Conclusion: Why EK3-Only Architecture Wins
 
 ```
 SUMMARY:
 ════════════════════════════════════════════════════════════════
 
-✓ JEDAN DIZAJN za sve - od 3.3 kW do 3 MW
-✓ MASOVNA PROIZVODNJA - cena pada, kvalitet raste
-✓ GRANULARNA POUZDANOST - 0.33% gubitak po kvaru, ne 10%
-✓ ROBOT ZAMENA - 40 sekundi, ne 2-5 dana
-✓ UNIVERSAL INVENTORY - jedan tip rezervnog dela
-✓ GRACEFUL DEGRADATION - sistem nikad "pao"
-✓ NIŽA CENA - 33%+ ušteda na hardveru
-✓ CIRCULAR ECONOMY - moduli se popravljaju i vraćaju
-✓ CUSTOM RACK - optimizovan za termiku i robotsku zamenu
+✓ ONE DESIGN for all - from 3.3 kW to 3 MW
+✓ MASS PRODUCTION - price drops, quality increases
+✓ GRANULAR RELIABILITY - 0.33% loss per failure, not 10%
+✓ ROBOT REPLACEMENT - 40 seconds, not 2-5 days
+✓ UNIVERSAL INVENTORY - one type of spare part
+✓ GRACEFUL DEGRADATION - system never "down"
+✓ LOWER COST - 33%+ hardware savings
+✓ CIRCULAR ECONOMY - modules repaired and returned
+✓ CUSTOM RACK - optimized for thermal and robotic swap
 
-OVO JE NOVA PARADIGMA:
-Ne "koliko kW po modulu" nego "koliko modula po kW"
+THIS IS A NEW PARADIGM:
+Not "how many kW per module" but "how many modules per kW"
 
-SPECIFIKACIJE EK3:
-• Snaga: 3.3 kW continuous, 3.6 kW peak
-• Dimenzije: 200×320×44mm (1U half-width)
-• Masa: 3.5 kg
+EK3 SPECIFICATIONS:
+• Power: 3.3 kW continuous, 3.6 kW peak
+• Dimensions: 200×320×44mm (1U half-width)
+• Mass: 3.5 kg
 • SiC: 900V Wolfspeed
-• Komunikacija: CAN-FD @ 5 Mbps
+• Communication: CAN-FD @ 5 Mbps
 • MCU: STM32G474 (Cortex-M4)
-• Efikasnost: >96% peak, >94% @ 50% load
+• Efficiency: >96% peak, >94% @ 50% load
 ```
 
 ---
 
-## Sledeći Koraci
+## Next Steps
 
-1. **Custom rack termalno modelovanje** - CFD simulacija
-2. **Backplane PCB dizajn** - 20-pin konektori + CAN-FD
-3. **Robot B prototip** - custom gripper za EK3
-4. **Centralni PFC dizajn** - modularan za redundanciju
-5. **Pilot rack** - 1 rack = 24 modula = 79 kW demo
+1. **Custom rack thermal modeling** - CFD simulation
+2. **Backplane PCB design** - 20-pin connectors + CAN-FD
+3. **Robot B prototype** - custom gripper for EK3
+4. **Central PFC design** - modular for redundancy
+5. **Pilot rack** - 1 rack = 24 modules = 79 kW demo
 
 ---
 
-## Datum
+## Date
 
-Kreirano: Januar 2026
-Status: Koncept
+Created: January 2026
+Status: Concept

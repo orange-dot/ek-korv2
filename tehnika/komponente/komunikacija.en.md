@@ -1,11 +1,11 @@
-# Komunikacijski Protokoli za EV Punjače
+# Communication Protocols for EV Chargers
 
-## 1. Pregled Komunikacijske Arhitekture
+## 1. Communication Architecture Overview
 
-### 1.1 Komunikacijski Slojevi
+### 1.1 Communication Layers
 
 ```
-Hijerarhija Komunikacije u EV Punjenju:
+Communication Hierarchy in EV Charging:
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                     CLOUD / BACKEND                             │
@@ -34,9 +34,9 @@ Hijerarhija Komunikacije u EV Punjenju:
 │  └─────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 
-Protokoli po Slojevima:
+Protocols by Layer:
 
-│ Sloj                    │ Protokol              │ Medijum       │
+│ Layer                   │ Protocol              │ Medium        │
 ├─────────────────────────┼───────────────────────┼───────────────┤
 │ Cloud ↔ Station         │ OCPP 1.6/2.0          │ 4G/Ethernet   │
 │ Station ↔ Power Module  │ CAN / Modbus          │ Twisted pair  │
@@ -47,44 +47,44 @@ Protokoli po Slojevima:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.2 Standardi za EV Punjenje
+### 1.2 EV Charging Standards
 
 ```
-Ključni Standardi:
+Key Standards:
 
-IEC 61851-1: Opšti zahtevi za EV punjenje
-    └── Definira signalizaciju, bezbednost, konektore
+IEC 61851-1: General requirements for EV charging
+    └── Defines signaling, safety, connectors
 
 IEC 61851-23: DC charging (CHAdeMO, CCS, GB/T)
-    └── Specifičnosti za DC fast charging
+    └── Specifics for DC fast charging
 
-IEC 61851-24: Digitalna komunikacija za DC
-    └── Kontrolni protokol za DC punjenje
+IEC 61851-24: Digital communication for DC
+    └── Control protocol for DC charging
 
-ISO 15118: Komunikacija vozilo-mreža (V2G)
-    ├── Part 1: Opšte definicije
-    ├── Part 2: Mrežni i aplikacijski protokol
-    ├── Part 3: Fizički sloj i data link (PLC)
-    ├── Part 4: Zahtevi za umrežavanje
-    ├── Part 8: Wireless (WiFi baziran)
+ISO 15118: Vehicle-to-Grid communication (V2G)
+    ├── Part 1: General definitions
+    ├── Part 2: Network and application protocol
+    ├── Part 3: Physical layer and data link (PLC)
+    ├── Part 4: Networking requirements
+    ├── Part 8: Wireless (WiFi based)
     └── Part 20: 2nd generation (ISO 15118-20)
 
-CHAdeMO: Japanski standard za DC (verzije 0.9-3.0)
+CHAdeMO: Japanese standard for DC (versions 0.9-3.0)
 
-GB/T: Kineski standard (GB/T 27930)
+GB/T: Chinese standard (GB/T 27930)
 
 OCPP (Open Charge Point Protocol):
-    ├── OCPP 1.6: Najrasprostranjeniji
-    ├── OCPP 2.0: Novi, sa ISO 15118 podrškom
-    └── OCPP 2.0.1: Trenutno aktuelna verzija
+    ├── OCPP 1.6: Most widespread
+    ├── OCPP 2.0: New, with ISO 15118 support
+    └── OCPP 2.0.1: Currently active version
 ```
 
-## 2. IEC 61851-1: Osnovna Signalizacija
+## 2. IEC 61851-1: Basic Signaling
 
 ### 2.1 Control Pilot (CP) Signal
 
 ```
-CP Signalizacija (PWM):
+CP Signaling (PWM):
 
     Voltage
     (V)
@@ -106,48 +106,48 @@ CP Signalizacija (PWM):
       └────────────────────────────────────► t
             1 kHz PWM
 
-Stanja CP Signala:
+CP Signal States:
 
-│ Stanje │ Pozitivna │ Negativna │ Značenje              │
+│ State  │ Positive  │ Negative  │ Meaning               │
 ├────────┼───────────┼───────────┼───────────────────────┤
-│   A    │   +12V    │    N/A    │ EV nije konektovan    │
-│   B    │   +9V     │   -12V    │ EV konektovan, ne puni│
-│   C    │   +6V     │   -12V    │ EV puni, bez ventil.  │
-│   D    │   +3V     │   -12V    │ EV puni, sa ventil.   │
-│   E    │    0V     │    0V     │ Greška                │
-│   F    │   -12V    │   -12V    │ EVSE nije dostupan    │
+│   A    │   +12V    │    N/A    │ EV not connected      │
+│   B    │   +9V     │   -12V    │ EV connected, not chg │
+│   C    │   +6V     │   -12V    │ EV charging, no vent. │
+│   D    │   +3V     │   -12V    │ EV charging, w/ vent. │
+│   E    │    0V     │    0V     │ Error                 │
+│   F    │   -12V    │   -12V    │ EVSE not available    │
 
-Duty Cycle → Max Struja:
+Duty Cycle → Max Current:
 
-│ Duty Cycle  │ Max Struja (A)                    │
+│ Duty Cycle  │ Max Current (A)                    │
 ├─────────────┼───────────────────────────────────┤
 │ 10%         │ 6 A                               │
-│ 16%         │ 10 A (min za ISO 15118 HLC)       │
+│ 16%         │ 10 A (min for ISO 15118 HLC)      │
 │ 25%         │ 16 A                              │
 │ 50%         │ 32 A                              │
 │ 80%         │ 51 A                              │
 │ 90%         │ 57 A                              │
-│ 96%         │ 80 A (max za AC Mode 3)           │
+│ 96%         │ 80 A (max for AC Mode 3)          │
 │ 5%          │ Digital communication mode (HLC)  │
 
 Formula:
-I (A) = Duty Cycle (%) × 0.6    (za DC ≤ 85%)
-I (A) = (Duty Cycle - 64) × 2.5  (za DC > 85%)
+I (A) = Duty Cycle (%) × 0.6    (for DC ≤ 85%)
+I (A) = (Duty Cycle - 64) × 2.5  (for DC > 85%)
 ```
 
 ### 2.2 Proximity Pilot (PP)
 
 ```
-PP Signal za Cable Rating:
+PP Signal for Cable Rating:
 
-PP Pin Otpori i Kapaciteti:
+PP Pin Resistors and Capacities:
 
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
 │   EVSE ──────┬───────────────────────────────── Connector  │
 │              │                                              │
 │         ┌────┴────┐                                         │
-│         │  R_pp   │  Otpor koji određuje kapacitet kabla   │
+│         │  R_pp   │  Resistor determining cable capacity   │
 │         └────┬────┘                                         │
 │              │                                              │
 │             GND                                             │
@@ -160,12 +160,12 @@ PP Pin Otpori i Kapaciteti:
 │ 680         │ 20 A             │ 4                   │
 │ 1500        │ 13 A             │ 2.5                 │
 
-PP za DC punjenje (CCS):
-- Koristi se za button detection (disconnection)
-- Nije za cable rating (DC kabel fiksiran)
+PP for DC charging (CCS):
+- Used for button detection (disconnection)
+- Not for cable rating (DC cable is fixed)
 ```
 
-### 2.3 Hardverska Implementacija
+### 2.3 Hardware Implementation
 
 ```
 CP Signal Generator:
@@ -208,15 +208,15 @@ CP State Detection:
                      MCU
               (State Machine)
 
-Komponente:
-- OP-AMP: LM358 ili TL072 (rail-to-rail preferirano)
-- Comparator za peak detection: LM393
-- Voltage divider: 10:1 za ADC kompatibilnost
+Components:
+- OP-AMP: LM358 or TL072 (rail-to-rail preferred)
+- Comparator for peak detection: LM393
+- Voltage divider: 10:1 for ADC compatibility
 ```
 
 ## 3. ISO 15118: High-Level Communication
 
-### 3.1 Pregled ISO 15118
+### 3.1 ISO 15118 Overview
 
 ```
 ISO 15118 Stack:
@@ -313,16 +313,16 @@ Charging Session Flow (DC Fast Charging):
        │◄───── SessionStopRes ─────────────────│
        │                                        │
 
-Timing zahtevi:
+Timing requirements:
 - SLAC: <10 s
 - V2G message response: <2 s
 - CurrentDemand cycle: 50-250 ms
 ```
 
-### 3.3 ISO 15118-20: Druga Generacija
+### 3.3 ISO 15118-20: Second Generation
 
 ```
-Nove Funkcije u ISO 15118-20:
+New Features in ISO 15118-20:
 
 1. Bidirectional Power Transfer (BPT):
    - V2G (Vehicle to Grid)
@@ -335,7 +335,7 @@ Nove Funkcije u ISO 15118-20:
    - Contract certificates
 
 3. AC Bidirectional:
-   - Podrška za trofazno AC V2G
+   - Support for three-phase AC V2G
 
 4. Wireless Charging:
    - ISO 15118-20 + SAE J2954
@@ -366,10 +366,10 @@ ISO 15118-20 (Simplified, more structured):
 ### 3.4 PLC Hardware
 
 ```
-HomePlug GreenPHY Implementacija:
+HomePlug GreenPHY Implementation:
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                    PLC MODEM (EVSE strana)                      │
+│                    PLC MODEM (EVSE side)                        │
 │                                                                 │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐         │
 │  │    MCU      │SPI │    PLC      │    │  Coupling   │         │
@@ -386,19 +386,19 @@ PLC Modem Chips:
    - SPI/UART interface
    - Integrated MAC/PHY
    - ISO 15118-3 compliant
-   - Cena: ~$15-20
+   - Price: ~$15-20
 
 2. Lumissil IS2062G:
    - Green PHY v1.1
    - SLAC support
    - Lower cost alternative
-   - Cena: ~$10-12
+   - Price: ~$10-12
 
 3. I2SE Modules (PLC Stamp):
    - QCA7000 based modules
    - Ready-to-use solutions
    - Development kits available
-   - Cena: ~€80-100 (dev kit)
+   - Price: ~€80-100 (dev kit)
 
 Coupling Circuit:
 
@@ -424,10 +424,10 @@ Coupling Circuit:
 
 ## 4. OCPP (Open Charge Point Protocol)
 
-### 4.1 OCPP Arhitektura
+### 4.1 OCPP Architecture
 
 ```
-OCPP Komunikacija:
+OCPP Communication:
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
@@ -449,9 +449,9 @@ OCPP Komunikacija:
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 
-OCPP Verzije:
+OCPP Versions:
 
-│ Verzija │ Transport     │ Encoding │ Features            │
+│ Version │ Transport     │ Encoding │ Features            │
 ├─────────┼───────────────┼──────────┼─────────────────────┤
 │ 1.5     │ SOAP/HTTP     │ XML      │ Basic               │
 │ 1.6     │ WebSocket     │ JSON     │ Smart Charging      │
@@ -460,22 +460,22 @@ OCPP Verzije:
 │ 2.1     │ WebSocket     │ JSON     │ V2G, ISO 15118-20   │
 ```
 
-### 4.2 OCPP 1.6 Poruke
+### 4.2 OCPP 1.6 Messages
 
 ```
-Ključne OCPP 1.6 Poruke:
+Key OCPP 1.6 Messages:
 
-1. Core Profile (obavezne):
+1. Core Profile (mandatory):
 ┌────────────────────────────────────────────────────────────┐
-│ Poruka              │ Smer     │ Opis                      │
+│ Message             │ Direction│ Description               │
 ├─────────────────────┼──────────┼───────────────────────────┤
-│ Authorize           │ CP→CSMS  │ Provera autorizacije      │
+│ Authorize           │ CP→CSMS  │ Authorization check       │
 │ BootNotification    │ CP→CSMS  │ Startup, capabilities     │
-│ Heartbeat           │ CP→CSMS  │ Keep-alive (svaka 5 min)  │
-│ MeterValues         │ CP→CSMS  │ Energija, snaga, itd.     │
-│ StartTransaction    │ CP→CSMS  │ Početak punjenja          │
-│ StopTransaction     │ CP→CSMS  │ Kraj punjenja             │
-│ StatusNotification  │ CP→CSMS  │ Status promene            │
+│ Heartbeat           │ CP→CSMS  │ Keep-alive (every 5 min)  │
+│ MeterValues         │ CP→CSMS  │ Energy, power, etc.       │
+│ StartTransaction    │ CP→CSMS  │ Charging start            │
+│ StopTransaction     │ CP→CSMS  │ Charging end              │
+│ StatusNotification  │ CP→CSMS  │ Status changes            │
 │ DataTransfer        │ ↔        │ Vendor-specific           │
 │ ChangeAvailability  │ CSMS→CP  │ Enable/disable connector  │
 │ ChangeConfiguration │ CSMS→CP  │ Update settings           │
@@ -500,24 +500,24 @@ Ključne OCPP 1.6 Poruke:
 └────────────────────────────────────────────────────────────┘
 ```
 
-### 4.3 OCPP 2.0.1 Novosti
+### 4.3 OCPP 2.0.1 Improvements
 
 ```
-OCPP 2.0.1 Poboljšanja:
+OCPP 2.0.1 Enhancements:
 
 1. Device Model:
-   - Hijerarhijski model komponenti
-   - EVSE → Connector struktura
-   - Standardizovane varijable
+   - Hierarchical component model
+   - EVSE → Connector structure
+   - Standardized variables
 
 2. Security:
-   - TLS 1.2/1.3 obavezan
+   - TLS 1.2/1.3 mandatory
    - Client certificates
    - Security events/logging
 
-3. ISO 15118 Integracija:
+3. ISO 15118 Integration:
    ┌─────────────────────────────────────────────────────┐
-   │ Poruka                  │ Opis                      │
+   │ Message                  │ Description              │
    ├─────────────────────────┼───────────────────────────┤
    │ Get15118EVCertificate   │ Certificate installation  │
    │ DeleteCertificate       │ Certificate management    │
@@ -526,17 +526,17 @@ OCPP 2.0.1 Poboljšanja:
    └─────────────────────────────────────────────────────┘
 
 4. Smart Charging Enhanced:
-   - Prioretizacija profila
+   - Profile prioritization
    - Cost-based charging
    - V2G preparation
 
 5. Transaction Handling:
    - TransactionEvent (unified)
-   - Detaljniji status reporting
+   - More detailed status reporting
 
-OCPP 2.0.1 Primer Poruke (JSON):
+OCPP 2.0.1 Message Example (JSON):
 
-// StartTransaction equivalent u 2.0.1
+// StartTransaction equivalent in 2.0.1
 {
   "transactionId": "TX001",
   "eventType": "Started",
@@ -563,7 +563,7 @@ OCPP 2.0.1 Primer Poruke (JSON):
 }
 ```
 
-### 4.4 OCPP Implementacija
+### 4.4 OCPP Implementation
 
 ```
 Software Libraries:
@@ -586,7 +586,7 @@ Software Libraries:
    npm install ocpp-js
 
 3. Java: Java-OCA-OCPP
-   Maven: com.infuse-ev:java-oca-ocpp
+   Maven: com.infuse-ev/java-oca-ocpp
 
 4. C/C++: libocpp (Everest)
    Open source, production ready
@@ -594,7 +594,7 @@ Software Libraries:
 
 CSMS Backend Options:
 
-│ Rešenje        │ Tip        │ Cena          │ Features        │
+│ Solution       │ Type       │ Price         │ Features        │
 ├────────────────┼────────────┼───────────────┼─────────────────┤
 │ SteVe          │ Open source│ Free          │ Basic, 1.6      │
 │ Everest        │ Open source│ Free          │ Advanced, 2.0   │
@@ -607,7 +607,7 @@ CSMS Backend Options:
 
 ## 5. CHAdeMO Protocol
 
-### 5.1 CHAdeMO Komunikacija
+### 5.1 CHAdeMO Communication
 
 ```
 CHAdeMO CAN Communication:
@@ -639,7 +639,7 @@ CHAdeMO CAN Messages:
 │ 0x109  │ EVSE   │ Present voltage, current, status             │
 └────────────────────────────────────────────────────────────────┘
 
-Primer CAN Poruke (0x101 - EV Request):
+CAN Message Example (0x101 - EV Request):
 
 Byte │ Content                    │ Resolution
 ─────┼────────────────────────────┼───────────
@@ -653,7 +653,7 @@ Byte │ Content                    │ Resolution
  7   │ Reserved                   │
 ```
 
-### 5.2 CHAdeMO Sekvenca
+### 5.2 CHAdeMO Sequence
 
 ```
 Charging Sequence:
@@ -699,14 +699,14 @@ Charging Sequence:
 ```
 CHAdeMO 3.0 / ChaoJi:
 
-Collaboration između CHAdeMO Association i China Electricity
-Council za novi globalni standard.
+Collaboration between CHAdeMO Association and China Electricity
+Council for a new global standard.
 
-Karakteristike:
-- Max 900 kW (do 1500V / 600A)
-- Novi konektor dizajn (manji, lakši)
-- Unapređena komunikacija
-- Kompatibilnost sa starim CHAdeMO
+Characteristics:
+- Max 900 kW (up to 1500V / 600A)
+- New connector design (smaller, lighter)
+- Enhanced communication
+- Backward compatibility with old CHAdeMO
 
          CHAdeMO 2.0          CHAdeMO 3.0/ChaoJi
          ───────────          ──────────────────
@@ -719,12 +719,12 @@ Communication: CAN               CAN + PLC option
 Status: Pilot deployments 2024+
 ```
 
-## 6. CAN Bus Interno
+## 6. Internal CAN Bus
 
-### 6.1 Interna CAN Arhitektura
+### 6.1 Internal CAN Architecture
 
 ```
-CAN-FD Bus unutar Punjača:
+CAN-FD Bus inside Charger:
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
@@ -741,7 +741,7 @@ CAN-FD Bus unutar Punjača:
 │   │  │Module 1 │       │Module 2 │    ...    │  Ctrl    │     │
 │   │  └─────────┘       └─────────┘           └──────────┘     │
 │   │                                                            │
-│   │  Terminacija                          Terminacija          │
+│   │  Termination                          Termination          │
 │   │     ├═══════════════════════════════════════┤             │
 │   │    120Ω                                    120Ω            │
 │   │                                                            │
@@ -764,12 +764,12 @@ CAN Message Allocation:
 │ 0x700-0x7FF│ Bootloader                 │ On demand│
 ```
 
-### 6.2 CANopen za Punjače
+### 6.2 CANopen for Chargers
 
 ```
 CANopen Object Dictionary:
 
-Standard objects za EV charger:
+Standard objects for EV charger:
 
 │ Index  │ Name                      │ Access │
 ├────────┼───────────────────────────┼────────┤
@@ -798,35 +798,35 @@ RPDO1: Voltage SP, Current SP (event-driven)
 ### 6.3 CAN-FD Hardware
 
 ```
-CAN-FD Transceiver Selection (PREPORUČENO za EK3):
+CAN-FD Transceiver Selection (RECOMMENDED for EK3):
 
-1. NXP TJA1443 (PREPORUČENO):
-   - CAN-FD, do 5 Mbps
+1. NXP TJA1443 (RECOMMENDED):
+   - CAN-FD, up to 5 Mbps
    - -40°C to +150°C
    - AEC-Q100 qualified
    - Standby mode: <5 μA
    - Bus fault protection
-   - Cena: ~$1.8
+   - Price: ~$1.8
 
 2. Infineon TLE9250:
    - CAN-FD, 8 Mbps (headroom)
    - Integrated ESD protection
    - Wake patterns
-   - Cena: ~$2
+   - Price: ~$2
 
 3. Texas Instruments TCAN1044:
    - CAN-FD, 5 Mbps
    - -40°C to +125°C
    - Low quiescent current
-   - Cena: ~$1.6
+   - Price: ~$1.6
 
-LEGACY (za CHAdeMO/external):
+LEGACY (for CHAdeMO/external):
 
 4. NXP TJA1042:
    - CAN 2.0, 1 Mbps
-   - Industry standard za vehicle comms
+   - Industry standard for vehicle comms
    - AEC-Q100 qualified
-   - Cena: ~$1.2
+   - Price: ~$1.2
 
 CAN Isolation:
 
@@ -845,14 +845,14 @@ CAN Isolation:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 7. Ethernet i Cloud Komunikacija
+## 7. Ethernet and Cloud Communication
 
-### 7.1 Ethernet Interfejs
+### 7.1 Ethernet Interface
 
 ```
-Ethernet za OCPP i dijagnostiku:
+Ethernet for OCPP and diagnostics:
 
-Opcije:
+Options:
 1. Integrated MAC (STM32H7, etc.)
 2. SPI-to-Ethernet (W5500)
 3. Industrial Ethernet module
@@ -867,16 +867,16 @@ W5500 Module Setup:
 │   │    │       │ Hardware │       │       │                 │
 │   └────┘       └──────────┘       └──────┘                 │
 │                                                             │
-│   Prednosti:                                                │
+│   Advantages:                                               │
 │   - Offloaded TCP/IP stack                                  │
 │   - Hardware socket management                              │
 │   - SPI: 80 MHz, ~25 Mbps                                  │
-│   - Cena: ~$5-10 (module)                                  │
+│   - Price: ~$5-10 (module)                                  │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 
 Security Considerations:
-- TLS 1.2/1.3 za OCPP
+- TLS 1.2/1.3 for OCPP
 - Firewall rules
 - VLAN segregation
 - Certificate pinning
@@ -885,24 +885,24 @@ Security Considerations:
 ### 7.2 Cellular Connectivity
 
 ```
-4G/LTE Modul za Remote Communication:
+4G/LTE Module for Remote Communication:
 
-Moduli:
+Modules:
 1. Quectel EC25:
    - Cat 4 LTE
    - 150 Mbps DL / 50 Mbps UL
    - GPS integrated
-   - Cena: ~$40
+   - Price: ~$40
 
 2. SIMCom SIM7600:
    - Cat 4 LTE
    - Global bands
-   - Cena: ~$35
+   - Price: ~$35
 
 3. u-blox SARA-R4:
    - LTE Cat M1 / NB-IoT
    - Low power
-   - Cena: ~$25
+   - Price: ~$25
 
 Architecture:
 ┌─────────────────────────────────────────────────────────────┐
@@ -926,13 +926,13 @@ Architecture:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 8. Bill of Materials - Komunikacija
+## 8. Bill of Materials - Communication
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ KOMUNIKACIONE KOMPONENTE (150 kW DC Punjač)                     │
+│ COMMUNICATION COMPONENTS (150 kW DC Charger)                    │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
-│ Komponenta                   │ Qty │ Jed. cena  │    Ukupno     │
+│ Component                    │ Qty │ Unit Price │    Total      │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ PLC Modem (QCA7000 module)   │  1  │    €80     │     €80       │
 │ (I2SE GreenPHY devkit)       │     │            │               │
@@ -950,34 +950,34 @@ Architecture:
 │ RFID Reader (ISO 14443)      │  1  │    €25     │     €25       │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ RS-485 Transceiver           │  2  │    €2      │     €4        │
-│ (za MID merenje)             │     │            │               │
+│ (for MID metering)           │     │            │               │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ Connectors, cables           │ set │    €30     │     €30       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ UKUPNO KOMUNIKACIJA                             │    €218       │
+│ TOTAL COMMUNICATION                             │    €218       │
 └─────────────────────────────────────────────────┴───────────────┘
 ```
 
-## 9. Zaključak
+## 9. Conclusion
 
 ```
-Preporuke za Komunikaciju:
+Communication Recommendations:
 
 1. Vehicle Communication:
-   ├── IEC 61851-1 (PWM): Obavezno - osnovna signalizacija
-   ├── ISO 15118-2: Preporučeno za CCS DC punjenje
-   ├── ISO 15118-20: Future-proof za V2G
-   └── CHAdeMO: Po potrebi za japanska vozila
+   ├── IEC 61851-1 (PWM): Mandatory - basic signaling
+   ├── ISO 15118-2: Recommended for CCS DC charging
+   ├── ISO 15118-20: Future-proof for V2G
+   └── CHAdeMO: As needed for Japanese vehicles
 
 2. Backend Communication:
-   ├── OCPP 1.6: Minimum za interoperabilnost
-   ├── OCPP 2.0.1: Za nove instalacije
-   └── OCPP 2.1: Kada V2G bude aktuelan
+   ├── OCPP 1.6: Minimum for interoperability
+   ├── OCPP 2.0.1: For new installations
+   └── OCPP 2.1: When V2G becomes relevant
 
 3. Internal Communication:
-   ├── CAN: Standard za power modules
-   ├── CANopen: Za kompleksnije sisteme
-   └── Modbus: Za legacy komponente
+   ├── CAN: Standard for power modules
+   ├── CANopen: For more complex systems
+   └── Modbus: For legacy components
 
 4. Connectivity:
    ├── 4G/LTE: Primary for remote management
@@ -985,7 +985,7 @@ Preporuke za Komunikaciju:
    └── WiFi: Optional for configuration
 
 5. Security:
-   ├── TLS 1.3 za sve mrežne konekcije
+   ├── TLS 1.3 for all network connections
    ├── Certificate management (PKI)
-   └── Secure boot za firmware integrity
+   └── Secure boot for firmware integrity
 ```

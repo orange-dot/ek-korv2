@@ -1,0 +1,19 @@
+# Credentials and secrets
+.ftp-credentials
+*.env
+.env.*
+
+# Node modules
+node_modules/
+
+# Build outputs
+web/dist/
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
