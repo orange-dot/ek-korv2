@@ -166,7 +166,7 @@ FORMAT:
 
 KRITIČNE DIMENZIJE ZA DEFINISATI:
 ─────────────────────────────────────────────────────────────
-• Modul: 100 × 300 × 44.45mm (1U) - FINALIZOVATI
+• Modul: 200 × 320 × 44mm (1U half-width) - FINALIZOVANO
 • Gripper points: Lokacija, prečnik, dubina
 • Konektor: Tip, pin count, raspored
 • Masa: Target i tolerancija
@@ -295,7 +295,7 @@ MEDIUM CLAIMS (realniji):
    by robotic means during vehicle charging operation..."
 
 NARROW CLAIMS (backup, lako dobiti):
-• "Module having dimensions of approximately 100×300×44mm
+• "Module having dimensions of approximately 200×320×44mm
    with specific connector arrangement for blind mating..."
 
 DEPENDENT CLAIMS (dodaju specifičnosti):

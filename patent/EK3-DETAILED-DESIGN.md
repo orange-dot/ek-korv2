@@ -16,8 +16,8 @@ EK3 - OSNOVNE SPECIFIKACIJE
 
 Naziv:          EK3 (ElektroKombinacija 3kW Module)
 Snaga:          3.3 kW continuous (3.6 kW peak)
-Dimenzije:      100 × 300 × 44 mm (blade server form factor)
-Masa:           ~2.5 kg
+Dimenzije:      200 × 320 × 44 mm (1U half-width, telecom style)
+Masa:           ~3.5 kg
 Efikasnost:     >96% peak, >94% @ 50% load
 Hlađenje:       Forced air (shared plenum)
 Životni vek:    >50,000 hours @ rated load
@@ -440,32 +440,39 @@ PROTECTION FEATURES
 ### 3.1 Form Factor
 
 ```
-BLADE SERVER FORM FACTOR
+1U HALF-WIDTH FORM FACTOR (Telecom Style)
 ═══════════════════════════════════════════════════════════════
 
-Inspiracija: HP ProLiant BL460c, Dell M1000e blades
+Inspiracija: Eltek Flatpack2, Delta DPR 3000, Huawei R4850
 
-Dimenzije: 100 × 300 × 44 mm (W × D × H)
+Dimenzije: 200 × 320 × 44 mm (W × D × H)
 
-       ◀────────── 300mm ──────────▶
-      ┌──────────────────────────────┐
-      │                              │ ▲
-      │     ┌──────────────────┐     │ │
-      │     │                  │     │ 44mm
-      │     │   EK3 MODULE     │     │ │
-      │     │                  │     │ ▼
-      │     └──────────────────┘     │
-      │          100mm               │
-      └──────────────────────────────┘
-              ▲
-              │
-        Connector side
-         (blind mate)
+       ◀──────────── 320mm ────────────▶
+      ┌────────────────────────────────────┐
+      │                                    │ ▲
+      │   ┌────────────────────────────┐   │ │
+      │   │                            │   │ 44mm
+      │   │       EK3 MODULE           │   │ │
+      │   │                            │   │ ▼
+      │   └────────────────────────────┘   │
+      │              200mm                 │
+      └────────────────────────────────────┘
+                      ▲
+                      │
+                Connector side
+                 (blind mate)
 
 Zašto ove dimenzije:
 • 44mm = 1U height (standardno za rack)
-• 300mm dubina - praktično za komponente
-• 100mm širina - dozvoljava gustinu + airflow
+• 320mm dubina - dovoljna za LLC transformer + caps
+• 200mm širina - 2 modula u 19" rack = 6.6kW po 1U
+• Dokazano u industriji (Eltek, Delta, Huawei koriste slično za 3kW)
+
+Rack density:
+• 19" rack: 2 modula po 1U redu
+• 6U = 12 modula = 40kW
+• 12U = 24 modula = 80kW
+• 42U full rack = 84 modula = 277kW (teoretski max)
 ```
 
 ### 3.2 Enclosure
