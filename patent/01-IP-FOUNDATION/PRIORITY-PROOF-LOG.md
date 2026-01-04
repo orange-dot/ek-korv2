@@ -87,13 +87,16 @@ Alternativa: OriginStamp blockchain
 
 ## Dokumenti Obuhvaćeni
 
-| ID | Naziv | Status |
-|----|-------|--------|
-| EK-2026-001 | Unified Modular Power Architecture | ✅ Committed |
-| EK-2026-002 | Dual-Purpose Robotic Swap Station | ✅ Committed |
-| EK-2026-003 | Distributed Power Sparing System | ✅ Committed |
-| EK-2026-004 | Fleet-Integrated Maintenance Logistics | ✅ Committed |
-| EK-2026-005 | Coordinated Dual-Robot System | ✅ NEW |
+| ID | Naziv | Datum | Status |
+|----|-------|-------|--------|
+| EK-2026-001 | Unified Modular Power Architecture | 2026-01-02 | ✅ Committed |
+| EK-2026-002 | Dual-Purpose Robotic Swap Station | 2026-01-02 | ✅ Committed |
+| EK-2026-003 | Distributed Power Sparing System | 2026-01-02 | ✅ Committed |
+| EK-2026-004 | Fleet-Integrated Maintenance Logistics | 2026-01-02 | ✅ Committed |
+| EK-2026-005 | Coordinated Dual-Robot System | 2026-01-02 | ✅ Committed |
+| EK-2026-006 | JEZGRO Microkernel (EK-RTOS) | 2026-01-03 | ✅ Committed |
+| EK-2026-007 | Decentralized V2G Control System | 2026-01-04 | ✅ NEW |
+| EK-2026-008 | V2G AI/ML Fleet Optimization | 2026-01-04 | ✅ NEW |
 
 ---
 
@@ -133,4 +136,27 @@ Witness: Marija Janjatović
 
 ---
 
-Poslednji update: 2026-01-02
+---
+
+## Dodatni Priority Dates
+
+### 2026-01-04 Commit (EK-2026-007, EK-2026-008)
+
+```
+Concepts disclosed:
+- EK-2026-007: Decentralized V2G Control System
+  - Per-module PLL and droop control
+  - Hot-swap during V2G operation
+  - ISO 15118-20 BPT integration
+
+- EK-2026-008: V2G AI/ML Fleet Optimization
+  - Grid frequency prediction (edge ML)
+  - Physics-informed battery degradation
+  - Priority-based fleet allocation
+
+Git commit: [TBD - nakon commit-a]
+```
+
+---
+
+Poslednji update: 2026-01-04

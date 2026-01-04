@@ -8,7 +8,13 @@
     "timeline": "Razvoj",
     "team": "Vizija",
     "contact": "Kontakt",
-    "simulation": "Simulacija"
+    "simulation": "Simulacija",
+    "simulations": "Simulacije",
+    "busCharging": "Punjenje autobusa",
+    "laDelivery": "LA Dostava",
+    "patent": "Patenti",
+    "internal": "Interno",
+    "jezgroDev": "JEZGRO Dev"
   },
   "simulation": {
     "title": "Simulacija Sistema",
@@ -328,8 +334,8 @@
       "success": "Poruka uspešno poslata!"
     },
     "info": {
-      "email": "bojan.janjatovic@gmail.com",
-      "address": "Vojislava Ilica 8, Kikinda, Severni Banat"
+      "email": "bojan@elektrokombinacija.com",
+      "address": "Vojislava Ilića 8, Kikinda, Srbija"
     }
   },
   "robots": {
@@ -396,5 +402,11 @@
   "footer": {
     "copyright": "© 2026 ELEKTROKOMBINACIJA. Sva prava zadržana.",
     "tagline": "Prediktivna dijagnostika za EV punjače."
+  },
+  "protected": {
+    "patentPortfolio": "Patent Portfolio",
+    "pitch": "Investitor Prezentacija",
+    "confidential": "POVERLJIVO - SAMO ZA OVLAŠĆENE",
+    "backToHome": "Nazad na početnu"
   }
 }

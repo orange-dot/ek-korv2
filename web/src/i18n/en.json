@@ -8,7 +8,13 @@
     "timeline": "Development",
     "team": "Vision",
     "contact": "Contact",
-    "simulation": "Simulation"
+    "simulation": "Simulation",
+    "simulations": "Simulations",
+    "busCharging": "Bus Charging",
+    "laDelivery": "LA Delivery",
+    "patent": "Patents",
+    "internal": "Internal",
+    "jezgroDev": "JEZGRO Dev"
   },
   "simulation": {
     "title": "System Simulation",
@@ -398,8 +404,8 @@
       "success": "Message sent successfully!"
     },
     "info": {
-      "email": "bojan.janjatovic@gmail.com",
-      "address": "Vojislava Ilica 8, Kikinda, North Banat, Serbia"
+      "email": "bojan@elektrokombinacija.com",
+      "address": "Vojislava Ilića 8, Kikinda, Serbia"
     }
   },
   "robots": {
@@ -466,5 +472,11 @@
   "footer": {
     "copyright": "© 2026 ELEKTROKOMBINACIJA. All rights reserved.",
     "tagline": "Predictive diagnostics for EV chargers."
+  },
+  "protected": {
+    "patentPortfolio": "Patent Portfolio",
+    "pitch": "Investor Presentation",
+    "confidential": "CONFIDENTIAL - AUTHORIZED RECIPIENTS ONLY",
+    "backToHome": "Back to home"
   }
 }

@@ -22,10 +22,11 @@ function getStateColor(state) {
 
 export default function BusMarker({ bus }) {
   const markerRef = useRef(null);
-  const { routes, selectItem, selectedItem } = useSimulation();
+  const { routes, selectItem, selectedItem, pendingDecision } = useSimulation();
 
   const route = routes.find(r => r.id === bus.routeId);
   const isSelected = selectedItem?.type === 'bus' && selectedItem?.id === bus.id;
+  const hasPendingDecision = pendingDecision?.busId === bus.id;
   const position = route ? interpolatePosition(route, bus.progress) : [44.815, 20.46];
 
   // Update marker position
@@ -47,6 +48,7 @@ export default function BusMarker({ bus }) {
 
     // Selection ring color
     const selectionColor = '#fbbf24'; // amber/gold for selection
+    const alertColor = '#f97316'; // orange for pending decision
 
     return L.divIcon({
       className: 'bus-marker-icon',
@@ -56,10 +58,42 @@ export default function BusMarker({ bus }) {
           width: 48px;
           height: 56px;
         ">
+          <!-- Pending decision alert indicator -->
+          ${hasPendingDecision ? `
+            <div style="
+              position: absolute;
+              top: -35px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+              color: white;
+              padding: 4px 8px;
+              border-radius: 8px;
+              font-size: 9px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 2px 8px rgba(249, 115, 22, 0.5);
+              animation: bounce 0.5s ease infinite;
+              z-index: 1000;
+            ">
+              ⚠️ ODLUKA
+            </div>
+          ` : ''}
+
           <!-- Main bus marker -->
           <svg viewBox="0 0 48 48" width="48" height="48">
+            <!-- Pending decision ring (orange, urgent pulsing) -->
+            ${hasPendingDecision ? `
+              <circle cx="24" cy="24" r="23" fill="none" stroke="${alertColor}" stroke-width="4" opacity="1">
+                <animate attributeName="stroke-opacity" values="1;0.3;1" dur="0.5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="24" cy="24" r="28" fill="none" stroke="${alertColor}" stroke-width="2" opacity="0.6">
+                <animate attributeName="r" values="24;32;24" dur="1s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.6;0;0.6" dur="1s" repeatCount="indefinite"/>
+              </circle>
+            ` : ''}
             <!-- Selection ring -->
-            ${isSelected ? `
+            ${isSelected && !hasPendingDecision ? `
               <circle cx="24" cy="24" r="23" fill="none" stroke="${selectionColor}" stroke-width="3" opacity="1">
                 <animate attributeName="stroke-opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite"/>
               </circle>
@@ -69,7 +103,7 @@ export default function BusMarker({ bus }) {
               </circle>
             ` : ''}
             <!-- Glow effect for low battery -->
-            ${isLowBattery && !isSelected ? `
+            ${isLowBattery && !isSelected && !hasPendingDecision ? `
               <circle cx="24" cy="24" r="22" fill="none" stroke="${batteryColor}" stroke-width="1" opacity="0.5">
                 <animate attributeName="r" values="20;24;20" dur="1s" repeatCount="indefinite"/>
                 <animate attributeName="opacity" values="0.5;0.2;0.5" dur="1s" repeatCount="indefinite"/>
@@ -151,13 +185,17 @@ export default function BusMarker({ bus }) {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
           }
+          @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-4px); }
+          }
         </style>
       `,
       iconSize: [48, 56],
       iconAnchor: [24, 48],
       popupAnchor: [0, -48],
     });
-  }, [bus.batteryLevel, bus.state, bus.name, isSelected]);
+  }, [bus.batteryLevel, bus.state, bus.name, isSelected, hasPendingDecision]);
 
   // Update icon
   useEffect(() => {

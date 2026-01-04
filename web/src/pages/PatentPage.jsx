@@ -20,20 +20,21 @@ const patents = [
   {
     id: 'EK-2026-001',
     title: 'Unified Modular Power Architecture (EK3)',
-    description: 'EK3 blade module: 3kW DC/DC converter with SiC MOSFETs, LLC resonant topology, 200×320×44mm (1U half-width telecom format), ~3.5kg, >96% efficiency. Blind-mate connectors enable hot-swap in <1 second. Scalable from 3kW (single module) to 3MW (1000 modules).',
+    description: 'EK3 blade module: 3.3kW DC/DC converter with 900V SiC MOSFETs (Wolfspeed), LLC resonant topology, 200×320×44mm (1U half-width format), ~3.5kg, >96% efficiency. CAN-FD @ 5Mbps. Blind-mate connectors enable hot-swap in <1 second. Scalable from 3.3kW (single module) to 3MW (909 modules).',
     inventor: 'Bojan Janjatović',
     dateOfConception: '2026-01-02',
     priorityDate: '2026-01-02',
     status: 'disclosed',
     category: 'hardware',
     claims: [
-      'Standardized blade-format power module (200×320×44mm, 1U half-width)',
-      'LLC resonant DC/DC topology with SiC MOSFETs for >96% efficiency',
-      'Blind-mate connector system with sequenced power/signal contacts',
-      'Planar transformer design for manufacturing repeatability',
+      'Standardized blade-format power module (200×320×44mm, 1U half-width, 3.5kg)',
+      'LLC resonant DC/DC topology with 900V SiC MOSFETs (Wolfspeed C3M0065090D)',
+      'Blind-mate connector system with 20-pin data + sequenced power contacts',
+      'Planar transformer design integrated in PCB for manufacturing repeatability',
       'Integrated current sensing (Infineon TLI4971) and thermal monitoring',
-      'STM32G474 control MCU with CAN-FD communication',
+      'STM32G474 control MCU with CAN-FD @ 5 Mbps communication',
       'Film capacitors (no electrolytics) for 50,000+ hour lifespan',
+      'Custom rack design optimized for thermal management and robotic swap',
     ],
   },
   {
@@ -57,7 +58,7 @@ const patents = [
   {
     id: 'EK-2026-003',
     title: 'Distributed Power Sparing System',
-    description: 'Power distribution inspired by 3PAR storage architecture. Wide striping spreads load across ALL modules. Distributed sparing eliminates dedicated hot-spare. 84 modules in 19" rack = 252kW. Single module failure = 0.3% capacity loss (vs 10% in traditional systems).',
+    description: 'Power distribution inspired by 3PAR storage architecture. Wide striping spreads load across ALL modules. Distributed sparing eliminates dedicated hot-spare. 84 modules in custom rack = 277kW. Single module failure = 0.33% capacity loss (vs 10% in traditional systems).',
     inventor: 'Bojan Janjatović',
     dateOfConception: '2026-01-02',
     priorityDate: '2026-01-02',
@@ -68,8 +69,8 @@ const patents = [
       'Distributed sparing - no dedicated hot-spare, all modules active',
       'Graceful degradation: 1/84 = 1.2% (not 10%) capacity loss per failure',
       'Automatic load rebalancing within milliseconds of failure detection',
-      'Backplane design for 84 modules per 19" rack (252kW)',
-      'CAN bus communication protocol for module coordination',
+      'Custom rack design for 84 modules (277kW @ 3.3kW per module)',
+      'CAN-FD @ 5 Mbps for swarm coordination',
     ],
   },
   {
@@ -327,8 +328,36 @@ export default function PatentPage() {
           ))}
         </div>
 
+        {/* Detailed Documentation CTA */}
+        <div className="mt-12 p-6 rounded-xl bg-gradient-to-r from-accent-cyan/10 to-accent-purple/10 border border-accent-cyan/30">
+          <div className="flex items-start gap-4">
+            <Shield className="w-8 h-8 text-accent-cyan flex-shrink-0" />
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Detailed Technical Documentation Available
+              </h3>
+              <p className="text-slate-400 mb-4">
+                Access comprehensive technical specifications including microkernel architecture,
+                hardware security design, rack system blueprints, firmware architecture,
+                and security model documentation.
+              </p>
+              <Link
+                to="/patent-portfolio"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-accent-cyan text-primary font-medium rounded-lg hover:bg-accent-cyan/90 transition-colors"
+              >
+                <FileText className="w-4 h-4" />
+                Access Full Portfolio
+                <ExternalLink className="w-4 h-4" />
+              </Link>
+              <p className="text-xs text-slate-500 mt-2">
+                Password required • Contains confidential technical details
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Footer note */}
-        <div className="mt-12 p-4 rounded-xl bg-slate-800/50 border border-border">
+        <div className="mt-6 p-4 rounded-xl bg-slate-800/50 border border-border">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-slate-400">

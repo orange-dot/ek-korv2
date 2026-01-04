@@ -46,6 +46,8 @@
 - EK-2026-001: Unified Modular Power Architecture
 - EK-2026-002: Dual-Purpose Robotic Swap Station
 - EK-2026-003: Distributed Power Sparing System
+- EK-2026-006: JEZGRO Microkernel (fault-tolerant firmware)
+- EK-2026-007: Decentralized V2G Control System (per-module grid sync, droop control)
 
 ### Ključni Claims
 
@@ -175,6 +177,7 @@
 
 ### Obuhvata (Claims scope)
 - EK-2026-004: Fleet-Integrated Maintenance Logistics
+- EK-2026-008: V2G AI/ML Fleet Optimization (frequency prediction, battery degradation, priority allocation)
 
 ### Ključni Claims
 
@@ -250,6 +253,14 @@ Ova matrica eksplicitno definiše šta svaki patent pokriva:
 | **Zero truck-roll logistics** | ❌ | ❌ | ✅ |
 | **Circular economy system** | ❌ | ❌ | ✅ |
 | **Service center integration** | ❌ | ❌ | ✅ |
+| **Per-module V2G control** | ✅ (EK-007) | ❌ | ❌ |
+| **Droop control (P(f), Q(V))** | ✅ (EK-007) | ❌ | ❌ |
+| **Hot-swap during V2G** | ✅ (EK-007) | ❌ | ❌ |
+| **ISO 15118-20 BPT integration** | ✅ (EK-007) | ❌ | ❌ |
+| **Grid frequency ML prediction** | ❌ | ❌ | ✅ (EK-008) |
+| **Battery degradation model** | ❌ | ❌ | ✅ (EK-008) |
+| **Priority-based fleet V2G** | ❌ | ❌ | ✅ (EK-008) |
+| **Edge-deployed ML** | ❌ | ❌ | ✅ (EK-008) |
 
 **Legenda:**
 - ✅ = Ovaj patent POKRIVA ovaj element
@@ -387,10 +398,12 @@ Witness: Marija Janjatović
 ## CHECKLIST PRE FILING-A
 
 ### Dokumentacija
-- [x] Invention disclosure documents (5 komada)
-- [x] Priority proof (Git commits)
+- [x] Invention disclosure documents (8 komada: EK-001 do EK-008)
+- [x] Priority proof (Git commits: 2026-01-02, 2026-01-03, 2026-01-04)
 - [x] Competitive research (prior art analysis)
 - [x] Filing strategy (ovaj dokument)
+- [x] V2G Control technical docs (tehnika/inzenjersko/en/07-v2g-control.md)
+- [x] AI/ML technical docs (tehnika/inzenjersko/en/11-v2g-ai-ml.md)
 - [ ] Detailed technical drawings
 - [ ] Prototype photos/videos
 - [ ] Witness signatures (notarized)
@@ -461,5 +474,6 @@ the same inventor.
 ---
 
 *Dokument kreiran: 2026-01-02*
-*Verzija: 1.0*
+*Poslednji update: 2026-01-04 (dodato: EK-007 V2G Control, EK-008 AI/ML)*
+*Verzija: 1.1*
 *Za internu upotrebu i konsultaciju sa patent advokatom*

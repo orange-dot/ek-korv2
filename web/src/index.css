@@ -92,3 +92,55 @@ body {
 .decision-modal-overlay {
   z-index: 9999 !important;
 }
+
+/* Ensure all map marker icons are clickable */
+.drone-marker-icon,
+.swarmbot-marker-icon,
+.delivery-pod-marker-icon,
+.rooftop-hub-marker-icon,
+.street-hub-marker-icon,
+.bus-marker-icon,
+.station-marker-icon,
+.robot-marker-icon {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.drone-marker-icon > div,
+.swarmbot-marker-icon > div,
+.delivery-pod-marker-icon > div,
+.rooftop-hub-marker-icon > div,
+.street-hub-marker-icon > div,
+.bus-marker-icon > div,
+.station-marker-icon > div,
+.robot-marker-icon > div {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure Leaflet marker pane has correct pointer-events */
+.leaflet-marker-pane {
+  pointer-events: auto !important;
+}
+
+.leaflet-marker-icon {
+  pointer-events: auto !important;
+}
+
+/* Make SVG elements inside markers clickable */
+.drone-marker-icon svg,
+.swarmbot-marker-icon svg,
+.delivery-pod-marker-icon svg,
+.rooftop-hub-marker-icon svg,
+.street-hub-marker-icon svg,
+.bus-marker-icon svg,
+.station-marker-icon svg,
+.robot-marker-icon svg {
+  pointer-events: auto !important;
+}
+
+/* Ensure interactive panes work correctly */
+.leaflet-interactive {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}

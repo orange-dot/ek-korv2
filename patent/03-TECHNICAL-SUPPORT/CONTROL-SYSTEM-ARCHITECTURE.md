@@ -1,14 +1,132 @@
 # Control System Architecture
 
-**Document Version:** 1.0
-**Date:** 2026-01-03
+> **Note:** This is the patent filing version. For living documentation, see [`tehnika/10-microkernel-architecture.md`](../../tehnika/10-microkernel-architecture.md).
+
+**Document Version:** 1.1
+**Date:** 2026-01-04
 **Author:** Bojan Janjatović
 **Email:** bojan.janjatovic@gmail.com
 **Address:** Vojislava Ilica 8, Kikinda, Severni Banat, Serbia
 
 ---
 
-## 1. System Overview
+## 1. Microkernel-Inspired Architecture
+
+### 1.1 Design Philosophy
+
+```
+MICROKERNEL PRINCIPLES APPLIED TO POWER ELECTRONICS
+═══════════════════════════════════════════════════════════════
+
+The EK3 control system architecture draws inspiration from
+microkernel operating systems (such as MINIX):
+
+MICROKERNEL OS                    EK3 SYSTEM
+═══════════════                   ══════════════════════════════
+Minimal kernel (IPC,              Minimal backplane (power bus,
+scheduling, memory)               CAN routing only)
+
+User-space services               Module firmware (health,
+                                  swarm, logging)
+
+Message passing IPC               CAN-FD message protocol
+
+Process isolation                 Module electrical isolation
+
+Kernel crash = system down        Backplane fail = system down
+Service crash = recoverable       Module fail = recoverable
+
+This architecture ensures:
+• No single point of failure in intelligence layer
+• Graceful degradation when components fail
+• Independent module operation
+• System survives loss of any single module
+```
+
+### 1.2 Trust Boundaries
+
+```
+TRUST BOUNDARY ARCHITECTURE
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│                      TRUST LEVELS                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  LEVEL 0: HARDWARE (Non-bypassable)                         │
+│  ════════════════════════════════                           │
+│  • Hardware OCP/OVP/OTP protection circuits                 │
+│  • Analog comparators, not software controlled              │
+│  • Cannot be disabled by any firmware                       │
+│  • Backplane passive routing                                │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 1: KERNEL FIRMWARE (Minimal, signed)                 │
+│  ══════════════════════════════════════════                 │
+│  • Secure bootloader                                        │
+│  • Fault handlers                                           │
+│  • Power stage control (LLC switching)                      │
+│  • CAN-FD driver                                            │
+│  • Cryptographic engine                                     │
+│  Size: ~20KB, rarely updated, extensively tested            │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 2: SERVICES (Isolated, sandboxed)                    │
+│  ═══════════════════════════════════════                    │
+│  • Health monitoring                                        │
+│  • Thermal management                                       │
+│  • Swarm coordination                                       │
+│  • Audit logging                                            │
+│  • OTA update handler                                       │
+│  Bugs here cannot compromise Level 0/1                      │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 3: EXTERNAL (Authenticated, rate-limited)            │
+│  ═══════════════════════════════════════════════            │
+│  • Commands from Station Controller                         │
+│  • Firmware updates                                         │
+│  • Configuration changes                                    │
+│  All require cryptographic authentication                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 1.3 Message Passing Semantics
+
+```
+CAN-FD AS INTER-PROCESS COMMUNICATION (IPC)
+═══════════════════════════════════════════════════════════════
+
+Just as microkernel IPC enables service communication,
+CAN-FD provides standardized message passing between modules:
+
+MESSAGE TYPES:
+┌─────────────────────────────────────────────────────────────┐
+│ TYPE              │ PATTERN          │ EXAMPLE              │
+├───────────────────┼──────────────────┼──────────────────────┤
+│ Request-Response  │ Sync, blocking   │ GET_STATUS           │
+│                   │ (with timeout)   │ SET_POWER            │
+├───────────────────┼──────────────────┼──────────────────────┤
+│ Publish           │ Periodic         │ HEARTBEAT (1Hz)      │
+│                   │ broadcast        │ THERMAL_SHARE (10Hz) │
+├───────────────────┼──────────────────┼──────────────────────┤
+│ Event             │ Async, one-shot  │ FAULT_ALERT          │
+│                   │ high priority    │ STATE_CHANGE         │
+└─────────────────────────────────────────────────────────────┘
+
+PROTOCOL GUARANTEES:
+• Delivery: At-least-once (CAN hardware retry)
+• Ordering: Per-source FIFO (sequence numbers)
+• Latency: <1ms for 64-byte message at 5 Mbps
+• Authentication: CMAC on security-critical messages
+```
+
+---
+
+## 2. System Overview
 
 ```
 HIJERARHIJA KONTROLNOG SISTEMA
@@ -59,13 +177,13 @@ PRINCIP: Svaki nivo može raditi AUTONOMNO ako viši nivo otkaže
 SAŽETAK - MODULE CONTROLLER
 ═══════════════════════════════════════════════════════════════
 
-Hardware: ESP32-S3 (prototip) → STM32H7 (produkcija)
+Hardware: STM32G474 (Cortex-M4 @ 170MHz, integrated CAN-FD)
 
 Funkcije:
-• Power conversion control (PFC + DC-DC)
+• DC-DC power conversion control (LLC resonant)
 • Senzor monitoring (I, V, T, ESR)
 • Health assessment (rule-based + ML)
-• CAN communication sa Station Controller
+• CAN-FD communication @ 5 Mbps
 
 Autonomija:
 • Može raditi samostalno za osnovno punjenje
@@ -73,7 +191,7 @@ Autonomija:
 • Degraded mode ako komunikacija otkaže
 
 Interfejs prema LEVEL 2:
-• CAN 2.0B @ 500kbps (ili CAN-FD @ 2Mbps)
+• CAN-FD @ 5 Mbps (64-byte payload)
 • Status reporting svake sekunde
 • Event-driven alarmi odmah
 ```
@@ -313,12 +431,14 @@ Error Handling:
 ### 3.4 Communication Interfaces
 
 ```
-CAN BUS NETWORK (Interni)
+CAN-FD BUS NETWORK (Interni)
 ═══════════════════════════════════════════════════════════════
 
 Topology: Single bus, multi-drop
-Speed: CAN 2.0B @ 500kbps (upgrade path: CAN-FD @ 2Mbps)
+Speed: CAN-FD @ 5 Mbps (data phase) / 1 Mbps (arbitration)
+Payload: 64 bytes (vs 8 bytes CAN 2.0)
 Termination: 120Ω na oba kraja
+Latency: <1ms per message
 
 Node Addresses:
 • 0x100-0x1FF: EK3 Modules (slot 1-255)
@@ -331,26 +451,33 @@ Message Types:
 
 # Heartbeat (svake sekunde)
 ID: 0x100 + slot_number
-LEN: 8
-DATA: [status, temp, efficiency, anomaly, ESR_H, ESR_L, RUL, reserved]
+LEN: 64 (CAN-FD)
+DATA: [
+  status, temp_junction, temp_ambient, efficiency,
+  power_out_H, power_out_L, voltage_H, voltage_L,
+  current_H, current_L, ESR_H, ESR_L, RUL, fan_speed,
+  anomaly_score, fault_code, uptime_H, uptime_M, uptime_L,
+  ... (extended telemetry)
+]
 
 # Command (od Station Controller)
 ID: 0x700
-LEN: 8
-DATA: [cmd_type, target_slot, param1, param2, ...]
+LEN: 64 (CAN-FD)
+DATA: [cmd_type, target_slot, params[0-61]]
 
 Commands:
   0x01 = Power ON
   0x02 = Power OFF
-  0x03 = Set power limit
+  0x03 = Set power limit (params: power_H, power_L)
   0x04 = Enter standby
   0x05 = Prepare for swap (safe shutdown)
   0x10 = Request detailed diagnostics
+  0x20 = Firmware update (params: chunk data)
 
-# Alarm (event-driven, priority)
+# Alarm (event-driven, high priority)
 ID: 0x080 + slot_number (high priority ID range)
-LEN: 8
-DATA: [alarm_code, severity, value1, value2, ...]
+LEN: 64 (CAN-FD)
+DATA: [alarm_code, severity, timestamp[4], values[58]]
 ```
 
 ```
