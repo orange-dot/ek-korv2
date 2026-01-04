@@ -1,11 +1,11 @@
-# EMC/EMI za EV Punjače
+# EMC/EMI for EV Chargers
 
-## 1. EMC Standardi
+## 1. EMC Standards
 
-### 1.1 Primenjivi Standardi
+### 1.1 Applicable Standards
 
 ```
-EMC Standardi za EV Charging Equipment:
+EMC Standards for EV Charging Equipment:
 
 ┌─────────────────────────────────────────────────────────────────┐
 │ Standard        │ Scope                                         │
@@ -34,7 +34,7 @@ Class B (Residential):
 - Generally recommended for all EV chargers
 ```
 
-### 1.2 Emisije Limits
+### 1.2 Emissions Limits
 
 ```
 Conducted Emissions (CISPR 11 Class B):
@@ -56,7 +56,7 @@ Frequency Range: 30 MHz - 1 GHz
 │ 30 - 230          │ 30                   │
 │ 230 - 1000        │ 37                   │
 
-Harmonic Currents (IEC 61000-3-12 za >16A):
+Harmonic Currents (IEC 61000-3-12 for >16A):
 
 │ Harmonic Order │ Current Limit (% fundamental) │
 ├────────────────┼───────────────────────────────┤
@@ -70,10 +70,10 @@ Harmonic Currents (IEC 61000-3-12 za >16A):
 
 ## 2. EMI Filtering
 
-### 2.1 Filter Topologija
+### 2.1 Filter Topology
 
 ```
-Tipična EMI Filter Struktura:
+Typical EMI Filter Structure:
 
                    AC INPUT
     L1 ──┬─────────────────────────────────────────── To PFC
@@ -210,9 +210,9 @@ Enclosure Shielding Effectiveness:
 
 SE (dB) = 20 × log10(E_incident / E_transmitted)
 
-Zahtev za Class B: SE > 40 dB @ 30 MHz
+Requirement for Class B: SE > 40 dB @ 30 MHz
 
-Metode:
+Methods:
 
 1. Metal Enclosure:
    - Steel: >60 dB typical
@@ -367,7 +367,7 @@ DC Link Surge Suppressor:
     DC- ──┴──────────────────────────── Load
 ```
 
-## 5. Testing i Certification
+## 5. Testing and Certification
 
 ### 5.1 Pre-Compliance Testing
 
@@ -441,9 +441,9 @@ Certification Cost Estimate:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ EMC KOMPONENTE (150 kW DC Punjač)                               │
+│ EMC COMPONENTS (150 kW DC Charger)                              │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
-│ Komponenta                   │ Qty │ Jed. cena  │    Ukupno     │
+│ Component                    │ Qty │ Unit Price │    Total      │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ 3-phase EMI Filter 250A      │  1  │   €400     │    €400       │
 │ (Schaffner FN3280)           │     │            │               │
@@ -462,6 +462,6 @@ Certification Cost Estimate:
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ Feedthrough filters          │  6  │    €15     │     €90       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ UKUPNO EMC                                      │    €900       │
+│ TOTAL EMC                                       │    €900       │
 └─────────────────────────────────────────────────┴───────────────┘
 ```

@@ -1,32 +1,32 @@
-# Thermal Management Sistem
+# Thermal Management System
 
-## Filozofija: Liquid Cooling jer je Bolje
+## Philosophy: Liquid Cooling Because It's Better
 
 ```
 AIR COOLING                      LIQUID COOLING
 ────────────────────────────────────────────────────────────
-"Jednostavnije"              →   "2× veća gustina snage"
+"Simpler"                    →   "2x higher power density"
 h = 25-250 W/m²K             →   h = 100-20,000 W/m²K
-Pasivno                      →   Aktivno + AI kontrola
-Fiksni airflow               →   Dinamički flow rate
+Passive                      →   Active + AI control
+Fixed airflow                →   Dynamic flow rate
 ΔT = 40-60°C                 →   ΔT = 10-20°C
-Bučno pri visokoj snazi      →   Tiho (pumpa < ventilator)
+Noisy at high power          →   Quiet (pump < fan)
 ```
 
 ---
 
-## 1. Zašto Liquid Cooling?
+## 1. Why Liquid Cooling?
 
-### Termalna Fizika
+### Thermal Physics
 
 ```
 HEAT CAPACITY COMPARISON
 ────────────────────────
-Vazduh (air):     Cp ≈ 1,005 J/(kg·K)
-Voda (water):     Cp ≈ 4,186 J/(kg·K)
-Etilen glikol 50%: Cp ≈ 3,400 J/(kg·K)
+Air:                  Cp ≈ 1,005 J/(kg·K)
+Water:                Cp ≈ 4,186 J/(kg·K)
+Ethylene glycol 50%:  Cp ≈ 3,400 J/(kg·K)
 
-Voda ima ~3,500× veći volumetrijski toplotni kapacitet od vazduha
+Water has ~3,500x greater volumetric heat capacity than air
 
 HEAT TRANSFER COEFFICIENT
 ─────────────────────────
@@ -36,7 +36,7 @@ Liquid (laminar flow):        100-1,000 W/m²K
 Liquid (turbulent flow):      1,000-20,000 W/m²K
 Microchannel liquid:          10,000-100,000 W/m²K
 
-Liquid cooling: 10-100× efikasniji prenos toplote
+Liquid cooling: 10-100x more efficient heat transfer
 ```
 
 ### Power Density Impact
@@ -60,7 +60,7 @@ Noise: <40 dB
 Total volume: ~12 L
 Power density: 2.5 kW/L
 
-Result: 2× veća gustina snage
+Result: 2x higher power density
 ```
 
 ---
@@ -70,10 +70,10 @@ Result: 2× veća gustina snage
 ### EK3 (3 kW) - Hybrid Cooling
 
 ```
-EK3 koristi kombinovani pristup:
-• Primarno: Kondukcija na aluminum enclosure
-• Sekundarno: Natural/forced air convection
-• Opciono: Liquid cooling interface za ugradnju u EK30 kabinet
+EK3 uses a combined approach:
+• Primary: Conduction to aluminum enclosure
+• Secondary: Natural/forced air convection
+• Optional: Liquid cooling interface for installation in EK30 cabinet
 
 ┌─────────────────────────────────────────────┐
 │                  AMBIENT AIR                │
@@ -145,7 +145,7 @@ Thermal budget EK30 (30 kW, 97% efficiency):
 
 ---
 
-## 3. Coldplate Dizajn
+## 3. Coldplate Design
 
 ### Microchannel Technology
 
@@ -221,7 +221,7 @@ Multi-pass serpentine (EK30):
 • Higher pressure drop
 • Preferred for high-power
 
-Counter-flow (za buduće verzije):
+Counter-flow (for future versions):
 • Coldest coolant meets hottest devices
 • Best temperature uniformity
 • Complex manifold design
@@ -374,7 +374,7 @@ SENSORS
 
 ## 5. Junction Temperature Estimation
 
-### Zašto je Tj Kritičan?
+### Why is Tj Critical?
 
 ```
 FAILURE STATISTICS
@@ -383,7 +383,7 @@ FAILURE STATISTICS
 • 60% of semiconductor failures = thermal-related
 • Failure rate doubles for every 10°C Tj increase
 
-Za SiC:
+For SiC:
 • Max Tj: 175°C (vs 150°C for Si IGBT)
 • Operating target: <150°C (25°C margin)
 • Reliability improves significantly at lower Tj
@@ -664,8 +664,8 @@ Response to leak detection:
 
 ### EK30 Thermal BOM
 
-| Komponenta | Specifikacija | Qty | Unit Price | Total |
-|------------|---------------|-----|------------|-------|
+| Component | Specification | Qty | Unit Price | Total |
+|-----------|---------------|-----|------------|-------|
 | Coldplate | Aluminum, microchannel, 300×200mm | 1 | €120 | €120 |
 | Pump | Brushless DC, 10L/min, PWM | 1 | €35 | €35 |
 | Radiator | Al fin-tube, 300×300×50mm | 1 | €60 | €60 |
@@ -685,7 +685,7 @@ Response to leak detection:
 
 ## 9. Performance Targets
 
-| Parametar | Target | Notes |
+| Parameter | Target | Notes |
 |-----------|--------|-------|
 | Max Tj at full load | <150°C | 25°C margin to absolute max |
 | Coolant ΔT (in-out) | <10°C | At 30 kW |
@@ -697,7 +697,7 @@ Response to leak detection:
 
 ---
 
-## Reference i Izvori
+## References and Sources
 
 - [Boyd Liquid Cold Plates](https://www.boydcorp.com/thermal/liquid-cooling-systems/liquid-cold-plates.html)
 - [EV Charger Liquid Cooling Requirements](https://www.evengineeringonline.com/why-high-power-dc-ev-chargers-require-liquid-cooling-systems/)

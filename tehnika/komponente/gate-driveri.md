@@ -1,52 +1,52 @@
-# Gate Driver Dizajn za EV Punjače
+# Gate Driver Design for EV Chargers
 
-## 1. Uvod u Gate Driving
+## 1. Introduction to Gate Driving
 
-### 1.1 Uloga Gate Drivera
+### 1.1 Role of Gate Drivers
 
 ```
-Blok Dijagram Sistema:
+System Block Diagram:
 
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   MCU/DSP   │────▶│ Gate Driver │────▶│ Power Stage │
-│  (3.3V PWM) │     │ (Izolovan)  │     │ (IGBT/SiC)  │
+│  (3.3V PWM) │     │ (Isolated)  │     │ (IGBT/SiC)  │
 └─────────────┘     └─────────────┘     └─────────────┘
                           │
                     ┌─────┴─────┐
-                    │ Funkcije: │
-                    │ - Izolacija│
-                    │ - Pojačanje│
-                    │ - Zaštita  │
+                    │ Functions:│
+                    │ - Isolation│
+                    │ - Amplific.│
+                    │ - Protect. │
                     │ - Timing   │
                     └───────────┘
 
-Zašto je Gate Driver Kritičan:
+Why Gate Drivers are Critical:
 
-1. Naponsko pojačanje: 3.3V → ±15V (IGBT) ili +15V/-4V (SiC)
-2. Strujno pojačanje: mA → Amperi (peak gate current)
-3. Galvanska izolacija: LV kontrola ↔ HV power
-4. Zaštite: Desaturacija, UVLO, prekostruja
-5. Timing kontrola: Dead-time, soft turn-off
+1. Voltage amplification: 3.3V → ±15V (IGBT) or +15V/-4V (SiC)
+2. Current amplification: mA → Amperes (peak gate current)
+3. Galvanic isolation: LV control ↔ HV power
+4. Protection: Desaturation, UVLO, overcurrent
+5. Timing control: Dead-time, soft turn-off
 ```
 
-### 1.2 Gate Driver Zahtevi po Tehnologiji
+### 1.2 Gate Driver Requirements by Technology
 
-| Parametar | Si IGBT | SiC MOSFET | GaN HEMT |
+| Parameter | Si IGBT | SiC MOSFET | GaN HEMT |
 |-----------|---------|------------|----------|
-| Vgs(on) | +15V | +15V do +18V | +5V do +6V |
-| Vgs(off) | 0V do -8V | -4V do -5V | 0V do -3V |
+| Vgs(on) | +15V | +15V to +18V | +5V to +6V |
+| Vgs(off) | 0V to -8V | -4V to -5V | 0V to -3V |
 | Peak Ig | 2-5 A | 5-15 A | 2-5 A |
 | dv/dt immunity | 50 kV/μs | 100+ kV/μs | 100+ kV/μs |
 | Propagation delay | <500 ns | <100 ns | <50 ns |
 | Dead-time | 1-3 μs | 100-500 ns | 50-200 ns |
-| Izolacija | 1200V | 1500V+ | 650V |
+| Isolation | 1200V | 1500V+ | 650V |
 
-## 2. Topologije Gate Drivera
+## 2. Gate Driver Topologies
 
-### 2.1 Jednostepeni Gate Driver
+### 2.1 Single-Stage Gate Driver
 
 ```
-Šema jednostepenog gate drivera:
+Single-stage gate driver schematic:
 
             Vcc (+15V)
                │
@@ -63,21 +63,21 @@ PWM ──────┼──┤ U1  ├┼────┬──── Gate
                │         │
               GND ───────┴──── Source
 
-Komponente:
-- U1: Gate driver IC (npr. UCC27531)
-- Rg: Gate otpornik (1-20Ω)
-- Cgs: Gate-Source kapacitivnost (interno)
+Components:
+- U1: Gate driver IC (e.g., UCC27531)
+- Rg: Gate resistor (1-20Ω)
+- Cgs: Gate-Source capacitance (internal)
 
-Ograničenja:
-- Bez izolacije
-- Samo za low-side switching
-- Nije pogodno za high-side
+Limitations:
+- No isolation
+- Only for low-side switching
+- Not suitable for high-side
 ```
 
-### 2.2 Izolovani Gate Driver
+### 2.2 Isolated Gate Driver
 
 ```
-Izolovani gate driver sa optokuplerom:
+Isolated gate driver with optocoupler:
 
      ┌─────────────────┬──────────────────────┐
      │   PRIMARY       │      SECONDARY       │
@@ -94,20 +94,20 @@ PWM ─┼─┤ Input ├───┤ ▓▓▓▓▓ ├──┤Output ├─
      │                 │                      │
      └─────────────────┴──────────────────────┘
                        │
-                   Izolacija
+                   Isolation
                    (2.5-5 kV)
 
-Tipovi izolacije:
-1. Optokupler - tradicionalno, sporije
-2. Kapacitivna - brža, CMTI dobra
-3. Induktivna (transformator) - najbrža
-4. GMR (Giant Magnetoresistive) - novije
+Isolation types:
+1. Optocoupler - traditional, slower
+2. Capacitive - faster, good CMTI
+3. Inductive (transformer) - fastest
+4. GMR (Giant Magnetoresistive) - newer
 ```
 
 ### 2.3 Half-Bridge Gate Driver
 
 ```
-Integrisani half-bridge driver:
+Integrated half-bridge driver:
 
                      Vboot
                        │
@@ -136,41 +136,41 @@ LIN ─┼───────────►│  SIDE   ├──────�
      │                GND                   │
      └──────────────────────────────────────┘
 
-Bootstrap napajanje High-Side drivera:
-- Cboot se puni kada je Low-Side ON
-- Dboot sprečava pražnjenje nazad
+Bootstrap power supply for High-Side driver:
+- Cboot charges when Low-Side is ON
+- Dboot prevents discharge back
 - Cboot ≥ 10 × Qg (gate charge)
-- Refresh potreban (ne može 100% duty cycle)
+- Refresh needed (cannot run 100% duty cycle)
 ```
 
-## 3. Komercijalni Gate Driveri
+## 3. Commercial Gate Drivers
 
-### 3.1 Za IGBT Module
+### 3.1 For IGBT Modules
 
 #### Infineon EiceDRIVER
 
 ```
 1ED020I12-F2 (Single Channel):
 ┌─────────────────────────────────────┐
-│ Parametar          │ Vrednost       │
-├────────────────────┼────────────────┤
-│ Izlazna struja     │ ±2 A peak      │
-│ Izolacija          │ 1200 V         │
-│ CMTI               │ 50 kV/μs       │
-│ Propagation delay  │ 100 ns typ     │
-│ Pulse width dist.  │ 10 ns          │
-│ Vcc range          │ 13-20 V        │
-│ Desaturacija       │ Da             │
-│ UVLO               │ Da             │
-│ Soft turn-off      │ Da             │
-│ Package            │ DSO-16         │
-│ Cena               │ ~€8            │
+│ Parameter            │ Value        │
+├──────────────────────┼──────────────┤
+│ Output current       │ ±2 A peak    │
+│ Isolation            │ 1200 V       │
+│ CMTI                 │ 50 kV/μs     │
+│ Propagation delay    │ 100 ns typ   │
+│ Pulse width dist.    │ 10 ns        │
+│ Vcc range            │ 13-20 V      │
+│ Desaturation         │ Yes          │
+│ UVLO                 │ Yes          │
+│ Soft turn-off        │ Yes          │
+│ Package              │ DSO-16       │
+│ Price                │ ~€8          │
 └─────────────────────────────────────┘
 
-2ED020I12-F2 (Dual Channel za Half-Bridge):
-- Iste karakteristike
-- Integrisana dead-time kontrola
-- Interlock funkcija
+2ED020I12-F2 (Dual Channel for Half-Bridge):
+- Same characteristics
+- Integrated dead-time control
+- Interlock function
 ```
 
 #### SKYPER Prime (Semikron)
@@ -178,48 +178,48 @@ Bootstrap napajanje High-Side drivera:
 ```
 SKYPER 32PRO R:
 ┌─────────────────────────────────────┐
-│ Profesionalni IGBT driver           │
+│ Professional IGBT driver            │
 ├─────────────────────────────────────┤
-│ Izlazna struja: ±15 A peak          │
-│ Izolacija: 2500 Vrms / 1 min        │
+│ Output current: ±15 A peak          │
+│ Isolation: 2500 Vrms / 1 min        │
 │ CMTI: 50 kV/μs                      │
-│ Zaštite:                            │
-│   - VCE desaturacija monitoring     │
+│ Protections:                        │
+│   - VCE desaturation monitoring     │
 │   - Soft shutdown                   │
-│   - Active clamping opcija          │
-│   - UVLO sa hysterezom              │
-│ Power supply: ±15V, izolovan DC/DC  │
-│ Cena: ~€80                          │
+│   - Active clamping option          │
+│   - UVLO with hysteresis            │
+│ Power supply: ±15V, isolated DC/DC  │
+│ Price: ~€80                         │
 └─────────────────────────────────────┘
 
-Primena: Industrijski IGBT moduli
-         FF-series, SEMITRANS, itd.
+Application: Industrial IGBT modules
+             FF-series, SEMITRANS, etc.
 ```
 
-### 3.2 Za SiC MOSFET
+### 3.2 For SiC MOSFET
 
 #### Wolfspeed CGD Series
 
 ```
-CGD12HBXMP (za XM3 module):
+CGD12HBXMP (for XM3 modules):
 ┌─────────────────────────────────────┐
-│ Optimizovan za SiC MOSFET           │
+│ Optimized for SiC MOSFET            │
 ├─────────────────────────────────────┤
-│ Izlazna struja: ±10 A peak          │
-│ Vgs izlaz: +15V / -4V               │
-│ Izolacija: 2.5 kV                   │
+│ Output current: ±10 A peak          │
+│ Vgs output: +15V / -4V              │
+│ Isolation: 2.5 kV                   │
 │ CMTI: 100 kV/μs                     │
 │ Propagation delay: 80 ns            │
 │ Rise/Fall time: 8 ns                │
 │                                     │
-│ SiC-specifične funkcije:            │
-│   - Dvostepeni turn-off             │
+│ SiC-specific features:              │
+│   - Two-stage turn-off              │
 │   - Active Miller clamp             │
-│   - Desaturacija < 1 μs reakcija    │
-│   - Soft turn-off za short circuit  │
+│   - Desaturation < 1 μs response    │
+│   - Soft turn-off for short circuit │
 │                                     │
-│ Integrisani DC/DC konverter         │
-│ Cena: ~€120                         │
+│ Integrated DC/DC converter          │
+│ Price: ~€120                        │
 └─────────────────────────────────────┘
 ```
 
@@ -228,44 +228,44 @@ CGD12HBXMP (za XM3 module):
 ```
 Si8285 (Dual Isolated):
 ┌─────────────────────────────────────┐
-│ Parametar          │ Vrednost       │
-├────────────────────┼────────────────┤
-│ Izlazna struja     │ 4 A source/sink│
-│ CMTI               │ 200 kV/μs      │
-│ Propagation delay  │ 24 ns typ      │
-│ Jitter             │ 0.3 ns         │
-│ Izolacija          │ 5 kV           │
-│ Undervoltage lockout│ Konfigurabilan│
-│ Package            │ SOIC-16 WB     │
-│ Cena               │ ~€12           │
+│ Parameter            │ Value        │
+├──────────────────────┼──────────────┤
+│ Output current       │ 4 A source/sink│
+│ CMTI                 │ 200 kV/μs    │
+│ Propagation delay    │ 24 ns typ    │
+│ Jitter               │ 0.3 ns       │
+│ Isolation            │ 5 kV         │
+│ Undervoltage lockout │ Configurable │
+│ Package              │ SOIC-16 WB   │
+│ Price                │ ~€12         │
 └─────────────────────────────────────┘
 
-Prednosti za SiC:
-- Ultra-visok CMTI (200 kV/μs)
-- Vrlo nizak propagation delay
-- Nizak jitter za precizno paralelisanje
+Advantages for SiC:
+- Ultra-high CMTI (200 kV/μs)
+- Very low propagation delay
+- Low jitter for precise paralleling
 ```
 
 #### Texas Instruments UCC2152x
 
 ```
-UCC21520 (4A/6A verzije):
+UCC21520 (4A/6A versions):
 ┌─────────────────────────────────────┐
-│ Dual-channel sa izolacijom          │
+│ Dual-channel with isolation         │
 ├─────────────────────────────────────┤
 │ Peak source current: 4A / 6A        │
 │ Peak sink current: 6A / 6A          │
 │ CMTI: 100 kV/μs                     │
 │ Propagation delay: 19 ns typ        │
 │ Delay matching: 2 ns                │
-│ Input filter: 5 ns programabilni    │
+│ Input filter: 5 ns programmable     │
 │ UVLO threshold: Selectable          │
-│ Split outputs: Da (za Rg(on)/off)   │
+│ Split outputs: Yes (for Rg(on)/off) │
 │ Package: SOIC-16                    │
-│ Cena: ~€5-6                         │
+│ Price: ~€5-6                        │
 └─────────────────────────────────────┘
 
-UCC21750 (Single za SiC):
+UCC21750 (Single for SiC):
 - Integrated isolated power
 - Active Miller clamp
 - Two-level turn-off
@@ -277,26 +277,26 @@ UCC21750 (Single za SiC):
 ```
 2SP0115T2Ax-FF450R12ME4:
 ┌─────────────────────────────────────┐
-│ Plug-and-play za Infineon module    │
+│ Plug-and-play for Infineon modules  │
 ├─────────────────────────────────────┤
-│ Kompletno rešenje:                  │
-│   - Gate driver × 2 kanala          │
-│   - Izolovano napajanje             │
-│   - Fiber optic interfejs opcija    │
-│   - Konfigurabilan Rg               │
+│ Complete solution:                  │
+│   - Gate driver × 2 channels        │
+│   - Isolated power supply           │
+│   - Fiber optic interface option    │
+│   - Configurable Rg                 │
 │                                     │
-│ Karakteristike:                     │
+│ Features:                           │
 │   - SCALE-2 chipset                 │
 │   - Advanced Active Clamping (AAC)  │
-│   - Short circuit type I i II       │
+│   - Short circuit type I and II     │
 │   - Soft turn-off                   │
 │   - Status feedback                 │
 │                                     │
-│ Cena: ~€150                         │
+│ Price: ~€150                        │
 └─────────────────────────────────────┘
 ```
 
-### 3.3 Za GaN
+### 3.3 For GaN
 
 ```
 Texas Instruments LMG1210:
@@ -305,54 +305,54 @@ Texas Instruments LMG1210:
 ├─────────────────────────────────────┤
 │ Vout: 5.25V                         │
 │ Source current: 1.5A                │
-│ Sink current: 5A (asymetrično)      │
+│ Sink current: 5A (asymmetric)       │
 │ Propagation delay: 6.2 ns           │
 │ Dead-time: 4 ns min                 │
 │ Bootstrap: 100V max                 │
 │ Package: QFN-16                     │
-│ Cena: ~€4                           │
+│ Price: ~€4                          │
 └─────────────────────────────────────┘
 
-Napomena: GaN zahteva različit pristup
-- Niži gate napon (5-6V)
-- Brže switching (ns)
-- Krući layout zahtevi
+Note: GaN requires different approach
+- Lower gate voltage (5-6V)
+- Faster switching (ns)
+- Stricter layout requirements
 ```
 
-## 4. Dizajn Gate Drive Kola
+## 4. Gate Drive Circuit Design
 
 ### 4.1 Gate Resistor Selection
 
 ```
-Funkcija Gate Otpornika:
+Gate Resistor Function:
 
-1. Kontrola dv/dt i di/dt
-2. Prigušenje oscilacija (ringing)
-3. EMI kontrola
-4. Balansiranje gubitaka (turn-on vs turn-off)
+1. dv/dt and di/dt control
+2. Oscillation damping (ringing)
+3. EMI control
+4. Balancing losses (turn-on vs turn-off)
 
-Proračun:
+Calculation:
 
 dv/dt = Ig / (Cgd + Cds)
 di/dt = (Vgs - Vth) × gm / Ciss
 
-Za željeni dv/dt od 10 V/ns sa Cgd = 50 pF:
+For desired dv/dt of 10 V/ns with Cgd = 50 pF:
 Ig = dv/dt × Cgd = 10 × 50 = 500 mA
 
-Za Vgs = 15V, Vth = 3V:
+For Vgs = 15V, Vth = 3V:
 Rg(on) = (Vdrv - Vgs_miller) / Ig
 Rg(on) = (15 - 10) / 0.5 = 10Ω
 
-Tipične vrednosti:
+Typical values:
 ┌───────────────┬─────────────┬─────────────┐
-│ Tehnologija   │ Rg(on)      │ Rg(off)     │
+│ Technology    │ Rg(on)      │ Rg(off)     │
 ├───────────────┼─────────────┼─────────────┤
 │ IGBT          │ 2-10 Ω      │ 2-5 Ω       │
 │ SiC MOSFET    │ 1-5 Ω       │ 1-3 Ω       │
 │ GaN           │ 0-2 Ω       │ 0-2 Ω       │
 └───────────────┴─────────────┴─────────────┘
 
-Separatni Rg za ON/OFF (split output):
+Separate Rg for ON/OFF (split output):
 
         ┌────────┐
         │  Gate  │
@@ -364,15 +364,15 @@ Drv+───►│ Driver ├─┬─►Rg(on)──┬── GATE
                        ▲      │
                        └──────┘
 
-Prednost: Nezavisna kontrola turn-on i turn-off
+Advantage: Independent control of turn-on and turn-off
 ```
 
-### 4.2 Negative Bias za SiC
+### 4.2 Negative Bias for SiC
 
 ```
-Zašto negativan Vgs(off) za SiC:
+Why negative Vgs(off) for SiC:
 
-Problem: Parazitno uključenje
+Problem: Parasitic turn-on
          (Miller turn-on)
 
              Cgd
@@ -386,20 +386,20 @@ Gate ──┤  │Cgs   ┤  │ Cds
              │
            Source
 
-Kada high-side uključuje:
-- dVds/dt na low-side indukuje struju
-- Struja kroz Cgd podiže Vgs
-- Ako Vgs > Vth → parazitno uključenje!
+When high-side turns on:
+- dVds/dt on low-side induces current
+- Current through Cgd raises Vgs
+- If Vgs > Vth → parasitic turn-on!
 
-Rešenje: Negativan Vgs(off)
+Solution: Negative Vgs(off)
 
-IGBT: Vgs(off) = 0V do -8V
-      (Vth = 5-7V, dovoljna margina)
+IGBT: Vgs(off) = 0V to -8V
+      (Vth = 5-7V, sufficient margin)
 
-SiC:  Vgs(off) = -4V do -5V
-      (Vth = 2-4V, manja margina!)
+SiC:  Vgs(off) = -4V to -5V
+      (Vth = 2-4V, smaller margin!)
 
-Implementacija negativnog biasa:
+Negative bias implementation:
 
      +15V ──┬──────────────────┐
             │                  │
@@ -416,25 +416,25 @@ Implementacija negativnog biasa:
             │                  │
      -4V ───┴──────────────────┘
 
-Preporučeni naponi:
+Recommended voltages:
 - Infineon SiC: +18V / -3V
 - Wolfspeed: +15V / -4V
 - ROHM: +18V / -5V
 
-UPOZORENJE: Proveriti max Vgs u datasheetu!
-            Tipično Vgs(max) = +22V / -6V
+WARNING: Check max Vgs in datasheet!
+         Typically Vgs(max) = +22V / -6V
 ```
 
 ### 4.3 Active Miller Clamp
 
 ```
-Problem: Miller plateau oscilacije
+Problem: Miller plateau oscillations
 
-Tokom Miller plateau (turn-off):
-Vgs ≈ konstanto ali Ig varira
-→ Oscilacije mogu uzrokovati re-triggering
+During Miller plateau (turn-off):
+Vgs ≈ constant but Ig varies
+→ Oscillations can cause re-triggering
 
-Active Miller Clamp rešenje:
+Active Miller Clamp solution:
 
               Vdrv
                │
@@ -455,31 +455,31 @@ Active Miller Clamp rešenje:
                      │
                    SOURCE
 
-Kada Q_clamp aktivan:
+When Q_clamp active:
 - Low impedance path: Gate → Source
-- Drži Vgs na Vee
-- Sprečava Miller turn-on
+- Holds Vgs at Vee
+- Prevents Miller turn-on
 
 Timing:
-- Q_clamp ON malo pre Q_off ON
-- Ostaje ON tokom celog OFF stanja
+- Q_clamp ON slightly before Q_off ON
+- Remains ON during entire OFF state
 ```
 
 ### 4.4 Desaturation Protection
 
 ```
-Desaturacija detektuje short circuit/overcurrent:
+Desaturation detects short circuit/overcurrent:
 
-Normalan rad IGBT:
-- IGBT zasićen (saturated)
+Normal IGBT operation:
+- IGBT saturated
 - Vce(sat) = 1.5-2.5V @ Ic nominal
 
 Short circuit:
-- IGBT izlazi iz zasićenja
-- Vce raste do Vdc (800V!)
-- Ic raste nekontrolisano
+- IGBT exits saturation
+- Vce rises to Vdc (800V!)
+- Ic rises uncontrollably
 
-Desat detekcija:
+Desat detection:
 
          Vdc (800V)
            │
@@ -506,30 +506,30 @@ Desat detekcija:
            │         FAULT
            └────────────┘
 
-Tipičan threshold:
-- Vdesat = 7-9V (iznad Vce(sat) + margina)
-- Blanking time: 2-5 μs (za turn-on spike)
+Typical threshold:
+- Vdesat = 7-9V (above Vce(sat) + margin)
+- Blanking time: 2-5 μs (for turn-on spike)
 
-Reakcija na fault:
-1. Soft turn-off (sporo Rg)
-2. 2-level turn-off (prvo ograniči di/dt)
-3. Fault signal ka MCU
+Fault response:
+1. Soft turn-off (slow Rg)
+2. 2-level turn-off (first limit di/dt)
+3. Fault signal to MCU
 ```
 
 ### 4.5 Soft Turn-Off
 
 ```
-Problem: Brzo isključenje pri visokoj struji
+Problem: Fast turn-off at high current
 
-di/dt = L × dI/dt → Naponski spike
+di/dt = L × dI/dt → Voltage spike
 
-Za L_stray = 50 nH, I = 500A, dt = 100ns:
+For L_stray = 50 nH, I = 500A, dt = 100ns:
 V_spike = 50×10^-9 × 500 / 100×10^-9 = 250V!
 
-Vce ukupno = Vdc + V_spike = 800 + 250 = 1050V
-→ Prekoračenje 1200V ratinga!
+Vce total = Vdc + V_spike = 800 + 250 = 1050V
+→ Exceeding 1200V rating!
 
-Soft Turn-Off sekvenca:
+Soft Turn-Off sequence:
 
      Vgs
       │
@@ -555,18 +555,18 @@ Soft Turn-Off sekvenca:
       │                │
       └────────────────┴───────────► t
 
-Implementacija:
-- Stage 1: Normalan Rg(off)
-- Stage 2: Veći Rg ili konstantna struja
-- Transition: Vce threshold ili timer
+Implementation:
+- Stage 1: Normal Rg(off)
+- Stage 2: Higher Rg or constant current
+- Transition: Vce threshold or timer
 ```
 
-## 5. Izolovano Napajanje
+## 5. Isolated Power Supply
 
-### 5.1 Bootstrap Napajanje
+### 5.1 Bootstrap Power Supply
 
 ```
-Bootstrap za half-bridge:
+Bootstrap for half-bridge:
 
      Vcc (+15V)
        │
@@ -593,37 +593,37 @@ Bootstrap za half-bridge:
        │                │
        └────────────────┴────────── GND
 
-Proračun C_boot:
+C_boot calculation:
 
 C_boot ≥ Qg / ΔV
 
-Gde je:
-- Qg = ukupan gate charge
-- ΔV = dozvoljeni pad napona (tipično 1V)
+Where:
+- Qg = total gate charge
+- ΔV = allowed voltage drop (typically 1V)
 
-Za SiC sa Qg = 500 nC, ΔV = 1V:
+For SiC with Qg = 500 nC, ΔV = 1V:
 C_boot ≥ 500 nC / 1V = 500 nF
 
 Plus margin (×10): C_boot ≥ 5 μF
-Preporučeno: 10-22 μF / 25V
+Recommended: 10-22 μF / 25V
 
-Ograničenja bootstrap-a:
-- Ne može 100% duty cycle (potreban refresh)
-- Max OFF time ograničen (leakage)
-- Startup sekvenca potrebna
+Bootstrap limitations:
+- Cannot run 100% duty cycle (needs refresh)
+- Max OFF time limited (leakage)
+- Startup sequence required
 ```
 
-### 5.2 Izolovani DC/DC za Gate Driver
+### 5.2 Isolated DC/DC for Gate Driver
 
 ```
-Kada koristiti izolovani DC/DC:
+When to use isolated DC/DC:
 
-1. Kada je potreban 100% duty cycle
-2. Za high-side u trofaznom inverteru
-3. Za full-bridge (4 nezavisna gate-a)
-4. Kada je potreban negativan bias
+1. When 100% duty cycle is needed
+2. For high-side in three-phase inverter
+3. For full-bridge (4 independent gates)
+4. When negative bias is needed
 
-Push-Pull izolovani DC/DC:
+Push-Pull isolated DC/DC:
 
      Vin          T1         Vout
       │     ┌────┬────┐       │
@@ -640,72 +640,72 @@ Push-Pull izolovani DC/DC:
       │   └─┬─┘  │  └─┬─┘     │
       │     │    │    │       │
      GND    └────┴────┘     GND2
-          (Izolacija)
+          (Isolation)
 
-Komercijalni moduli:
+Commercial modules:
 
 RECOM R15P21503D:
 - Vin: 15V (12-18V)
 - Vout: +15V / -3V
 - Power: 2W
-- Izolacija: 5.2 kV
-- Cena: ~€25
+- Isolation: 5.2 kV
+- Price: ~€25
 
 Murata MGJ2D121505SC:
 - Vin: 12V
 - Vout: +15V / -5V
 - Power: 2W
-- Izolacija: 5.2 kV
-- Cena: ~€20
+- Isolation: 5.2 kV
+- Price: ~€20
 
 MORNSUN QA02 Series:
-- Vin: 5V / 12V / 24V opcije
+- Vin: 5V / 12V / 24V options
 - Vout: +15V / -5V
 - Power: 2W
-- Izolacija: 3.5 kV
-- Cena: ~€8 (ekonomičnija opcija)
+- Isolation: 3.5 kV
+- Price: ~€8 (more economical option)
 ```
 
 ### 5.3 Gate Driver Power Budget
 
 ```
-Proračun snage za gate driver:
+Gate driver power calculation:
 
-1. Gate charge gubici:
+1. Gate charge losses:
    Pg = Qg × Vgs × f_sw
 
-   Za SiC (Qg = 150 nC, Vgs = 19V, f_sw = 50 kHz):
+   For SiC (Qg = 150 nC, Vgs = 19V, f_sw = 50 kHz):
    Pg = 150×10^-9 × 19 × 50000 = 142 mW
 
 2. Quiescent current:
    Pq = Vcc × Iq
-   Tipično Iq = 5-20 mA
+   Typically Iq = 5-20 mA
    Pq = 15 × 0.01 = 150 mW
 
-3. Izolacioni DC/DC efikasnost:
+3. Isolation DC/DC efficiency:
    η = 80-85%
 
    Pdc = (Pg + Pq) / η
    Pdc = (142 + 150) / 0.82 = 356 mW per channel
 
-Za half-bridge (2 kanala):
+For half-bridge (2 channels):
 P_total = 2 × 356 = 712 mW
 
-Za 3-fazni inverter (6 kanala):
+For 3-phase inverter (6 channels):
 P_total = 6 × 356 = 2.14 W
 
-NAPOMENA: Ovo je samo za gate drive!
-         Dodatna snaga za MCU, senzore, itd.
+NOTE: This is only for gate drive!
+      Additional power for MCU, sensors, etc.
 ```
 
-## 6. PCB Layout za Gate Driver
+## 6. PCB Layout for Gate Drivers
 
-### 6.1 Kritične Putanje
+### 6.1 Critical Paths
 
 ```
-Gate Driver Layout Prioriteti:
+Gate Driver Layout Priorities:
 
-                   HIGH dv/dt ZONA
+                   HIGH dv/dt ZONE
     ┌─────────────────────────────────────────┐
     │                                         │
     │    ┌─────────────────────────────┐      │
@@ -717,9 +717,9 @@ Gate Driver Layout Prioriteti:
     │    └─────┼─────────────┼─────────┘      │
     │          │             │                │
     │    ┌─────┴──┐    ┌─────┴──┐             │
-    │    │ Rg     │    │ Rg     │ ← Što bliže │
-    │    └────┬───┘    └────┬───┘   modulu    │
-    │         │             │                 │
+    │    │ Rg     │    │ Rg     │ ← As close │
+    │    └────┬───┘    └────┬───┘   as        │
+    │         │             │       possible  │
     │    ┌────┴─────────────┴────┐            │
     │    │    GATE DRIVER IC     │            │
     │    │    ┌───┐    ┌───┐     │            │
@@ -731,7 +731,7 @@ Gate Driver Layout Prioriteti:
     │    └────┴───┴────┴───┴─────┘            │
     │              │                          │
     │    ──────────┼──────────────────────    │
-    │    IZOLACIONA BARIJERA                  │
+    │    ISOLATION BARRIER                    │
     │    ──────────┼──────────────────────    │
     │              │                          │
     │    ┌─────────┴───────────┐              │
@@ -741,20 +741,20 @@ Gate Driver Layout Prioriteti:
     │                                         │
     └─────────────────────────────────────────┘
 
-Pravila:
-1. Gate loop što kraći (< 2 cm)
-2. Rg što bliže modulu
-3. Decopling kondenzatori na VCC/VEE
-4. Kelvin source konekcija
-5. Fizička separacija HV/LV zona
+Rules:
+1. Gate loop as short as possible (< 2 cm)
+2. Rg as close to module as possible
+3. Decoupling capacitors on VCC/VEE
+4. Kelvin source connection
+5. Physical separation of HV/LV zones
 ```
 
-### 6.2 Kelvin Source Konekcija
+### 6.2 Kelvin Source Connection
 
 ```
-Važnost Kelvin Source:
+Importance of Kelvin Source:
 
-BEZ Kelvin source:
+WITHOUT Kelvin source:
                     L_stray
     Driver ───Rg───┬──⌇⌇⌇───┬── GATE
                    │        │
@@ -769,12 +769,12 @@ BEZ Kelvin source:
                          Power GND
 
 Problem:
-- Power struja teče kroz L_source
-- V = L × di/dt stvara napon na source
-- Gate-Source napon varira!
+- Power current flows through L_source
+- V = L × di/dt creates voltage on source
+- Gate-Source voltage varies!
 - Vgs_actual = Vgs_driver - L_source × di/dt
 
-SA Kelvin source (4-pin package):
+WITH Kelvin source (4-pin package):
 
     Driver ───Rg───┬─────────┬── GATE
                    │         │
@@ -800,11 +800,11 @@ TO-247-4 Pinout:
      S = Source (Power)
      SK = Source Kelvin
 
-Rezultat:
-- Kelvin source samo za sensing
-- Nema di/dt uticaja
-- Preciznija Vgs kontrola
-- Brže, čistije switching
+Result:
+- Kelvin source only for sensing
+- No di/dt influence
+- More precise Vgs control
+- Faster, cleaner switching
 ```
 
 ### 6.3 Decoupling Strategy
@@ -827,25 +827,25 @@ Gate Driver Decoupling:
     GND ─────────┴────────────────┴───────────
 
 Placement:
-- C1, C3: ≤5mm od driver IC
-- C2, C4: Na ulazu napajanja
+- C1, C3: ≤5mm from driver IC
+- C2, C4: At power supply input
 
-Tip kondenzatora:
-- C1, C3: MLCC X7R ili C0G
-- C2, C4: MLCC X5R/X7R ili Tantalum
+Capacitor type:
+- C1, C3: MLCC X7R or C0G
+- C2, C4: MLCC X5R/X7R or Tantalum
 
-Za bootstrap:
+For bootstrap:
 - 10-22 μF / 25V
 - Low ESR MLCC
-- Blizu bootstrap diode
+- Close to bootstrap diode
 ```
 
-## 7. Zaštitne Funkcije
+## 7. Protection Functions
 
 ### 7.1 Under-Voltage Lockout (UVLO)
 
 ```
-UVLO funkcija:
+UVLO function:
 
       Vcc
        │
@@ -868,25 +868,25 @@ UVLO funkcija:
        │         │                     │
        │         └─────────────────────┘
 
-Tipični UVLO pragovi:
+Typical UVLO thresholds:
 
-│ Aplikacija     │ UVLO ON │ UVLO OFF │ Hyst  │
-├────────────────┼─────────┼──────────┼───────┤
-│ IGBT (+15V)    │ 13.0V   │ 11.5V    │ 1.5V  │
-│ SiC (+15V/-4V) │ 13.0V   │ 11.5V    │ 1.5V  │
-│ SiC (+18V/-5V) │ 15.5V   │ 14.0V    │ 1.5V  │
-│ GaN (+5V)      │ 4.5V    │ 4.0V     │ 0.5V  │
+│ Application      │ UVLO ON │ UVLO OFF │ Hyst  │
+├──────────────────┼─────────┼──────────┼───────┤
+│ IGBT (+15V)      │ 13.0V   │ 11.5V    │ 1.5V  │
+│ SiC (+15V/-4V)   │ 13.0V   │ 11.5V    │ 1.5V  │
+│ SiC (+18V/-5V)   │ 15.5V   │ 14.0V    │ 1.5V  │
+│ GaN (+5V)        │ 4.5V    │ 4.0V     │ 0.5V  │
 
-Zašto je UVLO važan:
-- Nedovoljan Vgs = linearan rad = termalni runaway
-- Gate oxide stress kod SiC ako Vgs previsok
-- Definisano ponašanje pri power-up/down
+Why UVLO is important:
+- Insufficient Vgs = linear operation = thermal runaway
+- Gate oxide stress in SiC if Vgs too high
+- Defined behavior during power-up/down
 ```
 
 ### 7.2 Short Circuit Protection Types
 
 ```
-Type I: Uključenje u short circuit
+Type I: Turn-on into short circuit
 
     Ic
      │
@@ -898,12 +898,12 @@ Type I: Uključenje u short circuit
      └────────────────────────► t
           t_desat (<5μs)
 
-- MOSFET uključuje u postojeći short
-- Struja limitirana saturacijom
-- Desat detektuje visok Vce/Vds odmah
-- Reaction time: < 5 μs kritično
+- MOSFET turns on into existing short
+- Current limited by saturation
+- Desat detects high Vce/Vds immediately
+- Reaction time: < 5 μs critical
 
-Type II: Short circuit tokom ON stanja
+Type II: Short circuit during ON state
 
     Ic
      │         ┌──────────────
@@ -914,27 +914,27 @@ Type II: Short circuit tokom ON stanja
      └────────────────────────► t
               t_SC
 
-- Normalan rad, zatim short
-- Brz porast struje
-- Teže detektovati (počinje od normalnog Vce)
-- Potrebna brža reakcija
+- Normal operation, then short
+- Rapid current rise
+- Harder to detect (starts from normal Vce)
+- Faster reaction needed
 
-SiC vs IGBT Short Circuit Kapacitet:
+SiC vs IGBT Short Circuit Capacity:
 
-│ Parametar      │ IGBT     │ SiC MOSFET │
-├────────────────┼──────────┼────────────┤
-│ SC kapacitet   │ 10 μs    │ 2-5 μs     │
-│ Reakcija potrebna│ <5 μs  │ <1 μs      │
-│ SC struja      │ 5-10×In  │ 3-8×In     │
-│ Energija limit │ Visoka   │ Niža       │
+│ Parameter        │ IGBT     │ SiC MOSFET │
+├──────────────────┼──────────┼────────────┤
+│ SC capacity      │ 10 μs    │ 2-5 μs     │
+│ Reaction needed  │ <5 μs    │ <1 μs      │
+│ SC current       │ 5-10×In  │ 3-8×In     │
+│ Energy limit     │ High     │ Lower      │
 
-Za SiC: KRITIČNO brza desaturacija!
+For SiC: CRITICAL fast desaturation!
 ```
 
-### 7.3 Implementacija Zaštite
+### 7.3 Protection Implementation
 
 ```
-Kompletna zaštitna sekvenca:
+Complete protection sequence:
 
     FAULT ──┬──────────────────────────────────
             │
@@ -946,8 +946,8 @@ Kompletna zaštitna sekvenca:
             │                 ▼
             │  ┌──────────────────────────────┐
             │  │   BLANKING TIME              │
-            │  │   (2-5 μs za IGBT)           │
-            │  │   (0.5-1 μs za SiC)          │
+            │  │   (2-5 μs for IGBT)          │
+            │  │   (0.5-1 μs for SiC)         │
             │  └──────────────┬───────────────┘
             │                 │
             │                 ▼
@@ -966,7 +966,7 @@ Kompletna zaštitna sekvenca:
             │
             └──► MCU/DSP: Fault handling
 
-Tipična šema dvostepenog turn-off:
+Typical two-stage turn-off schematic:
 
            Vgs
             │
@@ -986,15 +986,15 @@ Tipična šema dvostepenog turn-off:
                  t0        t1 (1-2 μs)
 ```
 
-## 8. Testiranje Gate Drivera
+## 8. Gate Driver Testing
 
-### 8.1 Statički Testovi
+### 8.1 Static Tests
 
 ```
 1. Output Voltage Test:
    - Vout(high): +15V ±0.5V
    - Vout(low): -4V ±0.3V
-   - Meriti pod opterećenjem (Rload = 100Ω)
+   - Measure under load (Rload = 100Ω)
 
 2. Propagation Delay:
    ┌────────────────────────────────────────┐
@@ -1011,24 +1011,24 @@ Tipična šema dvostepenog turn-off:
    │                                        │
    └────────────────────────────────────────┘
 
-   Meriti: tpd(on), tpd(off)
-   Specifikacija: <100 ns tipično
+   Measure: tpd(on), tpd(off)
+   Specification: <100 ns typical
 
 3. UVLO Test:
-   - Rampa Vcc: 0V → 20V → 0V
-   - Meriti tačke uključenja/isključenja
-   - Verifikovati histerezis
+   - Ramp Vcc: 0V → 20V → 0V
+   - Measure turn-on/turn-off points
+   - Verify hysteresis
 
 4. CMTI Test:
-   - Aplikovati dv/dt na izolacijsku barijeru
-   - Meriti izlazne smetnje
-   - Spec: >100 kV/μs za SiC
+   - Apply dv/dt across isolation barrier
+   - Measure output disturbance
+   - Spec: >100 kV/μs for SiC
 ```
 
-### 8.2 Dinamički Testovi
+### 8.2 Dynamic Tests
 
 ```
-Double Pulse Test sa Gate Driver Evaluacijom:
+Double Pulse Test with Gate Driver Evaluation:
 
 Setup:
     Vdc ──┬──────────┬───────────
@@ -1045,146 +1045,146 @@ Setup:
                │     │
     GND ───────┴─────┴───────────
 
-Merenja:
-1. Rise time / Fall time izlaza drivera
+Measurements:
+1. Rise time / Fall time of driver output
 2. Gate voltage overshoot/undershoot
-3. Miller plateau karakteristike
+3. Miller plateau characteristics
 4. Gate ringing
-5. Switching energije (Eon, Eoff)
+5. Switching energies (Eon, Eoff)
 
-Test sekvenca:
-│ Parametar        │ Prva nulsa │ Druga nulsa │
-├──────────────────┼────────────┼─────────────┤
-│ Trajanje         │ 5 μs       │ 2 μs        │
-│ Dead time        │ -          │ 2 μs        │
-│ Meri se          │ Turn-on    │ Turn-off    │
-│                  │ (Id = 0)   │ (Id = Il)   │
+Test sequence:
+│ Parameter        │ First pulse │ Second pulse│
+├──────────────────┼─────────────┼─────────────┤
+│ Duration         │ 5 μs        │ 2 μs        │
+│ Dead time        │ -           │ 2 μs        │
+│ Measured         │ Turn-on     │ Turn-off    │
+│                  │ (Id = 0)    │ (Id = Il)   │
 ```
 
 ### 8.3 Test Equipment
 
 ```
-Potrebna oprema:
+Required equipment:
 
-1. Osciloskop:
-   - Bandwidth: ≥200 MHz (≥500 MHz za SiC)
+1. Oscilloscope:
+   - Bandwidth: ≥200 MHz (≥500 MHz for SiC)
    - Sample rate: ≥1 GS/s
-   - Isolated channels za HV
+   - Isolated channels for HV
 
-   Preporuka: Tektronix MDO3054, Keysight DSOX3054
+   Recommendation: Tektronix MDO3054, Keysight DSOX3054
 
 2. Voltage Probes:
-   - Differential za gate voltage
-   - High voltage za Vce/Vds
+   - Differential for gate voltage
+   - High voltage for Vce/Vds
 
-   Preporuka:
+   Recommendation:
    - Tektronix THDP0200 (1500V, 200 MHz)
    - PMK PHV 4002-3 (2 kV, 400 MHz)
 
 3. Current Probes:
-   - Rogowski coil za di/dt
-   - Hall effect za DC + AC
+   - Rogowski coil for di/dt
+   - Hall effect for DC + AC
 
-   Preporuka:
+   Recommendation:
    - PEM CWT Mini (di/dt)
    - LEM PR30 (DC + AC)
 
 4. Power Supply:
-   - Izolovano, low noise
+   - Isolated, low noise
    - ±15V / -5V outputs
 
-   Preporuka:
+   Recommendation:
    - Recom bench supplies
    - Custom LISN filtered
 
 5. Function Generator:
-   - Za PWM generisanje
+   - For PWM generation
    - <10 ns rise time
 
-   Preporuka: Tektronix AFG31000
+   Recommendation: Tektronix AFG31000
 ```
 
 ## 9. Bill of Materials - Gate Drivers
 
-### 9.1 Za 150 kW Punjač (6 kanala)
+### 9.1 For 150 kW Charger (6 channels)
 
 ```
-Opcija A: Integrisani modularni driveri
+Option A: Integrated modular drivers
 
 ┌────────────────────────────────────────────────────────┐
-│ Komponenta              │ Qty │ Jed. cena │   Ukupno  │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ Wolfspeed CGD12HBXMP    │  3  │   €120    │   €360    │
-│ (Half-bridge SiC driver)│     │           │           │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ DC/DC RECOM R15P21503D  │  6  │   €25     │   €150    │
-│ (Backup/aux)            │     │           │           │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ Gate resistor kit       │ set │   €20     │   €20     │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ Decoupling capacitors   │ set │   €30     │   €30     │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ UKUPNO (Opcija A)       │     │           │   €560    │
+│ Component               │ Qty │ Unit Price │   Total   │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ Wolfspeed CGD12HBXMP    │  3  │   €120     │   €360    │
+│ (Half-bridge SiC driver)│     │            │           │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ DC/DC RECOM R15P21503D  │  6  │   €25      │   €150    │
+│ (Backup/aux)            │     │            │           │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ Gate resistor kit       │ set │   €20      │   €20     │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ Decoupling capacitors   │ set │   €30      │   €30     │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ TOTAL (Option A)        │     │            │   €560    │
 └────────────────────────────────────────────────────────┘
 
-Opcija B: Diskretni driveri (fleksibilnije)
+Option B: Discrete drivers (more flexible)
 
 ┌────────────────────────────────────────────────────────┐
-│ Komponenta              │ Qty │ Jed. cena │   Ukupno  │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ Silicon Labs Si8285     │  3  │   €12     │   €36     │
-│ (Dual isolated driver)  │     │           │           │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ DC/DC Murata MGJ2       │  6  │   €20     │   €120    │
-│ (+15V/-5V, 2W)          │     │           │           │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ Desat protection IC     │  6  │   €8      │   €48     │
-│ (ACPL-339J ili slično)  │     │           │           │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ Gate resistors (matched)│  12 │   €1      │   €12     │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ Decopling kit           │ set │   €40     │   €40     │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ Bootstrap diode + cap   │  6  │   €5      │   €30     │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ UKUPNO (Opcija B)       │     │           │   €286    │
+│ Component               │ Qty │ Unit Price │   Total   │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ Silicon Labs Si8285     │  3  │   €12      │   €36     │
+│ (Dual isolated driver)  │     │            │           │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ DC/DC Murata MGJ2       │  6  │   €20      │   €120    │
+│ (+15V/-5V, 2W)          │     │            │           │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ Desat protection IC     │  6  │   €8       │   €48     │
+│ (ACPL-339J or similar)  │     │            │           │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ Gate resistors (matched)│  12 │   €1       │   €12     │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ Decoupling kit          │ set │   €40      │   €40     │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ Bootstrap diode + cap   │  6  │   €5       │   €30     │
+├─────────────────────────┼─────┼────────────┼───────────┤
+│ TOTAL (Option B)        │     │            │   €286    │
 └────────────────────────────────────────────────────────┘
 
-Preporuka:
-- Za brz razvoj: Opcija A (manje rizika)
-- Za cost optimization: Opcija B (niža cena, više posla)
-- Za EXPO 2027: Opcija A preporučeno
+Recommendation:
+- For rapid development: Option A (less risk)
+- For cost optimization: Option B (lower cost, more work)
+- For EXPO 2027: Option A recommended
 ```
 
-## 10. Zaključak
+## 10. Conclusion
 
-### Ključne Preporuke za Gate Driver Dizajn:
+### Key Recommendations for Gate Driver Design:
 
 ```
-1. Izbor drivera prema poluvodiču:
-   ├── IGBT: Standardni izolovani (1ED020I12)
-   ├── SiC: Specijalizovani sa CMTI >100kV/μs
-   └── GaN: Integrisani half-bridge (LMG1210)
+1. Driver selection by semiconductor:
+   ├── IGBT: Standard isolated (1ED020I12)
+   ├── SiC: Specialized with CMTI >100kV/μs
+   └── GaN: Integrated half-bridge (LMG1210)
 
-2. Zaštitne funkcije (OBAVEZNO):
-   ├── UVLO sa histerezom
-   ├── Desaturation detection (<1μs za SiC)
-   ├── Soft turn-off sekvenac
+2. Protection functions (MANDATORY):
+   ├── UVLO with hysteresis
+   ├── Desaturation detection (<1μs for SiC)
+   ├── Soft turn-off sequence
    └── Fault reporting
 
-3. Layout prioriteti:
-   ├── Minimizovati gate loop
-   ├── Kelvin source konekcija
+3. Layout priorities:
+   ├── Minimize gate loop
+   ├── Kelvin source connection
    ├── Proper decoupling
-   └── HV/LV separacija
+   └── HV/LV separation
 
-4. Napajanje:
-   ├── Izolovani DC/DC za svaki kanal
-   ├── +15V/-4V za SiC (proveriti datasheet!)
-   └── Dovoljan power budget (>500mW/ch)
+4. Power supply:
+   ├── Isolated DC/DC for each channel
+   ├── +15V/-4V for SiC (check datasheet!)
+   └── Sufficient power budget (>500mW/ch)
 
-5. Testiranje:
-   ├── Double pulse test obavezan
-   ├── Desat protection verifikacija
-   └── CMTI test na završenom dizajnu
+5. Testing:
+   ├── Double pulse test mandatory
+   ├── Desat protection verification
+   └── CMTI test on finished design
 ```

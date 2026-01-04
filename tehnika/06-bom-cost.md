@@ -1,19 +1,19 @@
-# Bill of Materials i Cost Analysis
+# Bill of Materials and Cost Analysis
 
-## Filozofija: Premium Komponente, AI Kompenzacija
+## Philosophy: Premium Components, AI Compensation
 
 ```
-TRADICIONALNI PRISTUP             ELEKTROKOMBINACIJA
+TRADITIONAL APPROACH               ELEKTROKOMBINACIJA
 ────────────────────────────────────────────────────────────
-"Jeftiniji IGBT"            →    "Skuplji SiC, ali 50% manji gubici"
-"Jednostavniji air cool"    →    "Skuplji liquid, ali 2× gustina"
-"2-level jer je jeftiniji"  →    "3-level jer je bolji THD"
-"Minimum senzora"           →    "AI treba podatke"
+"Cheaper IGBT"              →    "More expensive SiC, but 50% lower losses"
+"Simpler air cool"          →    "More expensive liquid, but 2× density"
+"2-level because cheaper"   →    "3-level because better THD"
+"Minimum sensors"           →    "AI needs data"
 
-REZULTAT:
-Veći BOM cost              →    Ali: duži životni vek, manji TCO
-Kompleksniji dizajn        →    Ali: AI upravlja kompleksnošću
-Premium pozicioniranje     →    Ali: premium performanse
+RESULT:
+Higher BOM cost            →    But: longer lifespan, lower TCO
+More complex design        →    But: AI manages complexity
+Premium positioning        →    But: premium performance
 ```
 
 ---
@@ -22,7 +22,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Power Electronics
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | PE01 | SiC MOSFET 1000V/35A | C3M0065100K | 8 | 15.00 | 120.00 |
 | PE02 | SiC Schottky 650V | C3D10065A | 8 | 8.00 | 64.00 |
@@ -41,7 +41,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Control Electronics
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | CE01 | MCU | STM32H743 | 1 | 18.00 | 18.00 |
 | CE02 | Crystal oscillator | 25MHz, ±10ppm | 1 | 2.00 | 2.00 |
@@ -59,7 +59,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Thermal
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | TH01 | Aluminum enclosure | Finned, 150×120×80 | 1 | 40.00 | 40.00 |
 | TH02 | Internal heatsink | Aluminum, machined | 1 | 20.00 | 20.00 |
@@ -70,7 +70,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Connectivity
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | CN01 | DC output connector | Anderson PP45 | 1 | 8.00 | 8.00 |
 | CN02 | AC input connector | IEC 60320 C14 | 1 | 3.00 | 3.00 |
@@ -81,7 +81,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Mechanical & Misc
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | MC01 | Power PCB | 4-layer, 2oz Cu | 1 | 40.00 | 40.00 |
 | MC02 | Mounting hardware | Screws, standoffs | 1 set | 5.00 | 5.00 |
@@ -92,7 +92,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### EK3 Total BOM
 
-| Kategorija | Subtotal € |
+| Category | Subtotal € |
 |------------|------------|
 | Power Electronics | 545.00 |
 | Control Electronics | 93.00 |
@@ -107,7 +107,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Power Electronics
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | PE01 | SiC Module 1200V | CAB011M12FM3 | 2 | 350.00 | 700.00 |
 | PE02 | SiC MOSFET 650V (T-type) | IMW65R048M1H | 12 | 20.00 | 240.00 |
@@ -128,7 +128,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Control Electronics
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | CE01 | MCU (main) | STM32N657 (NPU) | 1 | 35.00 | 35.00 |
 | CE02 | MCU (safety) | STM32G474 | 1 | 12.00 | 12.00 |
@@ -147,7 +147,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### V2G / Grid Interface
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | V2G01 | PLC Modem | HomePlug GP | 1 | 25.00 | 25.00 |
 | V2G02 | Crypto IC | OPTIGA SLS32 | 1 | 8.00 | 8.00 |
@@ -160,7 +160,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Thermal System
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | TH01 | Coldplate | Al microchannel | 1 | 120.00 | 120.00 |
 | TH02 | Pump | Brushless DC, 10L/min | 1 | 35.00 | 35.00 |
@@ -178,7 +178,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Swarm / Communication
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | SW01 | CAN-FD Transceiver (ext) | TJA1443 | 1 | 3.00 | 3.00 |
 | SW02 | CAN connectors | M12, 5-pin | 2 | 5.00 | 10.00 |
@@ -192,7 +192,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### Mechanical & Enclosure
 
-| ID | Komponenta | Part Number | Qty | Unit € | Total € |
+| ID | Component | Part Number | Qty | Unit € | Total € |
 |----|------------|-------------|-----|--------|---------|
 | MC01 | Enclosure | IP65, 400×300×150 | 1 | 150.00 | 150.00 |
 | MC02 | Power PCB | 6-layer, heavy Cu | 1 | 200.00 | 200.00 |
@@ -206,7 +206,7 @@ Premium pozicioniranje     →    Ali: premium performanse
 
 ### EK30 Total BOM
 
-| Kategorija | Subtotal € |
+| Category | Subtotal € |
 |------------|------------|
 | Power Electronics | 2,850.00 |
 | Control Electronics | 238.00 |
@@ -281,7 +281,7 @@ After 3 years:
 
 ### Assembly Labor
 
-| Operacija | EK3 (min) | EK30 (min) |
+| Operation | EK3 (min) | EK30 (min) |
 |-----------|-----------|------------|
 | PCB assembly (SMT) | Outsourced | Outsourced |
 | Through-hole assembly | 30 | 45 |
@@ -556,8 +556,8 @@ RESULT: Best value in market segment
 
 ## Reference
 
-Cene komponenti bazirane na:
+Component prices based on:
 - Digi-Key, Mouser pricing (Q3 2024)
 - Wolfspeed distributor quotes
-- Alibaba za volume reference
+- Alibaba for volume reference
 - Industry reports (Yole, IHS Markit)

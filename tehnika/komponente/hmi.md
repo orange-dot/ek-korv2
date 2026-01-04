@@ -1,27 +1,27 @@
-# HMI i Korisničko Sučelje za EV Punjače
+# HMI and User Interface for EV Chargers
 
-## 1. HMI Zahtevi
+## 1. HMI Requirements
 
-### 1.1 Korisnički Interfejs
+### 1.1 User Interface
 
 ```
-Osnovni Zahtevi:
+Basic Requirements:
 
-1. Fizički elementi:
-   ├── Display (touchscreen ili non-touch)
-   ├── LED indikatori statusa
-   ├── RFID čitač
+1. Physical elements:
+   ├── Display (touchscreen or non-touch)
+   ├── LED status indicators
+   ├── RFID reader
    ├── Emergency stop button
    └── Connector holder/hook
 
-2. Informacije za korisnika:
-   ├── Status punjača (Available/Charging/Faulted)
+2. Information for user:
+   ├── Charger status (Available/Charging/Faulted)
    ├── Charging progress (%, kWh, time)
    ├── Price information
    ├── Instructions
    └── Error messages
 
-3. Pristupačnost:
+3. Accessibility:
    ├── ADA/EN 301 549 compliance
    ├── Readable in sunlight
    ├── Contrast ratio >3:1
@@ -31,9 +31,9 @@ Osnovni Zahtevi:
 ### 1.2 Display Options
 
 ```
-Display Tipovi:
+Display Types:
 
-1. TFT LCD sa Touchscreen:
+1. TFT LCD with Touchscreen:
 ┌─────────────────────────────────────────────────────────────┐
 │ Size: 7-10 inch                                            │
 │ Resolution: 800×480 to 1280×800                            │
@@ -112,10 +112,10 @@ Main Charging Screen:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Status Indikatori
+### 2.2 Status Indicators
 
 ```
-LED Status Indikatori:
+LED Status Indicators:
 
 │ Status       │ LED Color     │ Pattern      │ Meaning              │
 ├──────────────┼───────────────┼──────────────┼──────────────────────┤
@@ -149,12 +149,12 @@ Power: 5V, ~1W for 24 LEDs
 Library: FastLED (Arduino) or similar
 ```
 
-## 3. RFID i Autorizacija
+## 3. RFID and Authorization
 
-### 3.1 RFID Čitač
+### 3.1 RFID Reader
 
 ```
-RFID Standards za EV Charging:
+RFID Standards for EV Charging:
 
 │ Standard   │ Frequency │ Range  │ Use Case           │
 ├────────────┼───────────┼────────┼────────────────────┤
@@ -163,7 +163,7 @@ RFID Standards za EV Charging:
 │ ISO 15693  │ 13.56 MHz │ 1 m    │ Vicinity cards    │
 │ ISO 18000  │ 13.56 MHz │ 1 m    │ RFID tags         │
 
-Preporučeno: ISO 14443A (MIFARE compatible)
+Recommended: ISO 14443A (MIFARE compatible)
 
 RFID Reader Modules:
 
@@ -240,28 +240,28 @@ https://charge.example.com/start?
 // Server validates request, initiates OCPP RemoteStart
 ```
 
-## 4. Lokalizacija
+## 4. Localization
 
 ### 4.1 Multi-Language Support
 
 ```
-Jezici za EXPO 2027 (Srbija):
+Languages for EXPO 2027 (Serbia):
 
-1. Srpski (primary)
-2. Engleski (international)
-3. Nemački (visitors)
-4. Kineski (Higer buses)
+1. Serbian (primary)
+2. English (international)
+3. German (visitors)
+4. Chinese (Higer buses)
 
 String Resources:
 
 // strings_sr.json
 {
-  "welcome": "Добродошли",
-  "connect_vehicle": "Повежите возило",
-  "charging": "Пуњење у току",
-  "complete": "Пуњење завршено",
-  "stop": "Стоп",
-  "error": "Грешка"
+  "welcome": "Dobrodosli",
+  "connect_vehicle": "Povezite vozilo",
+  "charging": "Punjenje u toku",
+  "complete": "Punjenje zavrseno",
+  "stop": "Stop",
+  "error": "Greska"
 }
 
 // strings_en.json
@@ -284,15 +284,15 @@ Language Selection:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ HMI KOMPONENTE (150 kW DC Punjač)                               │
+│ HMI COMPONENTS (150 kW DC Charger)                              │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
-│ Komponenta                   │ Qty │ Jed. cena  │    Ukupno     │
+│ Component                    │ Qty │ Unit Price │    Total      │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ 10" Industrial Touch Panel   │  1  │   €350     │    €350       │
 │ (Sunlight readable, IP65)    │     │            │               │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ Raspberry Pi CM4 + carrier   │  1  │   €100     │    €100       │
-│ (ili SBC za HMI)             │     │            │               │
+│ (or SBC for HMI)             │     │            │               │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ RFID Reader ISO 14443        │  1  │    €70     │     €70       │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
@@ -302,6 +302,6 @@ Language Selection:
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ Bezels, mounting hardware    │ set │    €40     │     €40       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ UKUPNO HMI                                      │    €585       │
+│ TOTAL HMI                                       │    €585       │
 └─────────────────────────────────────────────────┴───────────────┘
 ```

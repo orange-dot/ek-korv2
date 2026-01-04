@@ -1,329 +1,329 @@
-# Power Electronics - Detaljna razrada
+# Power Electronics - Detailed Analysis
 
-## 1. Uvod
+## 1. Introduction
 
-Power electronics je srce svakog EV punjača. Pretvara mrežni AC napon u regulirani DC napon potreban za punjenje baterije vozila. Ovaj dokument detaljno razrađuje sve aspekte dizajna power electronics sustava.
-
----
-
-## 2. Arhitektura sustava
-
-### 2.1 Dvostupanjska arhitektura (standard)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    DVOSTUPANJSKA ARHITEKTURA                                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│   3-faz AC        EMI         AC/DC          DC Link        DC/DC          │
-│   400V 50Hz      Filter       (PFC)          Bus           (Isolated)      │
-│                                                                             │
-│   ┌─────┐      ┌───────┐    ┌───────┐      ┌───────┐     ┌───────┐        │
-│   │     │      │       │    │       │      │       │     │       │        │
-│   │  ~  │─────►│ EMI   │───►│ PFC   │─────►│ 800V  │────►│ LLC/  │───► DC │
-│   │     │      │       │    │       │      │  DC   │     │ DAB   │    Out │
-│   │     │      │       │    │       │      │       │     │       │        │
-│   └─────┘      └───────┘    └───────┘      └───────┘     └───────┘        │
-│                                                                             │
-│   Funkcije:                                                                 │
-│   • EMI Filter: Suzbijanje smetnji, THD redukcija                          │
-│   • PFC: Power factor correction (>0.99), AC→DC konverzija                 │
-│   • DC Link: Energetski buffer, decoupling između stupnjeva                │
-│   • DC/DC: Galvanska izolacija, naponska regulacija                        │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### 2.2 Prednosti dvostupanjske arhitekture
-
-| Prednost | Obrazloženje |
-|----------|--------------|
-| Decoupling | PFC i DC/DC mogu se optimizirati neovisno |
-| Regulacija | Širok izlazni naponski raspon (150-920V) |
-| Izolacija | Galvanska izolacija u DC/DC stupnju |
-| Efikasnost | Svaki stupanj optimiziran za svoju funkciju |
-| Modularnost | Lakše skaliranje snage |
-
-### 2.3 Jednostupanjska arhitektura (alternativa)
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│              JEDNOSTUPANJSKA ARHITEKTURA                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   3-faz AC      EMI        Izolirani         DC                │
-│   400V         Filter      AC/DC            Output              │
-│                                                                 │
-│   ┌─────┐    ┌───────┐   ┌────────────┐   ┌───────┐           │
-│   │     │    │       │   │            │   │       │           │
-│   │  ~  │───►│ EMI   │──►│  Matrix /  │──►│Filter │──► DC     │
-│   │     │    │       │   │  DAB-based │   │       │   Out     │
-│   │     │    │       │   │            │   │       │           │
-│   └─────┘    └───────┘   └────────────┘   └───────┘           │
-│                                                                 │
-│   Prednosti:                                                    │
-│   • Manji broj komponenti                                      │
-│   • Potencijalno veća efikasnost (jedan stupanj konverzije)   │
-│   • Kompaktniji dizajn                                         │
-│                                                                 │
-│   Nedostaci:                                                    │
-│   • Složenija kontrola                                         │
-│   • Ograničen naponski raspon                                  │
-│   • Manje fleksibilan dizajn                                   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+Power electronics is the heart of every EV charger. It converts grid AC voltage into regulated DC voltage required for charging vehicle batteries. This document provides detailed analysis of all aspects of power electronics system design.
 
 ---
 
-## 3. AC/DC Stupanj - Power Factor Correction
+## 2. System Architecture
 
-### 3.1 Zašto PFC?
+### 2.1 Two-Stage Architecture (Standard)
 
-**Bez PFC:**
+```
++-------------------------------------------------------------------------------+
+|                    TWO-STAGE ARCHITECTURE                                      |
++-------------------------------------------------------------------------------+
+|                                                                               |
+|   3-phase AC        EMI         AC/DC          DC Link        DC/DC          |
+|   400V 50Hz        Filter       (PFC)          Bus           (Isolated)      |
+|                                                                               |
+|   +-----+      +-------+    +-------+      +-------+     +-------+           |
+|   |     |      |       |    |       |      |       |     |       |           |
+|   |  ~  |----->| EMI   |--->| PFC   |----->| 800V  |---->| LLC/  |---> DC    |
+|   |     |      |       |    |       |      |  DC   |     | DAB   |    Out    |
+|   |     |      |       |    |       |      |       |     |       |           |
+|   +-----+      +-------+    +-------+      +-------+     +-------+           |
+|                                                                               |
+|   Functions:                                                                  |
+|   - EMI Filter: Interference suppression, THD reduction                      |
+|   - PFC: Power factor correction (>0.99), AC->DC conversion                  |
+|   - DC Link: Energy buffer, decoupling between stages                        |
+|   - DC/DC: Galvanic isolation, voltage regulation                            |
+|                                                                               |
++-------------------------------------------------------------------------------+
+```
+
+### 2.2 Advantages of Two-Stage Architecture
+
+| Advantage | Explanation |
+|-----------|-------------|
+| Decoupling | PFC and DC/DC can be optimized independently |
+| Regulation | Wide output voltage range (150-920V) |
+| Isolation | Galvanic isolation in DC/DC stage |
+| Efficiency | Each stage optimized for its function |
+| Modularity | Easier power scaling |
+
+### 2.3 Single-Stage Architecture (Alternative)
+
+```
++---------------------------------------------------------------+
+|              SINGLE-STAGE ARCHITECTURE                         |
++---------------------------------------------------------------+
+|                                                               |
+|   3-phase AC      EMI        Isolated         DC              |
+|   400V           Filter      AC/DC            Output          |
+|                                                               |
+|   +-----+    +-------+   +------------+   +-------+          |
+|   |     |    |       |   |            |   |       |          |
+|   |  ~  |--->| EMI   |-->|  Matrix /  |-->|Filter |--> DC    |
+|   |     |    |       |   |  DAB-based |   |       |   Out    |
+|   |     |    |       |   |            |   |       |          |
+|   +-----+    +-------+   +------------+   +-------+          |
+|                                                               |
+|   Advantages:                                                 |
+|   - Fewer components                                          |
+|   - Potentially higher efficiency (one conversion stage)      |
+|   - More compact design                                       |
+|                                                               |
+|   Disadvantages:                                               |
+|   - More complex control                                       |
+|   - Limited voltage range                                      |
+|   - Less flexible design                                       |
+|                                                               |
++---------------------------------------------------------------+
+```
+
+---
+
+## 3. AC/DC Stage - Power Factor Correction
+
+### 3.1 Why PFC?
+
+**Without PFC:**
 - Power factor: 0.6-0.7
 - THD: 80-100%
-- Harmonici opterećuju mrežu
-- Penali od distributera električne energije
+- Harmonics load the grid
+- Penalties from electricity distributors
 
-**S PFC:**
+**With PFC:**
 - Power factor: >0.99
 - THD: <5%
-- Sinusoidalna ulazna struja
-- Usklađenost sa standardima (IEC 61000-3-2/12)
+- Sinusoidal input current
+- Compliance with standards (IEC 61000-3-2/12)
 
-### 3.2 Vienna Rectifier - Detaljna analiza
+### 3.2 Vienna Rectifier - Detailed Analysis
 
-#### Topologija
+#### Topology
 
 ```
                            DC+ (400V)
-                              │
-                              │
-    ┌─────────────────────────┼─────────────────────────┐
-    │                         │                         │
-   ═══                       ═══                       ═══
-   ═══ C1                    ═══ C1                    ═══ C1
-    │                         │                         │
-    │    D1a    S1    D1b     │    D2a    S2    D2b     │    D3a    S3    D3b
-    ├────►┤────┤────├◄────────├────►┤────┤────├◄────────├────►┤────┤────├◄────┤
-    │           │              │          │              │          │          │
-    │           │              │          │              │          │          │
-    L1──[L]─────┴──────────────│          │              │          │          │
-                               │          │              │          │          │
-    L2──[L]────────────────────┴──────────┴──────────────│          │          │
-                                                         │          │          │
-    L3──[L]──────────────────────────────────────────────┴──────────┴──────────┤
-    │                                                                           │
-    │                         │                         │                       │
-   ═══                       ═══                       ═══                      │
-   ═══ C2                    ═══ C2                    ═══ C2                   │
-    │                         │                         │                       │
-    └─────────────────────────┼─────────────────────────┘                       │
-                              │                                                 │
-                           DC- (400V)                                           │
-                              │                                                 │
-                         Neutral Point ◄────────────────────────────────────────┘
+                              |
+                              |
+    +-------------------------+-------------------------+
+    |                         |                         |
+   ===                       ===                       ===
+   === C1                    === C1                    === C1
+    |                         |                         |
+    |    D1a    S1    D1b     |    D2a    S2    D2b     |    D3a    S3    D3b
+    +---->|----+----<|--------+---->|----+----<|--------+---->|----+----<|----+
+    |           |              |          |              |          |          |
+    |           |              |          |              |          |          |
+    L1--[L]-----+--------------|          |              |          |          |
+                               |          |              |          |          |
+    L2--[L]--------------------+----------+--------------+          |          |
+                                                         |          |          |
+    L3--[L]----------------------------------------------+----------+----------+
+    |                                                                           |
+    |                         |                         |                       |
+   ===                       ===                       ===                      |
+   === C2                    === C2                    === C2                   |
+    |                         |                         |                       |
+    +-------------------------+-------------------------+                       |
+                              |                                                 |
+                           DC- (400V)                                           |
+                              |                                                 |
+                         Neutral Point <----------------------------------------+
 ```
 
-#### Princip rada
+#### Operating Principle
 
-**Pozitivna poluperioda (faza L1):**
-1. Struja teče kroz L1, D1a, S1 (kad je uključen), i vraća se kroz neutral point
-2. S1 se PWM modulira za kontrolu struje
-3. Kad je S1 isključen, struja teče kroz D1a u gornji DC bus
+**Positive half-period (phase L1):**
+1. Current flows through L1, D1a, S1 (when on), and returns through neutral point
+2. S1 is PWM modulated to control current
+3. When S1 is off, current flows through D1a into upper DC bus
 
-**Negativna poluperioda (faza L1):**
-1. Struja teče iz neutral pointa, kroz S1 (kad je uključen), D1b, i vraća se u L1
-2. Kad je S1 isključen, struja teče iz donjeg DC busa kroz D1b
+**Negative half-period (phase L1):**
+1. Current flows from neutral point, through S1 (when on), D1b, and returns to L1
+2. When S1 is off, current flows from lower DC bus through D1b
 
-#### Matematički model
+#### Mathematical Model
 
-**Ulazna struja (po fazi):**
+**Input current (per phase):**
 ```
-i_L(t) = I_m × sin(ωt)
+i_L(t) = I_m x sin(wt)
 
-Gdje je:
-- I_m = √2 × I_rms
-- ω = 2πf = 2π × 50 = 314.16 rad/s
-```
-
-**DC link napon:**
-```
-V_dc = 2 × V_ac_peak / √3 × M
-
-Za 400V AC ulaz i M=0.95:
-V_dc = 2 × 565V / 1.732 × 0.95 = ~620V (minimum)
-
-Tipično se koristi V_dc = 700-800V za marginu
+Where:
+- I_m = sqrt(2) x I_rms
+- w = 2pif = 2pi x 50 = 314.16 rad/s
 ```
 
-**Duty cycle za PFC:**
+**DC link voltage:**
+```
+V_dc = 2 x V_ac_peak / sqrt(3) x M
+
+For 400V AC input and M=0.95:
+V_dc = 2 x 565V / 1.732 x 0.95 = ~620V (minimum)
+
+Typically V_dc = 700-800V is used for margin
+```
+
+**Duty cycle for PFC:**
 ```
 d(t) = 1 - (V_dc/2) / |v_ac(t)|
 
-Za sinusoidalnu struju, duty cycle varira sinusoidalno
+For sinusoidal current, duty cycle varies sinusoidally
 ```
 
-#### Specifikacije komponenti
+#### Component Specifications
 
-| Komponenta | Vrijednost | Tip | Proizvođač |
-|------------|------------|-----|------------|
+| Component | Value | Type | Manufacturer |
+|-----------|-------|------|--------------|
 | S1-S3 | 1200V/50A | SiC MOSFET | Wolfspeed C3M0065100K |
 | D1a-D3b | 1200V/30A | SiC Schottky | Wolfspeed C4D20120D |
-| L1-L3 | 200-500 µH | Sendust/Powder | Magnetics |
-| C1, C2 | 500-1000 µF | Film PP | TDK EPCOS |
+| L1-L3 | 200-500 uH | Sendust/Powder | Magnetics |
+| C1, C2 | 500-1000 uF | Film PP | TDK EPCOS |
 
-#### Kontrolna strategija
+#### Control Strategy
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│              VIENNA RECTIFIER CONTROL                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   V_dc_ref ──┬──►[   ]──► V_dc_error                           │
-│              │   │-│                                            │
-│   V_dc_meas ─┘   [PI]──► I_ref (amplitude)                     │
-│                    │                                            │
-│                    ▼                                            │
-│   V_ac_phase ──►[×]──► i_ref(t) = I_ref × sin(θ)              │
-│                    │                                            │
-│                    ▼                                            │
-│   i_L_meas ─────►[ - ]──► i_error                              │
-│                    │                                            │
-│                    ▼                                            │
-│                  [PI/PR]──► duty cycle                         │
-│                    │                                            │
-│                    ▼                                            │
-│                  [PWM]──► Gate signals S1, S2, S3              │
-│                                                                 │
-│   Tipični PI parametri:                                        │
-│   • Voltage loop: Kp=0.5, Ki=50, bandwidth ~20 Hz             │
-│   • Current loop: Kp=0.1, Ki=500, bandwidth ~2 kHz            │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
++---------------------------------------------------------------+
+|              VIENNA RECTIFIER CONTROL                          |
++---------------------------------------------------------------+
+|                                                               |
+|   V_dc_ref --+-->[   ]--> V_dc_error                          |
+|              |   |-|                                           |
+|   V_dc_meas -+   [PI]--> I_ref (amplitude)                    |
+|                    |                                           |
+|                    v                                           |
+|   V_ac_phase -->[x]--> i_ref(t) = I_ref x sin(theta)          |
+|                    |                                           |
+|                    v                                           |
+|   i_L_meas ----->[- ]--> i_error                              |
+|                    |                                           |
+|                    v                                           |
+|                  [PI/PR]--> duty cycle                        |
+|                    |                                           |
+|                    v                                           |
+|                  [PWM]--> Gate signals S1, S2, S3             |
+|                                                               |
+|   Typical PI parameters:                                      |
+|   - Voltage loop: Kp=0.5, Ki=50, bandwidth ~20 Hz            |
+|   - Current loop: Kp=0.1, Ki=500, bandwidth ~2 kHz           |
+|                                                               |
++---------------------------------------------------------------+
 ```
 
-#### Performanse
+#### Performance
 
-| Parametar | Vrijednost | Uvjet |
-|-----------|------------|-------|
-| Efikasnost | 98.5% | Puno opterećenje |
-| Power factor | 0.995 | Puno opterećenje |
-| THD struje | 2.5% | Puno opterećenje |
-| THD struje | 5% | 20% opterećenja |
+| Parameter | Value | Condition |
+|-----------|-------|-----------|
+| Efficiency | 98.5% | Full load |
+| Power factor | 0.995 | Full load |
+| Current THD | 2.5% | Full load |
+| Current THD | 5% | 20% load |
 
 ---
 
-### 3.3 Active Front End (AFE) - Bidirekcijski
+### 3.3 Active Front End (AFE) - Bidirectional
 
-#### Topologija (Three-Phase Two-Level)
+#### Topology (Three-Phase Two-Level)
 
 ```
                                     DC+
-                                     │
-                                    ═══
-                                    ═══ C_dc
-                                     │
-    ┌────────────────┬───────────────┼───────────────┬────────────────┐
-    │                │               │               │                │
-   ┌┴┐              ┌┴┐             ┌┴┐             ┌┴┐              ┌┴┐
-   │S1│             │S3│            │S5│            │  │             │  │
-   │  │             │  │            │  │            │  │             │  │
-   └┬┘              └┬┘             └┬┘             └┬┘              └┬┘
-    │                │               │               │                │
-    ├────[L1]────────┤               │               │                │
-    │                │               │               │                │
-    │                ├────[L2]───────┤               │                │
-    │                │               │               │                │
-    │                │               ├────[L3]───────┤                │
-    │                │               │               │                │
-   ┌┴┐              ┌┴┐             ┌┴┐             │                │
-   │S2│             │S4│            │S6│            │                │
-   │  │             │  │            │  │            │                │
-   └┬┘              └┬┘             └┬┘             │                │
-    │                │               │               │                │
-    └────────────────┴───────────────┼───────────────┴────────────────┘
-                                     │
-                                    ═══
-                                    ═══ C_dc
-                                     │
+                                     |
+                                    ===
+                                    === C_dc
+                                     |
+    +----------------+---------------+---------------+----------------+
+    |                |               |               |                |
+   +-+              +-+             +-+             +-+              +-+
+   |S1|             |S3|            |S5|            |  |             |  |
+   |  |             |  |            |  |            |  |             |  |
+   +-+              +-+             +-+             +-+              +-+
+    |                |               |               |                |
+    +----[L1]--------+               |               |                |
+    |                |               |               |                |
+    |                +----[L2]-------+               |                |
+    |                |               |               |                |
+    |                |               +----[L3]-------+                |
+    |                |               |               |                |
+   +-+              +-+             +-+             |                |
+   |S2|             |S4|            |S6|            |                |
+   |  |             |  |            |  |            |                |
+   +-+              +-+             +-+             |                |
+    |                |               |               |                |
+    +----------------+---------------+---------------+----------------+
+                                     |
+                                    ===
+                                    === C_dc
+                                     |
                                     DC-
 ```
 
-#### Prednosti AFE nad Vienna Rectifierom
+#### Advantages of AFE over Vienna Rectifier
 
-| Aspekt | Vienna | AFE |
+| Aspect | Vienna | AFE |
 |--------|--------|-----|
-| Bidirekcionalnost | Ne | Da |
-| V2G sposobnost | Ne | Da |
-| Reaktivna kompenzacija | Ne | Da |
-| Broj aktivnih sklopki | 3 | 6 |
-| Efikasnost | 98.5% | 97-98% |
-| Kompleksnost kontrole | Srednja | Visoka |
+| Bidirectionality | No | Yes |
+| V2G capability | No | Yes |
+| Reactive compensation | No | Yes |
+| Number of active switches | 3 | 6 |
+| Efficiency | 98.5% | 97-98% |
+| Control complexity | Medium | High |
 
-#### Space Vector Modulation (SVM) za AFE
+#### Space Vector Modulation (SVM) for AFE
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SPACE VECTOR DIAGRAM                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│                         V3 (010)                                │
-│                            /\                                   │
-│                           /  \                                  │
-│                          /    \                                 │
-│                         /      \                                │
-│                        /   S3   \                               │
-│                       /          \                              │
-│              V2 (110)/     S2     \ V4 (011)                   │
-│                     /              \                            │
-│                    /    ┌──────┐    \                          │
-│                   /     │V_ref │     \                         │
-│                  /      │  θ   │      \                        │
-│                 /       └──────┘       \                       │
-│                /     S1          S4     \                      │
-│               /                          \                     │
-│      V1 (100)────────────────────────────── V5 (001)          │
-│               \           S6           S5 /                    │
-│                \                        /                      │
-│                 \                      /                       │
-│                  \        V0         /                         │
-│                   \     (000,111)   /                          │
-│                    \              /                            │
-│                     \            /                             │
-│                      V6 (101)                                  │
-│                                                                 │
-│   Switching states: V0-V7 (8 states, 2 zero vectors)          │
-│   V_ref se sintetizira iz najbližih vektora                   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
++---------------------------------------------------------------+
+|                    SPACE VECTOR DIAGRAM                        |
++---------------------------------------------------------------+
+|                                                               |
+|                         V3 (010)                               |
+|                            /\                                  |
+|                           /  \                                 |
+|                          /    \                                |
+|                         /      \                               |
+|                        /   S3   \                              |
+|                       /          \                             |
+|              V2 (110)/     S2     \ V4 (011)                  |
+|                     /              \                           |
+|                    /    +------+    \                         |
+|                   /     |V_ref |     \                        |
+|                  /      |  t   |      \                       |
+|                 /       +------+       \                      |
+|                /     S1          S4     \                     |
+|               /                          \                    |
+|      V1 (100)---------------------------- V5 (001)           |
+|               \           S6           S5 /                   |
+|                \                        /                     |
+|                 \                      /                      |
+|                  \        V0         /                        |
+|                   \     (000,111)   /                         |
+|                    \              /                           |
+|                     \            /                            |
+|                      V6 (101)                                 |
+|                                                               |
+|   Switching states: V0-V7 (8 states, 2 zero vectors)         |
+|   V_ref is synthesized from nearest vectors                  |
+|                                                               |
++---------------------------------------------------------------+
 ```
 
-#### SVM algoritam
+#### SVM Algorithm
 
 ```c
 // Space Vector Modulation Implementation
 void SVM_Calculate(float V_alpha, float V_beta, float V_dc,
                    float* duty_a, float* duty_b, float* duty_c) {
 
-    // Izračun sektora
+    // Calculate sector
     float V_ref = sqrt(V_alpha*V_alpha + V_beta*V_beta);
     float theta = atan2(V_beta, V_alpha);
     if (theta < 0) theta += 2*PI;
 
     int sector = (int)(theta / (PI/3)) + 1;
 
-    // Normalizacija
+    // Normalization
     float m = V_ref / (V_dc / sqrt(3));  // Modulation index
     float angle = theta - (sector-1) * PI/3;
 
-    // Vrijeme vektora
+    // Vector times
     float T1 = m * sin(PI/3 - angle);
     float T2 = m * sin(angle);
     float T0 = 1 - T1 - T2;
 
-    // Duty cycle prema sektoru
+    // Duty cycle according to sector
     switch(sector) {
         case 1:
             *duty_a = T1 + T2 + T0/2;
@@ -344,164 +344,165 @@ void SVM_Calculate(float V_alpha, float V_beta, float V_dc,
 
 ### 3.4 Three-Level NPC (Neutral Point Clamped)
 
-#### Topologija
+#### Topology
 
 ```
                                          DC+
-                                          │
-                                         ═══ C1
-                                          │
-    ┌─────────────────┬───────────────────┼─────────────────┐
-    │                 │                   │                 │
-   ┌┴┐               ┌┴┐                 ┌┴┐               │
-   │S1a│             │S2a│               │S3a│              │
-   └┬┘               └┬┘                 └┬┘               │
-    │                 │                   │                 │
-   ┌┴┐               ┌┴┐                 ┌┴┐               │
-   │S1b│             │S2b│               │S3b│              │
-   └┬┘               └┬┘                 └┬┘               │
-    │                 │                   │                 │
-    ├────►│D1├────────┼────►│D2├──────────┼────►│D3├───────┤ Neutral
-    │                 │                   │                 │   Point
-   ┌┴┐               ┌┴┐                 ┌┴┐               │
-   │S1c│             │S2c│               │S3c│              │
-   └┬┘               └┬┘                 └┬┘               │
-    │                 │                   │                 │
-   ┌┴┐               ┌┴┐                 ┌┴┐               │
-   │S1d│             │S2d│               │S3d│              │
-   └┬┘               └┬┘                 └┬┘               │
-    │                 │                   │                 │
-    └─────────────────┴───────────────────┼─────────────────┘
-                                          │
-                                         ═══ C2
-                                          │
+                                          |
+                                         === C1
+                                          |
+    +-----------------+-------------------+------------------+
+    |                 |                   |                 |
+   +-+               +-+                 +-+               |
+   |S1a|             |S2a|               |S3a|              |
+   +-+               +-+                 +-+               |
+    |                 |                   |                 |
+   +-+               +-+                 +-+               |
+   |S1b|             |S2b|               |S3b|              |
+   +-+               +-+                 +-+               |
+    |                 |                   |                 |
+    +---->|D1+--------+---->|D2+----------+---->|D3+-------+ Neutral
+    |                 |                   |                 |   Point
+   +-+               +-+                 +-+               |
+   |S1c|             |S2c|               |S3c|              |
+   +-+               +-+                 +-+               |
+    |                 |                   |                 |
+   +-+               +-+                 +-+               |
+   |S1d|             |S2d|               |S3d|              |
+   +-+               +-+                 +-+               |
+    |                 |                   |                 |
+    +-----------------+-------------------+------------------+
+                                          |
+                                         === C2
+                                          |
                                          DC-
 ```
 
-#### Prednosti 3-Level NPC
+#### Advantages of 3-Level NPC
 
-| Prednost | Kvantifikacija |
-|----------|----------------|
-| Niži naponski stres | V_dc/2 po sklopki (vs V_dc za 2-level) |
-| Manji THD | 50% manji nego 2-level |
-| Manje dv/dt | Pola od 2-level |
-| Manji EMI | Značajno poboljšanje |
-| Veća efikasnost | +0.5-1% |
+| Advantage | Quantification |
+|-----------|----------------|
+| Lower voltage stress | V_dc/2 per switch (vs V_dc for 2-level) |
+| Lower THD | 50% less than 2-level |
+| Lower dv/dt | Half of 2-level |
+| Lower EMI | Significant improvement |
+| Higher efficiency | +0.5-1% |
 
-#### Nedostaci
+#### Disadvantages
 
-- Više komponenti (12 sklopki + 6 dioda vs 6 sklopki)
-- Balansiranje neutral pointa
-- Kompleksnija kontrola
+- More components (12 switches + 6 diodes vs 6 switches)
+- Neutral point balancing
+- More complex control
 
 ---
 
-## 4. DC/DC Stupanj - Izolirani pretvarači
+## 4. DC/DC Stage - Isolated Converters
 
-### 4.1 LLC Rezonantni pretvarač - Detaljna analiza
+### 4.1 LLC Resonant Converter - Detailed Analysis
 
-#### Topologija
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         LLC RESONANT CONVERTER                              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│   V_dc+ ──┬──────┐                                                         │
-│           │     ┌┴┐                                                        │
-│           │     │S1│ (High-side)                                           │
-│           │     └┬┘                                                        │
-│           │      │                                                          │
-│           │      ├──────[Lr]──────[Cr]──────┐                              │
-│           │      │                          │                               │
-│           │      │    ┌────────────────┐    │                               │
-│           │      │    │                │    │                               │
-│           │      │    │   ┌────────┐   │    │        SEKUNDARNA STRANA     │
-│           │      │    │   │        │   │    │    ┌─────────────────────┐   │
-│           │      │    │   │   Lm   │   │    │    │                     │   │
-│           │      └────┤   │        │   ├────┘    │    D1  ┌───┐       │   │
-│           │           │   └────────┘   │         │   ──►├─┤   ├───┐   │   │
-│           │           │                │         │       └───┘   │   │   │
-│           │           │  TRANSFORMER   │    ○────┤              ═══  │   │
-│           │           │    n:1         │    ○    │   ──►├─┐     ═══ C_out│
-│           │           │                │         │   D2  │ │      │   │   │
-│           │      ┌────┤                ├────┐    │       └─┤      │   │   │
-│           │      │    │                │    │    │         └──────┤   │   │
-│           │      │    └────────────────┘    │    │                │   │   │
-│           │      │                          │    └────────────────┼───┘   │
-│           │      ├──────────────────────────┘                     │       │
-│           │      │                                                ▼       │
-│           │     ┌┴┐                                           V_out       │
-│           │     │S2│ (Low-side)                                           │
-│           │     └┬┘                                                        │
-│           │      │                                                          │
-│   V_dc- ──┴──────┘                                                         │
-│                                                                             │
-│   Komponente:                                                               │
-│   • Lr = Rezonantna induktivnost (serijska)                                │
-│   • Cr = Rezonantni kondenzator                                            │
-│   • Lm = Magnetizacijska induktivnost transformatora                       │
-│   • n = Omjer namota transformatora                                        │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Rezonantne frekvencije
-
-**Serijska rezonantna frekvencija (fr):**
-```
-fr = 1 / (2π × √(Lr × Cr))
-```
-
-**Paralelna rezonantna frekvencija (fp):**
-```
-fp = 1 / (2π × √((Lr + Lm) × Cr))
-```
-
-**Odnos:**
-```
-fp < fr (uvijek)
-
-Ln = Lm / Lr  (tipično 3-7)
-
-fp = fr / √(1 + Ln)
-```
-
-#### Gain karakteristika
+#### Topology
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                   LLC GAIN CHARACTERISTIC                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   Gain │                                                        │
-│   M    │     Light load                                        │
-│        │        ╱╲                                              │
-│   1.4 ─│       ╱  ╲                                             │
-│        │      ╱    ╲  Medium load                               │
-│   1.2 ─│     ╱      ╲    ╱╲                                     │
-│        │    ╱        ╲  ╱  ╲  Heavy load                        │
-│   1.0 ─│───╱──────────╲╱────╲─────────────────                  │
-│        │  ╱                  ╲                                  │
-│   0.8 ─│ ╱                    ╲                                 │
-│        │╱                      ╲                                │
-│   0.6 ─│                        ╲                               │
-│        │                                                        │
-│        └────────────────────────────────────────────────────    │
-│             fp        fr                    f_sw                │
-│                                                                 │
-│   Operativne regije:                                           │
-│   • f_sw < fp: Capacitive mode (izbjegavati - gubitak ZVS)    │
-│   • fp < f_sw < fr: Below resonance (ZVS, boost operation)    │
-│   • f_sw = fr: Resonance (max efficiency)                     │
-│   • f_sw > fr: Above resonance (ZVS, buck operation)          │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------------------------+
+|                         LLC RESONANT CONVERTER                                 |
++-------------------------------------------------------------------------------+
+|                                                                               |
+|   V_dc+ --+------+                                                            |
+|           |     +-+                                                           |
+|           |     |S1| (High-side)                                              |
+|           |     +-+                                                           |
+|           |      |                                                            |
+|           |      +------[Lr]------[Cr]------+                                 |
+|           |      |                          |                                 |
+|           |      |    +----------------+    |                                 |
+|           |      |    |                |    |                                 |
+|           |      |    |   +--------+   |    |        SECONDARY SIDE          |
+|           |      |    |   |        |   |    |    +---------------------+     |
+|           |      |    |   |   Lm   |   |    |    |                     |     |
+|           |      +----+   |        |   +----+    |    D1  +---+       |     |
+|           |           |   +--------+   |         |   -->|-+   +---+   |     |
+|           |           |                |         |       +---+   |   |     |
+|           |           |  TRANSFORMER   |    o----+              === |     |
+|           |           |    n:1         |    o    |   -->|-+     === C_out|
+|           |           |                |         |   D2  | |      |   |     |
+|           |      +----+                +----+    |       +-+      |   |     |
+|           |      |    |                |    |    |         +------+   |     |
+|           |      |    |                |    |    |                |   |     |
+|           |      |    +----------------+    |    +----------------+---+     |
+|           |      |                          |                     |         |
+|           |      +--------------------------+                     |         |
+|           |      |                                                v         |
+|           |     +-+                                           V_out         |
+|           |     |S2| (Low-side)                                             |
+|           |     +-+                                                          |
+|           |      |                                                            |
+|   V_dc- --+------+                                                            |
+|                                                                               |
+|   Components:                                                                 |
+|   - Lr = Resonant inductance (series)                                        |
+|   - Cr = Resonant capacitor                                                  |
+|   - Lm = Transformer magnetizing inductance                                  |
+|   - n = Transformer turns ratio                                              |
+|                                                                               |
++-------------------------------------------------------------------------------+
 ```
 
-#### Dizajn procedura za 50 kW LLC
+#### Resonant Frequencies
 
-**Ulazni parametri:**
+**Series resonant frequency (fr):**
+```
+fr = 1 / (2pi x sqrt(Lr x Cr))
+```
+
+**Parallel resonant frequency (fp):**
+```
+fp = 1 / (2pi x sqrt((Lr + Lm) x Cr))
+```
+
+**Relationship:**
+```
+fp < fr (always)
+
+Ln = Lm / Lr  (typically 3-7)
+
+fp = fr / sqrt(1 + Ln)
+```
+
+#### Gain Characteristic
+
+```
++---------------------------------------------------------------+
+|                   LLC GAIN CHARACTERISTIC                      |
++---------------------------------------------------------------+
+|                                                               |
+|   Gain |                                                       |
+|   M    |     Light load                                       |
+|        |        /\                                             |
+|   1.4 -|       /  \                                            |
+|        |      /    \  Medium load                              |
+|   1.2 -|     /      \    /\                                    |
+|        |    /        \  /  \  Heavy load                       |
+|   1.0 -|---/----------\/----\-----------                       |
+|        |  /                  \                                 |
+|   0.8 -| /                    \                                |
+|        |/                      \                               |
+|   0.6 -|                        \                              |
+|        |                                                       |
+|        +------------------------------------------------------  |
+|             fp        fr                    f_sw               |
+|                                                               |
+|   Operating regions:                                          |
+|   - f_sw < fp: Capacitive mode (avoid - loses ZVS)           |
+|   - fp < f_sw < fr: Below resonance (ZVS, boost operation)   |
+|   - f_sw = fr: Resonance (max efficiency)                    |
+|   - f_sw > fr: Above resonance (ZVS, buck operation)         |
+|                                                               |
++---------------------------------------------------------------+
+```
+
+#### Design Procedure for 50 kW LLC
+
+**Input parameters:**
 ```
 P_out = 50 kW
 V_in = 800 V (DC link)
@@ -509,343 +510,343 @@ V_out = 200-800 V (battery range)
 f_r = 100 kHz (target resonant frequency)
 ```
 
-**Korak 1: Omjer transformatora**
+**Step 1: Transformer ratio**
 ```
-n = V_in / (2 × V_out_nom) = 800 / (2 × 400) = 1:1
-```
-
-**Korak 2: Ekvivalentni otpor opterećenja**
-```
-R_ac = (8 × n² × V_out²) / (π² × P_out)
-R_ac = (8 × 1 × 400²) / (π² × 50000) = 2.6 Ω
+n = V_in / (2 x V_out_nom) = 800 / (2 x 400) = 1:1
 ```
 
-**Korak 3: Quality factor (Q)**
+**Step 2: Equivalent load resistance**
 ```
-Q = √(Lr/Cr) / R_ac
-
-Tipično Q = 0.3-0.5 za širok raspon opterećenja
-Odabiremo Q = 0.4
+R_ac = (8 x n^2 x V_out^2) / (pi^2 x P_out)
+R_ac = (8 x 1 x 400^2) / (pi^2 x 50000) = 2.6 ohm
 ```
 
-**Korak 4: Ln = Lm/Lr**
+**Step 3: Quality factor (Q)**
 ```
-Ln = 5 (kompromis između gain raspona i efikasnosti)
-```
+Q = sqrt(Lr/Cr) / R_ac
 
-**Korak 5: Izračun komponenti**
-```
-Cr = 1 / (2π × fr × Q × R_ac)
-Cr = 1 / (2π × 100k × 0.4 × 2.6) = 153 nF
-
-Lr = 1 / ((2π × fr)² × Cr)
-Lr = 1 / ((2π × 100k)² × 153n) = 16.5 µH
-
-Lm = Ln × Lr = 5 × 16.5 = 82.5 µH
+Typically Q = 0.3-0.5 for wide load range
+We choose Q = 0.4
 ```
 
-**Korak 6: Verifikacija gain raspona**
+**Step 4: Ln = Lm/Lr**
 ```
-M_min = V_out_min × n / (V_in/2) = 200 × 1 / 400 = 0.5
-M_max = V_out_max × n / (V_in/2) = 800 × 1 / 400 = 2.0
-
-Potreban M raspon: 0.5 - 2.0
-LLC s Ln=5, Q=0.4 može postići M = 0.7 - 1.4
-
-Problem: Potreban veći M raspon!
+Ln = 5 (compromise between gain range and efficiency)
 ```
 
-**Korak 7: Redizajn za širi raspon**
+**Step 5: Component calculation**
 ```
-Opcija A: Smanjiti Ln na 3
-- Veći M raspon ali manja efikasnost
+Cr = 1 / (2pi x fr x Q x R_ac)
+Cr = 1 / (2pi x 100k x 0.4 x 2.6) = 153 nF
 
-Opcija B: Koristiti varijabilni DC link
-- PFC regulira V_dc za optimalni M
+Lr = 1 / ((2pi x fr)^2 x Cr)
+Lr = 1 / ((2pi x 100k)^2 x 153n) = 16.5 uH
 
-Opcija C: Dodatni buck/boost stupanj
-- Povećava kompleksnost ali omogućuje puni raspon
+Lm = Ln x Lr = 5 x 16.5 = 82.5 uH
 ```
 
-#### Soft Switching analiza
-
-**Zero Voltage Switching (ZVS) uvjet:**
+**Step 6: Gain range verification**
 ```
-Za ZVS primarnih sklopki:
+M_min = V_out_min x n / (V_in/2) = 200 x 1 / 400 = 0.5
+M_max = V_out_max x n / (V_in/2) = 800 x 1 / 400 = 2.0
+
+Required M range: 0.5 - 2.0
+LLC with Ln=5, Q=0.4 can achieve M = 0.7 - 1.4
+
+Problem: Larger M range needed!
+```
+
+**Step 7: Redesign for wider range**
+```
+Option A: Reduce Ln to 3
+- Larger M range but lower efficiency
+
+Option B: Use variable DC link
+- PFC regulates V_dc for optimal M
+
+Option C: Additional buck/boost stage
+- Increases complexity but enables full range
+```
+
+#### Soft Switching Analysis
+
+**Zero Voltage Switching (ZVS) condition:**
+```
+For ZVS of primary switches:
 I_Lm(t_dead) > 0
 
-I_Lm_peak = (V_in × T_sw) / (4 × Lm)
+I_Lm_peak = (V_in x T_sw) / (4 x Lm)
 
-Dead time za ZVS:
-t_dead > (2 × C_oss × V_in) / I_Lm_peak
+Dead time for ZVS:
+t_dead > (2 x C_oss x V_in) / I_Lm_peak
 
-Tipično: t_dead = 100-500 ns
+Typical: t_dead = 100-500 ns
 ```
 
-**Zero Current Switching (ZCS) na sekundarnoj strani:**
+**Zero Current Switching (ZCS) on secondary side:**
 ```
-Kad f_sw > fr, diode na sekundarnoj strani
-prirodno komutiraju pri nultoj struji (ZCS)
+When f_sw > fr, diodes on secondary side
+naturally commutate at zero current (ZCS)
 ```
 
 ---
 
-### 4.2 Dual Active Bridge (DAB) - Detaljna analiza
+### 4.2 Dual Active Bridge (DAB) - Detailed Analysis
 
-#### Topologija
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        DUAL ACTIVE BRIDGE (DAB)                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│   PRIMARNI H-BRIDGE              TRANSFORMER           SEKUNDARNI H-BRIDGE │
-│                                                                             │
-│   V1+ ──┬────────┐                  ┌────┐                ┌────────┬── V2+ │
-│         │       ┌┴┐                 │    │               ┌┴┐       │       │
-│         │       │S1│                │    │               │S5│       │       │
-│         │       └┬┘                 │    │               └┬┘       │       │
-│         │        │                  │    │                │        │       │
-│         │        ├──────[L]─────────┤ n:1├────────────────┤        │       │
-│         │        │                  │    │                │        │       │
-│         │       ┌┴┐                 │    │               ┌┴┐       │       │
-│         │       │S3│                │    │               │S7│       │       │
-│         │       └┬┘                 │    │               └┬┘       │       │
-│         │        │                  └────┘                │        │       │
-│         │        │                                        │        │       │
-│         │        │                                        │        │       │
-│         │       ┌┴┐                                      ┌┴┐       │       │
-│         │       │S2│                                     │S6│       │       │
-│         │       └┬┘                                      └┬┘       │       │
-│         │        │                                        │        │       │
-│         │        ├────────────────────────────────────────┤        │       │
-│         │        │                                        │        │       │
-│         │       ┌┴┐                                      ┌┴┐       │       │
-│         │       │S4│                                     │S8│       │       │
-│         │       └┬┘                                      └┬┘       │       │
-│         │        │                                        │        │       │
-│   V1- ──┴────────┘                                        └────────┴── V2- │
-│                                                                             │
-│   L = Serijska induktivnost (može biti leakage transformatora)             │
-│   n = Omjer namota transformatora                                          │
-│   S1-S4 = Primarne sklopke                                                 │
-│   S5-S8 = Sekundarne sklopke                                               │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Single Phase Shift (SPS) kontrola
+#### Topology
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│              SINGLE PHASE SHIFT MODULATION                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   V_p  │    ┌─────┐         ┌─────┐                            │
-│        │    │     │         │     │                            │
-│   +V1 ─┤────┘     └─────────┘     └─────────                   │
-│        │                                                        │
-│    0  ─┤                                                        │
-│        │         ┌─────┐         ┌─────┐                       │
-│   -V1 ─┤─────────┘     └─────────┘     └────                   │
-│        │                                                        │
-│        └───────────────────────────────────────► t              │
-│                                                                 │
-│   V_s  │       ┌─────┐         ┌─────┐                         │
-│        │  φ    │     │         │     │                         │
-│   +V2 ─┤──┼────┘     └─────────┘     └─────                    │
-│        │  │                                                     │
-│    0  ─┤  │                                                     │
-│        │  │    ┌─────┐         ┌─────┐                         │
-│   -V2 ─┤──┼────┘     └─────────┘     └─────                    │
-│        │  │                                                     │
-│        └──┴────────────────────────────────────► t              │
-│           │                                                     │
-│           φ = Phase shift angle                                 │
-│                                                                 │
-│   Prijenos snage:                                              │
-│                                                                 │
-│   P = (V1 × V2 × φ × (π - |φ|)) / (2π² × f_sw × L × n)        │
-│                                                                 │
-│   Maksimalna snaga pri φ = π/2 (90°)                           │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------------------------+
+|                        DUAL ACTIVE BRIDGE (DAB)                                |
++-------------------------------------------------------------------------------+
+|                                                                               |
+|   PRIMARY H-BRIDGE              TRANSFORMER           SECONDARY H-BRIDGE      |
+|                                                                               |
+|   V1+ --+--------+                  +----+                +--------+-- V2+    |
+|         |       +-+                 |    |               +-+       |          |
+|         |       |S1|                |    |               |S5|       |          |
+|         |       +-+                 |    |               +-+       |          |
+|         |        |                  |    |                |        |          |
+|         |        +------[L]---------+ n:1+----------------+        |          |
+|         |        |                  |    |                |        |          |
+|         |       +-+                 |    |               +-+       |          |
+|         |       |S3|                |    |               |S7|       |          |
+|         |       +-+                 |    |               +-+       |          |
+|         |        |                  +----+                |        |          |
+|         |        |                                        |        |          |
+|         |        |                                        |        |          |
+|         |       +-+                                      +-+       |          |
+|         |       |S2|                                     |S6|       |          |
+|         |       +-+                                      +-+       |          |
+|         |        |                                        |        |          |
+|         |        +----------------------------------------+        |          |
+|         |        |                                        |        |          |
+|         |       +-+                                      +-+       |          |
+|         |       |S4|                                     |S8|       |          |
+|         |       +-+                                      +-+       |          |
+|         |        |                                        |        |          |
+|   V1- --+--------+                                        +--------+-- V2-    |
+|                                                                               |
+|   L = Series inductance (can be transformer leakage)                         |
+|   n = Transformer turns ratio                                                 |
+|   S1-S4 = Primary switches                                                   |
+|   S5-S8 = Secondary switches                                                 |
+|                                                                               |
++-------------------------------------------------------------------------------+
 ```
 
-#### Extended Phase Shift (EPS) i Dual Phase Shift (DPS)
-
-Za poboljšanje efikasnosti pri laganom opterećenju:
+#### Single Phase Shift (SPS) Control
 
 ```
-EPS: Dodaje phase shift unutar primarnog ili sekundarnog bridgea
-DPS: Phase shift i na primarnom i na sekundarnom bridgeu
-TPS: Triple phase shift - svi stupnjevi slobode
++---------------------------------------------------------------+
+|              SINGLE PHASE SHIFT MODULATION                     |
++---------------------------------------------------------------+
+|                                                               |
+|   V_p  |    +-----+         +-----+                           |
+|        |    |     |         |     |                           |
+|   +V1 -+----+     +---------+     +-----------                |
+|        |                                                       |
+|    0  -+                                                       |
+|        |         +-----+         +-----+                      |
+|   -V1 -+---------+     +---------+     +------                |
+|        |                                                       |
+|        +------------------------------------------------> t    |
+|                                                               |
+|   V_s  |       +-----+         +-----+                        |
+|        |  phi    |     |         |     |                        |
+|   +V2 -+--+----+     +---------+     +-------                 |
+|        |  |                                                    |
+|    0  -+  |                                                    |
+|        |  |    +-----+         +-----+                        |
+|   -V2 -+--+----+     +---------+     +-------                 |
+|        |  |                                                    |
+|        +--+---------------------------------------------> t    |
+|           |                                                    |
+|           phi = Phase shift angle                              |
+|                                                               |
+|   Power transfer:                                             |
+|                                                               |
+|   P = (V1 x V2 x phi x (pi - |phi|)) / (2pi^2 x f_sw x L x n)|
+|                                                               |
+|   Maximum power at phi = pi/2 (90 deg)                        |
+|                                                               |
++---------------------------------------------------------------+
 ```
 
-#### ZVS analiza za DAB
+#### Extended Phase Shift (EPS) and Dual Phase Shift (DPS)
+
+For improved efficiency at light load:
 
 ```
-ZVS uvjet za primarne sklopke:
-I_L(0) < 0  (struja mora teći kroz antiparalelnu diodu)
-
-I_L(0) = (n×V2 - V1) × φ / (2π × f_sw × L) + (V1 × (π - φ)) / (2π × f_sw × L)
-
-Za širok ZVS raspon:
-- Optimizirati L
-- Koristiti napredne modulacijske strategije (EPS, DPS)
-- Dodati pomoćne ZVS mreže
+EPS: Adds phase shift within primary or secondary bridge
+DPS: Phase shift in both primary and secondary bridge
+TPS: Triple phase shift - all degrees of freedom
 ```
 
-#### Dizajn primjer za 50 kW DAB
+#### ZVS Analysis for DAB
 
-**Specifikacije:**
+```
+ZVS condition for primary switches:
+I_L(0) < 0  (current must flow through antiparallel diode)
+
+I_L(0) = (n x V2 - V1) x phi / (2pi x f_sw x L) + (V1 x (pi - phi)) / (2pi x f_sw x L)
+
+For wide ZVS range:
+- Optimize L
+- Use advanced modulation strategies (EPS, DPS)
+- Add auxiliary ZVS networks
+```
+
+#### Design Example for 50 kW DAB
+
+**Specifications:**
 ```
 P = 50 kW
 V1 = 800 V (DC link)
-V2 = 200-800 V (baterija)
+V2 = 200-800 V (battery)
 f_sw = 50 kHz
 ```
 
-**Transformator:**
+**Transformer:**
 ```
 n = V1 / V2_nom = 800 / 400 = 2:1
 ```
 
-**Serijska induktivnost:**
+**Series inductance:**
 ```
-Za P_max pri φ = π/4 (45°, za marginu):
+For P_max at phi = pi/4 (45 deg, for margin):
 
-L = (V1 × V2 × φ × (π - φ)) / (2π² × f_sw × P × n)
-L = (800 × 400 × 0.785 × 2.356) / (2 × 9.87 × 50k × 50k × 2)
-L = 12 µH
+L = (V1 x V2 x phi x (pi - phi)) / (2pi^2 x f_sw x P x n)
+L = (800 x 400 x 0.785 x 2.356) / (2 x 9.87 x 50k x 50k x 2)
+L = 12 uH
 ```
 
 **Transformer leakage:**
 ```
-Ako je L_leakage = 5 µH, dodati:
-L_ext = 12 - 5 = 7 µH eksterna induktivnost
+If L_leakage = 5 uH, add:
+L_ext = 12 - 5 = 7 uH external inductance
 ```
 
 ---
 
-## 5. Usporedba topologija
+## 5. Topology Comparison
 
-### 5.1 AC/DC topologije
+### 5.1 AC/DC Topologies
 
-| Parametar | Vienna | 2L-AFE | 3L-NPC | T-Type |
+| Parameter | Vienna | 2L-AFE | 3L-NPC | T-Type |
 |-----------|--------|--------|--------|--------|
-| Efikasnost | 98.5% | 97% | 98% | 98.2% |
+| Efficiency | 98.5% | 97% | 98% | 98.2% |
 | Power factor | 0.99 | 0.99 | 0.99 | 0.99 |
 | THD | <3% | <5% | <3% | <3% |
-| V2G | Ne | Da | Da | Da |
-| Broj sklopki | 3 | 6 | 12 | 9 |
-| Naponski stres | V_dc | V_dc | V_dc/2 | Mix |
-| Kompleksnost | Srednja | Srednja | Visoka | Srednja |
-| Cijena | $ | $ | $$$ | $$ |
-| **Preporuka** | Unidir. | V2G simple | High power | Best overall |
+| V2G | No | Yes | Yes | Yes |
+| Number of switches | 3 | 6 | 12 | 9 |
+| Voltage stress | V_dc | V_dc | V_dc/2 | Mix |
+| Complexity | Medium | Medium | High | Medium |
+| Cost | $ | $ | $$$ | $$ |
+| **Recommendation** | Unidir. | V2G simple | High power | Best overall |
 
-### 5.2 DC/DC topologije
+### 5.2 DC/DC Topologies
 
-| Parametar | LLC | DAB | PSFB | CLLC |
+| Parameter | LLC | DAB | PSFB | CLLC |
 |-----------|-----|-----|------|------|
-| Efikasnost | 98% | 97% | 96% | 97.5% |
-| Bidirekcionalnost | Ne | Da | Ne | Da |
-| V2G | Ne | Da | Ne | Da |
-| ZVS raspon | Širok | Ograničen | Srednji | Širok |
-| Naponski raspon | ±20% | Širok | Širok | Širok |
-| Kompleksnost | Srednja | Visoka | Niska | Visoka |
-| Cijena | $$ | $$$ | $ | $$$ |
-| **Preporuka** | Unidir. | V2G | Budget | V2G premium |
+| Efficiency | 98% | 97% | 96% | 97.5% |
+| Bidirectionality | No | Yes | No | Yes |
+| V2G | No | Yes | No | Yes |
+| ZVS range | Wide | Limited | Medium | Wide |
+| Voltage range | +/-20% | Wide | Wide | Wide |
+| Complexity | Medium | High | Low | High |
+| Cost | $$ | $$$ | $ | $$$ |
+| **Recommendation** | Unidir. | V2G | Budget | V2G premium |
 
 ---
 
-## 6. Layout i PCB dizajn
+## 6. Layout and PCB Design
 
-### 6.1 Power loop minimizacija
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    POWER LOOP OPTIMIZATION                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   LOŠE (velika petlja):                                        │
-│                                                                 │
-│   DC+ ────────────────────────────┐                            │
-│                                   │                             │
-│                          ┌────────┴────────┐                   │
-│                          │     MOSFET      │                   │
-│                          └────────┬────────┘                   │
-│                                   │                             │
-│                                   │     ← Duga petlja          │
-│                                   │       = Visoki L          │
-│                          ┌────────┴────────┐                   │
-│                          │   Kondenzator   │                   │
-│                          └────────┬────────┘                   │
-│                                   │                             │
-│   DC- ────────────────────────────┘                            │
-│                                                                 │
-│                                                                 │
-│   DOBRO (minimalna petlja):                                    │
-│                                                                 │
-│   DC+ ───┐                                                     │
-│          │                                                      │
-│   ┌──────┴──────┬──────────────┐                               │
-│   │   MOSFET    │  Kondenzator │  ← Minimalna petlja          │
-│   └──────┬──────┴──────────────┘    = Niski L                  │
-│          │                                                      │
-│   DC- ───┘                                                     │
-│                                                                 │
-│   Preporuke:                                                   │
-│   • Koristiti laminirane bus barove                           │
-│   • DC link kapacitor direktno uz MOSFETe                     │
-│   • Višeslojni PCB s power i ground planovima                 │
-│   • Ciljna parazitska induktivnost: < 10 nH                   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 6.2 Gate driver layout
+### 6.1 Power Loop Minimization
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                  GATE DRIVER PCB LAYOUT                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐  │
-│   │                                                         │  │
-│   │   ┌─────────┐                        ┌─────────┐       │  │
-│   │   │  Gate   │    ← Kratki putovi     │  SiC    │       │  │
-│   │   │ Driver  │───────────────────────►│ MOSFET  │       │  │
-│   │   │   IC    │    < 20mm              │         │       │  │
-│   │   └─────────┘                        └─────────┘       │  │
-│   │        │                                   │            │  │
-│   │        │                                   │            │  │
-│   │   ┌────┴────┐                         ┌────┴────┐      │  │
-│   │   │ Decoup. │                         │ Kelvin  │      │  │
-│   │   │  Caps   │                         │ Source  │      │  │
-│   │   │100nF×3  │                         │  Conn.  │      │  │
-│   │   └─────────┘                         └─────────┘      │  │
-│   │                                                         │  │
-│   │   Pravila:                                             │  │
-│   │   • Kelvin source za precizno gate-source              │  │
-│   │   • Decoupling caps < 5mm od gate drivera             │  │
-│   │   • Minimizirati gate loop induktivnost               │  │
-│   │   • Odvojeni slojevi za power i signal                │  │
-│   │                                                         │  │
-│   └─────────────────────────────────────────────────────────┘  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
++---------------------------------------------------------------+
+|                    POWER LOOP OPTIMIZATION                     |
++---------------------------------------------------------------+
+|                                                               |
+|   BAD (large loop):                                           |
+|                                                               |
+|   DC+ ----------------------------+                           |
+|                                   |                           |
+|                          +--------+--------+                  |
+|                          |     MOSFET      |                  |
+|                          +--------+--------+                  |
+|                                   |                           |
+|                                   |     <- Long loop         |
+|                                   |        = High L          |
+|                          +--------+--------+                  |
+|                          |   Capacitor     |                  |
+|                          +--------+--------+                  |
+|                                   |                           |
+|   DC- ----------------------------+                           |
+|                                                               |
+|                                                               |
+|   GOOD (minimal loop):                                        |
+|                                                               |
+|   DC+ ---+                                                    |
+|          |                                                     |
+|   +------+------+---------------+                             |
+|   |   MOSFET    |  Capacitor    |  <- Minimal loop           |
+|   +------+------+---------------+     = Low L                 |
+|          |                                                     |
+|   DC- ---+                                                    |
+|                                                               |
+|   Recommendations:                                            |
+|   - Use laminated bus bars                                    |
+|   - DC link capacitor directly next to MOSFETs               |
+|   - Multi-layer PCB with power and ground planes             |
+|   - Target parasitic inductance: < 10 nH                     |
+|                                                               |
++---------------------------------------------------------------+
+```
+
+### 6.2 Gate Driver Layout
+
+```
++---------------------------------------------------------------+
+|                  GATE DRIVER PCB LAYOUT                        |
++---------------------------------------------------------------+
+|                                                               |
+|   +-------------------------------------------------------+  |
+|   |                                                       |  |
+|   |   +---------+                        +---------+     |  |
+|   |   |  Gate   |    <- Short paths      |  SiC    |     |  |
+|   |   | Driver  |----------------------->| MOSFET  |     |  |
+|   |   |   IC    |    < 20mm              |         |     |  |
+|   |   +---------+                        +---------+     |  |
+|   |        |                                   |          |  |
+|   |        |                                   |          |  |
+|   |   +----+----+                         +----+----+    |  |
+|   |   | Decoup. |                         | Kelvin  |    |  |
+|   |   |  Caps   |                         | Source  |    |  |
+|   |   |100nFx3  |                         |  Conn.  |    |  |
+|   |   +---------+                         +---------+    |  |
+|   |                                                       |  |
+|   |   Rules:                                             |  |
+|   |   - Kelvin source for precise gate-source            |  |
+|   |   - Decoupling caps < 5mm from gate driver          |  |
+|   |   - Minimize gate loop inductance                   |  |
+|   |   - Separate layers for power and signal            |  |
+|   |                                                       |  |
+|   +-------------------------------------------------------+  |
+|                                                               |
++---------------------------------------------------------------+
 ```
 
 ---
 
-## 7. Simulacija i verifikacija
+## 7. Simulation and Verification
 
-### 7.1 Preporučeni alati
+### 7.1 Recommended Tools
 
-| Alat | Namjena | Cijena |
-|------|---------|--------|
-| LTspice | Circuit simulation | Besplatno |
+| Tool | Purpose | Cost |
+|------|---------|------|
+| LTspice | Circuit simulation | Free |
 | PLECS | Power electronics | $$ |
 | PSIM | Power electronics | $$ |
 | Simulink/Simscape | System simulation | $$$ |
@@ -854,31 +855,31 @@ L_ext = 12 - 5 = 7 µH eksterna induktivnost
 | Ansys Icepak | Thermal simulation | $$$$ |
 | CST Studio | EMC simulation | $$$$ |
 
-### 7.2 Kritične simulacije
+### 7.2 Critical Simulations
 
-1. **Steady-state analiza**
-   - Efikasnost vs opterećenje
-   - THD vs opterećenje
-   - Power factor vs opterećenje
+1. **Steady-state analysis**
+   - Efficiency vs load
+   - THD vs load
+   - Power factor vs load
 
-2. **Transient analiza**
+2. **Transient analysis**
    - Load step response
    - Startup/shutdown
    - Fault conditions
 
-3. **Thermal analiza**
+3. **Thermal analysis**
    - Junction temperature
    - Thermal cycling stress
    - Cooling system adequacy
 
-4. **EMC analiza**
+4. **EMC analysis**
    - Conducted emissions
    - Radiated emissions
    - Filter effectiveness
 
 ---
 
-## 8. Reference
+## 8. References
 
 - [MDPI: Power Converter Topologies Review](https://www.mdpi.com/2079-9292/12/7/1581)
 - [Wolfspeed: SiC in DC Fast Chargers](https://www.wolfspeed.com/knowledge-center/article/designing-with-silicon-carbide-sic-in-electric-vehicle-dc-fast-chargers/)

@@ -1,49 +1,49 @@
-# Mjerenje i Billing za EV Punjače
+# Metering and Billing for EV Chargers
 
-## 1. Zahtevi za Mjerenje
+## 1. Metering Requirements
 
-### 1.1 Regulatorni Zahtevi
+### 1.1 Regulatory Requirements
 
 ```
-MID Direktiva (Measuring Instruments Directive 2014/32/EU):
+MID Directive (Measuring Instruments Directive 2014/32/EU):
 
-Za komercijalno punjenje, merenje energije mora biti:
-- MID sertifikovano (klasa B minimum)
+For commercial charging, energy metering must be:
+- MID certified (class B minimum)
 - Tamper-evident
 - Verifiable (inspection possible)
 
 Accuracy Classes:
 
-│ Klasa │ Active Energy Error │ Primena              │
+│ Class │ Active Energy Error │ Application          │
 ├───────┼─────────────────────┼──────────────────────┤
 │   A   │ ±2%                 │ Basic metering       │
 │   B   │ ±1%                 │ Commercial EV charge │
 │   C   │ ±0.5%               │ Precision billing    │
 
-Za DC punjenje potrebno:
-- DC energy meter (ne standardni AC kWh meter!)
-- Posebni MID sertifikati za DC
-- Trenutno ograničen broj proizvođača
+For DC charging required:
+- DC energy meter (not standard AC kWh meter!)
+- Special MID certificates for DC
+- Currently limited number of manufacturers
 ```
 
-### 1.2 Šta Meriti
+### 1.2 What to Measure
 
 ```
-Parametri za Billing:
+Parameters for Billing:
 
-1. Obavezni:
+1. Mandatory:
    ├── Active Energy (kWh) - MID certified
    ├── Charging Time (duration)
    └── Session ID
 
-2. Preporučeni (za transparentnost):
+2. Recommended (for transparency):
    ├── Voltage (real-time)
    ├── Current (real-time)
    ├── Power (kW)
    ├── SOC start/end (from vehicle)
    └── Peak power
 
-3. Za dijagnostiku:
+3. For diagnostics:
    ├── Power factor
    ├── Harmonics
    ├── Temperature
@@ -55,7 +55,7 @@ Parametri za Billing:
 ### 2.1 MID Certified DC Meters
 
 ```
-Komercijalno Dostupni MID DC Metri:
+Commercially Available MID DC Meters:
 
 1. Phoenix Contact EEM-350-D-MID:
 ┌─────────────────────────────────────────────────────────────┐
@@ -129,12 +129,12 @@ Hall Effect (Closed Loop):
 │          Analog output                                      │
 └─────────────────────────────────────────────────────────────┘
 
-Preporuka za MID:
-→ Shunt-based sa izolovanim pojačavačem
-→ Kalibracija na fabrici + periodična verifikacija
+Recommendation for MID:
+→ Shunt-based with isolated amplifier
+→ Factory calibration + periodic verification
 ```
 
-### 2.3 Konekcija sa Billing Sistemom
+### 2.3 Connection with Billing System
 
 ```
 Data Flow for Billing:
@@ -192,7 +192,7 @@ OCPP MeterValues Message:
 }
 ```
 
-## 3. Billing Modeli
+## 3. Billing Models
 
 ### 3.1 Pricing Strategies
 
@@ -243,12 +243,12 @@ float calculate_bill(ChargingSession *session)
 }
 ```
 
-### 3.2 Roaming i Interoperabilnost
+### 3.2 Roaming and Interoperability
 
 ```
 Roaming Networks:
 
-Za interoperabilnost punjača sa različitim operaterima:
+For charger interoperability with different operators:
 
 1. Hubject (HBS):
    - Largest EU roaming network
@@ -263,7 +263,7 @@ Za interoperabilnost punjača sa različitim operaterima:
    - German network
    - VDE certified
 
-Protocol za Roaming (OCPI 2.2):
+Protocol for Roaming (OCPI 2.2):
 
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
@@ -290,14 +290,14 @@ Protocol za Roaming (OCPI 2.2):
 ### 4.1 German Eichrecht (Calibration Law)
 
 ```
-Eichrecht zahtevi (Nemački zakon o kalibraciji):
+Eichrecht requirements (German calibration law):
 
-Posebni zahtevi za transparentnost punjenja u Nemačkoj:
+Special requirements for charging transparency in Germany:
 
-1. Potpisan zapis svakog sesije
-2. Korisnik može verifikovati tačnost
-3. Digitalni potpis MID metra
-4. QR kod za verifikaciju
+1. Signed record of each session
+2. User can verify accuracy
+3. Digital signature from MID meter
+4. QR code for verification
 
 Signed Meter Record:
 
@@ -319,11 +319,11 @@ Signed Meter Record:
 │ [QR Code for verification]                                 │
 └─────────────────────────────────────────────────────────────┘
 
-Proizvodi koji podržavaju Eichrecht:
+Products supporting Eichrecht:
 
 1. ABB DC meters (Eichrecht ready)
 2. Siemens Sicharge D
-3. Keba P30 (za AC)
+3. Keba P30 (for AC)
 4. has-to-be OCMF implementation
 ```
 
@@ -332,7 +332,7 @@ Proizvodi koji podržavaju Eichrecht:
 ```
 OCMF (Open Charge Metering Format):
 
-Standard format za potpisane meter vrednosti.
+Standard format for signed meter values.
 
 OCMF Payload Example:
 
@@ -362,30 +362,30 @@ OCMF|{
 }|<signature>
 ```
 
-## 5. Display i Receipt
+## 5. Display and Receipt
 
-### 5.1 Zahtevi za Prikaz
+### 5.1 Display Requirements
 
 ```
-IEC 61851 / MID zahtevi za display:
+IEC 61851 / MID requirements for display:
 
-Obavezni prikazi tokom punjenja:
-1. Trenutna snaga (kW)
-2. Isporučena energija (kWh) - MID register
-3. Status punjenja
-4. Cena (ako komercijalno)
+Mandatory displays during charging:
+1. Current power (kW)
+2. Delivered energy (kWh) - MID register
+3. Charging status
+4. Price (if commercial)
 
-Na kraju sesije:
-1. Ukupna energija (kWh)
-2. Trajanje
-3. Ukupan iznos
+At end of session:
+1. Total energy (kWh)
+2. Duration
+3. Total amount
 4. Transaction ID
 
 Display Example:
 
 ┌─────────────────────────────────────────┐
 │                                         │
-│         ⚡ CHARGING IN PROGRESS         │
+│         CHARGING IN PROGRESS            │
 │                                         │
 │    ████████████████░░░░░░░  75%        │
 │                                         │
@@ -404,11 +404,11 @@ Display Example:
 ### 5.2 Receipt Generation
 
 ```
-Digitalni i Fizički Račun:
+Digital and Physical Receipt:
 
 Digital Receipt (email/app):
 ┌─────────────────────────────────────────┐
-│         ⚡ CHARGING RECEIPT             │
+│         CHARGING RECEIPT                │
 │                                         │
 │ Location: Belgrade EXPO Station #3     │
 │ Date: 2024-01-15                       │
@@ -434,19 +434,19 @@ Digital Receipt (email/app):
 │ [QR] Verify meter reading              │
 └─────────────────────────────────────────┘
 
-Printer Options (za fizički receipt):
+Printer Options (for physical receipt):
 1. Thermal printer (Epson TM-T88)
 2. Integrated in HMI panel
 3. Optional - most go paperless
 ```
 
-## 6. Bill of Materials - Mjerenje
+## 6. Bill of Materials - Metering
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ KOMPONENTE ZA MJERENJE (150 kW DC Punjač)                       │
+│ METERING COMPONENTS (150 kW DC Charger)                         │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
-│ Komponenta                   │ Qty │ Jed. cena  │    Ukupno     │
+│ Component                    │ Qty │ Unit Price │    Total      │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ DC Energy Meter MID Class B  │  1  │   €450     │    €450       │
 │ (Phoenix Contact EEM-350-D)  │     │            │               │
@@ -460,9 +460,9 @@ Printer Options (za fizički receipt):
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ Calibration certificate      │  1  │   €100     │    €100       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ UKUPNO MJERENJE                                 │    €700       │
+│ TOTAL METERING                                  │    €700       │
 └─────────────────────────────────────────────────┴───────────────┘
 
-Note: Eichrecht compliance dodaje ~€200-500 za
-      signing module i softversku implementaciju.
+Note: Eichrecht compliance adds ~€200-500 for
+      signing module and software implementation.
 ```

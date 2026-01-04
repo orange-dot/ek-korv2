@@ -1,5 +1,7 @@
 # Arhitektura Kontrolnog Sistema
 
+> **Napomena:** Ovo je verzija za patentnu prijavu. Za živu dokumentaciju, pogledajte [`tehnika/10-microkernel-architecture.sr.md`](../../tehnika/10-microkernel-architecture.sr.md).
+
 **Verzija Dokumenta:** 1.0
 **Datum:** 2026-01-03
 **Autor:** Bojan Janjatovic

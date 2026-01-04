@@ -1,26 +1,26 @@
-# Swarm Intelligence za Multi-Modul Sisteme
+# Swarm Intelligence for Multi-Module Systems
 
-## Filozofija: Distribuirana Inteligencija
+## Philosophy: Distributed Intelligence
 
 ```
-CENTRALIZOVANI SISTEM            ELEKTROKOMBINACIJA SWARM
+CENTRALIZED SYSTEM              ELEKTROKOMBINACIJA SWARM
 ────────────────────────────────────────────────────────────
-Jedan kontroler                →    Svaki modul = mozak
-Single point of failure       →    Nema single point
-Hijerarhijska kontrola        →    Peer-to-peer
+Single controller              →    Each module = brain
+Single point of failure       →    No single point
+Hierarchical control          →    Peer-to-peer
 Scalability limit             →    Plug & play
-Manual load balancing         →    Autonomna optimizacija
+Manual load balancing         →    Autonomous optimization
 Scheduled maintenance         →    Self-healing
 ```
 
 ---
 
-## 1. Swarm Arhitektura
+## 1. Swarm Architecture
 
-### Koncept
+### Concept
 
 ```
-TRADICIONALNO                    SWARM INTELLIGENCE
+TRADITIONAL                     SWARM INTELLIGENCE
 ─────────────────────────────────────────────────────────────
 
     ┌─────────────┐                 ┌─────┐
@@ -43,7 +43,7 @@ TRADICIONALNO                    SWARM INTELLIGENCE
                                     • Self-heals
 ```
 
-### Swarm Topologija
+### Swarm Topology
 
 ```
 FULLY CONNECTED MESH
@@ -718,8 +718,8 @@ Timeout watchdogs for stuck states
 
 ## 8. Bill of Materials - Swarm
 
-| Komponenta | Specifikacija | Qty | Unit Price | Total |
-|------------|---------------|-----|------------|-------|
+| Component | Specification | Qty | Unit Price | Total |
+|-----------|---------------|-----|------------|-------|
 | CAN-FD Transceiver | TJA1443 or equivalent | 1 | €3 | €3 |
 | CAN-FD Controller | Integrated in MCU | - | - | €0 |
 | Termination Resistor | 120Ω, 1% | 2 | €0.10 | €0.20 |
@@ -731,7 +731,7 @@ Timeout watchdogs for stuck states
 
 ---
 
-## Reference i Izvori
+## References and Sources
 
 - [Distributed Controller for Parallel Converters](https://ieeexplore.ieee.org/document/10621445/)
 - [Multi-Module Converter Control Strategy](https://ieeexplore.ieee.org/document/131193)

@@ -1,14 +1,132 @@
 # Control System Architecture
 
-**Document Version:** 1.0
-**Date:** 2026-01-03
+> **Note:** This is the patent filing version. For living documentation, see [`tehnika/10-microkernel-architecture.md`](../../tehnika/10-microkernel-architecture.md).
+
+**Document Version:** 1.1
+**Date:** 2026-01-04
 **Author:** Bojan Janjatović
 **Email:** bojan.janjatovic@gmail.com
 **Address:** Vojislava Ilica 8, Kikinda, Severni Banat, Serbia
 
 ---
 
-## 1. System Overview
+## 1. Microkernel-Inspired Architecture
+
+### 1.1 Design Philosophy
+
+```
+MICROKERNEL PRINCIPLES APPLIED TO POWER ELECTRONICS
+═══════════════════════════════════════════════════════════════
+
+The EK3 control system architecture draws inspiration from
+microkernel operating systems (such as MINIX):
+
+MICROKERNEL OS                    EK3 SYSTEM
+═══════════════                   ══════════════════════════════
+Minimal kernel (IPC,              Minimal backplane (power bus,
+scheduling, memory)               CAN routing only)
+
+User-space services               Module firmware (health,
+                                  swarm, logging)
+
+Message passing IPC               CAN-FD message protocol
+
+Process isolation                 Module electrical isolation
+
+Kernel crash = system down        Backplane fail = system down
+Service crash = recoverable       Module fail = recoverable
+
+This architecture ensures:
+• No single point of failure in intelligence layer
+• Graceful degradation when components fail
+• Independent module operation
+• System survives loss of any single module
+```
+
+### 1.2 Trust Boundaries
+
+```
+TRUST BOUNDARY ARCHITECTURE
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│                      TRUST LEVELS                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  LEVEL 0: HARDWARE (Non-bypassable)                         │
+│  ════════════════════════════════                           │
+│  • Hardware OCP/OVP/OTP protection circuits                 │
+│  • Analog comparators, not software controlled              │
+│  • Cannot be disabled by any firmware                       │
+│  • Backplane passive routing                                │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 1: KERNEL FIRMWARE (Minimal, signed)                 │
+│  ══════════════════════════════════════════                 │
+│  • Secure bootloader                                        │
+│  • Fault handlers                                           │
+│  • Power stage control (LLC switching)                      │
+│  • CAN-FD driver                                            │
+│  • Cryptographic engine                                     │
+│  Size: ~20KB, rarely updated, extensively tested            │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 2: SERVICES (Isolated, sandboxed)                    │
+│  ═══════════════════════════════════════                    │
+│  • Health monitoring                                        │
+│  • Thermal management                                       │
+│  • Swarm coordination                                       │
+│  • Audit logging                                            │
+│  • OTA update handler                                       │
+│  Bugs here cannot compromise Level 0/1                      │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 3: EXTERNAL (Authenticated, rate-limited)            │
+│  ═══════════════════════════════════════════════            │
+│  • Commands from Station Controller                         │
+│  • Firmware updates                                         │
+│  • Configuration changes                                    │
+│  All require cryptographic authentication                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 1.3 Message Passing Semantics
+
+```
+CAN-FD AS INTER-PROCESS COMMUNICATION (IPC)
+═══════════════════════════════════════════════════════════════
+
+Just as microkernel IPC enables service communication,
+CAN-FD provides standardized message passing between modules:
+
+MESSAGE TYPES:
+┌─────────────────────────────────────────────────────────────┐
+│ TYPE              │ PATTERN          │ EXAMPLE              │
+├───────────────────┼──────────────────┼──────────────────────┤
+│ Request-Response  │ Sync, blocking   │ GET_STATUS           │
+│                   │ (with timeout)   │ SET_POWER            │
+├───────────────────┼──────────────────┼──────────────────────┤
+│ Publish           │ Periodic         │ HEARTBEAT (1Hz)      │
+│                   │ broadcast        │ THERMAL_SHARE (10Hz) │
+├───────────────────┼──────────────────┼──────────────────────┤
+│ Event             │ Async, one-shot  │ FAULT_ALERT          │
+│                   │ high priority    │ STATE_CHANGE         │
+└─────────────────────────────────────────────────────────────┘
+
+PROTOCOL GUARANTEES:
+• Delivery: At-least-once (CAN hardware retry)
+• Ordering: Per-source FIFO (sequence numbers)
+• Latency: <1ms for 64-byte message at 5 Mbps
+• Authentication: CMAC on security-critical messages
+```
+
+---
+
+## 2. System Overview
 
 ```
 HIJERARHIJA KONTROLNOG SISTEMA

@@ -1,222 +1,222 @@
-# Analiza Konkurencije
+# Competitive Analysis
 
-## Postojeći Modularni DC Punjači
+## Existing Modular DC Chargers
 
-| Proizvođač | Model | Snaga modula | SiC | V2G | AI/Digital Twin | Liquid Cool |
+| Manufacturer | Model | Module Power | SiC | V2G | AI/Digital Twin | Liquid Cool |
 |------------|-------|--------------|-----|-----|-----------------|-------------|
-| **Kempower** | Power Unit V2 | 25 kW | ✅ | ❌ | Delimično | ✅ |
+| **Kempower** | Power Unit V2 | 25 kW | ✅ | ❌ | Partial | ✅ |
 | **Tritium** | TRI-FLEX | 25 kW | ? | ❌ | ❌ | ✅ |
-| **ABB** | Terra HP | 175-350 kW | Delimično | ❌ | ❌ | ✅ |
+| **ABB** | Terra HP | 175-350 kW | Partial | ❌ | ❌ | ✅ |
 | **Autel** | MaxiCharger DC | 20 kW | ❌ | ❌ | ✅ Predictive | ✅ |
 | **Sigenergy** | EVDC V2X | 25 kW | ? | ✅ | ❌ | ? |
-| **Delta** | DeltaGrid | Various | ? | Delimično | ✅ | ? |
+| **Delta** | DeltaGrid | Various | ? | Partial | ✅ | ? |
 | **Wallbox** | Quasar 2 | 11.5 kW | ? | ✅ | ❌ | ❌ |
 | **StarCharge** | Halo V2G | 7-11 kW | ? | ✅ | ❌ | ❌ |
 
-## Detaljna Analiza Ključnih Konkurenata
+## Detailed Analysis of Key Competitors
 
-### Kempower (Finska)
+### Kempower (Finland)
 ```
-PREDNOSTI:
-• SiC tehnologija u Power Module V2
-• Modularan (25 kW granularnost)
-• Do 1,200 kW skalabilnost
-• Dobar brand u Evropi
+STRENGTHS:
+• SiC technology in Power Module V2
+• Modular (25 kW granularity)
+• Up to 1,200 kW scalability
+• Strong brand in Europe
 
-SLABOSTI:
-• Nema V2G
-• AI samo na fleet nivou
-• Centralizovana kontrola
-• Premium cena (~€500+/kW)
+WEAKNESSES:
+• No V2G
+• AI only at fleet level
+• Centralized control
+• Premium price (~€500+/kW)
 ```
 
-### Tritium (Australija)
+### Tritium (Australia)
 ```
-PREDNOSTI:
-• TRI-FLEX do 3.2 MW
+STRENGTHS:
+• TRI-FLEX up to 3.2 MW
 • Liquid cooling, IP65
-• 97% efikasnost
-• Širok temperaturni opseg (-35 do +55°C)
+• 97% efficiency
+• Wide temperature range (-35 to +55°C)
 
-SLABOSTI:
-• Nema V2G
-• Nema AI/predictive
-• Kompleksna instalacija
-• Finansijski problemi (Chapter 11 u 2024)
+WEAKNESSES:
+• No V2G
+• No AI/predictive
+• Complex installation
+• Financial problems (Chapter 11 in 2024)
 ```
 
-### Sigenergy (Kina)
+### Sigenergy (China)
 ```
-PREDNOSTI:
-• V2G bidirekcioni
-• Integracija sa solar/storage
-• Pristupačna cena
-• 150-1000V opseg
+STRENGTHS:
+• V2G bidirectional
+• Integration with solar/storage
+• Affordable price
+• 150-1000V range
 
-SLABOSTI:
-• Manji brand recognition u EU
-• Bez AI/predictive maintenance
-• Manja snaga (25 kW max)
-• Upitna dugoročna podrška
+WEAKNESSES:
+• Lower brand recognition in EU
+• No AI/predictive maintenance
+• Lower power (25 kW max)
+• Questionable long-term support
 ```
 
-### Delta (Tajvan)
+### Delta (Taiwan)
 ```
-PREDNOSTI:
-• DeltaGrid AI platforma
+STRENGTHS:
+• DeltaGrid AI platform
 • Predictive maintenance
-• Jak brand, 40+ godina
-• Široka distribucija
+• Strong brand, 40+ years
+• Wide distribution
 
-SLABOSTI:
-• Konzervativan dizajn
-• IGBT (ne SiC) u većini modela
-• V2G ograničen
-• Manje inovativan
+WEAKNESSES:
+• Conservative design
+• IGBT (not SiC) in most models
+• Limited V2G
+• Less innovative
 ```
 
 ---
 
-## Šta JE Dostupno na Tržištu
+## What IS Available on the Market
 
-| Funkcija | Status | Ko ima |
+| Feature | Status | Who Has It |
 |----------|--------|--------|
-| SiC MOSFET | ✅ Dostupno | Kempower, neki drugi |
-| 25kW moduli | ✅ Standard | Svi veliki |
-| 97%+ efikasnost | ✅ Dostupno | Tritium, Kempower |
-| Liquid cooling | ✅ Dostupno | Tritium, ABB, Autel |
-| V2G bidirekcioni | ⚠️ Ograničeno | Sigenergy, Wallbox (mali) |
-| AI fleet management | ✅ Dostupno | Delta, CyberAutonomy |
-| ISO 15118-20 | ⚠️ Počinje | StarCharge, neki |
+| SiC MOSFET | ✅ Available | Kempower, some others |
+| 25kW modules | ✅ Standard | All major players |
+| 97%+ efficiency | ✅ Available | Tritium, Kempower |
+| Liquid cooling | ✅ Available | Tritium, ABB, Autel |
+| V2G bidirectional | ⚠️ Limited | Sigenergy, Wallbox (small) |
+| AI fleet management | ✅ Available | Delta, CyberAutonomy |
+| ISO 15118-20 | ⚠️ Starting | StarCharge, some |
 | Digital twin | ⚠️ Fleet level | Delta, IBM partnership |
 
 ---
 
-## Šta NIJE Dobro Rešeno
+## What is NOT Well Addressed
 
-### 1. V2G za Visoke Snage
+### 1. V2G for High Power
 ```
 PROBLEM:
-• V2G postoji samo za male snage (≤25 kW)
-• Nema V2G za fleet/depot aplikacije (100+ kW)
-• ISO 15118-20 tek u ranoj fazi
+• V2G exists only for low power (≤25 kW)
+• No V2G for fleet/depot applications (100+ kW)
+• ISO 15118-20 still in early stages
 
-PRILIKA:
-• Prvi V2G punjač za flote autobusa
-• Aggregirana V2G usluga za grid
+OPPORTUNITY:
+• First V2G charger for bus fleets
+• Aggregated V2G service for grid
 ```
 
-### 2. AI na Nivou Modula
-```
-PROBLEM:
-• AI je uvek na cloud/fleet nivou
-• Moduli su "glupi" - samo prate komande
-• Single point of failure za AI
-
-PRILIKA:
-• Edge AI u svakom modulu
-• Distribuirana inteligencija
-• Radi i offline
-```
-
-### 3. Pravi Swarm (Peer-to-Peer)
+### 2. AI at Module Level
 ```
 PROBLEM:
-• Svi koriste master-slave arhitekturu
-• Ako master otkaže, sistem staje
-• Skaliranje zahteva jači master
+• AI is always at cloud/fleet level
+• Modules are "dumb" - just follow commands
+• Single point of failure for AI
 
-PRILIKA:
-• Peer-to-peer bez centralnog mastera
-• Self-healing bez intervencije
-• Linearna skalabilnost
+OPPORTUNITY:
+• Edge AI in every module
+• Distributed intelligence
+• Works offline too
 ```
 
-### 4. Interoperabilnost Modula
+### 3. True Swarm (Peer-to-Peer)
 ```
 PROBLEM:
-• Svaki vendor ima proprietary module
-• Ne možeš mešati Kempower + Tritium
+• Everyone uses master-slave architecture
+• If master fails, system stops
+• Scaling requires stronger master
+
+OPPORTUNITY:
+• Peer-to-peer without central master
+• Self-healing without intervention
+• Linear scalability
+```
+
+### 4. Module Interoperability
+```
+PROBLEM:
+• Every vendor has proprietary modules
+• Can't mix Kempower + Tritium
 • Vendor lock-in
 
-PRILIKA:
-• Otvoreni standard za module?
-• Ili: najbolji proprietary da postane de-facto standard
+OPPORTUNITY:
+• Open standard for modules?
+• Or: best proprietary becomes de-facto standard
 ```
 
 ### 5. Reliability / Uptime
 ```
 PROBLEM:
-• Industrija ima ~95% uptime (loše!)
-• Česti kvarovi, spora dijagnostika
-• Korisnici frustrirani
+• Industry has ~95% uptime (poor!)
+• Frequent failures, slow diagnostics
+• Users frustrated
 
-PRILIKA:
-• 99%+ uptime kroz predictive
-• Self-healing bez tehničara
+OPPORTUNITY:
+• 99%+ uptime through predictive
+• Self-healing without technician
 • Remote diagnostics
 ```
 
 ---
 
-## ELEKTROKOMBINACIJA Pozicioniranje
+## ELEKTROKOMBINACIJA Positioning
 
-### Trenutni Koncept vs Konkurencija
+### Current Concept vs Competition
 
 ```
-FEATURE                    KONKURENCIJA              ELEKTROKOMBINACIJA
+FEATURE                    COMPETITION               ELEKTROKOMBINACIJA
 ───────────────────────────────────────────────────────────────────────
-Gde je AI?                 Fleet/Cloud level         Svaki modul ima NPU
-Kontrolna arhitektura      Centralizovana            Swarm peer-to-peer
-Topologija                 2-level (većina)          3-level NPC
+Where is AI?               Fleet/Cloud level         Every module has NPU
+Control architecture       Centralized               Swarm peer-to-peer
+Topology                   2-level (majority)        3-level NPC
 Digital twin               Fleet level               Per-module real-time
-V2G + visoka snaga         Ne postoji                Core feature
-Dokumentacija              Proprietary               Otvoreni tehnički koncept
+V2G + high power           Doesn't exist             Core feature
+Documentation              Proprietary               Open technical concept
 ```
 
-### Potencijalne Konkurentske Prednosti
+### Potential Competitive Advantages
 
-| # | Prednost | Konkurencija | Mi | Težina |
+| # | Advantage | Competition | Us | Difficulty |
 |---|----------|--------------|-----|--------|
-| 1 | V2G >50kW | ❌ Nema | ✅ | Srednja |
-| 2 | AI per-module | ❌ Nema | ✅ | Visoka |
-| 3 | True swarm | ❌ Nema | ✅ | Visoka |
-| 4 | 99%+ uptime | ~95% | Target | Srednja |
-| 5 | Lokalna proizvodnja | Import | ✅ | Niska |
-| 6 | Cena | €400-600/kW | €300/kW | Srednja |
+| 1 | V2G >50kW | ❌ None | ✅ | Medium |
+| 2 | AI per-module | ❌ None | ✅ | High |
+| 3 | True swarm | ❌ None | ✅ | High |
+| 4 | 99%+ uptime | ~95% | Target | Medium |
+| 5 | Local production | Import | ✅ | Low |
+| 6 | Price | €400-600/kW | €300/kW | Medium |
 
 ---
 
-## KLJUČNI PROBLEM: Reliability Kriza
+## KEY PROBLEM: Reliability Crisis
 
-### Statistika 2025/2026
+### Statistics 2025/2026
 
 ```
-METRIKA                    2024           2025           IZVOR
+METRIC                     2024           2025           SOURCE
 ──────────────────────────────────────────────────────────────────
-Neuspele sesije            19%            14%            J.D. Power
-Success rate (opšti)       ~73%           84%            J.D. Power Q1 2025
+Failed sessions            19%            14%            J.D. Power
+Success rate (general)     ~73%           84%            J.D. Power Q1 2025
 First-time success (FTCSR) -              71%            ChargerHelp 2025
-Reported uptime            98-99%         98.7-99%       Industrija (lažno!)
+Reported uptime            98-99%         98.7-99%       Industry (fake!)
 ```
 
-### Uptime vs Success Rate - KLJUČNI JAZ
+### Uptime vs Success Rate - KEY GAP
 
 ```
-TVRDE PROIZVOĐAČI          REALNOST (2025)
+MANUFACTURERS CLAIM        REALITY (2025)
 ─────────────────────────────────────────────────
 "98.7-99% uptime"      →   71% FTCSR (ChargerHelp)
-"Reliable"             →   14% sesija i dalje propada (J.D. Power)
-"Smart diagnostics"    →   "Naši podaci ne govore šta je problem"
+"Reliable"             →   14% of sessions still fail (J.D. Power)
+"Smart diagnostics"    →   "Our data doesn't tell us what the problem is"
 ```
 
 **Kameale Terry, CEO ChargerHelp:**
 > "Uptime tells us if a charger is available, but it doesn't tell us if a driver can actually plug in and get a charge on the first attempt."
 
-### Regionalne Razlike (Q2 2025 - Paren Report)
+### Regional Differences (Q2 2025 - Paren Report)
 
 ```
-NAJBOLJI                   NAJGORI
+BEST                       WORST
 ──────────────────────────────────────────
 Idaho: 92.0%               Vermont: 68.0%
 Wyoming: 90.7%             Maine: 75.5%
@@ -225,74 +225,74 @@ Nebraska: 90.5%            Oklahoma: 77.3%
 D.C.: 90.4%                Texas: 79.9%
 ```
 
-### Lideri po Pouzdanosti (2025)
+### Leaders by Reliability (2025)
 
 ```
-MREŽA                      RELIABILITY SCORE / SUCCESS RATE
+NETWORK                    RELIABILITY SCORE / SUCCESS RATE
 ─────────────────────────────────────────────────────────────
 Tesla Supercharger         91.2 (Vecharged), 709 satisfaction
 EVgo                       95% success rate Q1 2025
-Rivian Adventure Network   Na nivou Tesla
-Mercedes/Ford/Rivian       709 satisfaction (kao Tesla)
-Non-Tesla prosek           591 satisfaction (MNOGO LOŠIJE)
+Rivian Adventure Network   On par with Tesla
+Mercedes/Ford/Rivian       709 satisfaction (like Tesla)
+Non-Tesla average          591 satisfaction (MUCH WORSE)
 ```
 
-### Novi Regulatorni Zahtevi
+### New Regulatory Requirements
 
 ```
-🆕 KALIFORNIJA OD 1. JANUARA 2026:
+🆕 CALIFORNIA FROM JANUARY 1, 2026:
 ─────────────────────────────────────────────────────────────
-• Svi finansirani punjači MORAJU imati ≥90% success rate
-• Meri se 6 godina od instalacije
-• Ovo je PRVI pravi standard - ostali prate
+• All funded chargers MUST have ≥90% success rate
+• Measured for 6 years from installation
+• This is the FIRST real standard - others will follow
 
-FEDERALNI (BIL):
-• >97% uptime za NEVI projekte
-• ALI: uptime ≠ success rate (kako smo videli)
+FEDERAL (BIL):
+• >97% uptime for NEVI projects
+• BUT: uptime ≠ success rate (as we've seen)
 ```
 
-**Izvori:**
+**Sources:**
 - [J.D. Power 2025 EVX Study](https://www.jdpower.com/business/press-releases/2025-us-electric-vehicle-experience-evx-public-charging-study): 14% failed attempts (vs 19% 2024)
-- [ChargerHelp 2025 Annual Report](https://www.chargerhelp.com/2025-annual-reliability-report/): 71% FTCSR, 100k+ sesija
-- [Paren Q2 2025](https://www.paren.app/reports/state-of-the-industry-report-us-ev-fast-charging-q2-2025): Regionalni podaci
-- [California Energy Commission](https://www.energy.ca.gov/proceedings/active-proceedings/electric-vehicle-charging-infrastructure-reliability-reporting-and): 90% standard od 2026
+- [ChargerHelp 2025 Annual Report](https://www.chargerhelp.com/2025-annual-reliability-report/): 71% FTCSR, 100k+ sessions
+- [Paren Q2 2025](https://www.paren.app/reports/state-of-the-industry-report-us-ev-fast-charging-q2-2025): Regional data
+- [California Energy Commission](https://www.energy.ca.gov/proceedings/active-proceedings/electric-vehicle-charging-infrastructure-reliability-reporting-and): 90% standard from 2026
 
-### Degradacija sa Vremenom (KRITIČNO! - potvrđeno 2025)
+### Degradation Over Time (CRITICAL! - confirmed 2025)
 
 ```
-STAROST PUNJAČA          FIRST-TIME CHARGE SUCCESS RATE (ChargerHelp 2025)
+CHARGER AGE              FIRST-TIME CHARGE SUCCESS RATE (ChargerHelp 2025)
 ──────────────────────────────────────────────────────────────────────────
-Nov (Year 0)             85%
-Year 3                   69.9%  ← 15 POENA PAD!
-Year 4+                  Još gore
+New (Year 0)             85%
+Year 3                   69.9%  ← 15 POINT DROP!
+Year 4+                  Even worse
 
 "FTCSR at new stations averaged 85% but dropped below 70% by year three,
 a 15-point decline that uptime monitoring fails to capture."
 — ChargerHelp 2025 Annual Reliability Report
 ```
 
-**Zašto uptime ne hvata ovo:**
-- Punjač može biti "online" ali ne raditi iz prvog pokušaja
-- Treba više retry-a, reset-a, ili javljanja grešaka
-- Mnogi punjači sa "100% uptime" i dalje ne rade kako treba
+**Why uptime doesn't capture this:**
+- Charger can be "online" but not work on first attempt
+- Requires multiple retries, resets, or error reports
+- Many chargers with "100% uptime" still don't work properly
 
-### Uzroci Kvarova (po ChargerHelp analizi)
+### Failure Causes (per ChargerHelp analysis)
 
 ```
-TOP UZROCI NEUSPEŠNOG PUNJENJA:
+TOP CAUSES OF FAILED CHARGING:
 ───────────────────────────────
-1. Fizička oštećenja (kablovi, konektori, ekrani)   ~33%
-2. Connectivity/Software problemi                   ~33%
+1. Physical damage (cables, connectors, screens)    ~33%
+2. Connectivity/Software issues                     ~33%
 3. Payment system failures                          ~15%
-4. Ostalo (grid, temperature, etc.)                 ~19%
+4. Other (grid, temperature, etc.)                  ~19%
 
-DVE TREĆINE problema su kablovi/konektori + software!
+TWO THIRDS of problems are cables/connectors + software!
 ```
 
-### Dijagnostika je UŽASNA
+### Diagnostics are TERRIBLE
 
 ```
-CITAT OD INDUSTRY INSIDER:
+QUOTE FROM INDUSTRY INSIDER:
 
 "Our data today does not tell you what the problem is.
 The quality and granularity of data varies wildly.
@@ -304,20 +304,20 @@ or if it's the vehicle's fault."
 — Bill Ferro, EVSession CEO
 ```
 
-**Problem:** Čak ni operateri ne znaju šta je pokvareno!
-- Tehničar dolazi bez pravih delova
-- Multiple truck rolls za jedan kvar
-- Dugo vreme popravke
+**Problem:** Even operators don't know what's broken!
+- Technician arrives without the right parts
+- Multiple truck rolls for one failure
+- Long repair time
 
-### Connector Degradation (Skriveni Ubica)
+### Connector Degradation (Hidden Killer)
 
 ```
-FIZIKA DEGRADACIJE KONEKTORA:
+PHYSICS OF CONNECTOR DEGRADATION:
 ─────────────────────────────
-1. Kontaktna otpornost malo poraste (početak)
-2. Viša otpornost = više toplote
-3. Više toplote = brža degradacija
-4. Positive feedback loop do katastrofalnog kvara
+1. Contact resistance slightly increases (beginning)
+2. Higher resistance = more heat
+3. More heat = faster degradation
+4. Positive feedback loop to catastrophic failure
 
 "Connectors have one of the worst reliability ratings
 in FMEA calculations, and connectors subjected to
@@ -326,33 +326,34 @@ outside conditions are worse."
 
 ---
 
-## 🎯 KONKURENTSKA PREDNOST: Self-Healing Reliability
+## 🎯 COMPETITIVE ADVANTAGE: Self-Healing Reliability
 
-### Problem koji NIKO nije rešio
+### Problem that NO ONE has solved
 
 ```
-DANAŠNJI PRISTUP                    ELEKTROKOMBINACIJA
+TODAY'S APPROACH                    ELEKTROKOMBINACIJA
 ────────────────────────────────────────────────────────────
-Punjač se pokvari                   AI predvidi kvar 2 nedelje ranije
-Operater ne zna šta je              AI zna TAČNO šta i zašto
-Tehničar dolazi, ne zna šta treba   Tehničar dolazi sa pravim delom
-Prosečno 3 dana do popravke         Popravka pre nego što korisnik primeti
+Charger breaks down                 AI predicts failure 2 weeks earlier
+Operator doesn't know what it is    AI knows EXACTLY what and why
+Technician arrives, doesn't know    Technician arrives with right part
+  what's needed
+Average 3 days to repair            Repair before customer notices
 73% success rate                    99%+ success rate
-Degradacija posle 3 godine          AI kompenzuje degradaciju
+Degradation after 3 years           AI compensates for degradation
 ```
 
-### Kako ELEKTROKOMBINACIJA Rešava
+### How ELEKTROKOMBINACIJA Solves It
 
-#### 1. AI ZKLJUČIVO ZNA ŠTA JE POKVARENO
+#### 1. AI DEFINITELY KNOWS WHAT'S BROKEN
 
 ```
-TRADICIONALNA DIJAGNOSTIKA:
+TRADITIONAL DIAGNOSTICS:
 ───────────────────────────
 Error: "Charging Failed"
-→ Šta je problem? Ko zna...
-→ Tehničar mora doći i istražiti
+→ What's the problem? Who knows...
+→ Technician must come and investigate
 
-ELEKTROKOMBINACIJA AI DIJAGNOSTIKA:
+ELEKTROKOMBINACIJA AI DIAGNOSTICS:
 ───────────────────────────────────
 Error: "Charging Failed"
 AI Analysis:
@@ -362,74 +363,74 @@ AI Analysis:
 ├── Recommended action: Replace connector assembly
 └── Part number: EK-CCS2-CONN-001
 
-→ Tehničar zna šta da donese PRE nego što dođe
-→ Popravka za 30 minuta umesto 3 dana
+→ Technician knows what to bring BEFORE arriving
+→ Repair in 30 minutes instead of 3 days
 ```
 
 #### 2. PREDICTIVE CONNECTOR HEALTH
 
 ```
-MONITORING PARAMETARA:
+PARAMETER MONITORING:
 ──────────────────────
-• Kontaktna otpornost (mjerenje tokom svakog punjenja)
-• Temperatura konektora vs struja (termalni model)
-• Insertion count (mehanički износ)
-• Environmental exposure (vlaga, prašina)
+• Contact resistance (measurement during each charge)
+• Connector temperature vs current (thermal model)
+• Insertion count (mechanical wear)
+• Environmental exposure (moisture, dust)
 • Micro-arcing detection (EMI signature)
 
 AI MODEL:
 ─────────
-• Trenira se na podacima iz flote
-• Uči "normalan" vs "degradirajući" konektor
-• Predviđa RUL (Remaining Useful Life) konektora
-• Alert 2-4 nedelje pre očekivanog kvara
+• Trains on fleet data
+• Learns "normal" vs "degrading" connector
+• Predicts RUL (Remaining Useful Life) of connector
+• Alert 2-4 weeks before expected failure
 ```
 
 #### 3. SELF-HEALING SOFTWARE
 
 ```
-55% neuspešnih sesija = connectivity/software!
+55% of failed sessions = connectivity/software!
 
-TRADICIONALNO:
-• Software bug → punjač ne radi
-• Čeka se tehničar da restartuje
-• Ili čeka se OTA update (dani/nedelje)
+TRADITIONAL:
+• Software bug → charger doesn't work
+• Wait for technician to restart
+• Or wait for OTA update (days/weeks)
 
 ELEKTROKOMBINACIJA:
-• AI detektuje anomaliju u ponašanju
-• Automatski retry sa alternativnim pristupom
-• Self-healing bez reboot ako moguće
-• Ako treba reboot, uradi ga u 3 ujutru (ne tokom dana)
-• Svaki modul ima redundantni firmware slot
+• AI detects behavioral anomaly
+• Automatic retry with alternative approach
+• Self-healing without reboot if possible
+• If reboot needed, do it at 3 AM (not during day)
+• Every module has redundant firmware slot
 ```
 
 #### 4. DEGRADATION COMPENSATION
 
 ```
-ZAŠTO PUNJAČI DEGRADIRAJU POSLE 3 GODINE?
-─────────────────────────────────────────
-• Kapacitori gube kapacitet
-• MOSFET-i imaju viši Rds(on)
-• Termalni paste se suši
-• Senzori driftuju
+WHY DO CHARGERS DEGRADE AFTER 3 YEARS?
+─────────────────────────────────────
+• Capacitors lose capacity
+• MOSFETs have higher Rds(on)
+• Thermal paste dries out
+• Sensors drift
 
-TRADICIONALNO: Performanse opadaju, zamena posle 5-7 godina
+TRADITIONAL: Performance declines, replacement after 5-7 years
 
 ELEKTROKOMBINACIJA:
-• AI prati degradaciju SVAKE komponente
-• Automatski kompenzuje:
-  - Viši Rds(on)? Smanji switching frequency
-  - Termalni drift? Rekalibracija u realnom vremenu
-  - Kapacitor aging? Prilagodi control loop
-• Performanse OSTAJU ISTE 10+ godina
-• Zamena samo kad je ekonomski opravdano
+• AI tracks degradation of EVERY component
+• Automatically compensates:
+  - Higher Rds(on)? Reduce switching frequency
+  - Thermal drift? Real-time recalibration
+  - Capacitor aging? Adjust control loop
+• Performance STAYS THE SAME 10+ years
+• Replacement only when economically justified
 ```
 
 #### 5. STANDARDIZED ERROR CODES (Ahead of Industry)
 
 ```
-ChargeX Consortium TEK SADA preporučuje 26 standard error codes.
-Mi možemo implementirati BOLJE od dana 1:
+ChargeX Consortium is ONLY NOW recommending 26 standard error codes.
+We can implement BETTER from day 1:
 
 ELEKTROKOMBINACIJA ERROR TAXONOMY:
 ──────────────────────────────────
@@ -441,9 +442,9 @@ EK-SW-PAY-002: Payment backend unreachable
 EK-GRD-FRQ-001: Grid frequency out of range
 EK-VEH-BAT-001: Vehicle battery rejected charge
 
-Svaki error ima:
+Each error has:
 • Unique ID
-• Root cause kategorija (HW/SW/GRD/VEH/USR)
+• Root cause category (HW/SW/GRD/VEH/USR)
 • Severity level
 • Recommended action
 • Typical resolution time
@@ -452,48 +453,48 @@ Svaki error ima:
 
 ---
 
-## Trendovi 2025/2026
+## Trends 2025/2026
 
-### Pozitivni Signali
+### Positive Signals
 ```
-✅ Poboljšanje pouzdanosti - prvi put u 4 godine (J.D. Power)
-✅ 16,700 novih fast charging portova očekivano 2025 (2.4x vs 2022)
-✅ Kalifornija uvodi 90% success rate standard od 2026
-✅ Privatni sektor preuzima inicijativu (Tesla, EVgo, automaker mreže)
-✅ 230,000+ javnih charging konektora u SAD-u
-```
-
-### Negativni Signali
-```
-❌ NEVI federalno finansiranje pauzirano (feb 2025)
-❌ Siemens otpustio 450 ljudi iz EV charging divizije
-❌ LG Electronics napustio tržište (proleće 2025)
-❌ 1/3 punjača instaliranih 2023-2025 nikad nije dostigla breakeven
-❌ Non-Tesla mreže i dalje značajno lošije (591 vs 709 satisfaction)
+✅ Reliability improvement - first time in 4 years (J.D. Power)
+✅ 16,700 new fast charging ports expected 2025 (2.4x vs 2022)
+✅ California introduces 90% success rate standard from 2026
+✅ Private sector taking initiative (Tesla, EVgo, automaker networks)
+✅ 230,000+ public charging connectors in USA
 ```
 
-### Šta ovo znači za ELEKTROKOMBINACIJA
+### Negative Signals
+```
+❌ NEVI federal funding paused (Feb 2025)
+❌ Siemens laid off 450 people from EV charging division
+❌ LG Electronics exited market (Spring 2025)
+❌ 1/3 of chargers installed 2023-2025 never reached breakeven
+❌ Non-Tesla networks still significantly worse (591 vs 709 satisfaction)
+```
+
+### What This Means for ELEKTROKOMBINACIJA
 
 ```
-PRILIKA:
+OPPORTUNITY:
 ─────────────────────────────────────────────────────────────
-1. Konsolidacija tržišta - slabiji igrači izlaze
-2. Fokus na pouzdanost postaje OBAVEZAN (Kalifornija standard)
-3. Operateri traže rešenja koja RADE, ne samo jeftina
-4. First-mover advantage za 90%+ success rate
-5. Prediktivna dijagnostika postaje differentiator
+1. Market consolidation - weaker players exiting
+2. Focus on reliability becomes MANDATORY (California standard)
+3. Operators looking for solutions that WORK, not just cheap
+4. First-mover advantage for 90%+ success rate
+5. Predictive diagnostics becomes differentiator
 ```
 
 ---
 
 ## Quantified Competitive Advantage
 
-### Reliability ROI Calculator (ažurirano 2025)
+### Reliability ROI Calculator (updated 2025)
 
 ```
-SCENARIO: Fleet operator sa 20 punjača, 50 sesija/dan/punjač
+SCENARIO: Fleet operator with 20 chargers, 50 sessions/day/charger
 
-                            PROSEK 2025     ELEKTROKOMBINACIJA
+                            AVERAGE 2025     ELEKTROKOMBINACIJA
 ────────────────────────────────────────────────────────────────
 Success rate                84% (J.D.Power) 99%
 FTCSR (first-time)          71% (ChargerHelp) 98%
@@ -510,44 +511,44 @@ Charger replacement (Y5)    Yes (€180k)     No (AI compensates)
 5-YEAR TOTAL SAVINGS                        €200,000+
 ```
 
-**Napomena:** Iako je industrija poboljšala success rate na 84%, FTCSR (first-time)
-je i dalje samo 71%. To znači da korisnici moraju često da pokušaju više puta -
-frustrirajuće iskustvo koje naša prediktivna dijagnostika eliminiše.
+**Note:** Although the industry has improved success rate to 84%, FTCSR (first-time)
+is still only 71%. This means users often have to try multiple times -
+a frustrating experience that our predictive diagnostics eliminates.
 
-### Pozicioniranje
+### Positioning
 
 ```
-ELEKTROKOMBINACIJA - FOKUS NA POUZDANOST
+ELEKTROKOMBINACIJA - FOCUS ON RELIABILITY
 ════════════════════════════════════════
 
-Pristup: Prediktivna dijagnostika kao temelj
+Approach: Predictive diagnostics as foundation
 
-KLJUČNE KARAKTERISTIKE:
-• First-time charge success rate kao primarna metrika
-• AI predviđa probleme pre nego što se dese
-• Precizna dijagnostika - ne "error 47" već tačan uzrok
-• Kompenzacija degradacije tokom vremena
-• Tehničar dolazi sa pravim delom prvi put
+KEY CHARACTERISTICS:
+• First-time charge success rate as primary metric
+• AI predicts problems before they happen
+• Precise diagnostics - not "error 47" but exact cause
+• Degradation compensation over time
+• Technician arrives with right part first time
 
-CILJ: 98%+ FTCSR (vs industrija 71%)
+TARGET: 98%+ FTCSR (vs industry 71%)
 ```
 
 ---
 
-## Ostali Nerešeni Problemi (Sekundarne Prilike)
+## Other Unsolved Problems (Secondary Opportunities)
 
-1. **Grid connection** - 75% operatera ima probleme sa mrežom
-2. **Payment fragmentation** - 100+ različitih aplikacija
-3. **Cable management** - teški kablovi, fizički износ
-4. **Queue management** - čekanje, frustracija
-5. **Vandalism/theft** - sigurnost opreme
-6. **Battery health** - brzo punjenje vs degradacija baterije
+1. **Grid connection** - 75% of operators have grid issues
+2. **Payment fragmentation** - 100+ different apps
+3. **Cable management** - heavy cables, physical wear
+4. **Queue management** - waiting, frustration
+5. **Vandalism/theft** - equipment security
+6. **Battery health** - fast charging vs battery degradation
 
 ---
 
-## Reference
+## References
 
-### Konkurenti
+### Competitors
 - [Kempower Power Module](https://kempower.com/power-module/)
 - [Tritium TRI-FLEX](https://www.electrive.com/2025/04/30/tritium-launches-scalable-ev-charging-solution-tri-flex/)
 - [Sigenergy V2X](https://www.sigenergy.com/en/products/dc-charger)
@@ -555,7 +556,7 @@ CILJ: 98%+ FTCSR (vs industrija 71%)
 - [V2G Chargers Guide](https://zecar.com/resources/bidirectional-v2h-and-v2g-ev-chargers-guide)
 - [CyberAutonomy Digital Twin](https://www.cyberautonomy.io/)
 
-### Statistika i Izveštaji (2025/2026)
+### Statistics and Reports (2025/2026)
 - [J.D. Power 2025 EVX Public Charging Study](https://www.jdpower.com/business/press-releases/2025-us-electric-vehicle-experience-evx-public-charging-study)
 - [ChargerHelp 2025 Annual Reliability Report](https://www.chargerhelp.com/2025-annual-reliability-report/)
 - [Paren Q2 2025 US EV Fast Charging Report](https://www.paren.app/reports/state-of-the-industry-report-us-ev-fast-charging-q2-2025)
@@ -564,5 +565,5 @@ CILJ: 98%+ FTCSR (vs industrija 71%)
 - [NPR: 2025 Was a Roller Coaster Year for EVs](https://www.npr.org/2025/12/29/nx-s1-5638592/electric-vehicles-2025)
 - [Clean Trucking: Why Success Rate Beats Uptime](https://www.cleantrucking.com/infrastructure/charging-infastructure/article/15767696/ev-charging-report-why-success-rate-beats-uptime-in-2025)
 
-### Datum ažuriranja
-Poslednje ažuriranje: Januar 2026
+### Last Updated
+Last update: January 2026

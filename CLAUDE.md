@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Working language:** English (for all development, skills, internal tools)
 - **Documentation:** Bilingual (Serbian + English), identical content in both languages
-- **Technical docs** (`tehnika/`): Serbian primary, English `.en.md` versions parallel
+- **Technical docs** (`tehnika/`): English primary, Serbian `.sr.md` versions parallel
 - **Patent docs** (`patent/`): English primary, Serbian `.sr.md` versions parallel
 - **Skills/agents:** English only (`.claude/skills/`)
 
@@ -117,21 +117,16 @@ Available skills for project work:
 
 ## Bilingual Documentation Guidelines
 
-When maintaining documentation:
+**Standard naming convention (English primary everywhere):**
+- English (primary): `document.md`
+- Serbian: `document.sr.md`
 
-1. **Technical docs** (`tehnika/`): Both languages, parallel
-   - Serbian: `document.md`
-   - English: `document.en.md`
-   - Keep both versions identical and in sync
+This applies to all documentation folders:
+- `/tehnika/` - Technical documentation
+- `/patent/` - Patent documentation
+- `/strategija/` - Business strategy
+- `/reference/` - Research materials
 
-2. **Patent docs** (`patent/`): Both languages, parallel
-   - English: `document.md`
-   - Serbian: `document.sr.md`
-   - Keep both versions identical and in sync
-
-3. **Web app** (`web/`): Bilingual via i18n
-   - `sr.json` - Serbian
-   - `en.json` - English
-
-4. **Internal tools** (`.claude/`): English only
-   - Skills, agents, configuration files
+**Exceptions:**
+- **Web app** (`web/`): Bilingual via i18n (`sr.json`, `en.json`)
+- **Internal tools** (`.claude/`): English only

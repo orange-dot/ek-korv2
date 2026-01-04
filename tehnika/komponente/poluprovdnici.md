@@ -1,106 +1,106 @@
-# Poluvodičke Komponente za EV Punjače
+# Semiconductor Components for EV Chargers
 
-## Pregled Tehnologija
+## Technology Overview
 
-### Evolucija Poluvodičke Tehnologije
+### Evolution of Semiconductor Technology
 
 ```
-Generacije Power Poluvodača:
+Power Semiconductor Generations:
 
-   Si BJT → Si MOSFET → Si IGBT → SiC MOSFET → GaN HEMT
+   Si BJT -> Si MOSFET -> Si IGBT -> SiC MOSFET -> GaN HEMT
    1970s     1980s       1990s      2010s        2020s
 
-Performanse vs. Generacija:
-                                                    ★ GaN
-   Efikasnost                               ★ SiC
-   (%)        ★ Si IGBT
-        95 ─────●─────────────●─────────────●────
-                              ↑             ↑
-        90 ────────●──────────│─────────────│────
-                   │          │             │
-                   Si         SiC           GaN
-                   MOSFET     MOSFET        HEMT
+Performance vs. Generation:
+                                                    * GaN
+   Efficiency                               * SiC
+   (%)        * Si IGBT
+        95 -----*-----------*-------------*----
+                            ^             ^
+        90 --------*--------|--------------|----|
+                   |        |             |
+                   Si       SiC           GaN
+                   MOSFET   MOSFET        HEMT
 ```
 
-## 1. Silicijum IGBT (Insulated Gate Bipolar Transistor)
+## 1. Silicon IGBT (Insulated Gate Bipolar Transistor)
 
-### 1.1 Princip Rada
+### 1.1 Operating Principle
 
 ```
-IGBT Struktura (NPT - Non-Punch Through):
+IGBT Structure (NPT - Non-Punch Through):
 
-         Emiter (E)    Gate (G)
-            │             │
-    ┌───────┴─────────────┴───────┐
-    │  n+ │  p-body  │  n+        │ ← Emiter implant
-    │     └────┬─────┘            │
-    │          │ Kanal            │
-    │     n- drift region         │ ← Određuje Vce
-    │                             │
-    │     n+ buffer layer         │ ← PT verzija
-    │                             │
-    │     p+ collector            │
-    └─────────────────────────────┘
-                  │
-            Kolektor (C)
+         Emitter (E)    Gate (G)
+            |             |
+    +-------+-------------+-------+
+    |  n+ |  p-body  |  n+        | <- Emitter implant
+    |     +----+-----+            |
+    |          | Channel          |
+    |     n- drift region         | <- Determines Vce
+    |                             |
+    |     n+ buffer layer         | <- PT version
+    |                             |
+    |     p+ collector            |
+    +-----------------------------+
+                  |
+            Collector (C)
 
-Ekvivalentna Šema:
+Equivalent Circuit:
 
-         G ──┤├──┐
-                 │
-    E ────┬──────┴──────┬──── E
-          │    MOSFET   │
-          │      │      │
-          └──────┼──────┘
-                 │
-          ┌──────┴──────┐
-          │    PNP      │
-          │  Bipolar    │
-          └──────┬──────┘
-                 │
-    C ───────────┴─────────── C
+         G --|<--+
+                 |
+    E ----+------+------+---- E
+          |    MOSFET   |
+          |      |      |
+          +------+------+
+                 |
+          +------+------+
+          |    PNP      |
+          |  Bipolar    |
+          +------+------+
+                 |
+    C -----------+----------- C
 ```
 
-### 1.2 IGBT Generacije
+### 1.2 IGBT Generations
 
-| Generacija | Godina | Vce(sat) @ 100A | Eoff (mJ) | f_sw max | Napomena |
-|------------|--------|-----------------|-----------|----------|----------|
+| Generation | Year | Vce(sat) @ 100A | Eoff (mJ) | f_sw max | Note |
+|------------|------|-----------------|-----------|----------|------|
 | Gen 3 | 2000 | 2.5 V | 25 | 10 kHz | NPT |
 | Gen 4 | 2005 | 2.0 V | 18 | 15 kHz | Field-Stop |
 | Gen 5 | 2010 | 1.7 V | 12 | 20 kHz | Trench FS |
 | Gen 6 | 2015 | 1.5 V | 8 | 25 kHz | Micro-pattern |
 | Gen 7 | 2020 | 1.45 V | 6 | 30 kHz | RC-IGBT |
 
-### 1.3 Ključni Proizvođači IGBT Modula
+### 1.3 Key IGBT Module Manufacturers
 
 #### Infineon PrimePACK/EconoPACK
 
 ```
 EconoPACK+ 4 (FF450R12ME4):
-┌─────────────────────────────────────┐
-│                                     │
-│   ┌─────┐   ┌─────┐   ┌─────┐      │
-│   │ T1  │   │ T2  │   │ T3  │      │  Half-bridge
-│   │     │   │     │   │     │      │  konfiguacija
-│   └──┬──┘   └──┬──┘   └──┬──┘      │
-│      │         │         │         │
-│   ┌──┴──┐   ┌──┴──┐   ┌──┴──┐      │
-│   │ D1  │   │ D2  │   │ D3  │      │
-│   └─────┘   └─────┘   └─────┘      │
-│                                     │
-│   DC+  AC1  AC2  AC3  DC-          │
-└───┬────┬────┬────┬────┬────────────┘
-    │    │    │    │    │
++-------------------------------------+
+|                                     |
+|   +-----+   +-----+   +-----+      |
+|   | T1  |   | T2  |   | T3  |      |  Half-bridge
+|   |     |   |     |   |     |      |  configuration
+|   +--+--+   +--+--+   +--+--+      |
+|      |         |         |         |
+|   +--+--+   +--+--+   +--+--+      |
+|   | D1  |   | D2  |   | D3  |      |
+|   +-----+   +-----+   +-----+      |
+|                                     |
+|   DC+  AC1  AC2  AC3  DC-          |
++---+----+----+----+----+------------+
+    |    |    |    |    |
 
-Specifikacije FF450R12ME4:
+Specifications FF450R12ME4:
 - Vces: 1200 V
 - Ic nom: 450 A
-- Vce(sat): 1.70 V @ 450A, 125°C
-- Eon: 32 mJ @ 450A, 600V, 125°C
-- Eoff: 23 mJ @ 450A, 600V, 125°C
+- Vce(sat): 1.70 V @ 450A, 125C
+- Eon: 32 mJ @ 450A, 600V, 125C
+- Eoff: 23 mJ @ 450A, 600V, 125C
 - Rth(j-c) IGBT: 0.034 K/W
 - Rth(j-c) Diode: 0.062 K/W
-- Tjmax: 175°C
+- Tjmax: 175C
 ```
 
 #### Mitsubishi CM-Series
@@ -109,14 +109,14 @@ Specifikacije FF450R12ME4:
 CM600DX-24T (NX-Series):
 - Vces: 1200 V
 - Ic: 600 A
-- Vce(sat): 1.65 V @ 600A, 125°C
-- Posebnost: Integrisan NTC termistor
-- Pakovanje: Dual modul 62mm
+- Vce(sat): 1.65 V @ 600A, 125C
+- Feature: Integrated NTC thermistor
+- Package: Dual module 62mm
 
-Prednosti NX serije:
-1. Niži Vce(sat) za manje kondukcione gubitke
-2. Mekši switching za manji EMI
-3. Bolji paralelni rad više modula
+NX series advantages:
+1. Lower Vce(sat) for reduced conduction losses
+2. Softer switching for lower EMI
+3. Better parallel operation of multiple modules
 ```
 
 #### Semikron SEMiX / SEMITRANS
@@ -125,217 +125,217 @@ Prednosti NX serije:
 SEMiX453GB12E4s (Six-pack):
 
         DC+
-         │
-    ┌────┴────┬────────┬────────┐
-    │         │        │        │
-   ┌┴┐       ┌┴┐      ┌┴┐      │
-   │ │T1     │ │T3    │ │T5    │
-   └┬┘       └┬┘      └┬┘      │
-    ├─U───────┼─V──────┼─W─────┤ AC izlazi
-   ┌┴┐       ┌┴┐      ┌┴┐      │
-   │ │T2     │ │T4    │ │T6    │
-   └┬┘       └┬┘      └┬┘      │
-    │         │        │        │
-    └────┬────┴────────┴────────┘
-         │
+         |
+    +----+----+--------+--------+
+    |         |        |        |
+   +-+       +-+      +-+      |
+   | |T1     | |T3    | |T5    |
+   +-+       +-+      +-+      |
+    +--U-----+-V------+-W------+ AC outputs
+   +-+       +-+      +-+      |
+   | |T2     | |T4    | |T6    |
+   +-+       +-+      +-+      |
+    |         |        |        |
+    +----+----+--------+--------+
+         |
         DC-
 
-Specifikacije:
-- 6-pack konfiguracija za trofazni inverter
+Specifications:
+- 6-pack configuration for three-phase inverter
 - Vces: 1200 V
 - Ic: 450 A
-- Ugrađena termalna zaštita
-- Spring kontakti za lako montiranje
+- Built-in thermal protection
+- Spring contacts for easy mounting
 ```
 
-### 1.4 Proračun Gubitaka IGBT
+### 1.4 IGBT Loss Calculation
 
 ```
-Kondukcioni gubici:
-P_cond = Vce(sat) × Ic × D
+Conduction losses:
+P_cond = Vce(sat) x Ic x D
 
-Gde je:
-- Vce(sat) = Vce0 + r × Ic (linearizovano)
+Where:
+- Vce(sat) = Vce0 + r x Ic (linearized)
 - D = duty cycle
 
-Za sinusoidni izlaz:
-P_cond = Ic × (Vce0/π + r×Ic/4) + Ic × m × cos(φ) × (Vce0/4 + r×Ic/(3π))
+For sinusoidal output:
+P_cond = Ic x (Vce0/pi + r x Ic/4) + Ic x m x cos(phi) x (Vce0/4 + r x Ic/(3pi))
 
-Switching gubici:
-P_sw = f_sw × (Eon + Eoff) × (Vdc/Vref) × (Ic/Iref)
+Switching losses:
+P_sw = f_sw x (Eon + Eoff) x (Vdc/Vref) x (Ic/Iref)
 
-Gde je:
-- f_sw = switching frekvencija
-- Eon, Eoff = energije iz datasheeta
-- Vref, Iref = referentni uslovi iz datasheeta
+Where:
+- f_sw = switching frequency
+- Eon, Eoff = energies from datasheet
+- Vref, Iref = reference conditions from datasheet
 
-Ukupni gubici IGBT:
+Total IGBT losses:
 P_total = P_cond + P_sw
 
-Primer proračuna (150 kW inverter):
+Example calculation (150 kW inverter):
 - Vdc = 800 V, Ic = 200 A, f_sw = 16 kHz
 - Vce(sat) = 1.7 V, Eon = 15 mJ, Eoff = 12 mJ
-- D = 0.5, cos(φ) = 0.95
+- D = 0.5, cos(phi) = 0.95
 
-P_cond = 200 × 1.7 × 0.5 = 170 W
-P_sw = 16000 × (15 + 12) × 10^-3 × (800/600) × (200/450)
-P_sw = 16000 × 0.027 × 1.33 × 0.44 = 253 W
-P_total = 170 + 253 = 423 W po IGBT
+P_cond = 200 x 1.7 x 0.5 = 170 W
+P_sw = 16000 x (15 + 12) x 10^-3 x (800/600) x (200/450)
+P_sw = 16000 x 0.027 x 1.33 x 0.44 = 253 W
+P_total = 170 + 253 = 423 W per IGBT
 ```
 
-## 2. Silicijum Karbid (SiC) MOSFET
+## 2. Silicon Carbide (SiC) MOSFET
 
-### 2.1 Materijalne Prednosti SiC
+### 2.1 Material Advantages of SiC
 
 ```
-Poređenje Si vs SiC Materijala:
+Si vs SiC Material Comparison:
 
-Parametar           │   Si      │   SiC (4H)  │ Faktor
-────────────────────┼───────────┼─────────────┼────────
-Bandgap (eV)        │   1.12    │   3.26      │  2.9×
-Kritično polje      │   0.3     │   2.8       │  9.3×
-(MV/cm)             │           │             │
-Termalna provod.    │   1.5     │   4.9       │  3.3×
-(W/cm·K)            │           │             │
-Zasićena brzina e-  │   1.0     │   2.0       │  2.0×
-(×10^7 cm/s)        │           │             │
-Intrinsična temp.   │   150     │   900       │  6.0×
-(°C)                │           │             │
+Parameter           |   Si      |   SiC (4H)  | Factor
+--------------------+-----------+-------------+--------
+Bandgap (eV)        |   1.12    |   3.26      |  2.9x
+Critical field      |   0.3     |   2.8       |  9.3x
+(MV/cm)             |           |             |
+Thermal conduct.    |   1.5     |   4.9       |  3.3x
+(W/cm K)            |           |             |
+Saturated e- vel.   |   1.0     |   2.0       |  2.0x
+(x10^7 cm/s)        |           |             |
+Intrinsic temp.     |   150     |   900       |  6.0x
+(C)                 |           |             |
 
 Baliga Figure of Merit (BFOM):
-BFOM = ε × μ × Ec³
+BFOM = epsilon x mu x Ec^3
 
-SiC BFOM = 900 × Si BFOM
+SiC BFOM = 900 x Si BFOM
 
-Praktični rezultat:
-- 10× manji Rds(on) za istu naponsku klasu
-- 3× veća radna temperatura
-- 5-10× veća switching frekvencija
+Practical result:
+- 10x lower Rds(on) for same voltage class
+- 3x higher operating temperature
+- 5-10x higher switching frequency
 ```
 
-### 2.2 SiC MOSFET Struktura
+### 2.2 SiC MOSFET Structure
 
 ```
 Planar SiC MOSFET:
 
          Source (S)       Gate (G)
-            │                │
-    ┌───────┴────────────────┴───────┐
-    │   n+  │    p-well    │  n+    │
-    │       └──────┬───────┘        │
-    │              │ Kanal (JFET)   │
-    │         n- epitaksijalni      │
-    │              sloj             │
-    │                               │
-    │         n+ SiC supstrat       │
-    └───────────────────────────────┘
-                   │
+            |                |
+    +-------+----------------+-------+
+    |   n+  |    p-well    |  n+    |
+    |       +------+-------+        |
+    |              | Channel (JFET) |
+    |         n- epitaxial          |
+    |              layer            |
+    |                               |
+    |         n+ SiC substrate      |
+    +-------------------------------+
+                   |
              Drain (D)
 
-Trench SiC MOSFET (Novija generacija):
+Trench SiC MOSFET (Newer generation):
 
          S          G          S
-         │          │          │
-    ┌────┴────┬─────┴─────┬────┴────┐
-    │   n+    │   Oxide   │   n+    │
-    │ ┌───────┤           ├───────┐ │
-    │ │ p-well│           │p-well │ │
-    │ │       │ Poly-Si   │       │ │
-    │ │       │   Gate    │       │ │
-    │ └───────┤           ├───────┘ │
-    │         └───────────┘         │
-    │      n- drift region          │
-    │                               │
-    │      n+ SiC supstrat          │
-    └───────────────────────────────┘
-                   │
+         |          |          |
+    +----+----+-----+-----+----+----+
+    |   n+    |   Oxide   |   n+    |
+    | +-------+           +-------+ |
+    | | p-well|           |p-well | |
+    | |       | Poly-Si   |       | |
+    | |       |   Gate    |       | |
+    | +-------+           +-------+ |
+    |         +-----------+         |
+    |      n- drift region          |
+    |                               |
+    |      n+ SiC substrate         |
+    +-------------------------------+
+                   |
                    D
 
-Prednosti Trench strukture:
-- Eliminisan JFET efekat
-- 30-40% niži Rds(on)
-- Bolja gustina struje
+Trench structure advantages:
+- Eliminated JFET effect
+- 30-40% lower Rds(on)
+- Better current density
 ```
 
-### 2.3 Ključni SiC Proizvođači
+### 2.3 Key SiC Manufacturers
 
 #### Wolfspeed (Cree)
 
 ```
 C3M0016120K (Gen 3):
-┌─────────────────────────────────────┐
-│ Parametar          │ Vrednost       │
-├────────────────────┼────────────────┤
-│ Vds                │ 1200 V         │
-│ Rds(on) @ 25°C     │ 16 mΩ          │
-│ Rds(on) @ 175°C    │ 28 mΩ          │
-│ Id @ 25°C          │ 115 A          │
-│ Id @ 100°C         │ 95 A           │
-│ Qg (total)         │ 123 nC         │
-│ Ciss               │ 3300 pF        │
-│ Coss               │ 160 pF         │
-│ Crss               │ 13 pF          │
-│ Pakovanje          │ TO-247-4       │
-│ Cena (qty 100)     │ ~$45           │
-└─────────────────────────────────────┘
++-------------------------------------+
+| Parameter          | Value          |
++--------------------+----------------+
+| Vds                | 1200 V         |
+| Rds(on) @ 25C      | 16 mohm        |
+| Rds(on) @ 175C     | 28 mohm        |
+| Id @ 25C           | 115 A          |
+| Id @ 100C          | 95 A           |
+| Qg (total)         | 123 nC         |
+| Ciss               | 3300 pF        |
+| Coss               | 160 pF         |
+| Crss               | 13 pF          |
+| Package            | TO-247-4       |
+| Price (qty 100)    | ~$45           |
++-------------------------------------+
 
-C3M0032120K (Niža struja, niža cena):
-- Rds(on): 32 mΩ
+C3M0032120K (Lower current, lower price):
+- Rds(on): 32 mohm
 - Id: 63 A
-- Cena: ~$25
+- Price: ~$25
 
-CAB425M12XM3 (Power Modul):
-- Half-bridge konfiguracija
-- Rds(on): 4.2 mΩ (po switchu)
-- Id: 425 A kontinualno
-- Integrisana termistorska zaštita
-- 62mm industrijski footprint
+CAB425M12XM3 (Power Module):
+- Half-bridge configuration
+- Rds(on): 4.2 mohm (per switch)
+- Id: 425 A continuous
+- Integrated thermistor protection
+- 62mm industrial footprint
 ```
 
 #### Infineon CoolSiC
 
 ```
 IMZ120R016M1H (1200V, TO-247-4):
-- Rds(on): 16 mΩ @ 25°C
-- Tehnologija: Trench
-- .XT bonding za bolju pouzdanost
-- Kelvin source pin za precizno upravljanje
+- Rds(on): 16 mohm @ 25C
+- Technology: Trench
+- .XT bonding for better reliability
+- Kelvin source pin for precise control
 
-FF6MR12W2M1_B11 (CoolSiC Modul):
-┌─────────────────────────────────────┐
-│ EasyPACK 2B Half-Bridge             │
-├─────────────────────────────────────┤
-│ Vds: 1200 V                         │
-│ Rds(on): 6 mΩ (po switchu)          │
-│ Id: 400 A                           │
-│ Package: 34mm                       │
-│ Integrisan driver: Opciono          │
-└─────────────────────────────────────┘
+FF6MR12W2M1_B11 (CoolSiC Module):
++-------------------------------------+
+| EasyPACK 2B Half-Bridge             |
++-------------------------------------+
+| Vds: 1200 V                         |
+| Rds(on): 6 mohm (per switch)        |
+| Id: 400 A                           |
+| Package: 34mm                       |
+| Integrated driver: Optional         |
++-------------------------------------+
 
 Infineon HybridPACK Drive:
-- Kombinacija IGBT + SiC dioda
-- Optimizovan za EV traction
-- Kompaktno pakovanje
+- IGBT + SiC diode combination
+- Optimized for EV traction
+- Compact packaging
 ```
 
 #### ROHM
 
 ```
 SCT3022AL (3rd Gen):
-- Vds: 650 V (za 400V sisteme)
-- Rds(on): 22 mΩ
-- Trench struktura
-- TO-247N pakovanje
+- Vds: 650 V (for 400V systems)
+- Rds(on): 22 mohm
+- Trench structure
+- TO-247N package
 
 SCT4045DR (4th Gen, 1200V):
-- Rds(on): 45 mΩ
-- Poboljšana Crss (niža)
-- Robusniji gate oxide
+- Rds(on): 45 mohm
+- Improved Crss (lower)
+- More robust gate oxide
 
-BSM300D12P3G002 (Full SiC Modul):
+BSM300D12P3G002 (Full SiC Module):
 - 1200V/300A half-bridge
-- Rds(on): 5 mΩ
-- Optimizovan za 50+ kHz
+- Rds(on): 5 mohm
+- Optimized for 50+ kHz
 ```
 
 #### STMicroelectronics
@@ -343,260 +343,260 @@ BSM300D12P3G002 (Full SiC Modul):
 ```
 SCTW90N65G2V (Gen 2):
 - Vds: 650 V
-- Rds(on): 18 mΩ
-- Nizak Qg: 58 nC
-- HiP247 pakovanje (izolovano)
+- Rds(on): 18 mohm
+- Low Qg: 58 nC
+- HiP247 package (isolated)
 
-STPSC20H12 (SiC Schottky Dioda):
+STPSC20H12 (SiC Schottky Diode):
 - Vrrm: 1200 V
 - If: 20 A
 - Vf: 1.35 V @ 20A
 - Zero reverse recovery
 ```
 
-### 2.4 Proračun Gubitaka SiC MOSFET
+### 2.4 SiC MOSFET Loss Calculation
 
 ```
-Kondukcioni gubici:
-P_cond = Irms² × Rds(on)(Tj)
+Conduction losses:
+P_cond = Irms^2 x Rds(on)(Tj)
 
-Temperaturna zavisnost Rds(on):
-Rds(on)(T) = Rds(on)(25°C) × [1 + α×(T-25)]
+Temperature dependence of Rds(on):
+Rds(on)(T) = Rds(on)(25C) x [1 + alpha x (T-25)]
 
-Tipično α = 0.004 do 0.006 /°C za SiC
-(Znatno bolje od Si IGBT gde je α ~ 0.02)
+Typically alpha = 0.004 to 0.006 /C for SiC
+(Significantly better than Si IGBT where alpha ~ 0.02)
 
-Switching gubici:
-P_sw = 0.5 × f_sw × Vds × Id × (tr + tf)
+Switching losses:
+P_sw = 0.5 x f_sw x Vds x Id x (tr + tf)
 
-Gde je:
-- tr = rise time ≈ Qg / Ig(on)
-- tf = fall time ≈ Qg / Ig(off)
+Where:
+- tr = rise time ~ Qg / Ig(on)
+- tf = fall time ~ Qg / Ig(off)
 
-Praktičnije preko energija:
-P_sw = f_sw × (Eon + Eoff)
+More practical via energies:
+P_sw = f_sw x (Eon + Eoff)
 
-SiC tipične vrednosti (vs IGBT):
-- Eon: 0.3 mJ vs 15 mJ (50× manje)
-- Eoff: 0.2 mJ vs 12 mJ (60× manje)
+SiC typical values (vs IGBT):
+- Eon: 0.3 mJ vs 15 mJ (50x less)
+- Eoff: 0.2 mJ vs 12 mJ (60x less)
 
-Primer (150 kW, 800V, 200A, 50 kHz):
-Rds(on) @ 125°C = 16 mΩ × 1.5 = 24 mΩ
-P_cond = (200 × 0.707)² × 0.024 = 480 W
-P_sw = 50000 × (0.3 + 0.2) × 10^-3 = 25 W
+Example (150 kW, 800V, 200A, 50 kHz):
+Rds(on) @ 125C = 16 mohm x 1.5 = 24 mohm
+P_cond = (200 x 0.707)^2 x 0.024 = 480 W
+P_sw = 50000 x (0.3 + 0.2) x 10^-3 = 25 W
 P_total = 505 W
 
-Poređenje sa IGBT @ 16 kHz:
+Comparison with IGBT @ 16 kHz:
 IGBT: 423 W @ 16 kHz
 SiC:  505 W @ 50 kHz
 
-Pri istoj frekvenciji (16 kHz):
-SiC P_sw = 16000 × 0.5 × 10^-3 = 8 W
-SiC P_total = 480 + 8 = 488 W (slično IGBT)
+At same frequency (16 kHz):
+SiC P_sw = 16000 x 0.5 x 10^-3 = 8 W
+SiC P_total = 480 + 8 = 488 W (similar to IGBT)
 
-ALI: SiC može raditi na 50+ kHz
-→ Manji magnetics, manji filter
-→ Ukupno manji i lakši sistem
+BUT: SiC can operate at 50+ kHz
+-> Smaller magnetics, smaller filter
+-> Overall smaller and lighter system
 ```
 
-### 2.5 SiC Izazovi i Rešenja
+### 2.5 SiC Challenges and Solutions
 
 ```
-Problem 1: Gate Oxide Pouzdanost
-───────────────────────────────────
-Uzrok: Defekti na SiC/SiO2 interfejsu
-Simptom: Vth drift, threshold instabilnost
+Problem 1: Gate Oxide Reliability
+-----------------------------------
+Cause: Defects at SiC/SiO2 interface
+Symptom: Vth drift, threshold instability
 
-Rešenja:
-- Koristiti Vgs = +15V/-4V (ne +20V/-5V)
-- Izbegavati Vgs > 18V
-- Soft turn-on za smanjenje dV/dt
+Solutions:
+- Use Vgs = +15V/-4V (not +20V/-5V)
+- Avoid Vgs > 18V
+- Soft turn-on to reduce dV/dt
 
-Problem 2: Paralelni Rad
-───────────────────────────────────
-Uzrok: Negativni temperaturni koef. Rds(on)
-       na niskim strujama
+Problem 2: Parallel Operation
+-----------------------------------
+Cause: Negative temperature coefficient of Rds(on)
+       at low currents
 
-Rešenja:
-- Matching uređaja (±5% Vth)
-- Simetrična PCB layout
-- Gate otpornici za svaki uređaj
-- Derating (80% nominalne struje)
+Solutions:
+- Device matching (+/-5% Vth)
+- Symmetric PCB layout
+- Gate resistors for each device
+- Derating (80% of nominal current)
 
-Problem 3: Short Circuit Kapacitet
-───────────────────────────────────
-SiC: 2-5 μs vs IGBT: 10+ μs
+Problem 3: Short Circuit Capability
+-----------------------------------
+SiC: 2-5 us vs IGBT: 10+ us
 
-Rešenja:
-- Brza desaturaciona zaštita (<1 μs)
+Solutions:
+- Fast desaturation protection (<1 us)
 - Active Miller Clamp
-- Soft turn-off sekvenca
+- Soft turn-off sequence
 
-Problem 4: Cena
-───────────────────────────────────
+Problem 4: Cost
+-----------------------------------
 SiC: ~$0.30/A vs IGBT: ~$0.10/A
 
-Trend: 15-20% godišnje smanjenje
-Projekcija: Paritet 2026-2028
+Trend: 15-20% annual reduction
+Projection: Parity 2026-2028
 ```
 
-## 3. Galijum Nitrid (GaN)
+## 3. Gallium Nitride (GaN)
 
-### 3.1 GaN vs SiC Pozicioniranje
+### 3.1 GaN vs SiC Positioning
 
 ```
-Aplikacioni Prostor:
+Application Space:
 
-Snaga (kW)
-    │
- 500├───────────────────────────────
-    │                    │ SiC     │
- 200├───────────────────┼─────────┤
-    │         │ SiC     │ SiC/Si  │
- 100├─────────┼─────────┼─────────┤
-    │   GaN   │ SiC/GaN │   Si    │
-  50├─────────┼─────────┼─────────┤
-    │   GaN   │   GaN   │   Si    │
-  10├─────────┼─────────┼─────────┤
-    │   GaN   │   GaN   │   Si    │
-    └─────────┴─────────┴─────────┴──→ Napon (V)
+Power (kW)
+    |
+ 500+-------------------------------
+    |                    | SiC     |
+ 200+-------------------+---------+
+    |         | SiC     | SiC/Si  |
+ 100+---------+---------+---------+
+    |   GaN   | SiC/GaN |   Si    |
+  50+---------+---------+---------+
+    |   GaN   |   GaN   |   Si    |
+  10+---------+---------+---------+
+    |   GaN   |   GaN   |   Si    |
+    +---------+---------+---------+--> Voltage (V)
          400     650     1200
 
-Za EV punjače (>50 kW):
-- 400V sistemi: GaN ili SiC
-- 800V sistemi: SiC dominira
-- >100 kW: SiC preferiran
+For EV chargers (>50 kW):
+- 400V systems: GaN or SiC
+- 800V systems: SiC dominates
+- >100 kW: SiC preferred
 ```
 
-### 3.2 GaN HEMT Struktura
+### 3.2 GaN HEMT Structure
 
 ```
 Enhancement-mode GaN HEMT:
 
          S          G          D
-         │          │          │
-    ┌────┴────┬─────┴─────┬────┴────┐
-    │   n+    │   p-GaN   │   n+    │
-    │         │   (gate)  │         │
-    │     ────┴───────────┴────     │
-    │         AlGaN barrier         │
-    │     ════════════════════      │ ← 2DEG
-    │         GaN buffer            │
-    │                               │
-    │         Si supstrat           │
-    └───────────────────────────────┘
+         |          |          |
+    +----+----+-----+-----+----+----+
+    |   n+    |   p-GaN   |   n+    |
+    |         |   (gate)  |         |
+    |     ----+-----------+----     |
+    |         AlGaN barrier         |
+    |     =====================     | <- 2DEG
+    |         GaN buffer            |
+    |                               |
+    |         Si substrate          |
+    +-------------------------------+
 
 2DEG (Two-Dimensional Electron Gas):
-- Visoka mobilnost elektrona
-- Nizak Rds(on) bez drift regiona
-- Lateralna struktura (surface mount)
+- High electron mobility
+- Low Rds(on) without drift region
+- Lateral structure (surface mount)
 ```
 
-### 3.3 GaN Proizvođači za EV Punjače
+### 3.3 GaN Manufacturers for EV Chargers
 
 #### GaN Systems
 
 ```
 GS66516T (650V, Top-cooled):
 - Vds: 650 V
-- Rds(on): 25 mΩ
+- Rds(on): 25 mohm
 - Id: 60 A
 - Package: GaNPX (SMD)
-- Reverse conduction: Da (bez body diode)
+- Reverse conduction: Yes (no body diode)
 
 GS-EVB-HB-66508B-ON (Eval Board):
 - Half-bridge 650V/30A
 - Includes gate driver
-- Za razvoj 10-20 kW faza
+- For 10-20 kW phase development
 ```
 
 #### Efficient Power Conversion (EPC)
 
 ```
-EPC2206 (80V klasa - za DC/DC):
+EPC2206 (80V class - for DC/DC):
 - Vds: 80 V
-- Rds(on): 1.8 mΩ
+- Rds(on): 1.8 mohm
 - Id: 90 A
 - Chip-scale package
 
 EPC2218 (100V):
-- Za niskonaponske DC/DC stage
-- Idealan za LLC sekundare
+- For low-voltage DC/DC stages
+- Ideal for LLC secondaries
 
-Napomena: EPC fokusiran na <200V
-Za AC/DC stage potrebni 650V+ uređaji
+Note: EPC focused on <200V
+For AC/DC stage, 650V+ devices needed
 ```
 
 #### Navitas
 
 ```
 GaNFast NV6128 (650V):
-- Integrisano: GaN + driver
-- Half-bridge u jednom pakovanju
-- Pojednostavljen dizajn
-- Za OBC (On-Board Charger) aplikacije
+- Integrated: GaN + driver
+- Half-bridge in one package
+- Simplified design
+- For OBC (On-Board Charger) applications
 
-Napomena: Trenutno do ~10 kW
-Ne preporučuje se za >50 kW DC punjače
+Note: Currently up to ~10 kW
+Not recommended for >50 kW DC chargers
 ```
 
-### 3.4 GaN Primena u EV Punjačima
+### 3.4 GaN Application in EV Chargers
 
 ```
-Gde ima smisla koristiti GaN:
+Where GaN makes sense:
 
 1. On-Board Charger (OBC) - 7-22 kW
-   ✓ Kritična veličina/težina
-   ✓ 400V sistemi dominantni
-   ✓ GaN @ 500 kHz omogućava kompaktnost
+   OK Critical size/weight
+   OK 400V systems dominant
+   OK GaN @ 500 kHz enables compactness
 
-2. DC/DC Konverter u vozilu
-   ✓ 400V → 12V/48V
-   ✓ Visoka frekvencija za malu veličinu
+2. DC/DC Converter in vehicle
+   OK 400V -> 12V/48V
+   OK High frequency for small size
 
-3. Bidirekcioni V2G punjači <20 kW
-   ✓ Rezidencijalna primena
-   ✓ Premium segment
+3. Bidirectional V2G chargers <20 kW
+   OK Residential application
+   OK Premium segment
 
-Gde SiC dominira:
+Where SiC dominates:
 
 1. DC Fast Charging >50 kW
-   ✓ Potrebna 1200V klasa
-   ✓ Visoke struje (>200A)
-   ✓ GaN 650V ne pokriva 800V arhitekture
+   OK 1200V class needed
+   OK High currents (>200A)
+   OK GaN 650V doesn't cover 800V architectures
 
-2. Pantograph sistemi
-   ✓ Ekstremne snage (>300 kW)
-   ✓ Robusnost važnija od efikasnosti
+2. Pantograph systems
+   OK Extreme power (>300 kW)
+   OK Robustness more important than efficiency
 ```
 
-## 4. Diode Tehnologije
+## 4. Diode Technologies
 
 ### 4.1 Si Fast Recovery Diode
 
 ```
-Karakteristike:
-- Vrrm: do 1200V
+Characteristics:
+- Vrrm: up to 1200V
 - Trr: 50-200 ns
-- Qrr: visok (uzrokuje gubitke)
-- Cena: najniža
+- Qrr: high (causes losses)
+- Cost: lowest
 
-Primena:
-- Jeftini punjači
-- Niska switching frekvencija (<20 kHz)
-- Snubber diode
+Application:
+- Budget chargers
+- Low switching frequency (<20 kHz)
+- Snubber diodes
 ```
 
 ### 4.2 SiC Schottky Diode
 
 ```
-Prednosti vs Si FRD:
+Advantages vs Si FRD:
 - Zero reverse recovery
-- Bez Qrr gubitaka
-- Stabilno preko temperature
-- Pozitivan temp. koef. Vf
+- No Qrr losses
+- Stable over temperature
+- Positive temp coefficient of Vf
 
-Ključni proizvodi:
+Key products:
 
 Wolfspeed C4D20120D:
 - Vrrm: 1200 V
@@ -608,7 +608,7 @@ ROHM SCS220AM:
 - Vrrm: 650 V
 - If: 20 A
 - Vf: 1.35 V
-- AEC-Q101 kvalifikovan
+- AEC-Q101 qualified
 
 Infineon IDH16G65C6:
 - Vrrm: 650 V
@@ -617,210 +617,210 @@ Infineon IDH16G65C6:
 - Merged PiN Schottky (MPS)
 ```
 
-### 4.3 SiC vs Si Dioda u Vienna Rectifier
+### 4.3 SiC vs Si Diode in Vienna Rectifier
 
 ```
-Uticaj na performanse:
+Impact on performance:
 
-Sa Si FRD (Trr = 100ns, Qrr = 2μC):
-                     ┌──────┐
-  Struja ───────────┤      ├─────────
-                     │      │
-                     │      │  Reverse
-                     │      │  recovery
-                     └──┬───┘
-                        │
-                        ▼ Gubitak
+With Si FRD (Trr = 100ns, Qrr = 2uC):
+                     +------+
+  Current -----------|      |----------
+                     |      |
+                     |      |  Reverse
+                     |      |  recovery
+                     +--+---+
+                        |
+                        v Loss
 
-Sa SiC Schottky (Trr ≈ 0):
-                     ┌──────┐
-  Struja ───────────┤      │─────────
-                     │      │
-                     └──────┘
-                     Bez reverse recovery
+With SiC Schottky (Trr ~ 0):
+                     +------+
+  Current -----------|      |----------
+                     |      |
+                     +------+
+                     No reverse recovery
 
-Praktični rezultat za 50 kW Vienna:
-- Si FRD @ 50 kHz: 150 W diodni gubici
-- SiC Schottky @ 50 kHz: 25 W diodni gubici
-- Ušteda: 125 W × 6 dioda = 750 W!
+Practical result for 50 kW Vienna:
+- Si FRD @ 50 kHz: 150 W diode losses
+- SiC Schottky @ 50 kHz: 25 W diode losses
+- Savings: 125 W x 6 diodes = 750 W!
 ```
 
-## 5. Modularni Power Blokovi
+## 5. Modular Power Blocks
 
-### 5.1 Integrisani Power Moduli
+### 5.1 Integrated Power Modules
 
 ```
-Prednosti integrisanih modula:
-1. Optimizovan layout (minimalni paraziti)
-2. Matched komponente
-3. Integrisana zaštita
-4. Jednostavnije hlađenje
-5. Sertifikovano ponašanje
+Advantages of integrated modules:
+1. Optimized layout (minimal parasitics)
+2. Matched components
+3. Integrated protection
+4. Simpler cooling
+5. Certified behavior
 
-Nedostaci:
-1. Manja fleksibilnost
-2. Lead time problemi
-3. Viša cena po W
-4. Teža zamena
+Disadvantages:
+1. Less flexibility
+2. Lead time issues
+3. Higher cost per W
+4. Harder replacement
 ```
 
-### 5.2 Infineon FF-Series za Punjače
+### 5.2 Infineon FF-Series for Chargers
 
 ```
 FF8MR12W2M1H_B11 (CoolSiC Easy 1B):
 
-┌──────────────────────────────────────┐
-│  ┌─────────────────────────────────┐ │
-│  │        High Side MOSFET         │ │
-│  │   Rds(on) = 8 mΩ, Id = 480A     │ │
-│  ├─────────────────────────────────┤ │
-│  │         AC Terminal             │ │
-│  ├─────────────────────────────────┤ │
-│  │        Low Side MOSFET          │ │
-│  │   Rds(on) = 8 mΩ, Id = 480A     │ │
-│  └─────────────────────────────────┘ │
-│                                      │
-│   DC+  DC-  AC  NTC                  │
-└───┬────┬────┬───┬────────────────────┘
-    │    │    │   │
++--------------------------------------+
+|  +---------------------------------+ |
+|  |        High Side MOSFET         | |
+|  |   Rds(on) = 8 mohm, Id = 480A   | |
+|  +---------------------------------+ |
+|  |         AC Terminal             | |
+|  +---------------------------------+ |
+|  |        Low Side MOSFET          | |
+|  |   Rds(on) = 8 mohm, Id = 480A   | |
+|  +---------------------------------+ |
+|                                      |
+|   DC+  DC-  AC  NTC                  |
++---+----+----+---+--------------------+
+    |    |    |   |
 
-Termalne karakteristike:
+Thermal characteristics:
 - Rth(j-c): 0.12 K/W per switch
-- Tjmax: 175°C
-- Footprint: 34mm × 62mm
+- Tjmax: 175C
+- Footprint: 34mm x 62mm
 ```
 
-### 5.3 Wolfspeed XM3 Platforma
+### 5.3 Wolfspeed XM3 Platform
 
 ```
 CAB450M12XM3:
-┌─────────────────────────────────────┐
-│  Specifikacija        │ Vrednost    │
-├───────────────────────┼─────────────┤
-│  Topologija           │ Half-bridge │
-│  Vds                  │ 1200 V      │
-│  Rds(on) @ 25°C       │ 4.5 mΩ      │
-│  Id kontinualno       │ 450 A       │
-│  Id peak (1ms)        │ 850 A       │
-│  Rth(j-c)            │ 0.09 K/W    │
-│  Creepage             │ 5 mm        │
-│  Package              │ 62mm        │
-└─────────────────────────────────────┘
++-------------------------------------+
+|  Specification        | Value       |
++-----------------------+-------------+
+|  Topology             | Half-bridge |
+|  Vds                  | 1200 V      |
+|  Rds(on) @ 25C        | 4.5 mohm    |
+|  Id continuous        | 450 A       |
+|  Id peak (1ms)        | 850 A       |
+|  Rth(j-c)             | 0.09 K/W    |
+|  Creepage             | 5 mm        |
+|  Package              | 62mm        |
++-------------------------------------+
 
-Dostupni gate driveri:
+Available gate drivers:
 - CGD12HBXMP (Wolfspeed)
 - 2SP0215T2A0-12 (Power Integrations)
 - SKYPER 42LJ (Semikron)
 ```
 
-## 6. Izbor Poluvodiča za EV Punjač
+## 6. Semiconductor Selection for EV Charger
 
 ### 6.1 Decision Matrix
 
 ```
-Kriterijumi izbora (težinski):
+Selection criteria (weighted):
 
-                    │ Težina │ IGBT │ SiC │ Hibrid
-────────────────────┼────────┼──────┼─────┼────────
-Efikasnost          │   25%  │  3   │  5  │   4
-Gustina snage       │   20%  │  2   │  5  │   3
-Cena komponenti     │   20%  │  5   │  2  │   3
-Pouzdanost (proven) │   15%  │  5   │  3  │   4
-Dostupnost          │   10%  │  5   │  3  │   4
-Složenost dizajna   │   10%  │  4   │  2  │   3
-────────────────────┼────────┼──────┼─────┼────────
-UKUPNO              │  100%  │ 3.65 │ 3.5 │  3.45
+                    | Weight | IGBT | SiC | Hybrid
+--------------------+--------+------+-----+--------
+Efficiency          |   25%  |  3   |  5  |   4
+Power density       |   20%  |  2   |  5  |   3
+Component cost      |   20%  |  5   |  2  |   3
+Reliability (proven)|   15%  |  5   |  3  |   4
+Availability        |   10%  |  5   |  3  |   4
+Design complexity   |   10%  |  4   |  2  |   3
+--------------------+--------+------+-----+--------
+TOTAL               |  100%  | 3.65 | 3.5 | 3.45
 
-Rezultat: Zavisi od prioriteta!
+Result: Depends on priorities!
 
-Za EXPO 2027 (brz razvoj, pouzdanost):
-→ IGBT ili Hybrid preporučen
+For EXPO 2027 (fast development, reliability):
+-> IGBT or Hybrid recommended
 
-Za premium proizvod (efikasnost):
-→ Full SiC preporučen
+For premium product (efficiency):
+-> Full SiC recommended
 ```
 
-### 6.2 Preporučena Konfiguracija po Snazi
+### 6.2 Recommended Configuration by Power
 
 ```
-50 kW DC Punjač:
-├── PFC Stage: Vienna Rectifier
-│   ├── Switches: IGBT 1200V/75A × 6
-│   │   └── Infineon IKW75N120CH3
-│   └── Diode: SiC Schottky 1200V/20A × 6
-│       └── Wolfspeed C4D20120D
-│
-└── DC/DC Stage: LLC + Full Bridge
-    ├── Primary: IGBT 1200V/150A × 4
-    │   └── Infineon IKW150N120H3
-    └── Secondary: SiC Schottky 650V/60A × 4
-        └── ROHM SCS260AM
+50 kW DC Charger:
++-- PFC Stage: Vienna Rectifier
+|   +-- Switches: IGBT 1200V/75A x 6
+|   |   +-- Infineon IKW75N120CH3
+|   +-- Diode: SiC Schottky 1200V/20A x 6
+|       +-- Wolfspeed C4D20120D
+|
++-- DC/DC Stage: LLC + Full Bridge
+    +-- Primary: IGBT 1200V/150A x 4
+    |   +-- Infineon IKW150N120H3
+    +-- Secondary: SiC Schottky 650V/60A x 4
+        +-- ROHM SCS260AM
 
-150 kW DC Punjač:
-├── PFC Stage: AFE (Active Front End)
-│   └── SiC Module 1200V/300A × 3
-│       └── Wolfspeed CAB450M12XM3
-│
-└── DC/DC Stage: DAB
-    ├── Primary: SiC Module 1200V/300A × 2
-    └── Secondary: SiC Module 1200V/300A × 2
+150 kW DC Charger:
++-- PFC Stage: AFE (Active Front End)
+|   +-- SiC Module 1200V/300A x 3
+|       +-- Wolfspeed CAB450M12XM3
+|
++-- DC/DC Stage: DAB
+    +-- Primary: SiC Module 1200V/300A x 2
+    +-- Secondary: SiC Module 1200V/300A x 2
 
 300+ kW Pantograph:
-├── Modularni pristup: 3-4 × 100kW modula
-├── Svaki modul: Full SiC
-└── Paralelni DC izlaz sa load sharing
++-- Modular approach: 3-4 x 100kW modules
++-- Each module: Full SiC
++-- Parallel DC output with load sharing
 ```
 
-### 6.3 Bill of Materials - Poluvodici (150 kW)
+### 6.3 Bill of Materials - Semiconductors (150 kW)
 
 ```
-┌────────────────────────────────────────────────────────┐
-│ Komponenta              │ Qty │ Jed. cena │   Ukupno  │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ SiC Module 1200V/450A   │  6  │   €450    │  €2,700   │
-│ (Wolfspeed CAB450M12XM3)│     │           │           │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ SiC Gate Driver         │  6  │   €120    │   €720    │
-│ (CGD12HBXMP)           │     │           │           │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ SiC Schottky 1200V/40A  │  12 │   €25     │   €300    │
-│ (C4D40120D)            │     │           │           │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ TVS/Protection         │ set │   €150    │   €150    │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ NTC/Temperature Sensors │  12 │   €5      │   €60     │
-├─────────────────────────┼─────┼───────────┼───────────┤
-│ UKUPNO POLUVODICI      │     │           │  €3,930   │
-└────────────────────────────────────────────────────────┘
++--------------------------------------------------------+
+| Component               | Qty | Unit price |   Total   |
++-------------------------+-----+-----------+-----------+
+| SiC Module 1200V/450A   |  6  |   EUR450  |  EUR2,700 |
+| (Wolfspeed CAB450M12XM3)|     |           |           |
++-------------------------+-----+-----------+-----------+
+| SiC Gate Driver         |  6  |   EUR120  |   EUR720  |
+| (CGD12HBXMP)            |     |           |           |
++-------------------------+-----+-----------+-----------+
+| SiC Schottky 1200V/40A  |  12 |   EUR25   |   EUR300  |
+| (C4D40120D)             |     |           |           |
++-------------------------+-----+-----------+-----------+
+| TVS/Protection          | set |   EUR150  |   EUR150  |
++-------------------------+-----+-----------+-----------+
+| NTC/Temperature Sensors |  12 |   EUR5    |   EUR60   |
++-------------------------+-----+-----------+-----------+
+| TOTAL SEMICONDUCTORS    |     |           |  EUR3,930 |
++--------------------------------------------------------+
 
-IGBT alternativa (manja efikasnost):
-- IGBT Moduli (×6): €1,800
-- Fast Recovery Diode: €200
-- Gate Driveri: €480
-- UKUPNO: €2,600 (34% manje)
+IGBT alternative (lower efficiency):
+- IGBT Modules (x6): EUR1,800
+- Fast Recovery Diode: EUR200
+- Gate Drivers: EUR480
+- TOTAL: EUR2,600 (34% less)
 
 Trade-off:
-SiC: +€1,330 ali -2% gubitaka = 3 kW ušteda
-@ 0.15 €/kWh, 8h/dan, 300 dana = €1,080/god ušteda
-ROI: 1.2 godine
+SiC: +EUR1,330 but -2% losses = 3 kW savings
+@ EUR0.15/kWh, 8h/day, 300 days = EUR1,080/year savings
+ROI: 1.2 years
 ```
 
-## 7. Testiranje i Karakterizacija
+## 7. Testing and Characterization
 
-### 7.1 Statičko Testiranje
+### 7.1 Static Testing
 
 ```
-Parametri za merenje:
+Parameters to measure:
 
 1. Vce(sat) / Rds(on) vs Temperature
-   ┌────────────────────────────────┐
-   │ Test Setup:                    │
-   │ - Curve tracer (Keysight B1505)│
-   │ - Thermal chamber (-40 to 175°C)│
-   │ - Pulsed measurement (<1ms)    │
-   └────────────────────────────────┘
+   +--------------------------------+
+   | Test Setup:                    |
+   | - Curve tracer (Keysight B1505)|
+   | - Thermal chamber (-40 to 175C)|
+   | - Pulsed measurement (<1ms)    |
+   +--------------------------------+
 
-2. Gate Karakteristike
+2. Gate Characteristics
    - Vth (threshold voltage)
    - gm (transconductance)
    - Ciss, Coss, Crss vs Vds
@@ -834,90 +834,90 @@ Parametri za merenje:
    - Rth junction to case
 ```
 
-### 7.2 Dinamičko Testiranje
+### 7.2 Dynamic Testing
 
 ```
 Double Pulse Test Setup:
 
-    Vdc ──┬──────────┬───────────
-          │          │
-         ═╪═ Cdc    ┌┴┐
-          │         │ │ Load
-          │         │L│ Inductor
-          │         └┬┘
-          │          │
-          └────┬─────┤
-              ┌┴┐    │
-         DUT  │ │ ←──┼── Gate Driver
-              └┬┘    │
-               │     │
-    GND ───────┴─────┴───────────
+    Vdc --+----------+------------
+          |          |
+         =|= Cdc    +-+
+          |         | | Load
+          |         |L| Inductor
+          |         +-+
+          |          |
+          +----+-----+
+              +-+    |
+         DUT  | | <--+-- Gate Driver
+              +-+    |
+               |     |
+    GND -------+-----+-------------
 
-Mereni parametri:
+Measured parameters:
 - tr, tf (rise/fall time)
 - td(on), td(off) (delay time)
 - Eon, Eoff (switching energy)
 - di/dt, dv/dt
 - Overshoot, ringing
 
-Test uslovi (tipično):
-- Vdc = 800V (za 1200V uređaje)
+Test conditions (typical):
+- Vdc = 800V (for 1200V devices)
 - Id = rated current
-- Tj = 25°C, 125°C, 150°C
-- Rg = 0Ω, 10Ω, 20Ω (za Rg optimizaciju)
+- Tj = 25C, 125C, 150C
+- Rg = 0ohm, 10ohm, 20ohm (for Rg optimization)
 ```
 
-### 7.3 Pouzdanost i Životni Vek
+### 7.3 Reliability and Lifetime
 
 ```
 Accelerated Life Testing:
 
 1. Power Cycling Test
-   ┌──────────────────────────────────┐
-   │ Ton: 2s heating                  │
-   │ Toff: 2s cooling                 │
-   │ ΔTj: 100°C                       │
-   │ Cycles: >100,000 za kvalifikaciju│
-   └──────────────────────────────────┘
+   +----------------------------------+
+   | Ton: 2s heating                  |
+   | Toff: 2s cooling                 |
+   | DTj: 100C                        |
+   | Cycles: >100,000 for qualification|
+   +----------------------------------+
 
 2. Thermal Cycling
-   - -40°C to +125°C
-   - 1000 ciklusa minimum
+   - -40C to +125C
+   - 1000 cycles minimum
 
 3. High Temperature Reverse Bias (HTRB)
-   - Vds = 80% rated, Tj = 150°C
-   - 1000 sati
+   - Vds = 80% rated, Tj = 150C
+   - 1000 hours
 
 4. High Temperature Gate Bias (HTGB)
    - Vgs = max rated
-   - 1000 sati @ 150°C
+   - 1000 hours @ 150C
 
 5. Humidity Testing (H3TRB)
-   - 85°C, 85% RH
+   - 85C, 85% RH
    - Vds = 80% rated
-   - 1000 sati
+   - 1000 hours
 
-MTBF Proračun:
-Za SiC modul u 150 kW punjač:
-- Operating hours: 6000 h/god
-- Tj average: 100°C
-- Load cycles: 50,000/god
-- Očekivani MTBF: 200,000+ sati
-- Očekivani životni vek: 15+ godina
+MTBF Calculation:
+For SiC module in 150 kW charger:
+- Operating hours: 6000 h/year
+- Tj average: 100C
+- Load cycles: 50,000/year
+- Expected MTBF: 200,000+ hours
+- Expected lifetime: 15+ years
 ```
 
 ## 8. Emerging Technologies
 
-### 8.1 GaN na SiC Supstratu
+### 8.1 GaN on SiC Substrate
 
 ```
-GaN-on-SiC Prednosti:
-- Bolja termalna provodnost (SiC substrat)
-- Veća gustina snage
-- Potencijal za >1000V klase
+GaN-on-SiC Advantages:
+- Better thermal conductivity (SiC substrate)
+- Higher power density
+- Potential for >1000V classes
 
-Status: R&D faza
-Dostupnost: 2026+
+Status: R&D phase
+Availability: 2026+
 ```
 
 ### 8.2 Diamond Semiconductors
@@ -925,51 +925,51 @@ Dostupnost: 2026+
 ```
 Ultra-Wide Bandgap:
 - Bandgap: 5.5 eV (vs 3.3 SiC)
-- Kritično polje: 10 MV/cm
-- Termalna provodnost: 22 W/cm·K
+- Critical field: 10 MV/cm
+- Thermal conductivity: 22 W/cm K
 
-Status: Laboratorija
-Komercijalizacija: 2030+
+Status: Laboratory
+Commercialization: 2030+
 ```
 
 ### 8.3 Vertical GaN
 
 ```
 GaN-on-GaN:
-- Eliminiše Si substrat ograničenja
-- Omogućava >1200V klase
-- Vertikalna struktura kao SiC
+- Eliminates Si substrate limitations
+- Enables >1200V classes
+- Vertical structure like SiC
 
 Status: Early production
-Dostupnost: 2025-2026
+Availability: 2025-2026
 ```
 
-## 9. Zaključak i Preporuke
+## 9. Conclusion and Recommendations
 
-### Za EXPO 2027 Projekat:
+### For EXPO 2027 Project:
 
 ```
-Strategija 1: Konzervativan pristup
-- PFC: IGBT + SiC diode (Hybrid)
+Strategy 1: Conservative approach
+- PFC: IGBT + SiC diodes (Hybrid)
 - DC/DC: IGBT + SiC Schottky
-- Prednost: Proverena pouzdanost
-- Risk: Nizak
+- Advantage: Proven reliability
+- Risk: Low
 
-Strategija 2: Performance pristup
-- Full SiC dizajn
-- Veća efikasnost, manja veličina
-- Prednost: Premium pozicioniranje
-- Risk: Srednji (supply chain)
+Strategy 2: Performance approach
+- Full SiC design
+- Higher efficiency, smaller size
+- Advantage: Premium positioning
+- Risk: Medium (supply chain)
 
-Strategija 3: Platforma pristup
-- Dizajn za obe opcije
-- Zajednički gate driver, layout
-- Zamena IGBT ↔ SiC modula
-- Prednost: Fleksibilnost
-- Risk: Veći inicijalni development cost
+Strategy 3: Platform approach
+- Design for both options
+- Common gate driver, layout
+- Swap IGBT <-> SiC modules
+- Advantage: Flexibility
+- Risk: Higher initial development cost
 
-PREPORUKA: Strategija 3
-- Započeti sa IGBT za brzu validaciju
-- Upgrade na SiC za volume production
-- Zadržati obe opcije za različite segmente
+RECOMMENDATION: Strategy 3
+- Start with IGBT for fast validation
+- Upgrade to SiC for volume production
+- Keep both options for different segments
 ```

@@ -1,96 +1,96 @@
-# Power Electronics Arhitektura
+# Power Electronics Architecture
 
-## Filozofija: Bolje, Ne Lakše
+## Philosophy: Better, Not Easier
 
 ```
-TRADICIONALNO                     ELEKTROKOMBINACIJA
+TRADITIONAL                      ELEKTROKOMBINACIJA
 ───────────────────────────────────────────────────────────
-IGBT (jeftinije)            →    SiC MOSFET (50% manji gubici)
-2-level topologija          →    3-level NPC (bolji THD, manji stress)
-Si diode                    →    SiC Schottky (zero recovery)
-Air cooling                 →    Liquid cooling (2× gustina)
+IGBT (cheaper)              →    SiC MOSFET (50% lower losses)
+2-level topology            →    3-level NPC (better THD, lower stress)
+Si diodes                   →    SiC Schottky (zero recovery)
+Air cooling                 →    Liquid cooling (2× density)
 Fixed frequency PWM         →    AI-optimized switching
 ```
 
 ---
 
-## 1. SiC MOSFET Selekcija
+## 1. SiC MOSFET Selection
 
-### Zašto SiC umesto IGBT?
+### Why SiC instead of IGBT?
 
-| Parametar | Si IGBT | SiC MOSFET | Prednost |
+| Parameter | Si IGBT | SiC MOSFET | Advantage |
 |-----------|---------|------------|----------|
-| Switching losses | 100% (baseline) | 30-50% | 50-70% niže |
-| Conduction losses | Vce(sat) ~2V | Rds(on) × I² | 30-40% niže pri partial load |
-| Max junction temp | 150°C | 175°C | Veća termalna margina |
-| Switching frequency | <20 kHz typical | >100 kHz | 5× veća frekvencija |
-| Body diode | Slow recovery | Fast/Zero recovery | Nema reverse recovery losses |
-| Temperature coefficient | Negative | Positive | Prirodna strujno balansiranje |
+| Switching losses | 100% (baseline) | 30-50% | 50-70% lower |
+| Conduction losses | Vce(sat) ~2V | Rds(on) × I² | 30-40% lower at partial load |
+| Max junction temp | 150°C | 175°C | Higher thermal margin |
+| Switching frequency | <20 kHz typical | >100 kHz | 5× higher frequency |
+| Body diode | Slow recovery | Fast/Zero recovery | No reverse recovery losses |
+| Temperature coefficient | Negative | Positive | Natural current balancing |
 
-### Odabrani SiC MOSFET-i
+### Selected SiC MOSFETs
 
 #### EK3 (3.3 kW) - Wolfspeed 900V SiC
 
 ```
-Komponenta: C3M0065090D (preporučeno)
+Component: C3M0065090D (recommended)
 ─────────────────────────────────────────
-Napon: 900V
-Struja: 36A continuous
+Voltage: 900V
+Current: 36A continuous
 Rds(on): 65 mΩ @ 25°C
 Package: TO-247-4 (Kelvin source)
 
-Zašto 900V za 650V DC link?
-• Optimalan balans cene i margine
-• Dovoljna margina za voltage spikes (~40%)
-• Bolji Rds(on) nego 1200V varijante
-• Niža cena nego 1200V klasa
+Why 900V for 650V DC link?
+• Optimal balance of cost and margin
+• Sufficient margin for voltage spikes (~40%)
+• Better Rds(on) than 1200V variants
+• Lower cost than 1200V class
 
-Alternative:
-• Infineon IMZ120R045M1 (1200V) - veća margina
-• ROHM SCT3030AR (650V) - ako je DC link niži
+Alternatives:
+• Infineon IMZ120R045M1 (1200V) - higher margin
+• ROHM SCT3030AR (650V) - if DC link is lower
 • Onsemi NTH4L022N065SC (650V) - cost optimized
 ```
 
 #### EK30 (30 kW) - Wolfspeed Gen 4
 
 ```
-Komponenta: CAB011M12FM3 (Six-Pack Module)
+Component: CAB011M12FM3 (Six-Pack Module)
 ─────────────────────────────────────────
-Napon: 1200V
-Struja: 200A per phase
+Voltage: 1200V
+Current: 200A per phase
 Rds(on): 11 mΩ (full bridge 100A config)
 Package: 62mm industry standard
 
-Gen 4 prednosti (vs Gen 3):
-• 22% niži Rds(on) @ 125°C
-• 60% niži turn-on energy
-• 30% niži switching losses (soft body diode)
-• 50% niži VDS overshoot
+Gen 4 advantages (vs Gen 3):
+• 22% lower Rds(on) @ 125°C
+• 60% lower turn-on energy
+• 30% lower switching losses (soft body diode)
+• 50% lower VDS overshoot
 
-Dostupnost: Sampling sada, production Q1 2026
+Availability: Sampling now, production Q1 2026
 ```
 
-### Alternativa: Infineon CoolSiC G2
+### Alternative: Infineon CoolSiC G2
 
 ```
-Komponenta: AIMW120R015M2 (ili modul)
+Component: AIMW120R015M2 (or module)
 ─────────────────────────────────────
-Napon: 1200V
+Voltage: 1200V
 Rds(on): 15 mΩ
-Prednost: 25% niži switching losses vs G1
-Package: Various (discrete i moduli)
+Advantage: 25% lower switching losses vs G1
+Package: Various (discrete and modules)
 
-Kada koristiti Infineon:
-• Ako je Wolfspeed nedostupan
-• Za second-source strategiju
-• Automotive-qualified varijante (AEC-Q101)
+When to use Infineon:
+• If Wolfspeed is unavailable
+• For second-source strategy
+• Automotive-qualified variants (AEC-Q101)
 ```
 
 ---
 
-## 2. Topologija: 3-Level NPC
+## 2. Topology: 3-Level NPC
 
-### Zašto 3-Level umesto 2-Level?
+### Why 3-Level instead of 2-Level?
 
 ```
 2-LEVEL                          3-LEVEL NPC
@@ -104,7 +104,7 @@ Kada koristiti Infineon:
 │  S2   │─┘                    │    S2     │─┼── Vdc/2
 └───────┘                      └───────────┘ │
                                     D2 ──┤  │    ← Neutral point
-   Vout: 0 ili Vdc             ┌───────────┐ │
+   Vout: 0 or Vdc              ┌───────────┐ │
                                │    S3     │─┼── Vdc/2
                                └───────────┘ │
                                     D3 ──┤  │
@@ -112,50 +112,50 @@ Kada koristiti Infineon:
                                │    S4     │─┘
                                └───────────┘
 
-                               Vout: 0, Vdc/2, ili Vdc
+                               Vout: 0, Vdc/2, or Vdc
 ```
 
-### Prednosti 3-Level NPC
+### 3-Level NPC Advantages
 
-| Parametar | 2-Level | 3-Level NPC | Poboljšanje |
+| Parameter | 2-Level | 3-Level NPC | Improvement |
 |-----------|---------|-------------|-------------|
-| Voltage stress per switch | Vdc | Vdc/2 | 50% niži |
-| Output THD | ~5% | <2% | 60% bolji |
-| dv/dt stress | Visok | Nizak | EMC friendly |
-| Filter size | Baseline | 50% manji | Manja težina |
-| Switching losses | Baseline | 30% niže | Veća efikasnost |
+| Voltage stress per switch | Vdc | Vdc/2 | 50% lower |
+| Output THD | ~5% | <2% | 60% better |
+| dv/dt stress | High | Low | EMC friendly |
+| Filter size | Baseline | 50% smaller | Lower weight |
+| Switching losses | Baseline | 30% lower | Higher efficiency |
 
-### T-Type vs I-NPC Varijante
+### T-Type vs I-NPC Variants
 
 ```
-T-TYPE NPC (Odabrano za EK30)
+T-TYPE NPC (Selected for EK30)
 ─────────────────────────────
        S1 (1200V)
           │
     ┌─────┼─────┐
     │     │     │
-   S2a   OUT   S2b    ← Bidirekcioni switch (2×650V)
+   S2a   OUT   S2b    ← Bidirectional switch (2×650V)
     │     │     │
     └─────┼─────┘
           │
        S3 (1200V)
 
-Prednosti T-Type:
-• Manje komponenti nego I-NPC
-• Niži conduction losses
-• Optimalno za fsw < 50 kHz
+T-Type advantages:
+• Fewer components than I-NPC
+• Lower conduction losses
+• Optimal for fsw < 50 kHz
 
-I-NPC (Alternativa za višu frekvenciju)
+I-NPC (Alternative for higher frequency)
 ───────────────────────────────────────
-• Svi switchevi mogu biti 650V
-• Bolji za fsw > 50 kHz
-• Kompleksnija kontrola
+• All switches can be 650V
+• Better for fsw > 50 kHz
+• More complex control
 ```
 
-### Implementacija za EK30
+### Implementation for EK30
 
 ```
-DC Bus: 800V nominal (do 1000V max)
+DC Bus: 800V nominal (up to 1000V max)
 ───────────────────────────────────
 
 High-side: 1200V SiC MOSFET (Wolfspeed Gen 4)
@@ -163,31 +163,31 @@ Mid-point: 2× 650V SiC MOSFET back-to-back
 Low-side: 1200V SiC MOSFET (Wolfspeed Gen 4)
 
 Switching frequency: 30-50 kHz
-• Optimalno za T-type topologiju
-• Dobar balans efikasnosti i veličine
+• Optimal for T-type topology
+• Good balance of efficiency and size
 
 Gate driver: Isolated, +18V/-5V
-• Pozitivan bias: 18V za potpuno uključenje SiC
-• Negativan bias: -5V za immunity od parasitic turn-on
+• Positive bias: 18V for full SiC turn-on
+• Negative bias: -5V for immunity from parasitic turn-on
 ```
 
 ---
 
 ## 3. DC-DC Stage: LLC Resonant
 
-### Zašto LLC?
+### Why LLC?
 
 ```
-LLC RESONANT PREDNOSTI
+LLC RESONANT ADVANTAGES
 ──────────────────────
-1. Zero Voltage Switching (ZVS) od no-load do full-load
-2. Zero Current Switching (ZCS) na sekundarnim diodama
-3. Soft switching = minimalni EMI
-4. Mogućnost integracije Lr u transformer leakage
-5. Jednostavna sinhronizacija za bidirekcioni rad (V2G)
+1. Zero Voltage Switching (ZVS) from no-load to full-load
+2. Zero Current Switching (ZCS) on secondary diodes
+3. Soft switching = minimal EMI
+4. Ability to integrate Lr into transformer leakage
+5. Simple synchronization for bidirectional operation (V2G)
 ```
 
-### LLC Dizajn za EK3 (3.3 kW)
+### LLC Design for EK3 (3.3 kW)
 
 ```
                     Lr      Cr
@@ -203,27 +203,27 @@ Vdc ──────┼────┤           ├────┼───�
           └─────────┴───────────┘
                     Lm
 
-Parametri EK3:
+EK3 Parameters:
 ─────────────
 Input: 650V DC (from central PFC)
 Output: 50-500V DC (battery range)
 Power: 3.3 kW continuous (3.6 kW peak)
 Resonant frequency: 200 kHz
 Switching range: 150-250 kHz
-Transformer ratio: 1:1 (za širok output range)
+Transformer ratio: 1:1 (for wide output range)
 Magnetizing inductance Lm: 200 µH
 Resonant inductance Lr: 20 µH
 Resonant capacitor Cr: 32 nF
 
 Planar transformer:
-• Integrisan u PCB za manufacturing repeatability
+• Integrated into PCB for manufacturing repeatability
 • Leakage = Lr (no external inductor)
 • Film capacitors (no electrolytics)
 
-Očekivana efikasnost: >96% peak, >94% @ 50% load
+Expected efficiency: >96% peak, >94% @ 50% load
 ```
 
-### Three-Phase Interleaved LLC za EK30 (30 kW)
+### Three-Phase Interleaved LLC for EK30 (30 kW)
 
 ```
          Phase A      Phase B      Phase C
@@ -239,14 +239,14 @@ Očekivana efikasnost: >96% peak, >94% @ 50% load
 
 Interleaving: 120° phase shift
 ─────────────────────────────
-• Ripple cancellation na output
-• Smanjenje output filter capacitance za 70%
-• Distribucija termalne disipacije
+• Ripple cancellation on output
+• 70% reduction in output filter capacitance
+• Distribution of thermal dissipation
 
-Parametri EK30:
+EK30 Parameters:
 ─────────────
 Input: 800V DC (from NPC PFC)
-Output: 200-1000V DC (podržava 400V i 800V vozila)
+Output: 200-1000V DC (supports 400V and 800V vehicles)
 Power: 30 kW (3 × 10 kW phases)
 Switching frequency: 135-250 kHz
 Transformer ratio: 1:1.2
@@ -257,26 +257,26 @@ Reference: Wolfspeed 30kW interleaved LLC design
 
 ---
 
-## 4. Gate Driver Dizajn
+## 4. Gate Driver Design
 
-### Zahtevi za SiC MOSFET Gate Drive
+### Requirements for SiC MOSFET Gate Drive
 
 ```
-SiC SPECIFIČNOSTI
+SiC SPECIFICS
 ─────────────────
-1. Viši gate threshold: ~4V (vs 2V za Si)
-2. Niža gate kapacitancija: Brže switching, ali više dv/dt
-3. Miller plateau: Kraći, zahteva brži driver
-4. Parasitic turn-on: Osetljiv na dv/dt indukovan gate noise
+1. Higher gate threshold: ~4V (vs 2V for Si)
+2. Lower gate capacitance: Faster switching, but more dv/dt
+3. Miller plateau: Shorter, requires faster driver
+4. Parasitic turn-on: Sensitive to dv/dt induced gate noise
 
-REŠENJE: +18V/-5V Gate Drive
+SOLUTION: +18V/-5V Gate Drive
 ────────────────────────────
-• +18V: Osigurava nizak Rds(on) čak i na visokoj temperaturi
-• -5V: Sprečava lažno paljenje od dv/dt noise
-• Kelvin source: Eliminira common source inductance
+• +18V: Ensures low Rds(on) even at high temperature
+• -5V: Prevents false turn-on from dv/dt noise
+• Kelvin source: Eliminates common source inductance
 ```
 
-### Preporučeni Gate Driver IC
+### Recommended Gate Driver IC
 
 ```
 Isolated Gate Driver: Silicon Labs Si823Hx
@@ -284,15 +284,15 @@ Isolated Gate Driver: Silicon Labs Si823Hx
 • Peak output current: 8A source/sink
 • Propagation delay: <50 ns
 • CMTI: >200 kV/µs
-• Integrated DC-DC za ±supply
+• Integrated DC-DC for ±supply
 
-Alternative:
+Alternatives:
 • Infineon 1EDC series
 • Texas Instruments UCC21732
 • ROHM BM61S41RFV
 ```
 
-### Gate Resistor Optimizacija
+### Gate Resistor Optimization
 
 ```
          Rg_on
@@ -305,15 +305,15 @@ Driver OUT ──┼── MOSFET Gate
            │
          Doff (Schottky)
 
-Strategija:
-• Rg_on: Veći (10-20Ω) - kontrolisan turn-on, manji overshoot
-• Rg_off: Manji (2-5Ω) - brz turn-off za niže switching losses
-• Doff: Bypass dioda za asimetrične Rg vrednosti
+Strategy:
+• Rg_on: Higher (10-20Ω) - controlled turn-on, lower overshoot
+• Rg_off: Lower (2-5Ω) - fast turn-off for lower switching losses
+• Doff: Bypass diode for asymmetric Rg values
 ```
 
 ---
 
-## 5. EMI/EMC Dizajn
+## 5. EMI/EMC Design
 
 ### Common Mode Choke
 
@@ -326,22 +326,22 @@ Strategija:
            │ │
           PE (shield)
 
-Specifikacija:
+Specification:
 • Impedance: >1 kΩ @ 100 kHz
-• Saturation current: >50A (za EK30)
-• Nanocrystalline core za širok frekvencijski opseg
+• Saturation current: >50A (for EK30)
+• Nanocrystalline core for wide frequency range
 ```
 
 ### dv/dt Limiting
 
 ```
-3-level NPC prirodno ima niži dv/dt:
+3-level NPC naturally has lower dv/dt:
 • 2-level: dv/dt = Vdc / t_rise ≈ 800V / 50ns = 16 kV/µs
 • 3-level: dv/dt = (Vdc/2) / t_rise ≈ 400V / 50ns = 8 kV/µs
 
-Dodatne mere:
-• Snubber circuits na kritičnim nodovima
-• Shielded gate drive transformeri
+Additional measures:
+• Snubber circuits on critical nodes
+• Shielded gate drive transformers
 • Proper PCB layout (star grounding)
 ```
 
@@ -352,37 +352,37 @@ Dodatne mere:
 ### Hardware Protection
 
 ```
-DESAT Detection (za SiC)
+DESAT Detection (for SiC)
 ────────────────────────
 • Monitor Vds during on-state
 • Threshold: Vds > 8V = fault
-• Blanking time: 500 ns (SiC ima brz turn-on)
+• Blanking time: 500 ns (SiC has fast turn-on)
 • Response: Soft turn-off (controlled di/dt)
 
 Over-Current Protection
 ───────────────────────
 • Current sense resistor: 1-2 mΩ shunt
-• Hall effect sensor: Za galvansku izolaciju
-• Rogowski coil: Za brzu detekciju (AC komponenta)
+• Hall effect sensor: For galvanic isolation
+• Rogowski coil: For fast detection (AC component)
 
 Over-Voltage Protection
 ───────────────────────
-• Active clamp circuit na DC bus
-• TVS diode na gate
-• Varistor na AC input
+• Active clamp circuit on DC bus
+• TVS diode on gate
+• Varistor on AC input
 ```
 
 ### AI-Enhanced Protection
 
 ```
-Tradicionalno: Fixed thresholds
+Traditional: Fixed thresholds
 ELEKTROKOMBINACIJA: Adaptive AI thresholds
 
-Primeri:
-1. Cold start: Dozvoli viši inrush jer su komponente hladne
-2. Hot operation: Smanji current limit jer je termal margina manja
-3. Aged components: AI detektuje degradaciju, prilagođava limite
-4. Predictive: Anticipira probleme pre nego što se dogode
+Examples:
+1. Cold start: Allow higher inrush because components are cold
+2. Hot operation: Reduce current limit because thermal margin is smaller
+3. Aged components: AI detects degradation, adjusts limits
+4. Predictive: Anticipates problems before they occur
 ```
 
 ---
@@ -391,7 +391,7 @@ Primeri:
 
 ### EK3 (3.3 kW) - Power Electronics BOM
 
-| Komponenta | Part Number | Qty | Unit Price | Total |
+| Component | Part Number | Qty | Unit Price | Total |
 |------------|-------------|-----|------------|-------|
 | SiC MOSFET 900V | C3M0065090D | 4 | €18 | €72 |
 | SiC Schottky 650V | C3D10065A | 4 | €8 | €32 |
@@ -409,7 +409,7 @@ Primeri:
 
 ### EK30 (30 kW) - Power Electronics BOM
 
-| Komponenta | Part Number | Qty | Unit Price | Total |
+| Component | Part Number | Qty | Unit Price | Total |
 |------------|-------------|-----|------------|-------|
 | SiC Module 1200V | CAB011M12FM3 | 2 | €350 | €700 |
 | SiC MOSFET 650V (T-type) | Various | 12 | €20 | €240 |
@@ -457,7 +457,7 @@ V2G round-trip eff     >94%        AC→DC→AC
 
 ---
 
-## Reference i Izvori
+## References and Sources
 
 - [Wolfspeed 1200V SiC MOSFETs](https://www.wolfspeed.com/products/power/sic-mosfets/1200v-silicon-carbide-mosfets/)
 - [Wolfspeed Gen 4 Technology](https://www.eenewseurope.com/en/wolfspeed-launches-fourth-generation-sic-technology/)

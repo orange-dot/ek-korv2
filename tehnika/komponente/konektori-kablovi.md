@@ -1,11 +1,11 @@
-# Konektori i Kablovi za EV Punjače
+# Connectors and Cables for EV Chargers
 
-## 1. DC Charging Konektori
+## 1. DC Charging Connectors
 
 ### 1.1 CCS Combo 2 (EU Standard)
 
 ```
-CCS2 Connector Specifikacije:
+CCS2 Connector Specifications:
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                       CCS COMBO 2                               │
@@ -56,7 +56,7 @@ Pin Assignment:
 ### 1.2 CCS2 Connector Products
 
 ```
-Komercialni CCS2 Konektori:
+Commercial CCS2 Connectors:
 
 1. Phoenix Contact CCS DC Connector:
 ┌─────────────────────────────────────────────────────────────┐
@@ -149,10 +149,10 @@ CHAdeMO Suppliers:
    - Price: ~€600-900
 ```
 
-### 1.4 Pantograph Connectors (za Autobuse)
+### 1.4 Pantograph Connectors (for Buses)
 
 ```
-Pantograph Systems za Bus Charging:
+Pantograph Systems for Bus Charging:
 
 1. OppCharge (Opportunity Charging):
 ┌─────────────────────────────────────────────────────────────┐
@@ -204,7 +204,7 @@ Standard Interface (OppCharge / EN 50696):
 
 ## 2. Liquid Cooled Cable
 
-### 2.1 Konstrukcija
+### 2.1 Construction
 
 ```
 Liquid Cooled DC Cable Cross-Section:
@@ -250,7 +250,7 @@ Cooling Parameters:
 │ 500         │ 120        │ 6            │ <10°C      │
 ```
 
-### 2.2 Kabelski Sistemi
+### 2.2 Cable Systems
 
 ```
 Liquid Cooled Cable Systems:
@@ -304,7 +304,7 @@ Ampacity Calculation:
 
 I_rated = P / (√3 × V × pf)
 
-Za 150 kW @ 400V, pf=0.95:
+For 150 kW @ 400V, pf=0.95:
 I = 150000 / (√3 × 400 × 0.95) = 228A
 
 Cable selection (derating factors):
@@ -503,13 +503,13 @@ For Serbia (EXPO 2027):
 - Standard commercial grade suitable
 ```
 
-## 5. Bill of Materials - Konektori
+## 5. Bill of Materials - Connectors
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ KONEKTORI I KABLOVI (150 kW DC Punjač)                          │
+│ CONNECTORS AND CABLES (150 kW DC Charger)                       │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
-│ Komponenta                   │ Qty │ Jed. cena  │    Ukupno     │
+│ Component                    │ Qty │ Unit Price │    Total      │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ CCS2 Liquid Cooled Cable Assy│  1  │  €3,000    │   €3,000      │
 │ (5m, 350A rated)             │     │            │               │
@@ -529,26 +529,26 @@ For Serbia (EXPO 2027):
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ Cable retractor/holder       │  1  │   €300     │    €300       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ UKUPNO KONEKTORI/KABLOVI                        │   €5,450      │
-│ (sa CHAdeMO opcijom)                            │               │
+│ TOTAL CONNECTORS/CABLES                         │   €5,450      │
+│ (with CHAdeMO option)                           │               │
 │                                                 │               │
-│ Bez CHAdeMO:                                    │   €4,750      │
+│ Without CHAdeMO:                                │   €4,750      │
 └─────────────────────────────────────────────────┴───────────────┘
 
-Za Bus Pantograph dodatno:
+For Bus Pantograph additionally:
 │ Pantograph system            │  1  │ €20,000    │  €20,000      │
 │ (complete, incl. controls)   │     │            │               │
 ```
 
-## 6. Zaključak
+## 6. Conclusion
 
 ```
-Preporuke za Konektore i Kablove:
+Connector and Cable Recommendations:
 
 1. DC Connector Selection:
-   ├── CCS2: Obavezno za EU tržište
-   ├── CHAdeMO: Opcionalno za kompatibilnost
-   └── Pantograph: Za depot/bus charging
+   ├── CCS2: Mandatory for EU market
+   ├── CHAdeMO: Optional for compatibility
+   └── Pantograph: For depot/bus charging
 
 2. Cable Type:
    ├── >200A: Liquid cooling required
@@ -556,14 +556,14 @@ Preporuke za Konektore i Kablove:
    └── Quality brands: HUBER+SUHNER, Phoenix, ITT
 
 3. Internal Wiring:
-   ├── Laminated bus bars za low inductance
+   ├── Laminated bus bars for low inductance
    ├── Proper segregation power/signal
    └── Industrial grade connectors
 
 4. Environmental:
-   ├── IP54 minimum za sve
-   ├── UV resistant za outdoor
-   └── Temperature rated za climate
+   ├── IP54 minimum for all
+   ├── UV resistant for outdoor
+   └── Temperature rated for climate
 
 5. Testing:
    ├── Cycle testing (10,000+ insertions)

@@ -15,20 +15,19 @@ This guide defines the workflow for maintaining documentation in Serbian and Eng
 
 ## File Naming Convention
 
-For bilingual documents, use suffix:
-- `document.md` - Primary language version
-- `document.en.md` - English version (when Serbian is primary)
-- `document.sr.md` - Serbian version (when English is primary)
+**Standard: English primary everywhere**
+- `document.md` - English (primary)
+- `document.sr.md` - Serbian
 
 Example:
 ```
 tehnika/
-├── 00-arhitektura.md      # Serbian
-├── 00-arhitektura.en.md   # English (always maintained in parallel)
+├── 00-arhitektura.md      # English (primary)
+├── 00-arhitektura.sr.md   # Serbian
 
 patent/
-├── EK3-DETAILED-DESIGN.md    # English
-├── EK3-DETAILED-DESIGN.sr.md # Serbian (always maintained in parallel)
+├── EK3-DETAILED-DESIGN.md    # English (primary)
+├── EK3-DETAILED-DESIGN.sr.md # Serbian
 ```
 
 ## Translation Workflow

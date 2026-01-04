@@ -1,91 +1,91 @@
-# Swap Station Koncept
+# Swap Station Concept
 
-## Filozofija: Povratak Modularnosti
+## Philosophy: Return to Modularity
 
-### Lekcija iz Istorije: Evolucija Servisa TV Prijemnika
+### Lesson from History: Evolution of TV Set Servicing
 
 ```
-PRIMER: Kako se servisiranje televizora promenilo kroz decenije
+EXAMPLE: How TV servicing changed through the decades
 ═══════════════════════════════════════════════════════════════
 
-ERA 1 (1970-1990): VISOKO MODULARNI SISTEMI
+ERA 1 (1970-1990): HIGHLY MODULAR SYSTEMS
 ────────────────────────────────────────────
-TV prijemnik = šasija + zamenljivi moduli
-• Tuner modul
-• IF modul
-• Video procesor modul
-• Audio modul
-• Napajanje modul
+TV set = chassis + replaceable modules
+• Tuner module
+• IF module
+• Video processor module
+• Audio module
+• Power supply module
 
-SERVISIRANJE:
-├── Dijagnostika: Koji modul ne radi?
-├── Na terenu: Zameni modul (30 min)
-├── U servisu: Popravi modul (može i sutra)
-├── Tehničar: Ne mora biti ekspert za sve
-└── Rezultat: TV traje 15-20 godina
+SERVICING:
+├── Diagnostics: Which module is not working?
+├── On-site: Replace module (30 min)
+├── In shop: Repair module (can wait until tomorrow)
+├── Technician: Doesn't need to be an expert on everything
+└── Result: TV lasts 15-20 years
 
-ERA 2 (1990-2000s): VISOKO INTEGRISANI SISTEMI
+ERA 2 (1990-2000s): HIGHLY INTEGRATED SYSTEMS
 ────────────────────────────────────────────
-TV prijemnik = jedna ploča sa custom ASIC-ima
-• Sve funkcije u nekoliko čipova
-• Surface mount komponente
-• Proprietary delovi
+TV set = single board with custom ASICs
+• All functions in a few chips
+• Surface mount components
+• Proprietary parts
 
-SERVISIRANJE:
-├── Dijagnostika: Kompleksna, treba skupa oprema
-├── Na terenu: Skoro nemoguće
-├── U servisu: Često skuplje od novog uređaja
-├── Tehničar: Mora biti visoko specijalizovan
-└── Rezultat: "Baci i kupi nov" - planned obsolescence
+SERVICING:
+├── Diagnostics: Complex, requires expensive equipment
+├── On-site: Nearly impossible
+├── In shop: Often more expensive than new device
+├── Technician: Must be highly specialized
+└── Result: "Throw away and buy new" - planned obsolescence
 ```
 
-### Zašto se Industrija Okrenula Integraciji?
+### Why Did the Industry Turn to Integration?
 
 ```
-RAZLOZI ZA INTEGRACIJU:
-• Niža cena proizvodnje (manje konektora, manje sklapanja)
-• Manji form factor
-• "Dobro je za prodaju novih uređaja"
+REASONS FOR INTEGRATION:
+• Lower production cost (fewer connectors, less assembly)
+• Smaller form factor
+• "Good for selling new devices"
 
-ALI ZA INFRASTRUKTURU (punjači, industrijska oprema):
-• Cena zamene je OGROMNA
-• Downtime košta više od popravke
-• Očekivani životni vek: 15+ godina
-• Lokacije su teško dostupne
+BUT FOR INFRASTRUCTURE (chargers, industrial equipment):
+• Replacement cost is HUGE
+• Downtime costs more than repair
+• Expected lifespan: 15+ years
+• Locations are hard to access
 
-ZAKLJUČAK: Modularan dizajn je BOLJI za infrastrukturu!
+CONCLUSION: Modular design is BETTER for infrastructure!
 ```
 
-### ELEKTROKOMBINACIJA Pristup: Best of Both Worlds
+### ELEKTROKOMBINACIJA Approach: Best of Both Worlds
 
 ```
-KOMBINUJEMO:
+COMBINING:
 ════════════════════════════════════════════════════════════
 
-MODULARNOST IZ 1970-ih          TEHNOLOGIJA IZ 2020-ih
+MODULARITY FROM THE 1970s          TECHNOLOGY FROM THE 2020s
 ─────────────────────────────────────────────────────────
-Zamenljivi moduli          +    AI prediktivna dijagnostika
-Popravka u servisu         +    Robotska zamena na terenu
-Dugotrajna oprema          +    OTA firmware update
-Jednostavno održavanje     +    Cloud monitoring
+Replaceable modules            +    AI predictive diagnostics
+Repair in shop                 +    Robotic replacement on-site
+Long-lasting equipment         +    OTA firmware update
+Simple maintenance             +    Cloud monitoring
 
                     ═══════════════
-                    REZULTAT:
+                    RESULT:
                     ═══════════════
-                    • Zamena modula: 60 sekundi (robot)
-                    • Dijagnostika: AI zna unapred
-                    • Tehničar na terenu: NIJE POTREBAN
-                    • Životni vek: 15+ godina
-                    • Refurbishment: Cirkularna ekonomija
+                    • Module replacement: 60 seconds (robot)
+                    • Diagnostics: AI knows in advance
+                    • Technician on-site: NOT NEEDED
+                    • Lifespan: 15+ years
+                    • Refurbishment: Circular economy
 ```
 
 ---
 
-## Pregled Inovacije
+## Innovation Overview
 
-ELEKTROKOMBINACIJA Swap Station kombinuje dva procesa u jedan:
-1. **Battery swap** za električne autobuse (poznata tehnologija)
-2. **Module swap** za EK punjač module (NOVA tehnologija)
+ELEKTROKOMBINACIJA Swap Station combines two processes into one:
+1. **Battery swap** for electric buses (known technology)
+2. **Module swap** for EK charger modules (NEW technology)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -99,8 +99,8 @@ ELEKTROKOMBINACIJA Swap Station kombinuje dva procesa u jedan:
 │    │  │▓▓│ │▓▓│   │              │  [EK] [EK]   │              │
 │    │  └──┘ └──┘   │              │  [EK] [EK]   │              │
 │    │  ┌──┐ ┌──┐   │              │  [EK] [EK]   │              │
-│    │  │▓▓│ │░░│   │              │  Rezervni    │              │
-│    │  └──┘ └──┘   │              │  moduli      │              │
+│    │  │▓▓│ │░░│   │              │  Reserve     │              │
+│    │  └──┘ └──┘   │              │  modules     │              │
 │    └──────────────┘              └──────────────┘              │
 │           │                             │                       │
 │           └──────────┬──────────────────┘                       │
@@ -113,7 +113,7 @@ ELEKTROKOMBINACIJA Swap Station kombinuje dva procesa u jedan:
 │    ══════════════════╪══════════════════════════                │
 │                      │         BUS LANE                         │
 │              ┌───────▼───────┐                                  │
-│              │   AUTOBUS     │                                  │
+│              │   BUS         │                                  │
 │              │   ┌─────┐     │                                  │
 │              │   │ BAT │     │                                  │
 │              │   └─────┘     │                                  │
@@ -124,48 +124,48 @@ ELEKTROKOMBINACIJA Swap Station kombinuje dva procesa u jedan:
 
 ---
 
-## Zašto je Ovo Jedinstveno?
+## Why Is This Unique?
 
-### Postojeća Rešenja na Tržištu
+### Existing Solutions on the Market
 
-| Tehnologija | Postoji | Primeri | Ograničenja |
+| Technology | Exists | Examples | Limitations |
 |-------------|---------|---------|-------------|
-| Battery swap za EV | ✅ | NIO, Ample, CATL | Samo baterije vozila |
-| Robotic EV charging | ✅ | Rocsys, EVS Robot | Samo plug-in, ne swap |
-| Hot-swap charger moduli | ✅ | Kempower | Ručno, tehničar |
-| Robotic warehouse battery | ✅ | Ocado, UBTECH | Roboti, ne vozila |
+| Battery swap for EV | ✅ | NIO, Ample, CATL | Only vehicle batteries |
+| Robotic EV charging | ✅ | Rocsys, EVS Robot | Only plug-in, not swap |
+| Hot-swap charger modules | ✅ | Kempower | Manual, technician required |
+| Robotic warehouse battery | ✅ | Ocado, UBTECH | Robots, not vehicles |
 
-### ELEKTROKOMBINACIJA Inovacija
+### ELEKTROKOMBINACIJA Innovation
 
-| Nova Tehnologija | Status | Prednost |
+| New Technology | Status | Advantage |
 |------------------|--------|----------|
-| Robotic EK module swap | **NOVO** | Automatska zamena bez tehničara |
-| Dual-swap (battery + module) | **NOVO** | Dva procesa, jedna poseta |
-| AI-driven swap scheduling | **NOVO** | Predviđanje kada treba zamena |
-| Fleet-integrated maintenance | **NOVO** | Autobusi = servisna mreža |
+| Robotic EK module swap | **NEW** | Automatic replacement without technician |
+| Dual-swap (battery + module) | **NEW** | Two processes, one visit |
+| AI-driven swap scheduling | **NEW** | Predicting when replacement is needed |
+| Fleet-integrated maintenance | **NEW** | Buses = service network |
 
 ---
 
-## Workflow Detaljno
+## Workflow in Detail
 
-### Scenario: Autobus Dolazi na Swap
+### Scenario: Bus Arrives for Swap
 
 ```
-FAZA 1: IDENTIFIKACIJA (30 sec)
+PHASE 1: IDENTIFICATION (30 sec)
 ═══════════════════════════════════════════════════════════════
-Autobus ulazi → RFID/camera identifikacija
+Bus enters → RFID/camera identification
        │
        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ CLOUD PROVERA:                                              │
+│ CLOUD CHECK:                                                │
 │ • Bus ID: BG-1234-EV                                        │
 │ • Battery SoC: 12%                                          │
-│ • Potrebna baterija: Model B-400kWh                         │
-│ • EK Module status na ovoj stanici: [✓][✓][!][✓]           │
-│   → Modul #3 predviđen za zamenu (AI alert pre 3 dana)     │
+│ • Battery needed: Model B-400kWh                            │
+│ • EK Module status at this station: [✓][✓][!][✓]           │
+│   → Module #3 predicted for replacement (AI alert 3 days ago) │
 └─────────────────────────────────────────────────────────────┘
 
-FAZA 2: PARALELNI SWAP (3-5 min)
+PHASE 2: PARALLEL SWAP (3-5 min)
 ═══════════════════════════════════════════════════════════════
 
     ROBOT ARM #1                    ROBOT ARM #2
@@ -173,59 +173,59 @@ FAZA 2: PARALELNI SWAP (3-5 min)
          │                               │
          ▼                               ▼
 ┌─────────────────┐            ┌─────────────────┐
-│ 1. Pozicionira  │            │ 1. Pozicionira  │
-│    se ispod     │            │    se kod       │
-│    autobusa     │            │    charging     │
-│                 │            │    rack-a       │
-│ 2. Otključava   │            │                 │
-│    bateriju     │            │ 2. Disconnect   │
-│                 │            │    EK modul #3  │
-│ 3. Izvlači      │            │    (power+data) │
-│    praznu       │            │                 │
-│    bateriju     │            │ 3. Izvlači      │
-│                 │            │    degradirani  │
-│ 4. Postavlja    │            │    modul        │
-│    punu         │            │                 │
-│    bateriju     │            │ 4. Postavlja    │
-│                 │            │    novi modul   │
-│ 5. Zaključava   │            │                 │
-│    i verifikuje │            │ 5. Connect +    │
+│ 1. Positions    │            │ 1. Positions    │
+│    itself under │            │    itself at    │
+│    the bus      │            │    charging     │
+│                 │            │    rack         │
+│ 2. Unlocks      │            │                 │
+│    battery      │            │ 2. Disconnect   │
+│                 │            │    EK module #3 │
+│ 3. Extracts     │            │    (power+data) │
+│    empty        │            │                 │
+│    battery      │            │ 3. Extracts     │
+│                 │            │    degraded     │
+│ 4. Installs     │            │    module       │
+│    full         │            │                 │
+│    battery      │            │ 4. Installs     │
+│                 │            │    new module   │
+│ 5. Locks        │            │                 │
+│    and verifies │            │ 5. Connect +    │
 │                 │            │    AI verify    │
 └─────────────────┘            └─────────────────┘
          │                               │
          └───────────────┬───────────────┘
                          │
                          ▼
-FAZA 3: VERIFIKACIJA (30 sec)
+PHASE 3: VERIFICATION (30 sec)
 ═══════════════════════════════════════════════════════════════
 • Battery handshake OK
 • EK Module #3 online, self-test PASS
-• Charging station: 100% operativna
+• Charging station: 100% operational
 • Bus ready to depart
 
-FAZA 4: IZLAZ
+PHASE 4: EXIT
 ═══════════════════════════════════════════════════════════════
-Autobus odlazi sa punom baterijom
-Stanica ostaje potpuno funkcionalna
-Degradirani modul ide na refurbishment
+Bus departs with full battery
+Station remains fully functional
+Degraded module goes to refurbishment
 ```
 
 ---
 
-## Mehanički Dizajn EK Modula za Robotic Handling
+## Mechanical Design of EK Module for Robotic Handling
 
-### Zahtevi za Robot-Friendly Modul
+### Requirements for Robot-Friendly Module
 
 ```
 EK30 MODULE - ROBOTIC SWAP EDITION
 ══════════════════════════════════════════════════════════════
 
-DIMENZIJE:
+DIMENSIONS:
 ┌─────────────────────────────────────┐
 │                                     │  H: 400mm
 │  ┌───┐               ┌───┐         │  W: 300mm
 │  │ ● │               │ ● │         │  D: 500mm
-│  └───┘               └───┘         │  Masa: 25kg
+│  └───┘               └───┘         │  Mass: 25kg
 │    ROBOT GRIP POINTS               │
 │                                     │
 │  ┌─────────────────────────────┐   │
@@ -248,19 +248,19 @@ DIMENZIJE:
 └─────────────────────────────────────┘
 ```
 
-### Ključni Elementi za Automatsku Zamenu
+### Key Elements for Automatic Replacement
 
-| Komponenta | Specifikacija | Zašto |
+| Component | Specification | Why |
 |------------|---------------|-------|
-| **Robot Grip Points** | 2x M8 threaded inserts, 200mm apart | Standardna hvataljka |
-| **Power Connector** | Anderson SBS75 ili REMA DIN 160A | Quick-release, >10,000 cycles |
+| **Robot Grip Points** | 2x M8 threaded inserts, 200mm apart | Standard gripper |
+| **Power Connector** | Anderson SBS75 or REMA DIN 160A | Quick-release, >10,000 cycles |
 | **Data Connector** | Harting Han-Modular | Blind-mate, IP65 |
 | **Coolant** | Stäubli dry-break couplings | Zero-spill disconnect |
-| **Rail Guides** | 19" rack standard | Precizno pozicioniranje |
+| **Rail Guides** | 19" rack standard | Precise positioning |
 | **Alignment Pins** | 2x conical pins, ±2mm tolerance | Robot-friendly docking |
 | **Locking Mechanism** | Motorized cam lock | Automated secure/release |
 
-### Konektor Layout (Rear Panel)
+### Connector Layout (Rear Panel)
 
 ```
       ┌─────────────────────────────────────┐
@@ -290,40 +290,40 @@ DIMENZIJE:
 ### Swap Station Module Rack
 
 ```
-MODULE STORAGE RACK (kapacitet: 8 modula)
+MODULE STORAGE RACK (capacity: 8 modules)
 ══════════════════════════════════════════════════════════════
 
     ┌─────┬─────┬─────┬─────┐
-    │ EK1 │ EK2 │ EK3 │ EK4 │  ← Gornji red (rezervni)
-    │ ✓   │ ✓   │ ✓   │ CHG │     CHG = na punjenju
+    │ EK1 │ EK2 │ EK3 │ EK4 │  ← Upper row (reserve)
+    │ ✓   │ ✓   │ ✓   │ CHG │     CHG = charging
     ├─────┼─────┼─────┼─────┤
-    │ EK5 │ EK6 │ EK7 │ EK8 │  ← Donji red
-    │ ✓   │ RFB │ ✓   │ ✓   │     RFB = za refurbishment
+    │ EK5 │ EK6 │ EK7 │ EK8 │  ← Lower row
+    │ ✓   │ RFB │ ✓   │ ✓   │     RFB = for refurbishment
     └─────┴─────┴─────┴─────┘
 
-STATUS INDIKATORI:
-✓   = Spreman za deployment
+STATUS INDICATORS:
+✓   = Ready for deployment
 CHG = Charging/conditioning
-RFB = Needs refurbishment (skloniti)
-!   = Alert (degradacija detektovana)
+RFB = Needs refurbishment (remove)
+!   = Alert (degradation detected)
 
 RACK FEATURES:
-• Svaki slot ima charging capability (trickle charge)
+• Each slot has charging capability (trickle charge)
 • Temperature-controlled storage
 • Individual module health monitoring
-• FIFO rotation (najstariji prvi ide)
+• FIFO rotation (oldest goes first)
 ```
 
 ### Inventory Management Algorithm
 
 ```python
-# Pseudo-code za inventory management
+# Pseudo-code for inventory management
 
 class ModuleInventory:
     def check_swap_needed(self, station_id):
         """
-        Proverava da li neki modul na stanici treba zamenu
-        Poziva se svaki put kad autobus dođe
+        Checks if any module at the station needs replacement
+        Called every time a bus arrives
         """
         modules = get_active_modules(station_id)
 
@@ -332,7 +332,7 @@ class ModuleInventory:
             predicted_failure = module.predicted_failure_days
 
             if health < 70 or predicted_failure < 14:
-                # Modul treba zamenu
+                # Module needs replacement
                 reserve = find_best_reserve_module(station_id)
                 if reserve:
                     schedule_swap(module, reserve, next_bus_arrival)
@@ -341,10 +341,10 @@ class ModuleInventory:
 
     def post_swap_handling(self, removed_module):
         """
-        Šta raditi sa izvađenim modulom
+        What to do with removed module
         """
         if removed_module.health_score > 50:
-            # Može se refurbishovati
+            # Can be refurbished
             send_to_refurbishment_center(removed_module)
         else:
             # End of life
@@ -353,12 +353,12 @@ class ModuleInventory:
 
 ---
 
-## Robot Arm Specifikacije
+## Robot Arm Specifications
 
 ### Dual-Purpose Robot System
 
 ```
-OPCIJA A: Dva Zasebna Robota
+OPTION A: Two Separate Robots
 ═══════════════════════════════════════════════════════════════
 
 ┌─────────────────┐          ┌─────────────────┐
@@ -369,15 +369,15 @@ OPCIJA A: Dva Zasebna Robota
 │  Speed: Medium  │          │  Speed: Fast    │
 │  Precision: ±5mm│          │  Precision: ±1mm│
 │                 │          │                 │
-│  Tip: Gantry    │          │  Tip: 6-axis    │
-│  ili Cartesian  │          │  articulated    │
+│  Type: Gantry   │          │  Type: 6-axis   │
+│  or Cartesian   │          │  articulated    │
 └─────────────────┘          └─────────────────┘
 
-Prednosti: Paralelni rad, specijalizovani
-Mane: Veća cena, više održavanja
+Advantages: Parallel operation, specialized
+Disadvantages: Higher cost, more maintenance
 
 
-OPCIJA B: Jedan Multi-Purpose Robot + Tool Changer
+OPTION B: One Multi-Purpose Robot + Tool Changer
 ═══════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────┐
@@ -395,64 +395,64 @@ OPCIJA B: Jedan Multi-Purpose Robot + Tool Changer
 │         └─────────┘  └─────────┘       │
 └─────────────────────────────────────────┘
 
-Prednosti: Jeftiniji, manji footprint
-Mane: Sekvencijalni rad, sporije
+Advantages: Cheaper, smaller footprint
+Disadvantages: Sequential operation, slower
 
 
-OPCIJA C: Humanoid Robot (Futuristic)
+OPTION C: Humanoid Robot (Futuristic)
 ═══════════════════════════════════════════════════════════════
-Primer: UBTECH Walker S2 - već ima self battery swap
-Mogao bi da radi i module swap sa pravim toolingom
-Prednosti: Fleksibilan, adaptivan
-Mane: Još nije mature tehnologija za heavy-duty
+Example: UBTECH Walker S2 - already has self battery swap
+Could perform module swap with proper tooling
+Advantages: Flexible, adaptive
+Disadvantages: Technology not yet mature for heavy-duty
 ```
 
-### Preporučena Konfiguracija
+### Recommended Configuration
 
 ```
-PREPORUKA: OPCIJA A (Dva robota) za prvu fazu
+RECOMMENDATION: OPTION A (Two robots) for first phase
 
 BATTERY ROBOT:                    MODULE ROBOT:
-├── KUKA KR 500 ili              ├── Universal Robots UR20
-│   Fanuc M-900iB                │   ili KUKA LBR iiwa
+├── KUKA KR 500 or               ├── Universal Robots UR20
+│   Fanuc M-900iB                │   or KUKA LBR iiwa
 ├── Gantry mount                 ├── Floor/wall mount
 ├── Custom battery gripper       ├── Custom module gripper
 └── Safety: Light curtains       └── Collaborative mode
 
 SHARED SYSTEMS:
-├── Vision system (3D cameras za pozicioniranje)
-├── Central PLC (Siemens S7-1500 ili Beckhoff)
+├── Vision system (3D cameras for positioning)
+├── Central PLC (Siemens S7-1500 or Beckhoff)
 ├── Safety PLC (dedicated)
-└── Cloud connectivity za AI scheduling
+└── Cloud connectivity for AI scheduling
 ```
 
 ---
 
-## Fleet Integration: Autobusi kao Servisna Mreža
+## Fleet Integration: Buses as Service Network
 
-### Koncept
+### Concept
 
 ```
-TRADICIONALNI MODEL:
+TRADITIONAL MODEL:
 ═══════════════════════════════════════════════════════════════
-Punjač pokvaren → Operater primeti → Pozove tehničara →
-Tehničar planira → Vozi do lokacije → Dijagnostika →
-Možda nema deo → Vraća se → Dolazi ponovo → Popravlja
+Charger broken → Operator notices → Calls technician →
+Technician plans → Drives to location → Diagnostics →
+Maybe missing part → Returns → Comes back again → Repairs
 
-UKUPNO VREME: 2-5 dana
+TOTAL TIME: 2-5 days
 TRUCK ROLLS: 1-3
 
 
 ELEKTROKOMBINACIJA MODEL:
 ═══════════════════════════════════════════════════════════════
-AI predvidi kvar (14 dana ranije) →
-Sistem zna koji autobus dolazi na tu stanicu →
-Rezervni modul već čeka na stanici →
-Autobus dolazi na battery swap →
-Robot menja i bateriju i modul SIMULTANO →
-Autobus odlazi, stanica 100%
+AI predicts failure (14 days ahead) →
+System knows which bus arrives at that station →
+Reserve module already waiting at station →
+Bus arrives for battery swap →
+Robot replaces both battery and module SIMULTANEOUSLY →
+Bus departs, station 100%
 
-UKUPNO VREME: 0 dodatnog vremena (deo redovne operacije)
+TOTAL TIME: 0 additional time (part of regular operation)
 TRUCK ROLLS: 0
 ```
 
@@ -486,23 +486,23 @@ TRUCK ROLLS: 0
               └─────────────────┘
 
 MODULE FLOW:
-1. Central Hub ima pool rezervnih modula
-2. Autobusi (ili dedicirani transport) nose module do stanica
-3. Degradirani moduli se vraćaju u Hub za refurbishment
-4. Refurbishovani moduli idu nazad u cirkulaciju
+1. Central Hub has pool of reserve modules
+2. Buses (or dedicated transport) carry modules to stations
+3. Degraded modules are returned to Hub for refurbishment
+4. Refurbished modules go back into circulation
 ```
 
 ### Scheduling Algorithm
 
 ```python
-# AI Scheduling za module logistics
+# AI Scheduling for module logistics
 
 def optimize_module_delivery():
     """
-    Optimizuje dostavu rezervnih modula kroz bus fleet
+    Optimizes delivery of reserve modules through bus fleet
     """
 
-    # Koje stanice trebaju module uskoro?
+    # Which stations need modules soon?
     stations_needing_modules = []
     for station in all_stations:
         for module in station.modules:
@@ -513,17 +513,17 @@ def optimize_module_delivery():
                     'module_type': module.type
                 })
 
-    # Koji autobusi prolaze pored tih stanica?
+    # Which buses pass by those stations?
     for need in stations_needing_modules:
         buses = get_buses_passing_station(need['station'], next_48h)
 
         for bus in buses:
-            # Da li autobus može da ponese modul?
+            # Can the bus carry a module?
             if bus.has_cargo_space and bus.route_includes(central_hub):
                 schedule_module_pickup(bus, central_hub, need)
                 break
 
-    # Fallback: dedicirani transport ako nema pogodnog autobusa
+    # Fallback: dedicated transport if no suitable bus
     unmet_needs = [n for n in stations_needing_modules if not n.scheduled]
     for need in unmet_needs:
         schedule_dedicated_delivery(need)
@@ -536,17 +536,17 @@ def optimize_module_delivery():
 ### Cost Comparison
 
 ```
-TRADICIONALNI MODEL (20 stanica, 5 godina)
+TRADITIONAL MODEL (20 stations, 5 years)
 ═══════════════════════════════════════════════════════════════
-Tehničar truck rolls:        40/god × €150 × 5 = €30,000
-Downtime lost revenue:       €10,000/god × 5   = €50,000
-Emergency repairs:           €5,000/god × 5    = €25,000
+Technician truck rolls:        40/year × €150 × 5 = €30,000
+Downtime lost revenue:       €10,000/year × 5   = €50,000
+Emergency repairs:           €5,000/year × 5    = €25,000
 Module replacements:         10 × €3,000       = €30,000
                                         TOTAL: €135,000
 
-SWAP STATION MODEL (20 stanica, 5 godina)
+SWAP STATION MODEL (20 stations, 5 years)
 ═══════════════════════════════════════════════════════════════
-Robot system (amortized):    €100,000 ÷ 5     = €20,000/god × 5 = €100,000
+Robot system (amortized):    €100,000 ÷ 5     = €20,000/year × 5 = €100,000
 Module inventory (rotating): 40 × €2,500      = €100,000 (one-time, reused)
 Refurbishment costs:         €500/mod × 20    = €10,000
 Downtime:                    ~0               = €0
@@ -555,36 +555,36 @@ Truck rolls:                 ~0               = €0
 
 BREAK-EVEN ANALYSIS:
 ═══════════════════════════════════════════════════════════════
-• Initial investment viši, ali:
-• Posle Year 5, godišnji troškovi su ~€15,000 vs ~€27,000
-• Scale benefits: Više stanica = bolji ROI
-• Za 50+ stanica: break-even u godini 3
+• Initial investment higher, but:
+• After Year 5, annual costs are ~€15,000 vs ~€27,000
+• Scale benefits: More stations = better ROI
+• For 50+ stations: break-even in year 3
 ```
 
 ### Revenue Opportunities
 
 ```
-DODATNI PRIHODI:
+ADDITIONAL REVENUE:
 ═══════════════════════════════════════════════════════════════
 
 1. MODULE-AS-A-SERVICE
-   • Operateri ne kupuju module, nego plaćaju po kWh
-   • Mi održavamo inventory i health
+   • Operators don't buy modules, they pay per kWh
+   • We maintain inventory and health
    • Recurring revenue model
 
-2. FLEET MAINTENANCE UGOVOR
-   • Flat fee po autobusu/mesecu
-   • Uključuje battery swap + charger održavanje
-   • Predvidivi troškovi za operatere
+2. FLEET MAINTENANCE CONTRACT
+   • Flat fee per bus/month
+   • Includes battery swap + charger maintenance
+   • Predictable costs for operators
 
 3. DATA MONETIZATION
-   • Agregirani podaci o zdravlju flote
+   • Aggregated fleet health data
    • Benchmarking across operators
-   • Predictive insights za grid operatere
+   • Predictive insights for grid operators
 
 4. REFURBISHMENT SERVICES
-   • Third-party moduli mogu koristiti našu mrežu
-   • Standardizovani refurb proces
+   • Third-party modules can use our network
+   • Standardized refurb process
    • Circular economy partner
 ```
 
@@ -592,41 +592,41 @@ DODATNI PRIHODI:
 
 ## Implementation Roadmap
 
-### Faza 1: Proof of Concept (6 meseci)
+### Phase 1: Proof of Concept (6 months)
 
 ```
 DELIVERABLES:
-├── EK30 modul sa robotic-friendly dizajnom
-├── Jednostavan robot setup (1 arm + tool changer)
-├── Mock swap station (ne prava battery swap)
-├── Demonstracija module swap <60 sec
+├── EK30 module with robotic-friendly design
+├── Simple robot setup (1 arm + tool changer)
+├── Mock swap station (not real battery swap)
+├── Demonstration of module swap <60 sec
 └── AI scheduling prototype
 
-LOKACIJA: Kontrolisano okruženje (radionica)
+LOCATION: Controlled environment (workshop)
 BUDGET: €150,000
 ```
 
-### Faza 2: Pilot Station (12 meseci)
+### Phase 2: Pilot Station (12 months)
 
 ```
 DELIVERABLES:
-├── Puna swap station (battery + module)
-├── Integracija sa jednim bus operaterom
-├── 5 autobusa u pilot programu
+├── Full swap station (battery + module)
+├── Integration with one bus operator
+├── 5 buses in pilot program
 ├── Real-world data collection
-└── Refurbishment proces setup
+└── Refurbishment process setup
 
-LOKACIJA: Jedan grad (Beograd?)
+LOCATION: One city (Belgrade?)
 BUDGET: €500,000
-PARTNERI: GSP ili privatni bus operator
+PARTNERS: GSP or private bus operator
 ```
 
-### Faza 3: Scale (24 meseci)
+### Phase 3: Scale (24 months)
 
 ```
 DELIVERABLES:
-├── 5 swap stanica
-├── 50+ autobusa
+├── 5 swap stations
+├── 50+ buses
 ├── Module logistics network
 ├── Full AI optimization
 └── Commercial offering
@@ -637,41 +637,41 @@ REVENUE TARGET: Break-even by end of Year 3
 
 ---
 
-## Patentabilni Elementi
+## Patentable Elements
 
 ```
-POTENCIJALNI PATENTI:
+POTENTIAL PATENTS:
 ═══════════════════════════════════════════════════════════════
 
 1. "Integrated Battery and Charger Module Swap Station"
-   • Claim: Kombinovanje dva swap procesa u jedan visit
+   • Claim: Combining two swap processes into one visit
 
 2. "AI-Scheduled Predictive Module Replacement"
-   • Claim: Korišćenje predictive AI za scheduling swap-a
+   • Claim: Using predictive AI for swap scheduling
 
 3. "Fleet-Integrated Charger Maintenance Network"
-   • Claim: Korišćenje service fleet za transport modula
+   • Claim: Using service fleet for module transport
 
 4. "Robot-Compatible EV Charger Module Design"
-   • Claim: Specifični connector/gripper dizajn za automated handling
+   • Claim: Specific connector/gripper design for automated handling
 
 5. "Parallel Dual-Swap Robotic System"
-   • Claim: Dva robota rade simultano na različitim task-ovima
+   • Claim: Two robots working simultaneously on different tasks
 ```
 
 ---
 
-## Reference
+## References
 
 - [NIO Power Swap Station](https://www.nio.com/nio-power) - Battery swap benchmark
 - [Rocsys Autonomous Charging](https://www.rocsys.com/) - Robotic plug-in technology
-- [Kempower Power Module](https://kempower.com/power-module/) - Manual hot-swap moduli
+- [Kempower Power Module](https://kempower.com/power-module/) - Manual hot-swap modules
 - [UBTECH Walker S2](https://www.ubtrobot.com/en/humanoid/products/walker-s2) - Self battery swap robot
 - [Ocado Battery Swap](https://ocadointelligentautomation.com/systems/battery-swap) - Warehouse robot swap
 
 ---
 
-## Datum
+## Date
 
-Kreirano: Januar 2026
-Status: Koncept / Pre-development
+Created: January 2026
+Status: Concept / Pre-development

@@ -1,9 +1,9 @@
-# AI/ML Sistem Arhitektura
+# AI/ML System Architecture
 
-## Filozofija: AI Upravlja Kompleksnošću
+## Philosophy: AI Manages Complexity
 
 ```
-TRADICIONALNI PUNJAČ              ELEKTROKOMBINACIJA
+TRADITIONAL CHARGER              ELEKTROKOMBINACIJA
 ────────────────────────────────────────────────────────────
 Fixed thresholds            →    Adaptive AI thresholds
 Reactive alarms             →    Predictive diagnostics
@@ -15,12 +15,12 @@ Post-failure analysis       →    Real-time digital twin
 
 ---
 
-## 1. Edge AI Hardver
+## 1. Edge AI Hardware
 
 ### EK3 (3 kW) - Cortex-M7
 
 ```
-PROCESOR: STM32H7 Series
+PROCESSOR: STM32H7 Series
 ──────────────────────────
 • Core: ARM Cortex-M7 @ 480 MHz
 • DSP: Dual-issue, SIMD
@@ -30,15 +30,15 @@ PROCESOR: STM32H7 Series
 
 AI Capability:
 • TensorFlow Lite Micro
-• X-CUBE-AI optimizacija
-• ~50 MOPS za inference
-• Dovoljno za: anomaly detection, PID tuning, basic prediction
+• X-CUBE-AI optimization
+• ~50 MOPS for inference
+• Sufficient for: anomaly detection, PID tuning, basic prediction
 ```
 
 ### EK30 (30 kW) - Cortex-M55 + NPU
 
 ```
-PROCESOR: STM32N6 Series (2024/2025)
+PROCESSOR: STM32N6 Series (2024/2025)
 ─────────────────────────────────────
 • Core: ARM Cortex-M55 @ 800 MHz
 • NPU: Neural-ART Accelerator
@@ -47,7 +47,7 @@ PROCESOR: STM32N6 Series (2024/2025)
 • Helium: Vector processing extension
 
 AI Capability:
-• 600× više ML performansi vs standard MCU
+• 600× more ML performance vs standard MCU
 • Computer vision capable
 • Complex LSTM/GRU models
 • Real-time digital twin computation
@@ -57,7 +57,7 @@ Alternative: NXP i.MX RT1170 + eIQ ML
 ─────────────────────────────────────
 • Dual core: M7 @ 1GHz + M4
 • 2 MB SRAM
-• NPU za ML acceleration
+• NPU for ML acceleration
 ```
 
 ### Cloud AI Layer
@@ -97,12 +97,12 @@ Alternative: NXP i.MX RT1170 + eIQ ML
 
 ---
 
-## 2. Digital Twin Arhitektura
+## 2. Digital Twin Architecture
 
-### Koncept
+### Concept
 
 ```
-FIZIČKI MODUL                    DIGITALNI TWIN
+PHYSICAL MODULE                  DIGITAL TWIN
 ──────────────────────────────────────────────────────
 ┌─────────────┐                  ┌─────────────┐
 │             │  ──── sync ───→  │             │
@@ -118,7 +118,7 @@ FIZIČKI MODUL                    DIGITALNI TWIN
   Measured data                  Synthetic testing
 ```
 
-### Sinhronizovani Parametri (200+)
+### Synchronized Parameters (200+)
 
 ```
 POWER STAGE
@@ -166,7 +166,7 @@ VEHICLE
 ### Real-Time Implementation
 
 ```python
-# Pseudo-code za Digital Twin sync
+# Pseudo-code for Digital Twin sync
 
 class DigitalTwin:
     def __init__(self, module_id):
@@ -176,7 +176,7 @@ class DigitalTwin:
         self.ml_model = load_ml_model()
 
     def sync(self, telemetry):
-        """Sinhronizacija sa fizičkim modulom - <50ms"""
+        """Synchronization with physical module - <50ms"""
         self.state.update(telemetry)
 
         # Physics-based estimation
@@ -192,7 +192,7 @@ class DigitalTwin:
         )
 
     def simulate_scenario(self, scenario):
-        """What-if simulacija"""
+        """What-if simulation"""
         virtual_state = copy(self.state)
 
         for step in scenario.steps:
@@ -201,7 +201,7 @@ class DigitalTwin:
         return virtual_state
 
     def predict_failure(self, horizon_hours=1000):
-        """RUL predikcija"""
+        """RUL prediction"""
         return self.ml_model.predict_rul(
             self.state,
             horizon=horizon_hours
@@ -259,10 +259,10 @@ Measurement:
 • Flow sensor data vs pump power
 ```
 
-### ML Models za Prediction
+### ML Models for Prediction
 
 ```
-MODEL 1: LSTM za Rds(on) Trend
+MODEL 1: LSTM for Rds(on) Trend
 ──────────────────────────────
 Input: Last 1000 Rds(on) measurements
        + Temperature history
@@ -279,7 +279,7 @@ Accuracy target: RMSPE < 2%
 ```
 
 ```
-MODEL 2: Random Forest za Health Classification
+MODEL 2: Random Forest for Health Classification
 ───────────────────────────────────────────────
 Input features:
 • Rds(on) current value
@@ -298,7 +298,7 @@ Target accuracy: >90%
 ```
 
 ```
-MODEL 3: GRU za Anomaly Detection
+MODEL 3: GRU for Anomaly Detection
 ─────────────────────────────────
 Input: Rolling window of 100 samples
        Multiple parameters
@@ -374,7 +374,7 @@ Implementation:
 └────────────────────────────────────────────┘
 ```
 
-### Reinforcement Learning za Control
+### Reinforcement Learning for Control
 
 ```
 STATE (s):
@@ -530,15 +530,15 @@ Benefits:
 ### Transfer Learning
 
 ```
-Scenario: Nova instalacija bez historijskih podataka
+Scenario: New installation without historical data
 
-Rešenje:
-1. Preuzmi pre-trained model iz cloud-a
-2. Model već zna "generalno" ponašanje EK30
-3. Fine-tune na lokalnim podacima (nekoliko dana)
-4. Postani ekspert za lokalne uslove
+Solution:
+1. Download pre-trained model from cloud
+2. Model already knows "general" EK30 behavior
+3. Fine-tune on local data (a few days)
+4. Become an expert for local conditions
 
-Rezultat: Instant baseline + rapid specialization
+Result: Instant baseline + rapid specialization
 ```
 
 ---
@@ -623,9 +623,9 @@ Quantization impact:
 ### AI in Safety-Critical Systems
 
 ```
-Challenge: AI u safety-critical power electronics
+Challenge: AI in safety-critical power electronics
 
-Pristup: AI as ADVISOR, not ACTUATOR
+Approach: AI as ADVISOR, not ACTUATOR
 
 ┌─────────────────────────────────────────────────┐
 │                                                 │
@@ -659,20 +659,20 @@ AI CAN:
 ### Explainable AI
 
 ```
-Za certifikaciju potrebno:
-• Objašnjenje ZAŠTO je AI donio odluku
-• Audit trail svih AI akcija
-• Mogućnost replay-a scenarija
+Required for certification:
+• Explanation of WHY the AI made a decision
+• Audit trail of all AI actions
+• Ability to replay scenarios
 
-Implementacija:
-• Log sve AI inputs + outputs
-• SHAP values za feature importance
-• Simplified rule extraction za kritične odluke
+Implementation:
+• Log all AI inputs + outputs
+• SHAP values for feature importance
+• Simplified rule extraction for critical decisions
 ```
 
 ---
 
-## Reference i Izvori
+## References and Sources
 
 - [STM32N6 NPU Microcontroller](https://newsroom.st.com/media-center/press-item.html/p4665.html)
 - [Digital Twin in Power Electronics - OPAL-RT](https://www.opal-rt.com/blog/digital-twin-simulation-in-power-electronics-design/)

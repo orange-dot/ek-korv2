@@ -1,40 +1,40 @@
-# Kontrolna Elektronika za EV Punjače
+# Control Electronics for EV Chargers
 
-## 1. Arhitektura Kontrolnog Sistema
+## 1. Control System Architecture
 
-### 1.1 Hijerarhija Kontrole
+### 1.1 Control Hierarchy
 
 ```
-Struktura Kontrolnog Sistema EV Punjača:
+EV Charger Control System Structure:
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                    NIVO 3: SISTEM                               │
+│                    LEVEL 3: SYSTEM                              │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │            MAIN CONTROLLER (SBC/IPC)                     │   │
-│  │  - HMI interfejs                                         │   │
-│  │  - OCPP komunikacija                                     │   │
+│  │  - HMI interface                                         │   │
+│  │  - OCPP communication                                    │   │
 │  │  - User management                                       │   │
 │  │  - Billing/metering                                      │   │
-│  │  - Dijagnostika                                          │   │
+│  │  - Diagnostics                                           │   │
 │  │  Linux/RTOS                                              │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                              │ CAN/Ethernet                     │
 ├──────────────────────────────┼──────────────────────────────────┤
-│                    NIVO 2: SUPERVIZIJA                          │
+│                    LEVEL 2: SUPERVISION                         │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │            POWER MODULE CONTROLLER (DSP/MCU)             │   │
-│  │  - Sekvenciranje                                         │   │
+│  │  - Sequencing                                            │   │
 │  │  - Fault handling                                        │   │
 │  │  - ISO 15118 / CHAdeMO                                   │   │
 │  │  - Thermal management                                    │   │
 │  │  - Load sharing (multi-module)                           │   │
-│  │  Real-time OS ili Bare-metal                             │   │
+│  │  Real-time OS or Bare-metal                              │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                              │ SPI/CAN                          │
 ├──────────────────────────────┼──────────────────────────────────┤
-│                    NIVO 1: REAL-TIME                            │
+│                    LEVEL 1: REAL-TIME                           │
 │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐    │
-│  │  PFC Control   │  │  DC/DC Control │  │  Safety μC     │    │
+│  │  PFC Control   │  │  DC/DC Control │  │  Safety MCU    │    │
 │  │  (DSP/FPGA)    │  │  (DSP/FPGA)    │  │  (Dedicated)   │    │
 │  │  - PWM gen     │  │  - LLC control │  │  - Watchdog    │    │
 │  │  - Current loop│  │  - Sync rect   │  │  - Fault mon   │    │
@@ -44,13 +44,13 @@ Struktura Kontrolnog Sistema EV Punjača:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.2 Zahtevi za Real-Time Kontrolu
+### 1.2 Real-Time Control Requirements
 
 ```
-Kontrolne Petlje i Timing:
+Control Loops and Timing:
 
 ┌─────────────────────────────────────────────────────────────┐
-│ Kontrolna Petlja    │ Brzina     │ Kašnjenje │ Procesor    │
+│ Control Loop        │ Speed      │ Latency   │ Processor   │
 ├─────────────────────┼────────────┼───────────┼─────────────┤
 │ Current Control     │ 50-200 kHz │ <5 μs     │ DSP/FPGA    │
 │ Voltage Control     │ 10-50 kHz  │ <20 μs    │ DSP/MCU     │
@@ -64,28 +64,28 @@ Kontrolne Petlje i Timing:
 Bandwidth Requirements:
 - Current loop: BW > f_sw / 10 = 65kHz / 10 = 6.5 kHz
 - Voltage loop: BW > 1/10 × Current BW = 650 Hz
-- PLL bandwidth: 50-200 Hz (za grid sync)
+- PLL bandwidth: 50-200 Hz (for grid sync)
 ```
 
-## 2. Mikrokontrolerimcro (MCU)
+## 2. Microcontrollers (MCU)
 
-### 2.1 MCU Zahtevi za EV Punjač
+### 2.1 MCU Requirements for EV Charger
 
 ```
-Minimum zahtevi:
+Minimum requirements:
 
 ┌────────────────────────────────────────────────────┐
-│ Parametar           │ Minimum      │ Preporučeno  │
+│ Parameter           │ Minimum      │ Recommended  │
 ├─────────────────────┼──────────────┼──────────────┤
-│ CPU frekvencija     │ 120 MHz      │ 200+ MHz     │
-│ Flash memorija      │ 512 KB       │ 1-2 MB       │
+│ CPU frequency       │ 120 MHz      │ 200+ MHz     │
+│ Flash memory        │ 512 KB       │ 1-2 MB       │
 │ RAM                 │ 128 KB       │ 256+ KB      │
-│ PWM kanali          │ 6            │ 12+          │
-│ PWM rezolucija      │ 12-bit       │ 16-bit       │
-│ ADC kanali          │ 8            │ 16+          │
-│ ADC brzina          │ 1 MSPS       │ 5+ MSPS      │
-│ ADC rezolucija      │ 12-bit       │ 16-bit       │
-│ CAN interfejs       │ 1            │ 2+           │
+│ PWM channels        │ 6            │ 12+          │
+│ PWM resolution      │ 12-bit       │ 16-bit       │
+│ ADC channels        │ 8            │ 16+          │
+│ ADC speed           │ 1 MSPS       │ 5+ MSPS      │
+│ ADC resolution      │ 12-bit       │ 16-bit       │
+│ CAN interface       │ 1            │ 2+           │
 │ SPI/I2C             │ 2            │ 4+           │
 │ Timer channels      │ 8            │ 16+          │
 │ Math accelerator    │ Optional     │ FPU/CORDIC   │
@@ -93,9 +93,9 @@ Minimum zahtevi:
 └────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Preporučeni MCU-ovi
+### 2.2 Recommended MCUs
 
-#### Texas Instruments C2000 Serija
+#### Texas Instruments C2000 Series
 
 ```
 TMS320F28379D (Dual-Core):
@@ -117,31 +117,31 @@ TMS320F28379D (Dual-Core):
 │ Package: 176-pin HLQFP / 337-pin BGA                        │
 │ Price: ~$25-30 (qty 100)                                    │
 │                                                             │
-│ Posebno za power electronics:                               │
+│ Specifically for power electronics:                         │
 │ - High-resolution PWM (150 ps)                              │
 │ - Synchronized ADC trigger                                  │
 │ - Hardware trip zones                                       │
 │ - Dead-band generators                                      │
 └─────────────────────────────────────────────────────────────┘
 
-Primena u EV punjaču:
-- CPU1: PFC control + supervizija
+Application in EV charger:
+- CPU1: PFC control + supervision
 - CPU2: DC/DC control
 - CLA1: Fast current loop PFC
 - CLA2: Fast current loop DC/DC
 
-TMS320F280049C (Single-Core, niža cena):
+TMS320F280049C (Single-Core, lower cost):
 - 1× C28x @ 100 MHz
 - 256 KB Flash, 100 KB RAM
 - 16 PWM, 4 ADC (12-bit)
 - Price: ~$8-10 (qty 100)
-- Za manje snage ili kao pomoćni MCU
+- For lower power or as auxiliary MCU
 ```
 
-#### STMicroelectronics STM32 Serija
+#### STMicroelectronics STM32 Series
 
 ```
-STM32G474RE (Motor Control optimizovan):
+STM32G474RE (Motor Control optimized):
 
 ┌─────────────────────────────────────────────────────────────┐
 │                    STM32G474RE                              │
@@ -159,11 +159,11 @@ STM32G474RE (Motor Control optimizovan):
 │ Package: LQFP64/100                                         │
 │ Price: ~$8-12 (qty 100)                                     │
 │                                                             │
-│ Prednosti:                                                  │
-│ - Veliki ST ekosistem                                       │
+│ Advantages:                                                 │
+│ - Large ST ecosystem                                        │
 │ - Motor control libraries                                   │
-│ - STM32CubeMX za konfiguraciju                             │
-│ - Automotive grade varijante (STM32G4A)                     │
+│ - STM32CubeMX for configuration                            │
+│ - Automotive grade variants (STM32G4A)                      │
 └─────────────────────────────────────────────────────────────┘
 
 STM32H743 (High Performance):
@@ -171,7 +171,7 @@ STM32H743 (High Performance):
 - 2 MB Flash, 1 MB RAM
 - Dual ADC, 16-bit
 - Ethernet, USB, crypto
-- Za sistem kontroler sa HMI
+- For system controller with HMI
 - Price: ~$15-20 (qty 100)
 ```
 
@@ -196,24 +196,24 @@ XMC4800 (Industrial):
 │ Package: LQFP144                                            │
 │ Price: ~$12-15 (qty 100)                                    │
 │                                                             │
-│ Posebno:                                                    │
-│ - POSIF (Position Interface) za enkodere                   │
+│ Special features:                                           │
+│ - POSIF (Position Interface) for encoders                  │
 │ - Delta-Sigma demodulator                                   │
 │ - Industrial protocols built-in                             │
 └─────────────────────────────────────────────────────────────┘
 
 AURIX TC3xx (Automotive Safety):
-- Multi-core (do 6 cores)
+- Multi-core (up to 6 cores)
 - ASIL-D capable
 - Hardware security module
-- Za safety-critical funkcije
+- For safety-critical functions
 - Price: ~$30-50 (qty 100)
 ```
 
-### 2.3 Dual-Core Arhitektura
+### 2.3 Dual-Core Architecture
 
 ```
-Preporučena Dual-Core Konfiguracija:
+Recommended Dual-Core Configuration:
 
 ┌─────────────────────────────────────────────────────────────┐
 │                    DUAL-CORE SETUP                          │
@@ -221,14 +221,14 @@ Preporučena Dual-Core Konfiguracija:
 │        CORE 1            │           CORE 2                 │
 │   (Real-time Control)    │   (Communication/Supervision)    │
 ├──────────────────────────┼──────────────────────────────────┤
-│ - PWM generation         │ - CAN/Ethernet protokoli         │
+│ - PWM generation         │ - CAN/Ethernet protocols         │
 │ - Current/Voltage loops  │ - ISO 15118 state machine        │
-│ - ADC sampling           │ - OCPP klijent                   │
+│ - ADC sampling           │ - OCPP client                    │
 │ - PLL/Grid sync          │ - Thermal management             │
-│ - Fault detection        │ - Logging/Diagnostika            │
-│ - Trip handling          │ - HMI komunikacija               │
+│ - Fault detection        │ - Logging/Diagnostics            │
+│ - Trip handling          │ - HMI communication              │
 ├──────────────────────────┼──────────────────────────────────┤
-│ Bare-metal ili           │ RTOS (FreeRTOS, Zephyr)          │
+│ Bare-metal or            │ RTOS (FreeRTOS, Zephyr)          │
 │ minimal RTOS             │                                  │
 ├──────────────────────────┼──────────────────────────────────┤
 │ Cycle time: 10-50 μs     │ Cycle time: 1-10 ms              │
@@ -241,15 +241,15 @@ Inter-Core Communication:
 - Message queues
 ```
 
-## 3. Digitalni Signal Procesori (DSP)
+## 3. Digital Signal Processors (DSP)
 
-### 3.1 Prednosti DSP-a za Power Control
+### 3.1 DSP Advantages for Power Control
 
 ```
-DSP vs MCU za Power Electronics:
+DSP vs MCU for Power Electronics:
 
 ┌────────────────────────────────────────────────────────────┐
-│ Operacija              │ MCU (ARM)    │ DSP (C2000)        │
+│ Operation              │ MCU (ARM)    │ DSP (C2000)        │
 ├────────────────────────┼──────────────┼────────────────────┤
 │ MAC (Multiply-Accumul.)│ 1-2 cycles   │ 1 cycle            │
 │ Division               │ 12-20 cycles │ Hardware (4 cycles)│
@@ -262,20 +262,20 @@ DSP vs MCU za Power Electronics:
 └────────────────────────────────────────────────────────────┘
 
 Control Law Accelerator (CLA):
-- Nezavisna jezgra za kontrolne algoritme
-- Radi paralelno sa glavnim CPU
-- Direktan pristup ADC i PWM
-- Idealno za current loop
+- Independent core for control algorithms
+- Runs in parallel with main CPU
+- Direct access to ADC and PWM
+- Ideal for current loop
 
-Primer CLA performansi:
-- Current loop @ 100 kHz: ~50 ciklusa = 500 ns
-- Ostaje 9.5 μs za CPU poslove
+CLA performance example:
+- Current loop @ 100 kHz: ~50 cycles = 500 ns
+- Leaves 9.5 μs for CPU tasks
 ```
 
-### 3.2 DSP Control Loop Implementacija
+### 3.2 DSP Control Loop Implementation
 
 ```
-PFC Current Control na C2000:
+PFC Current Control on C2000:
 
 // ADC triggered by ePWM (hardware sync)
 __interrupt void adca1_isr(void)
@@ -315,42 +315,42 @@ __interrupt void adca1_isr(void)
 // Leaving >90% CPU for other tasks @ 50 kHz
 ```
 
-## 4. FPGA za Ultra-Brzu Kontrolu
+## 4. FPGA for Ultra-Fast Control
 
-### 4.1 Kada Koristiti FPGA
+### 4.1 When to Use FPGA
 
 ```
-FPGA Primene u EV Punjačima:
+FPGA Applications in EV Chargers:
 
 1. LLC Frequency Control (>200 kHz switching):
-   - Rezolucija frekvencije: <100 Hz koraci
-   - Reakcija: <1 μs
-   - DSP/MCU ne može dovoljno brzo
+   - Frequency resolution: <100 Hz steps
+   - Reaction: <1 μs
+   - DSP/MCU cannot be fast enough
 
-2. Sinhronizovana Rektifikacija:
-   - Precizno merenje ZVS trenutka
+2. Synchronous Rectification:
+   - Precise ZVS moment measurement
    - Dead-time <50 ns
-   - Body diode conduction minimizacija
+   - Body diode conduction minimization
 
 3. Multi-Module Interleaving:
-   - Fazni pomak između modula
-   - Master-slave sinhronizacija
+   - Phase shift between modules
+   - Master-slave synchronization
    - <10 ns jitter
 
 4. High-Speed Fault Protection:
-   - Reakcija <100 ns
-   - Paralelno praćenje svih parametara
-   - Hardverski shutdown
+   - Reaction <100 ns
+   - Parallel monitoring of all parameters
+   - Hardware shutdown
 
-5. Custom Protokoli:
-   - Proprietary BMS komunikacija
-   - Legacy interfejsi
+5. Custom Protocols:
+   - Proprietary BMS communication
+   - Legacy interfaces
 ```
 
-### 4.2 Preporučeni FPGA-ovi
+### 4.2 Recommended FPGAs
 
 ```
-Intel (Altera) Cyclone Serija:
+Intel (Altera) Cyclone Series:
 
 Cyclone 10 LP (10CL025):
 ┌─────────────────────────────────────────────────────────────┐
@@ -363,7 +363,7 @@ Cyclone 10 LP (10CL025):
 │ Package: FBGA 256                                           │
 │ Price: ~$20-30 (qty 100)                                    │
 │                                                             │
-│ Primena: PWM, fault detection, basic control                │
+│ Application: PWM, fault detection, basic control            │
 └─────────────────────────────────────────────────────────────┘
 
 Cyclone V SE (5CSEBA6):
@@ -377,11 +377,11 @@ Cyclone V SE (5CSEBA6):
 │ Package: FBGA 672                                           │
 │ Price: ~$80-120 (qty 100)                                   │
 │                                                             │
-│ Primena: Full system (FPGA + ARM processor)                 │
-│          Može zameniti MCU + FPGA kombinaciju               │
+│ Application: Full system (FPGA + ARM processor)             │
+│              Can replace MCU + FPGA combination             │
 └─────────────────────────────────────────────────────────────┘
 
-Xilinx Zynq Serija:
+Xilinx Zynq Series:
 
 Zynq-7020 (XC7Z020):
 ┌─────────────────────────────────────────────────────────────┐
@@ -394,17 +394,17 @@ Zynq-7020 (XC7Z020):
 │ Package: Various (CLG484 common)                            │
 │ Price: ~$100-150 (qty 100)                                  │
 │                                                             │
-│ Prednosti:                                                  │
-│ - Veliki Xilinx ekosistem                                   │
+│ Advantages:                                                 │
+│ - Large Xilinx ecosystem                                    │
 │ - Vivado tools                                              │
-│ - Power electronics IP cores dostupni                       │
+│ - Power electronics IP cores available                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 4.3 FPGA IP za Power Electronics
+### 4.3 FPGA IP for Power Electronics
 
 ```
-Potrebni IP Blokovi:
+Required IP Blocks:
 
 1. PWM Generator:
    ┌────────────────────────────────────────┐
@@ -428,7 +428,7 @@ Potrebni IP Blokovi:
    │   - Hardware trip input                │
    └────────────────────────────────────────┘
 
-2. Frequency Controller (za LLC):
+2. Frequency Controller (for LLC):
    ┌────────────────────────────────────────┐
    │        FREQ_CTRL IP                    │
    ├────────────────────────────────────────┤
@@ -470,82 +470,82 @@ Potrebni IP Blokovi:
    └────────────────────────────────────────┘
 ```
 
-## 5. Senzori i Merenja
+## 5. Sensors and Measurements
 
-### 5.1 Strujni Senzori
+### 5.1 Current Sensors
 
 ```
-Tipovi Strujnih Senzora:
+Current Sensor Types:
 
 1. Hall Effect (Open Loop):
    ┌────────────────────────────────────────────────────────┐
-   │ Princip: Hallov efekat u magnetnom polju provodnika    │
+   │ Principle: Hall effect in magnetic field of conductor  │
    │                                                        │
-   │ Proizvodi:                                             │
+   │ Products:                                              │
    │ - LEM HAS 200-S: ±200A, 50 kHz BW, ±1% accuracy       │
    │ - Allegro ACS758: ±50A, 120 kHz BW, ±1.5%             │
    │ - Melexis MLX91220: ±50A, integrated, ±1%             │
    │                                                        │
-   │ Prednosti: Izolacija, jednostavno, jeftino            │
-   │ Nedostaci: Offset drift, ograničena tačnost           │
+   │ Advantages: Isolation, simple, inexpensive            │
+   │ Disadvantages: Offset drift, limited accuracy         │
    │                                                        │
-   │ Cena: €5-30 (zavisno od struje)                       │
+   │ Price: €5-30 (depending on current)                   │
    └────────────────────────────────────────────────────────┘
 
 2. Hall Effect (Closed Loop / Flux-Null):
    ┌────────────────────────────────────────────────────────┐
-   │ Princip: Kompenzacioni namotaj održava nulu fluksa    │
+   │ Principle: Compensation winding maintains flux null    │
    │                                                        │
-   │ Proizvodi:                                             │
+   │ Products:                                              │
    │ - LEM LA 200-P: ±200A, 200 kHz BW, ±0.5%              │
    │ - LEM HAH1DR 500-S: ±500A, 100 kHz, ±0.5%             │
    │                                                        │
-   │ Prednosti: Visoka tačnost, brz                        │
-   │ Nedostaci: Skuplje, potrebno napajanje ±15V           │
+   │ Advantages: High accuracy, fast                       │
+   │ Disadvantages: More expensive, requires ±15V supply   │
    │                                                        │
-   │ Cena: €30-80                                           │
+   │ Price: €30-80                                          │
    └────────────────────────────────────────────────────────┘
 
 3. Shunt + Isolation Amplifier:
    ┌────────────────────────────────────────────────────────┐
-   │ Princip: Precizni otpornik + izolovano pojačanje      │
+   │ Principle: Precision resistor + isolated amplification │
    │                                                        │
-   │ Komponente:                                            │
+   │ Components:                                            │
    │ - Shunt: Isabellenhutte BVR (0.1-1 mΩ, 0.5%)         │
-   │ - Amp: TI AMC1311 (izolovano), Silicon Labs Si8920    │
+   │ - Amp: TI AMC1311 (isolated), Silicon Labs Si8920     │
    │                                                        │
-   │ Prednosti: Najbolja tačnost, linearnost               │
-   │ Nedostaci: Gubici u shuntu, termalni drift            │
+   │ Advantages: Best accuracy, linearity                  │
+   │ Disadvantages: Losses in shunt, thermal drift         │
    │                                                        │
-   │ Cena: €10-20 (shunt + amp)                            │
+   │ Price: €10-20 (shunt + amp)                           │
    │                                                        │
-   │ Proračun shunta:                                       │
+   │ Shunt calculation:                                     │
    │ R = V_max / I_max = 100mV / 300A = 0.33 mΩ            │
    │ P = I² × R = 300² × 0.00033 = 30 W (!!)               │
-   │ → Potrebno hlađenje ili niži R                        │
+   │ → Needs cooling or lower R                            │
    └────────────────────────────────────────────────────────┘
 
-4. Rogowski Coil (za di/dt):
+4. Rogowski Coil (for di/dt):
    ┌────────────────────────────────────────────────────────┐
-   │ Princip: Indukovani napon proporcionalan di/dt        │
+   │ Principle: Induced voltage proportional to di/dt      │
    │                                                        │
-   │ Proizvodi:                                             │
+   │ Products:                                              │
    │ - PEM CWT Mini: 30A-6kA peak, 20 MHz BW               │
-   │ - LEM PRiME: Integrisano rešenje                      │
+   │ - LEM PRiME: Integrated solution                      │
    │                                                        │
-   │ Prednosti: Bez saturacije, vrlo brz                   │
-   │ Nedostaci: Zahteva integrator za I                    │
+   │ Advantages: No saturation, very fast                  │
+   │ Disadvantages: Requires integrator for I              │
    │                                                        │
-   │ Primena: Fault detection, switching analysis          │
+   │ Application: Fault detection, switching analysis      │
    └────────────────────────────────────────────────────────┘
 
-Preporuka za 150 kW DC punjač:
-- AC strana (PFC): Closed-loop Hall (LEM LA 200-P)
-- DC strana: Shunt + isolated amp (za billing accuracy)
-- Fault: Open-loop Hall (brza detekcija)
+Recommendation for 150 kW DC charger:
+- AC side (PFC): Closed-loop Hall (LEM LA 200-P)
+- DC side: Shunt + isolated amp (for billing accuracy)
+- Fault: Open-loop Hall (fast detection)
 ```
 
-### 5.2 Naponski Senzori
+### 5.2 Voltage Sensors
 
 ```
 1. Resistor Divider + Isolation:
@@ -563,11 +563,11 @@ Preporuka za 150 kW DC punjač:
    │          │              │               │               │
    │          │         To ADC               │               │
    │                                                         │
-   │ Za Vhv = 1000V:                                         │
+   │ For Vhv = 1000V:                                        │
    │ Vmeas = 1000 × 10k / (1M + 10k) = 9.9V                 │
-   │ → Potreban još jedan divider ili atten                  │
+   │ → Need another divider or attenuator                   │
    │                                                         │
-   │ Izolacija: Si8920, AMC1311, ACPL-C87                   │
+   │ Isolation: Si8920, AMC1311, ACPL-C87                   │
    └─────────────────────────────────────────────────────────┘
 
 2. Hall Effect Voltage Sensor:
@@ -578,22 +578,22 @@ Preporuka za 150 kW DC punjač:
    │ - BW: 25 kHz                                            │
    │ - Output: Current (mA) → Shunt → Voltage                │
    │                                                         │
-   │ Prednosti: Kompletna izolacija                          │
-   │ Nedostaci: Veći, skuplji                                │
+   │ Advantages: Complete isolation                          │
+   │ Disadvantages: Larger, more expensive                   │
    │                                                         │
-   │ Cena: €25-40                                            │
+   │ Price: €25-40                                           │
    └─────────────────────────────────────────────────────────┘
 
-Preporuka za punjač:
-- AC ulaz: Resistor divider + AMC1311 (jeftino, precizno)
-- DC Link: LEM LV 25-P (izolacija kritična)
-- Izlaz (billing): High precision isolated (0.5% accuracy)
+Recommendation for charger:
+- AC input: Resistor divider + AMC1311 (cheap, precise)
+- DC Link: LEM LV 25-P (isolation critical)
+- Output (billing): High precision isolated (0.5% accuracy)
 ```
 
-### 5.3 Temperaturni Senzori
+### 5.3 Temperature Sensors
 
 ```
-Lokacije merenja temperature:
+Temperature measurement locations:
 
 ┌─────────────────────────────────────────────────────────────┐
 │                    POWER MODULE                             │
@@ -615,85 +615,85 @@ Lokacije merenja temperature:
 │  DC Link Caps: ★T9                                          │
 └─────────────────────────────────────────────────────────────┘
 
-Tipovi senzora:
+Sensor types:
 
-1. NTC Termistor (najčešći):
+1. NTC Thermistor (most common):
    - Epcos B57861S (10kΩ @ 25°C)
-   - Vishay NTCLE100 serija
-   - Cena: €0.5-2
+   - Vishay NTCLE100 series
+   - Price: €0.5-2
 
    R(T) = R25 × exp(B × (1/T - 1/298.15))
 
-   Za B = 3988K, R25 = 10kΩ:
+   For B = 3988K, R25 = 10kΩ:
    @ 100°C: R = 10k × exp(3988 × (1/373 - 1/298)) = 680Ω
 
-2. PT100/PT1000 (precizniji):
-   - Linearniji od NTC
+2. PT100/PT1000 (more precise):
+   - More linear than NTC
    - R = R0 × (1 + α×T)
    - α = 0.00385 /°C
-   - Cena: €5-15
+   - Price: €5-15
 
 3. Digital (I2C/SPI):
    - TI TMP117: ±0.1°C accuracy
    - Maxim MAX31865: PT100 interface
-   - Cena: €3-10
-   - Prednost: Nema kalibracije, jednostavno
+   - Price: €3-10
+   - Advantage: No calibration, simple
 
-Preporuka: NTC za brzinu, PT100 za preciznost
+Recommendation: NTC for speed, PT100 for precision
 ```
 
-### 5.4 ADC Izbor
+### 5.4 ADC Selection
 
 ```
-ADC Zahtevi za Power Control:
+ADC Requirements for Power Control:
 
 ┌─────────────────────────────────────────────────────────────┐
-│ Parametar          │ Current Sense │ Voltage Sense │ Temp  │
+│ Parameter          │ Current Sense │ Voltage Sense │ Temp  │
 ├────────────────────┼───────────────┼───────────────┼───────┤
-│ Rezolucija         │ 12-16 bit     │ 12 bit        │ 10 bit│
-│ Brzina             │ 1-5 MSPS      │ 500 kSPS      │ 10 SPS│
-│ Latencija          │ <1 μs         │ <5 μs         │ N/A   │
+│ Resolution         │ 12-16 bit     │ 12 bit        │ 10 bit│
+│ Speed              │ 1-5 MSPS      │ 500 kSPS      │ 10 SPS│
+│ Latency            │ <1 μs         │ <5 μs         │ N/A   │
 │ INL/DNL            │ <2 LSB        │ <2 LSB        │ <4 LSB│
 │ SINAD              │ >70 dB        │ >65 dB        │ N/A   │
-│ Simultaneous       │ Da            │ Poželjno      │ Ne    │
+│ Simultaneous       │ Yes           │ Preferred     │ No    │
 └─────────────────────────────────────────────────────────────┘
 
-Eksterni ADC opcije (ako MCU ADC nije dovoljan):
+External ADC options (if MCU ADC not sufficient):
 
 1. Texas Instruments ADS131M08:
-   - 8 kanala, simultaneous
+   - 8 channels, simultaneous
    - 24-bit, 32 kSPS per channel
    - Delta-Sigma
    - SPI interface
-   - Cena: ~$15
+   - Price: ~$15
 
 2. Analog Devices AD7606:
-   - 8 kanala, simultaneous
+   - 8 channels, simultaneous
    - 16-bit, 200 kSPS
    - SAR
    - Parallel/SPI interface
-   - Cena: ~$30
+   - Price: ~$30
 
 3. Texas Instruments ADS8688:
-   - 8 kanala, multiplexed
+   - 8 channels, multiplexed
    - 16-bit, 500 kSPS
    - SAR
    - SPI interface
-   - Cena: ~$12
+   - Price: ~$12
 
-Interni MCU ADC (STM32G4, C2000):
-- Obično dovoljan za većinu merenja
+Internal MCU ADC (STM32G4, C2000):
+- Usually sufficient for most measurements
 - Simultaneous sample-and-hold
-- Hardware triggering od PWM timera
-- Besplatan (uključen u MCU)
+- Hardware triggering from PWM timer
+- Free (included in MCU)
 ```
 
-## 6. Zaštitna Elektronika
+## 6. Protection Electronics
 
-### 6.1 Hardware Komparatori
+### 6.1 Hardware Comparators
 
 ```
-Brza Zaštita bez MCU Kašnjenja:
+Fast Protection without MCU Latency:
 
         ┌──────────────────────────────────────────────────┐
         │              COMPARATOR CIRCUIT                  │
@@ -715,44 +715,44 @@ Brza Zaštita bez MCU Kašnjenja:
         │    To Gate Driver FAULT input (<50 ns latency)  │
         └──────────────────────────────────────────────────┘
 
-Komponente:
+Components:
 
 1. TI TLV3501 (Ultra-fast):
    - Propagation delay: 4.5 ns
    - Rail-to-rail input/output
    - Push-pull output
-   - Cena: ~$2
+   - Price: ~$2
 
 2. Analog Devices ADCMP601:
    - Propagation delay: 3.5 ns
    - LVDS output option
-   - Cena: ~$3
+   - Price: ~$3
 
 3. STM32 Internal Comparators:
    - Propagation delay: ~30 ns
    - Direct PWM fault input
-   - Besplatan (u MCU)
+   - Free (in MCU)
 
-Konfiguracija threshold-a (DAC ili R-divider):
+Threshold configuration (DAC or R-divider):
 OCP: 120% × I_nominal
 OVP: 110% × V_nominal
-OTP: T_max - 10°C margina
+OTP: T_max - 10°C margin
 ```
 
 ### 6.2 Watchdog Timer
 
 ```
-Multi-Level Watchdog Strategija:
+Multi-Level Watchdog Strategy:
 
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
 │  ┌───────────────────────────────────────────────────────┐ │
 │  │             LEVEL 1: MCU Internal WDT                 │ │
 │  │                                                       │ │
-│  │  - Window watchdog (mora se kickovati u prozoru)     │ │
+│  │  - Window watchdog (must be kicked within window)    │ │
 │  │  - Timeout: 10-100 ms                                │ │
 │  │  - Reset: MCU soft reset                             │ │
-│  │  - Koristi se za firmware crash detekciju            │ │
+│  │  - Used for firmware crash detection                 │ │
 │  │                                                       │ │
 │  └───────────────────────────────────────────────────────┘ │
 │                                                             │
@@ -763,14 +763,14 @@ Multi-Level Watchdog Strategija:
 │  │  - Independent of MCU                                 │ │
 │  │  - Timeout: 100 ms - 2 s                             │ │
 │  │  - Output: Reset MCU OR disable power stage          │ │
-│  │  - Koristi se za MCU fault (hard lock)               │ │
+│  │  - Used for MCU fault (hard lock)                    │ │
 │  │                                                       │ │
 │  └───────────────────────────────────────────────────────┘ │
 │                                                             │
 │  ┌───────────────────────────────────────────────────────┐ │
 │  │             LEVEL 3: PWM Activity Monitor             │ │
 │  │                                                       │ │
-│  │  Custom circuit ili Safety MCU                        │ │
+│  │  Custom circuit or Safety MCU                         │ │
 │  │  - Monitors PWM switching                            │ │
 │  │  - Expects toggle every T_sw                         │ │
 │  │  - If no toggle for 2× T_sw → shutdown               │ │
@@ -786,57 +786,57 @@ TI TPS3823-33:
 - Supply: 3.3V
 - Timeout: 200 ms nominal
 - Push-pull reset output
-- Cena: ~$0.5
+- Price: ~$0.5
 
 Maxim MAX6369:
 - Programmable timeout (1ms - 60s)
 - SPI timeout select
 - Manual reset input
-- Cena: ~$2
+- Price: ~$2
 ```
 
-### 6.3 Izolacija
+### 6.3 Isolation
 
 ```
-Izolacijski Zahtevi:
+Isolation Requirements:
 
 ┌─────────────────────────────────────────────────────────────┐
-│ Interfejs              │ Napon      │ Tip izolacije        │
+│ Interface              │ Voltage    │ Isolation Type       │
 ├────────────────────────┼────────────┼──────────────────────┤
-│ Gate driver            │ 1200V      │ Kapacitivna/Optička  │
+│ Gate driver            │ 1200V      │ Capacitive/Optical   │
 │ Current sense (HV)     │ 1200V      │ Hall/Transformer     │
-│ Voltage sense (DC Link)│ 1000V      │ Optička/Kapacitivna  │
-│ CAN to power ground    │ 500V       │ Kapacitivna          │
+│ Voltage sense (DC Link)│ 1000V      │ Optical/Capacitive   │
+│ CAN to power ground    │ 500V       │ Capacitive           │
 │ USB/Ethernet           │ 1500V      │ Transformer          │
-│ User interface         │ 2500V      │ Optička (safety)     │
+│ User interface         │ 2500V      │ Optical (safety)     │
 └─────────────────────────────────────────────────────────────┘
 
-Digital Izolatori:
+Digital Isolators:
 
 Silicon Labs Si86xx Series:
 - 1 kV/μs CMTI
 - Up to 150 Mbps data rate
 - Multiple channels per package
-- Cena: $2-5 per channel
+- Price: $2-5 per channel
 
 Texas Instruments ISO7741:
 - 100 kV/μs CMTI
 - 100 Mbps
 - Reinforced isolation
-- Cena: ~$4 (quad channel)
+- Price: ~$4 (quad channel)
 
 Analog Devices ADuM1xx:
 - iCoupler technology
 - Various channel configs
-- Cena: $2-6
+- Price: $2-6
 ```
 
-## 7. PCB Dizajn za Kontrolnu Ploču
+## 7. PCB Design for Control Board
 
 ### 7.1 Layer Stackup
 
 ```
-Preporučeni 6-Layer Stackup:
+Recommended 6-Layer Stackup:
 
     ┌─────────────────────────────────────────────────────┐
 L1  │ Signal (MCU, high-speed traces)        │ 35μm Cu   │
@@ -864,7 +864,7 @@ L6  │ Signal (connectors, power)             │ 35μm Cu   │
 
 Total thickness: ~1.6 mm
 
-Zona Razdvajanje:
+Zone Separation:
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
 │  ┌──────────────────┐       ┌──────────────────┐          │
@@ -881,7 +881,7 @@ Zona Razdvajanje:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 7.2 Kritične Rute
+### 7.2 Critical Routes
 
 ```
 Routing Priorities:
@@ -916,13 +916,13 @@ Routing Priorities:
    └─────────────────────────────────────────────────────┘
 ```
 
-## 8. Bill of Materials - Kontrolna Elektronika
+## 8. Bill of Materials - Control Electronics
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ PROCESORI I LOGIKA                                              │
+│ PROCESSORS AND LOGIC                                            │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
-│ Komponenta                   │ Qty │ Jed. cena  │    Ukupno     │
+│ Component                    │ Qty │ Unit Price │    Total      │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ TMS320F28379D (Main DSP)     │  1  │    €30     │     €30       │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
@@ -932,11 +932,11 @@ Routing Priorities:
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ Safety MCU (TMS320F28069)    │  1  │    €12     │     €12       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ SUBTOTAL PROCESORI                              │     €85       │
+│ SUBTOTAL PROCESSORS                             │     €85       │
 └─────────────────────────────────────────────────┴───────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ SENZORI                                                         │
+│ SENSORS                                                         │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
 │ LEM LA 200-P (Current, AC)   │  3  │    €45     │    €135       │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
@@ -948,11 +948,11 @@ Routing Priorities:
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ Resistor dividers (HV sense) │ set │    €10     │     €10       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ SUBTOTAL SENZORI                                │    €245       │
+│ SUBTOTAL SENSORS                                │    €245       │
 └─────────────────────────────────────────────────┴───────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ ZAŠTITA I IZOLACIJA                                             │
+│ PROTECTION AND ISOLATION                                        │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
 │ TLV3501 (Comparator)         │  8  │    €2      │     €16       │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
@@ -962,11 +962,11 @@ Routing Priorities:
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ TVS/ESD protection           │ set │    €20     │     €20       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ SUBTOTAL ZAŠTITA                                │     €54       │
+│ SUBTOTAL PROTECTION                             │     €54       │
 └─────────────────────────────────────────────────┴───────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ NAPAJANJE                                                       │
+│ POWER SUPPLY                                                    │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
 │ AC/DC 24V/50W (Aux supply)   │  1  │    €25     │     €25       │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
@@ -978,11 +978,11 @@ Routing Priorities:
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ LDO, references              │ set │    €15     │     €15       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ SUBTOTAL NAPAJANJE                              │     €86       │
+│ SUBTOTAL POWER SUPPLY                           │     €86       │
 └─────────────────────────────────────────────────┴───────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ OSTALO                                                          │
+│ OTHER                                                           │
 ├──────────────────────────────┬─────┬────────────┬───────────────┤
 │ Crystal/Oscillators          │ set │    €10     │     €10       │
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
@@ -992,42 +992,42 @@ Routing Priorities:
 ├──────────────────────────────┼─────┼────────────┼───────────────┤
 │ PCB (6-layer, 200×150mm)     │  1  │    €50     │     €50       │
 ├──────────────────────────────┴─────┴────────────┼───────────────┤
-│ SUBTOTAL OSTALO                                 │    €110       │
+│ SUBTOTAL OTHER                                  │    €110       │
 └─────────────────────────────────────────────────┴───────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ UKUPNO KONTROLNA ELEKTRONIKA                    │    €580       │
+│ TOTAL CONTROL ELECTRONICS                       │    €580       │
 └─────────────────────────────────────────────────┴───────────────┘
 ```
 
-## 9. Zaključak i Preporuke
+## 9. Conclusions and Recommendations
 
 ```
-Preporuke za Kontrolnu Elektroniku:
+Control Electronics Recommendations:
 
-1. Procesor Izbor:
-   ├── Real-time control: TI C2000 (F28379D ili F280049)
-   ├── System/Communication: STM32H7 ili equivalentSTM32G4
-   ├── Safety: Dedicated MCU sa lockstep (AURIX, redundant)
-   └── FPGA: Opcionalno za LLC >200kHz ili custom protokole
+1. Processor Selection:
+   ├── Real-time control: TI C2000 (F28379D or F280049)
+   ├── System/Communication: STM32H7 or equivalent STM32G4
+   ├── Safety: Dedicated MCU with lockstep (AURIX, redundant)
+   └── FPGA: Optional for LLC >200kHz or custom protocols
 
-2. Senzori:
-   ├── Struja: Closed-loop Hall za tačnost, Open-loop za brzinu
-   ├── Napon: Izolovani pojačavači, LEM za DC Link
-   └── Temperatura: NTC svuda, PT100 za kritične tačke
+2. Sensors:
+   ├── Current: Closed-loop Hall for accuracy, Open-loop for speed
+   ├── Voltage: Isolated amplifiers, LEM for DC Link
+   └── Temperature: NTC everywhere, PT100 for critical points
 
-3. Zaštita:
-   ├── Hardware komparatori za OCP/OVP (<50ns reakcija)
+3. Protection:
+   ├── Hardware comparators for OCP/OVP (<50ns reaction)
    ├── Multi-level watchdog
-   └── Izolacija na svim HV interfejsima
+   └── Isolation on all HV interfaces
 
 4. PCB:
-   ├── Minimum 4 sloja, preporučeno 6
-   ├── Jasna separacija LV/HV zona
+   ├── Minimum 4 layers, recommended 6
+   ├── Clear separation of LV/HV zones
    └── Solid ground planes
 
-5. Redundancija:
-   ├── Dual ADC za kritična merenja
-   ├── Cross-check između MCU-ova
-   └── Fail-safe default stanja
+5. Redundancy:
+   ├── Dual ADC for critical measurements
+   ├── Cross-check between MCUs
+   └── Fail-safe default states
 ```
