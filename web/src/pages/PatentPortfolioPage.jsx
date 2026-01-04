@@ -187,7 +187,7 @@ Central AI orchestrates charging for entire bus fleet, optimizing for:
   },
   {
     id: 'technical',
-    title: 'Technical',
+    title: 'Technical Specs',
     icon: Cpu,
     documents: [
       {
@@ -203,11 +203,11 @@ Central AI orchestrates charging for entire bus fleet, optimizing for:
 | Parameter | Value |
 |-----------|-------|
 | Output Power | 3.3 kW |
-| Input Voltage | 380-480 VAC |
-| Output Voltage | 200-920 VDC |
-| Efficiency | >97% |
-| Power Factor | >0.99 |
-| THD | <5% |
+| Input Voltage | 650V DC (from central PFC) |
+| Output Voltage | 50-500V DC |
+| Efficiency (peak) | >96% @ 50% load |
+| Efficiency (full) | >94% @ 3.3 kW |
+| Standby Power | <3W (deep sleep) |
 
 ### Mechanical
 | Parameter | Value |
@@ -215,21 +215,22 @@ Central AI orchestrates charging for entire bus fleet, optimizing for:
 | Dimensions | 200 × 320 × 44 mm |
 | Weight | 3.5 kg |
 | Format | 1U half-width blade |
-| Cooling | Forced air |
+| Cooling | Forced air (shared) |
 | IP Rating | IP20 (in rack) |
 
 ### Semiconductors
-- **Primary MOSFETs**: Wolfspeed C3M0016120K (1200V SiC)
-- **Secondary MOSFETs**: Wolfspeed C3M0021120K (1200V SiC)
-- **Gate Driver**: Silicon Labs Si8271
-- **Controller**: STM32G474RET6
+- **MOSFETs**: Wolfspeed C3M0065090D (900V SiC, 65mΩ)
+- **Gate Driver**: Silicon Labs Si8271 (isolated)
+- **Controller**: STM32G474RET6 (170MHz, HRTIM)
+- **Current Sensor**: Infineon TLI4971 (±120A)
 
 ### Topology
-LLC resonant converter with:
-- ZVS primary switching
-- ZCS secondary switching
-- 400 kHz switching frequency
-- Integrated PFC stage
+LLC resonant DC/DC converter with:
+- ZVS primary switching (zero voltage)
+- ZCS secondary switching (zero current)
+- Planar transformer (PCB integrated)
+- Film capacitors only (no electrolytics)
+- 50,000+ hour design life
         `,
       },
       {
@@ -242,28 +243,299 @@ LLC resonant converter with:
 ## Control Architecture
 
 ### Module-Level Control (STM32G474)
-- LLC resonant control loop
-- Current/voltage regulation
-- Temperature monitoring
-- Fault detection and protection
-
-### Rack-Level Control (Master STM32)
-- Module coordination
-- Load balancing
-- Hot-swap management
-- External communication
+- LLC resonant control loop (HRTIM @ 184ps resolution)
+- Current/voltage regulation (dual-loop)
+- Temperature monitoring (NTC + IR sensor)
+- Fault detection (<1μs response)
 
 ### Communication Stack
-- **Internal**: CAN-FD @ 5 Mbps
-- **External**: Ethernet/OCPP
+- **Internal**: CAN-FD @ 5 Mbps (dual redundant bus)
+- **External**: Ethernet/OCPP 2.0.1
 - **Diagnostics**: USB-C debug port
+- **Protocol**: Custom EK-CAN with CMAC authentication
 
-### Safety Features
-- Hardware overcurrent protection
-- Overvoltage shutdown
-- Thermal derating
-- Arc fault detection
-- Ground fault monitoring
+### Safety Features (Hardware Layer 0)
+- Hardware OCP: <1μs response, non-bypassable
+- Hardware OVP: Zener clamp + crowbar
+- Hardware OTP: Thermal fuse backup
+- Arc fault detection: dI/dt monitoring
+- Ground fault: 30mA RCD equivalent
+        `,
+      },
+    ],
+  },
+  {
+    id: 'architecture',
+    title: 'Architecture',
+    icon: Cpu,
+    documents: [
+      {
+        id: 'microkernel',
+        title: 'Microkernel Architecture',
+        disclosureId: 'EK-TECH-010',
+        date: '2026-01-03',
+        status: 'complete',
+        summary: 'MINIX-inspired layered architecture for fault-tolerant power systems',
+        content: `
+## Microkernel Philosophy
+
+### Inspiration: MINIX Operating System
+The EK3 architecture draws from microkernel OS design principles:
+
+| OS Concept | Power Electronics Equivalent |
+|------------|------------------------------|
+| Minimal kernel | Hardware protection (OCP, OVP, OTP) + LLC control |
+| User processes | Health monitoring, thermal, swarm coordination |
+| IPC | CAN-FD message passing between modules |
+| Process isolation | Galvanic isolation + separate MCU per module |
+| Graceful degradation | N-1 redundancy, wide power striping |
+| Hot reload | Hot-swap module replacement |
+
+### Four-Layer Architecture
+- **Layer 0 (HAL)**: STM32 peripherals, SiC MOSFETs, magnetics
+- **Layer 1 (Kernel)**: OCP/OVP/OTP hardware, LLC controller, CAN-FD driver
+- **Layer 2 (Services)**: Health monitor, thermal manager, swarm coordinator, audit logger
+- **Layer 3 (Application)**: OCPP gateway, Fleet AI, cloud telemetry, operator UI
+
+### Key Benefits
+- Module failure = 0.4% capacity loss (not 10-33%)
+- Independent firmware updates per module
+- Same architecture from 3 kW to 3 MW
+- No single point of failure
+        `,
+      },
+      {
+        id: 'rack-system',
+        title: 'Rack System Design',
+        disclosureId: 'EK-TECH-016',
+        date: '2026-01-03',
+        status: 'complete',
+        summary: '3PAR-inspired passive backplane rack for 84 modules (277 kW)',
+        content: `
+## Custom Rack System
+
+### 3PAR Storage Inspiration
+| 3PAR Concept | EK3 Implementation |
+|--------------|-------------------|
+| Wide striping | All modules share load equally |
+| No dedicated spare | Distributed sparing (N+M) |
+| Autonomous nodes | Modules self-coordinate via Raft |
+| Passive backplane | Only power + CAN routing |
+| Hot-swap | Module replacement without shutdown |
+
+### Specifications
+| Parameter | Value |
+|-----------|-------|
+| Capacity | 84 EK3 modules |
+| Total power | 277 kW (84 × 3.3 kW) |
+| Redundancy | N-1 (98.8% with one failure) |
+| Height | 42U standard rack |
+| Width | 600 mm |
+| Depth | 1000 mm |
+| Weight (loaded) | ~400 kg |
+
+### Backplane Design
+- **Passive only**: No active components, no CPU
+- **Power bus**: 650V DC distribution
+- **Communication**: Dual CAN-FD (redundant)
+- **Connectors**: Blind-mate, 10,000+ cycles
+- **Robot access**: Front-accessible slots
+        `,
+      },
+    ],
+  },
+  {
+    id: 'security',
+    title: 'Security',
+    icon: Shield,
+    documents: [
+      {
+        id: 'security-model',
+        title: 'Security Model',
+        disclosureId: 'EK-TECH-011',
+        date: '2026-01-03',
+        status: 'complete',
+        summary: 'Defense-in-depth security with 6 layers from hardware to cloud',
+        content: `
+## Defense-in-Depth Model
+
+### Security Layers
+- **Layer 0**: Hardware security (tamper, crypto, OTP fuses)
+- **Layer 1**: Firmware security (secure boot, code signing)
+- **Layer 2**: Access control (RBAC, capability model)
+- **Layer 3**: Message authentication (CMAC signatures)
+- **Layer 4**: API authentication (OAuth2, API keys)
+- **Layer 5**: Network security (TLS 1.3, VPN, firewall)
+
+### Threat Model
+| Threat | Risk | Mitigation |
+|--------|------|------------|
+| Remote attack | High | TLS, OAuth2, rate limiting |
+| CAN bus injection | Medium | CMAC, sequence numbers |
+| Physical access | Medium | Tamper detection, RDP Level 2 |
+| Supply chain | Low | Secure boot, attestation |
+| Insider threat | Low | RBAC, comprehensive audit logging |
+
+### Trust Tiers
+- **Tier 0 (Hardware)**: Non-bypassable, always active
+- **Tier 1 (Kernel)**: Safety-critical, minimal attack surface
+- **Tier 2 (Authenticated)**: Verified identity, limited scope
+- **Tier 3 (External)**: Untrusted, full validation required
+        `,
+      },
+      {
+        id: 'hardware-security',
+        title: 'Hardware Security',
+        disclosureId: 'EK-TECH-013',
+        date: '2026-01-03',
+        status: 'complete',
+        summary: 'PCB-level security with guard rings, tamper detection, and crypto',
+        content: `
+## Hardware Security Design
+
+### PCB Security Features
+- **Guard rings**: 0.5mm width, via stitching @ 2mm
+- **Buried traces**: Sensitive signals on inner layers
+- **Via stitching**: Around crypto section perimeter
+- **Conformal coating**: Moisture + tampering protection
+
+### Cryptographic Hardware
+- **AES-256**: Hardware accelerator in STM32G474
+- **CMAC**: Message authentication for CAN-FD
+- **TRNG**: True random number generator
+- **Secure storage**: OTP fuses for keys
+
+### Tamper Protection
+| Feature | Response |
+|---------|----------|
+| Enclosure open | Key zeroization |
+| Voltage glitch | System reset |
+| Debug port probe | Lockout + log |
+| Temperature extreme | Graceful shutdown |
+
+### Production Security
+- **JTAG disabled**: RDP Level 2 (permanent)
+- **Unique keys**: Per-module provisioning
+- **Attestation**: Hardware identity verification
+- **Secure boot**: Signed firmware only
+        `,
+      },
+      {
+        id: 'audit-logging',
+        title: 'Audit Logging',
+        disclosureId: 'EK-TECH-012',
+        date: '2026-01-03',
+        status: 'complete',
+        summary: 'Tamper-evident logging with hash chains and cloud replication',
+        content: `
+## Audit Logging System
+
+### Log Categories
+- **Security events**: Auth, access control, tamper
+- **Safety events**: Faults, shutdowns, recoveries
+- **Operational events**: Swaps, maintenance, config
+- **Performance events**: Efficiency, temperature, load
+
+### Tamper Evidence
+- **Hash chains**: Each entry links to previous
+- **Sequence numbers**: Gap detection
+- **Timestamps**: NTP-synced, signed
+- **Cloud replication**: Real-time backup
+
+### Storage Architecture
+- **Local**: 8MB flash, circular buffer
+- **Edge**: Gateway aggregation
+- **Cloud**: Long-term retention (7 years)
+
+### Compliance
+- SOC 2 Type II compatible
+- GDPR data handling
+- IEC 62443 security logging
+        `,
+      },
+    ],
+  },
+  {
+    id: 'firmware',
+    title: 'Firmware',
+    icon: Cpu,
+    documents: [
+      {
+        id: 'firmware-arch',
+        title: 'Firmware Architecture',
+        disclosureId: 'EK-TECH-014',
+        date: '2026-01-03',
+        status: 'complete',
+        summary: 'Real-time firmware with RTOS, secure boot, and OTA updates',
+        content: `
+## Firmware Design
+
+### RTOS Selection: FreeRTOS
+- **Tick rate**: 1 kHz (1ms resolution)
+- **Tasks**: 8 priority levels
+- **Memory**: Static allocation (no malloc)
+- **Stack**: MPU-protected per task
+
+### Task Architecture
+| Task | Priority | Period | Function |
+|------|----------|--------|----------|
+| LLC Control | Highest | 100μs | PWM, current loop |
+| Safety Monitor | High | 1ms | Fault detection |
+| CAN Handler | High | Event | Message TX/RX |
+| Thermal | Medium | 100ms | Temperature control |
+| Health | Low | 1s | Diagnostics |
+| Telemetry | Lowest | 10s | Cloud reporting |
+
+### Secure Boot Chain
+1. ROM bootloader (immutable)
+2. First-stage loader (signed)
+3. Application firmware (signed)
+4. Configuration data (CMAC)
+
+### OTA Updates
+- **Dual bank**: A/B partition scheme
+- **Atomic**: Complete or rollback
+- **Signed**: RSA-2048 + SHA-256
+- **Delta**: Differential updates supported
+        `,
+      },
+      {
+        id: 'connector-spec',
+        title: 'Connector Specification',
+        disclosureId: 'EK-TECH-015',
+        date: '2026-01-03',
+        status: 'complete',
+        summary: 'Blind-mate connector system for robotic hot-swap operations',
+        content: `
+## EK3 Connector System
+
+### Requirements
+- **Robotic operation**: No visual alignment needed
+- **Hot-swap**: Connect under partial load
+- **Cycle life**: 10,000+ insertions
+- **Current**: 50A continuous per power pin
+
+### Connector Layout
+| Section | Pins | Function |
+|---------|------|----------|
+| Power | 4 | 650V DC (sequenced) |
+| Ground | 2 | Safety ground |
+| CAN-H/L | 4 | Dual CAN-FD bus |
+| Aux | 4 | I2C, GPIO, sense |
+| Guide | 2 | Mechanical alignment |
+
+### Sequencing
+1. Guide pins engage (mechanical alignment)
+2. Ground pins make contact
+3. Aux pins connect (presence detect)
+4. Power pins last (inrush limited)
+
+### Specifications
+- **Vendor**: Custom (Anderson SBS derivative)
+- **Rating**: 50A @ 1000V DC
+- **Contact**: Silver-plated copper
+- **Housing**: High-temp thermoplastic
+- **Keying**: Polarized, foolproof
         `,
       },
     ],

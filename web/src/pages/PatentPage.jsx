@@ -328,8 +328,36 @@ export default function PatentPage() {
           ))}
         </div>
 
+        {/* Detailed Documentation CTA */}
+        <div className="mt-12 p-6 rounded-xl bg-gradient-to-r from-accent-cyan/10 to-accent-purple/10 border border-accent-cyan/30">
+          <div className="flex items-start gap-4">
+            <Shield className="w-8 h-8 text-accent-cyan flex-shrink-0" />
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Detailed Technical Documentation Available
+              </h3>
+              <p className="text-slate-400 mb-4">
+                Access comprehensive technical specifications including microkernel architecture,
+                hardware security design, rack system blueprints, firmware architecture,
+                and security model documentation.
+              </p>
+              <Link
+                to="/patent-portfolio"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-accent-cyan text-primary font-medium rounded-lg hover:bg-accent-cyan/90 transition-colors"
+              >
+                <FileText className="w-4 h-4" />
+                Access Full Portfolio
+                <ExternalLink className="w-4 h-4" />
+              </Link>
+              <p className="text-xs text-slate-500 mt-2">
+                Password required • Contains confidential technical details
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Footer note */}
-        <div className="mt-12 p-4 rounded-xl bg-slate-800/50 border border-border">
+        <div className="mt-6 p-4 rounded-xl bg-slate-800/50 border border-border">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-slate-400">
