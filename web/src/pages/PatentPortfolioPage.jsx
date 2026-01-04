@@ -183,6 +183,48 @@ Central AI orchestrates charging for entire bus fleet, optimizing for:
 5. Verification and logging
         `,
       },
+      {
+        id: 'ek-rtos',
+        title: 'EK-RTOS Microkernel',
+        disclosureId: 'EK-2026-006',
+        date: '2026-01-04',
+        status: 'disclosed',
+        summary: 'MINIX-Inspired Microkernel RTOS for Fault-Tolerant Power Electronics with MPU Isolation',
+        content: `
+## Innovation
+
+A microkernel RTOS that brings MINIX reliability principles to embedded power electronics using MPU instead of MMU.
+
+### MINIX Mapping
+| MINIX Concept | EK-RTOS Implementation |
+|---------------|------------------------|
+| MMU isolation | MPU regions (no MMU needed) |
+| User-space servers | Unprivileged service tasks |
+| Message passing IPC | Zero-copy shared memory |
+| Reincarnation server | Watchdog + auto-restart |
+| Minimal kernel | ~8KB kernel code |
+
+### Key Features
+- **Fault Isolation**: Each service in own MPU region
+- **Auto-Restart**: Failed services restart in <50ms without system reset
+- **Message Passing**: MINIX-style synchronous IPC
+- **Hybrid Privilege**: Hard RT in kernel, services isolated
+- **Tiny Footprint**: 32KB Flash, 8KB RAM kernel
+
+### Architecture
+- **Layer 0**: Privileged drivers (LLC, CAN-FD, ADC)
+- **Layer 1**: Microkernel (scheduler, MPU, IPC)
+- **Layer 2**: Reincarnation server
+- **Layer 3**: User services (Thermal, Swarm, Audit, OCPP)
+
+### vs. FreeRTOS
+| Aspect | FreeRTOS | EK-RTOS |
+|--------|----------|---------|
+| Fault isolation | None | Full MPU |
+| Bug in logging | System crash | Logger restarts |
+| Service update | Full reflash | Single service |
+        `,
+      },
     ],
   },
   {
