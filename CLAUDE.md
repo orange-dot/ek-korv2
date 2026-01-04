@@ -33,11 +33,24 @@ Current concept: **EK3 (3.3kW modules)** that combine for any power level (3kW t
 
 ### `/tehnika/` - Technical Documentation
 ```
-00-arhitektura.md          # System architecture overview
-01-09-*.md                 # Power electronics, AI/ML, thermal, V2G, swarm, BOM, etc.
-komponente/                # Detailed component specs (semiconductors, gate drivers, etc.)
-SPECIFICATIONS.md          # Master specification document (single source of truth)
+tehnika/
+├── README.md              # Navigation and index
+├── konceptualno/          # Conceptual documentation
+│   ├── en/                # English (architecture, V2G concepts, swarm, competition)
+│   └── sr/                # Serbian translations
+├── inzenjersko/           # Engineering documentation
+│   ├── en/                # English (specs, power electronics, thermal, firmware)
+│   │   └── komponente/    # Component specifications
+│   └── sr/                # Serbian translations
+│       └── komponente/
+└── _archive/              # Superseded documents
 ```
+
+**Key documents:**
+- `inzenjersko/en/SPECIFICATIONS.md` - Master specification (single source of truth)
+- `konceptualno/en/00-arhitektura.md` - System architecture philosophy
+- `inzenjersko/en/01-power-electronics.md` - Power stage design with DAB control
+- `inzenjersko/en/07-v2g-control.md` - V2G control algorithms (PLL, droop)
 
 ### `/strategija/` - Business Strategy
 - `kombinacije-strategije.md` - 8 development paths
@@ -72,7 +85,7 @@ Auto-deploys to Azure Static Web Apps on push to `main`.
 
 ## Master Specification
 
-See `tehnika/SPECIFICATIONS.md` for single source of truth on all EK3 specs.
+See `tehnika/inzenjersko/en/SPECIFICATIONS.md` for single source of truth on all EK3 specs.
 
 ## Skills / Slash Commands
 
@@ -117,12 +130,16 @@ Available skills for project work:
 
 ## Bilingual Documentation Guidelines
 
-**Standard naming convention (English primary everywhere):**
+**Folder-based language separation (tehnika/):**
+- English: `tehnika/konceptualno/en/` and `tehnika/inzenjersko/en/`
+- Serbian: `tehnika/konceptualno/sr/` and `tehnika/inzenjersko/sr/`
+- No `.sr.md` suffix needed - folder determines language
+
+**Standard naming convention (other folders):**
 - English (primary): `document.md`
 - Serbian: `document.sr.md`
 
-This applies to all documentation folders:
-- `/tehnika/` - Technical documentation
+This applies to:
 - `/patent/` - Patent documentation
 - `/strategija/` - Business strategy
 - `/reference/` - Research materials

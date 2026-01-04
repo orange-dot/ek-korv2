@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo, useEffect, createContext, useContext, useReducer } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { useState, useCallback, useMemo, useEffect, useRef, createContext, useContext, useReducer } from 'react';
+import { MapContainer, TileLayer, useMap, CircleMarker, Polyline, Tooltip } from 'react-leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain,
@@ -40,6 +40,23 @@ import {
   Users,
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix Leaflet default icon issue in production (with defensive checks)
+try {
+  if (L?.Icon?.Default?.prototype?._getIconUrl) {
+    delete L.Icon.Default.prototype._getIconUrl;
+  }
+  if (L?.Icon?.Default?.mergeOptions) {
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    });
+  }
+} catch (e) {
+  console.warn('Leaflet icon fix failed:', e);
+}
 
 // Components
 import DroneMarker from '../components/simulation/map/DroneMarker';
@@ -50,18 +67,25 @@ import StreetHubMarker from '../components/simulation/map/StreetHubMarker';
 
 // Data & Engine
 import {
-  laDeliveryConfig,
   VEHICLE_TYPES,
   DELIVERY_STATES,
-  ROOFTOP_HUBS,
-  STREET_HUBS,
-  DRONE_CORRIDORS,
-  POD_ROUTES,
-  SWARM_ZONES,
-  LA_ZONES,
+  DELIVERY_PRIORITY,
+  PRIORITY_CONFIG,
   interpolateCorridorPosition
 } from '../data/laDelivery';
+import { CITIES, CITY_LIST, getCityConfig, INTERSTATE_CORRIDORS, HIGHWAY_SWAP_STATIONS, generateTruckFleet } from '../data/deliveryCities';
 import { useDeliveryEngine } from '../hooks/useDeliveryEngine';
+import DeliveryDecisionHUD from '../components/la-delivery/DeliveryDecisionHUD';
+import { SCENARIO_CONFIG, SCENARIO_TYPES } from '../data/laDecisionScenarios';
+import { applyDecisionEffect } from '../utils/laDecisionEffects';
+
+// US Map configuration
+const US_MAP_CONFIG = {
+  center: [39.8283, -98.5795], // Geographic center of contiguous US
+  zoom: 4,
+  minZoom: 3,
+  maxZoom: 18
+};
 
 // ============================================================================
 // Context for LA Delivery Simulation
@@ -122,49 +146,67 @@ const generateScheduledMaintenance = () => {
 };
 
 // Enrich hubs with extended data
-const enrichedRooftopHubs = ROOFTOP_HUBS.map(hub => ({
+const enrichHub = (hub, hubType) => ({
   ...hub,
-  history: generateHubHistory('rooftop'),
-  chargingSessions: generateChargingSessions('rooftop', hub.droneCapacity),
-  metrics: generateHubMetrics('rooftop'),
+  history: generateHubHistory(hubType),
+  chargingSessions: generateChargingSessions(hubType, hubType === 'rooftop' ? hub.droneCapacity : (hub.podCapacity + hub.swarmCapacity)),
+  metrics: generateHubMetrics(hubType),
   scheduledMaintenance: generateScheduledMaintenance(),
-  currentPower: Math.floor(Math.random() * hub.maxPower * 0.8),
-  temperature: Math.floor(Math.random() * 15) + 25,
-  gridStatus: Math.random() > 0.1 ? 'connected' : 'backup',
-  solarInput: Math.floor(Math.random() * 10)
-}));
+  currentPower: Math.floor(Math.random() * hub.maxPower * (hubType === 'rooftop' ? 0.8 : 0.7)),
+  temperature: Math.floor(Math.random() * (hubType === 'rooftop' ? 15 : 10)) + (hubType === 'rooftop' ? 25 : 20),
+  gridStatus: hubType === 'rooftop' ? (Math.random() > 0.1 ? 'connected' : 'backup') : 'connected',
+  solarInput: hubType === 'rooftop' ? Math.floor(Math.random() * 10) : 0,
+  queueLength: hubType === 'street' ? Math.floor(Math.random() * 3) : 0
+});
 
-const enrichedStreetHubs = STREET_HUBS.map(hub => ({
-  ...hub,
-  history: generateHubHistory('street'),
-  chargingSessions: generateChargingSessions('street', hub.podCapacity + hub.swarmCapacity),
-  metrics: generateHubMetrics('street'),
-  scheduledMaintenance: generateScheduledMaintenance(),
-  currentPower: Math.floor(Math.random() * hub.maxPower * 0.7),
-  temperature: Math.floor(Math.random() * 10) + 20,
-  gridStatus: 'connected',
-  queueLength: Math.floor(Math.random() * 3)
-}));
+// Generate all cities' enriched hub data
+const generateAllCitiesData = () => {
+  const allRooftopHubs = [];
+  const allStreetHubs = [];
+
+  Object.values(CITIES || {}).forEach(city => {
+    if (!city) return;
+    (city.rooftopHubs || []).forEach(hub => {
+      allRooftopHubs.push(enrichHub({ ...hub, cityId: city.id, cityName: city.shortName }, 'rooftop'));
+    });
+    (city.streetHubs || []).forEach(hub => {
+      allStreetHubs.push(enrichHub({ ...hub, cityId: city.id, cityName: city.shortName }, 'street'));
+    });
+  });
+
+  return { allRooftopHubs, allStreetHubs };
+};
+
+const { allRooftopHubs, allStreetHubs } = generateAllCitiesData();
+
+// Generate initial truck fleet
+const initialTrucks = generateTruckFleet(25);
 
 const initialState = {
   isRunning: true,
   speed: 1,
+  selectedCity: null, // null = US overview, cityId = zoomed into city
   drones: [],
   pods: [],
   swarmBots: [],
-  rooftopHubs: enrichedRooftopHubs,
-  streetHubs: enrichedStreetHubs,
+  trucks: initialTrucks, // Intercity heavy-duty trucks
+  rooftopHubs: allRooftopHubs,
+  streetHubs: allStreetHubs,
   selectedItem: null,
   activeZone: null,
   korAllThingExpanded: false,
   scenarioQueue: [],
+  focusedVehicle: null, // { id, type, position } - temporary focus for scenarios
+  decisionToast: null, // { message, type, vehicleId } - shows decision result
   stats: {
     packagesInTransit: 0,
     activeHandoffs: 0,
     dronesFlying: 0,
     podsMoving: 0,
     swarmsDelivering: 0,
-    ek3Utilization: 0
+    ek3Utilization: 0,
+    totalCities: Object.keys(CITIES).length,
+    activeCities: Object.keys(CITIES).length
   }
 };
 
@@ -180,6 +222,8 @@ function deliveryReducer(state, action) {
       return { ...state, pods: action.payload };
     case 'UPDATE_SWARM_BOTS':
       return { ...state, swarmBots: action.payload };
+    case 'UPDATE_TRUCKS':
+      return { ...state, trucks: action.payload };
     case 'UPDATE_HUBS':
       return { ...state, rooftopHubs: action.payload.rooftop, streetHubs: action.payload.street };
     case 'SELECT_ITEM':
@@ -203,6 +247,43 @@ function deliveryReducer(state, action) {
       };
     case 'CLEAR_SELECTION':
       return { ...state, selectedItem: null };
+    case 'SET_VEHICLE_PRIORITY': {
+      const { vehicleType, vehicleId, priority } = action.payload;
+      const listKey = vehicleType === 'drone' ? 'drones' : vehicleType === 'pod' ? 'pods' : 'swarmBots';
+      return {
+        ...state,
+        [listKey]: state[listKey].map(v =>
+          v.id === vehicleId ? { ...v, priority } : v
+        )
+      };
+    }
+    case 'ADD_DECISION_HISTORY': {
+      const { vehicleType, vehicleId, decision } = action.payload;
+      const listKey = vehicleType === 'drone' ? 'drones' : vehicleType === 'pod' ? 'pods' : 'swarmBots';
+      return {
+        ...state,
+        [listKey]: state[listKey].map(v =>
+          v.id === vehicleId
+            ? { ...v, decisionHistory: [...(v.decisionHistory || []).slice(-9), decision] }
+            : v
+        )
+      };
+    }
+    case 'REMOVE_SCENARIO':
+      return {
+        ...state,
+        scenarioQueue: state.scenarioQueue.filter(s => s.id !== action.payload)
+      };
+    case 'SET_FOCUSED_VEHICLE':
+      return { ...state, focusedVehicle: action.payload };
+    case 'CLEAR_FOCUSED_VEHICLE':
+      return { ...state, focusedVehicle: null };
+    case 'SET_SELECTED_CITY':
+      return { ...state, selectedCity: action.payload };
+    case 'SET_DECISION_TOAST':
+      return { ...state, decisionToast: action.payload };
+    case 'CLEAR_DECISION_TOAST':
+      return { ...state, decisionToast: null };
     default:
       return state;
   }
@@ -249,126 +330,153 @@ function DeliveryProvider({ children }) {
     }));
   };
 
-  // Initialize fleet on mount
+  // Initialize fleet on mount - generate for ALL cities
   useEffect(() => {
-    const drones = Array.from({ length: laDeliveryConfig.drones }, (_, i) => {
-      const corridor = DRONE_CORRIDORS[i % DRONE_CORRIDORS.length];
-      const progress = Math.random();
-      return {
-        id: `drone-${i + 1}`,
-        type: VEHICLE_TYPES.DRONE,
-        corridorId: corridor.id,
-        progress,
-        position: interpolateCorridorPosition(corridor, progress),
-        batteryLevel: 60 + Math.random() * 40,
-        state: DELIVERY_STATES.FLYING,
-        direction: Math.random() > 0.5 ? 1 : -1,
-        packages: Math.floor(Math.random() * 3),
-        altitude: 80 + Math.random() * 40,
-        zone: corridor.zone,
-        // Extended data
-        missionQueue: generateMissionQueue('drone', corridor.zone),
-        history: generateHistory('drone'),
-        metrics: {
-          totalDeliveries: Math.floor(Math.random() * 50) + 10,
-          totalDistance: Math.floor(Math.random() * 500) + 100,
-          avgDeliveryTime: Math.floor(Math.random() * 10) + 5,
-          efficiency: Math.floor(Math.random() * 20) + 80,
-          uptime: Math.floor(Math.random() * 10) + 90
-        },
-        health: {
-          motors: Math.floor(Math.random() * 10) + 90,
-          sensors: Math.floor(Math.random() * 5) + 95,
-          communication: Math.floor(Math.random() * 3) + 97,
-          temperature: Math.floor(Math.random() * 20) + 25
-        }
-      };
-    });
+    const allDrones = [];
+    const allPods = [];
+    const allSwarmBots = [];
 
-    const pods = Array.from({ length: laDeliveryConfig.pods }, (_, i) => {
-      const route = POD_ROUTES[i % POD_ROUTES.length];
-      return {
-        id: `pod-${i + 1}`,
-        type: VEHICLE_TYPES.POD,
-        routeId: route.id,
-        progress: Math.random(),
-        position: route.waypoints[0],
-        batteryLevel: 70 + Math.random() * 30,
-        state: DELIVERY_STATES.EN_ROUTE,
-        direction: 1,
-        packages: Math.floor(Math.random() * 15),
-        zone: route.zone,
-        // Extended data
-        missionQueue: generateMissionQueue('pod', route.zone),
-        history: generateHistory('pod'),
-        metrics: {
-          totalDeliveries: Math.floor(Math.random() * 200) + 50,
-          totalDistance: Math.floor(Math.random() * 2000) + 500,
-          avgDeliveryTime: Math.floor(Math.random() * 20) + 15,
-          efficiency: Math.floor(Math.random() * 15) + 85,
-          uptime: Math.floor(Math.random() * 8) + 92
-        },
-        health: {
-          drivetrain: Math.floor(Math.random() * 8) + 92,
-          sensors: Math.floor(Math.random() * 5) + 95,
-          cargo: 100,
-          temperature: Math.floor(Math.random() * 15) + 20
-        },
-        swarmBotsLoaded: Math.floor(Math.random() * 5)
-      };
-    });
+    // Generate vehicles for each city
+    Object.values(CITIES || {}).forEach((city, cityIndex) => {
+      if (!city || !city.fleet) return;
+      const cityPrefix = city.shortName.toLowerCase();
 
-    const swarmBots = [];
-    SWARM_ZONES.forEach((zone, zi) => {
-      for (let i = 0; i < zone.density; i++) {
-        const offset = zone.radius * 0.8;
-        swarmBots.push({
-          id: `swarm-${zi}-${i + 1}`,
-          type: VEHICLE_TYPES.SWARM_BOT,
-          position: [
-            zone.center[0] + (Math.random() - 0.5) * offset,
-            zone.center[1] + (Math.random() - 0.5) * offset
-          ],
-          basePosition: zone.center,
-          batteryLevel: 50 + Math.random() * 50,
-          state: Math.random() > 0.6 ? DELIVERY_STATES.SWARMING : DELIVERY_STATES.IDLE,
-          packages: Math.random() > 0.5 ? Math.floor(Math.random() * 3) + 1 : 0,
-          targetPosition: null,
-          zone: zone.zone,
-          baseHub: zone.baseHub,
-          // Extended data
-          missionQueue: generateMissionQueue('swarmbot', zone.zone),
-          history: generateHistory('swarmbot'),
+      // Generate drones for this city
+      for (let i = 0; i < city.fleet.drones; i++) {
+        const corridor = city.droneCorridors[i % city.droneCorridors.length];
+        const progress = Math.random();
+        allDrones.push({
+          id: `${cityPrefix}-drone-${i + 1}`,
+          cityId: city.id,
+          cityName: city.shortName,
+          type: VEHICLE_TYPES.DRONE,
+          corridorId: corridor?.id,
+          progress,
+          position: corridor ? interpolateCorridorPosition(corridor, progress) : city.center,
+          batteryLevel: 60 + Math.random() * 40,
+          state: DELIVERY_STATES.FLYING,
+          direction: Math.random() > 0.5 ? 1 : -1,
+          packages: Math.floor(Math.random() * 3),
+          altitude: 80 + Math.random() * 40,
+          zone: corridor?.zone || Object.keys(city.zones)[0],
+          priority: Object.values(DELIVERY_PRIORITY)[Math.floor(Math.random() * 4)] || DELIVERY_PRIORITY.STANDARD,
+          missionQueue: generateMissionQueue('drone', corridor?.zone || 'default'),
+          history: generateHistory('drone'),
+          decisionHistory: [],
           metrics: {
-            totalDeliveries: Math.floor(Math.random() * 30) + 5,
-            totalDistance: Math.floor(Math.random() * 50) + 10,
-            avgDeliveryTime: Math.floor(Math.random() * 5) + 3,
-            efficiency: Math.floor(Math.random() * 25) + 75,
-            uptime: Math.floor(Math.random() * 15) + 85
+            totalDeliveries: Math.floor(Math.random() * 50) + 10,
+            totalDistance: Math.floor(Math.random() * 500) + 100,
+            avgDeliveryTime: Math.floor(Math.random() * 10) + 5,
+            efficiency: Math.floor(Math.random() * 20) + 80,
+            uptime: Math.floor(Math.random() * 10) + 90
           },
           health: {
-            wheels: Math.floor(Math.random() * 10) + 90,
-            sensors: Math.floor(Math.random() * 8) + 92,
-            communication: Math.floor(Math.random() * 5) + 95,
-            temperature: Math.floor(Math.random() * 10) + 22
+            motors: Math.floor(Math.random() * 10) + 90,
+            sensors: Math.floor(Math.random() * 5) + 95,
+            communication: Math.floor(Math.random() * 3) + 97,
+            temperature: Math.floor(Math.random() * 20) + 25
           }
         });
       }
+
+      // Generate pods for this city
+      for (let i = 0; i < city.fleet.pods; i++) {
+        const route = city.podRoutes[i % city.podRoutes.length];
+        allPods.push({
+          id: `${cityPrefix}-pod-${i + 1}`,
+          cityId: city.id,
+          cityName: city.shortName,
+          type: VEHICLE_TYPES.POD,
+          routeId: route?.id,
+          progress: Math.random(),
+          position: route?.waypoints[0] || city.center,
+          batteryLevel: 70 + Math.random() * 30,
+          state: DELIVERY_STATES.EN_ROUTE,
+          direction: 1,
+          packages: Math.floor(Math.random() * 15),
+          zone: route?.zone || Object.keys(city.zones)[0],
+          priority: Object.values(DELIVERY_PRIORITY)[Math.floor(Math.random() * 4)] || DELIVERY_PRIORITY.STANDARD,
+          missionQueue: generateMissionQueue('pod', route?.zone || 'default'),
+          history: generateHistory('pod'),
+          decisionHistory: [],
+          metrics: {
+            totalDeliveries: Math.floor(Math.random() * 200) + 50,
+            totalDistance: Math.floor(Math.random() * 2000) + 500,
+            avgDeliveryTime: Math.floor(Math.random() * 20) + 15,
+            efficiency: Math.floor(Math.random() * 15) + 85,
+            uptime: Math.floor(Math.random() * 8) + 92
+          },
+          health: {
+            drivetrain: Math.floor(Math.random() * 8) + 92,
+            sensors: Math.floor(Math.random() * 5) + 95,
+            cargo: 100,
+            temperature: Math.floor(Math.random() * 15) + 20
+          },
+          swarmBotsLoaded: Math.floor(Math.random() * 5)
+        });
+      }
+
+      // Generate swarm bots for this city
+      const swarmZones = city.swarmZones || [];
+      swarmZones.forEach((zone, zi) => {
+        const botsPerZone = Math.ceil(city.fleet.swarmBots / (swarmZones.length || 1));
+        for (let i = 0; i < Math.min(zone.density, botsPerZone); i++) {
+          const offset = zone.radius * 0.8;
+          allSwarmBots.push({
+            id: `${cityPrefix}-swarm-${zi}-${i + 1}`,
+            cityId: city.id,
+            cityName: city.shortName,
+            type: VEHICLE_TYPES.SWARM_BOT,
+            position: [
+              zone.center[0] + (Math.random() - 0.5) * offset,
+              zone.center[1] + (Math.random() - 0.5) * offset
+            ],
+            basePosition: zone.center,
+            batteryLevel: 50 + Math.random() * 50,
+            state: Math.random() > 0.6 ? DELIVERY_STATES.SWARMING : DELIVERY_STATES.IDLE,
+            packages: Math.random() > 0.5 ? Math.floor(Math.random() * 3) + 1 : 0,
+            targetPosition: null,
+            zone: zone.zone,
+            baseHub: zone.baseHub,
+            priority: Object.values(DELIVERY_PRIORITY)[Math.floor(Math.random() * 4)] || DELIVERY_PRIORITY.STANDARD,
+            missionQueue: generateMissionQueue('swarmbot', zone.zone),
+            history: generateHistory('swarmbot'),
+            decisionHistory: [],
+            metrics: {
+              totalDeliveries: Math.floor(Math.random() * 30) + 5,
+              totalDistance: Math.floor(Math.random() * 50) + 10,
+              avgDeliveryTime: Math.floor(Math.random() * 5) + 3,
+              efficiency: Math.floor(Math.random() * 25) + 75,
+              uptime: Math.floor(Math.random() * 15) + 85
+            },
+            health: {
+              wheels: Math.floor(Math.random() * 10) + 90,
+              sensors: Math.floor(Math.random() * 8) + 92,
+              communication: Math.floor(Math.random() * 5) + 95,
+              temperature: Math.floor(Math.random() * 10) + 22
+            }
+          });
+        }
+      });
     });
 
-    dispatch({ type: 'INIT_FLEET', payload: { drones, pods, swarmBots } });
+    dispatch({ type: 'INIT_FLEET', payload: { drones: allDrones, pods: allPods, swarmBots: allSwarmBots } });
   }, []);
 
   // Calculate stats
   useEffect(() => {
+    // Calculate total EK3 modules from all city hubs
+    const totalEk3Modules = state.rooftopHubs.reduce((s, h) => s + (h.ek3Modules || 0), 0) +
+      state.streetHubs.reduce((s, h) => s + (h.ek3Modules || 0), 0);
+
     const stats = {
       packagesInTransit:
         state.drones.reduce((sum, d) => sum + (d.packages || 0), 0) +
         state.pods.reduce((sum, p) => sum + (p.packages || 0), 0) +
         state.swarmBots.reduce((sum, s) => sum + (s.packages || 0), 0),
       activeHandoffs:
-        state.drones.filter(d => d.state.includes('handoff')).length +
-        state.swarmBots.filter(s => s.state.includes('handoff')).length,
+        state.drones.filter(d => d.state?.includes?.('handoff')).length +
+        state.swarmBots.filter(s => s.state?.includes?.('handoff')).length,
       dronesFlying: state.drones.filter(d =>
         [DELIVERY_STATES.FLYING, DELIVERY_STATES.EN_ROUTE].includes(d.state)
       ).length,
@@ -376,16 +484,15 @@ function DeliveryProvider({ children }) {
       swarmsDelivering: state.swarmBots.filter(s =>
         [DELIVERY_STATES.SWARMING, DELIVERY_STATES.DELIVERING].includes(s.state)
       ).length,
-      ek3Utilization: Math.round(
+      ek3Utilization: totalEk3Modules > 0 ? Math.round(
         ((state.drones.filter(d => d.state === DELIVERY_STATES.CHARGING).length * 2) +
           (state.pods.filter(p => p.state === DELIVERY_STATES.CHARGING).length * 6) +
           (state.swarmBots.filter(s => s.state === DELIVERY_STATES.CHARGING).length)) /
-        (ROOFTOP_HUBS.reduce((s, h) => s + h.ek3Modules, 0) +
-          STREET_HUBS.reduce((s, h) => s + h.ek3Modules, 0)) * 100
-      )
+        totalEk3Modules * 100
+      ) : 0
     };
     dispatch({ type: 'UPDATE_STATS', payload: stats });
-  }, [state.drones, state.pods, state.swarmBots]);
+  }, [state.drones, state.pods, state.swarmBots, state.rooftopHubs, state.streetHubs]);
 
   const value = useMemo(() => ({
     ...state,
@@ -395,12 +502,24 @@ function DeliveryProvider({ children }) {
     updateDrones: (val) => dispatch({ type: 'UPDATE_DRONES', payload: val }),
     updatePods: (val) => dispatch({ type: 'UPDATE_PODS', payload: val }),
     updateSwarmBots: (val) => dispatch({ type: 'UPDATE_SWARM_BOTS', payload: val }),
+    updateTrucks: (val) => dispatch({ type: 'UPDATE_TRUCKS', payload: val }),
     selectItem: (type, id) => dispatch({ type: 'SELECT_ITEM', payload: { type, id } }),
     clearSelection: () => dispatch({ type: 'CLEAR_SELECTION' }),
     setZone: (zone) => dispatch({ type: 'SET_ZONE', payload: zone }),
     toggleKorAllThing: () => dispatch({ type: 'TOGGLE_KOR_ALL_THING' }),
     addScenario: (scenario) => dispatch({ type: 'ADD_SCENARIO', payload: scenario }),
-    updateScenario: (update) => dispatch({ type: 'UPDATE_SCENARIO', payload: update })
+    updateScenario: (update) => dispatch({ type: 'UPDATE_SCENARIO', payload: update }),
+    removeScenario: (id) => dispatch({ type: 'REMOVE_SCENARIO', payload: id }),
+    setVehiclePriority: (vehicleType, vehicleId, priority) =>
+      dispatch({ type: 'SET_VEHICLE_PRIORITY', payload: { vehicleType, vehicleId, priority } }),
+    addDecisionHistory: (vehicleType, vehicleId, decision) =>
+      dispatch({ type: 'ADD_DECISION_HISTORY', payload: { vehicleType, vehicleId, decision } }),
+    setFocusedVehicle: (vehicle) => dispatch({ type: 'SET_FOCUSED_VEHICLE', payload: vehicle }),
+    clearFocusedVehicle: () => dispatch({ type: 'CLEAR_FOCUSED_VEHICLE' }),
+    setSelectedCity: (cityId) => dispatch({ type: 'SET_SELECTED_CITY', payload: cityId }),
+    showDecisionToast: (toast) => dispatch({ type: 'SET_DECISION_TOAST', payload: toast }),
+    clearDecisionToast: () => dispatch({ type: 'CLEAR_DECISION_TOAST' }),
+    getCityConfig: (cityId) => cityId ? CITIES[cityId] : null
   }), [state]);
 
   return (
@@ -422,9 +541,49 @@ function useDelivery() {
 
 function MapController() {
   const map = useMap();
+  const { focusedVehicle, selectedCity } = useDelivery();
+  const prevFocusedRef = useRef(null);
+  const prevCityRef = useRef(null);
+
+  // Set initial view to US map
   useEffect(() => {
-    map.setView(laDeliveryConfig.center, laDeliveryConfig.zoom);
+    map.setView(US_MAP_CONFIG.center, US_MAP_CONFIG.zoom);
   }, [map]);
+
+  // Handle city selection - zoom to city or back to US
+  useEffect(() => {
+    if (selectedCity && selectedCity !== prevCityRef.current) {
+      const cityConfig = CITIES[selectedCity];
+      if (cityConfig) {
+        map.flyTo(cityConfig.center, cityConfig.zoom, { duration: 1.5 });
+      }
+      prevCityRef.current = selectedCity;
+    } else if (!selectedCity && prevCityRef.current) {
+      // Return to US view
+      map.flyTo(US_MAP_CONFIG.center, US_MAP_CONFIG.zoom, { duration: 1.5 });
+      prevCityRef.current = null;
+    }
+  }, [map, selectedCity]);
+
+  // Handle focused vehicle - fly to it, return to city/US when cleared
+  useEffect(() => {
+    if (focusedVehicle?.position) {
+      map.flyTo(focusedVehicle.position, 15, { duration: 1.5 });
+      prevFocusedRef.current = focusedVehicle;
+    } else if (prevFocusedRef.current !== null) {
+      // Return to city view or US view
+      if (selectedCity) {
+        const cityConfig = CITIES[selectedCity];
+        if (cityConfig) {
+          map.flyTo(cityConfig.center, cityConfig.zoom, { duration: 1.5 });
+        }
+      } else {
+        map.flyTo(US_MAP_CONFIG.center, US_MAP_CONFIG.zoom, { duration: 1.5 });
+      }
+      prevFocusedRef.current = null;
+    }
+  }, [map, focusedVehicle, selectedCity]);
+
   return null;
 }
 
@@ -437,18 +596,33 @@ function DeliveryMap() {
     drones,
     pods,
     swarmBots,
+    trucks,
     rooftopHubs,
     streetHubs,
     selectItem,
-    selectedItem
+    selectedItem,
+    selectedCity,
+    setSelectedCity
   } = useDelivery();
+
+  // Get all pod routes from all cities for reference
+  const allPodRoutes = useMemo(() => {
+    const routes = [];
+    Object.values(CITIES).forEach(city => {
+      routes.push(...city.podRoutes);
+    });
+    return routes;
+  }, []);
+
+  // Highway corridors for US view
+  const highways = useMemo(() => Object.values(INTERSTATE_CORRIDORS), []);
 
   return (
     <MapContainer
-      center={laDeliveryConfig.center}
-      zoom={laDeliveryConfig.zoom}
-      minZoom={laDeliveryConfig.minZoom}
-      maxZoom={laDeliveryConfig.maxZoom}
+      center={US_MAP_CONFIG.center}
+      zoom={US_MAP_CONFIG.zoom}
+      minZoom={US_MAP_CONFIG.minZoom}
+      maxZoom={US_MAP_CONFIG.maxZoom}
       className="w-full h-full"
       style={{ background: '#030308' }}
       zoomControl={false}
@@ -490,7 +664,7 @@ function DeliveryMap() {
         <DeliveryPodMarker
           key={pod.id}
           pod={pod}
-          route={POD_ROUTES.find(r => r.id === pod.routeId)}
+          route={allPodRoutes.find(r => r.id === pod.routeId)}
           onSelect={selectItem}
           isSelected={selectedItem?.id === pod.id}
         />
@@ -513,14 +687,105 @@ function DeliveryMap() {
       ))}
 
       {/* Drones (render last for top layer) */}
-      {drones.map(drone => (
-        <DroneMarker
-          key={drone.id}
-          drone={drone}
-          corridor={DRONE_CORRIDORS.find(c => c.id === drone.corridorId)}
-          onSelect={selectItem}
-          isSelected={selectedItem?.id === drone.id}
+      {drones.map(drone => {
+        // Find corridor from any city
+        let corridor = null;
+        for (const city of Object.values(CITIES)) {
+          corridor = city.droneCorridors.find(c => c.id === drone.corridorId);
+          if (corridor) break;
+        }
+        return (
+          <DroneMarker
+            key={drone.id}
+            drone={drone}
+            corridor={corridor}
+            onSelect={selectItem}
+            isSelected={selectedItem?.id === drone.id}
+          />
+        );
+      })}
+
+      {/* Interstate Highway Corridors (US overview only) */}
+      {!selectedCity && highways.map(corridor => (
+        <Polyline
+          key={corridor.id}
+          positions={corridor.waypoints}
+          pathOptions={{
+            color: corridor.color,
+            weight: 3,
+            opacity: 0.6,
+            dashArray: '10, 5'
+          }}
         />
+      ))}
+
+      {/* Highway Swap Stations (US overview only) */}
+      {!selectedCity && HIGHWAY_SWAP_STATIONS.map(station => (
+        <CircleMarker
+          key={station.id}
+          center={station.position}
+          radius={6}
+          pathOptions={{
+            fillColor: '#ff6b00',
+            fillOpacity: 0.9,
+            color: '#fff',
+            weight: 1
+          }}
+        >
+          <Tooltip permanent={false} direction="top" className="swap-tooltip">
+            <div className="text-xs">
+              <div className="font-bold">{station.name}</div>
+              <div>Batteries: {station.batteryInventory}</div>
+              <div>Queue: {station.queueLength}</div>
+            </div>
+          </Tooltip>
+        </CircleMarker>
+      ))}
+
+      {/* Heavy-duty Trucks (US overview only) */}
+      {!selectedCity && trucks?.map(truck => (
+        <CircleMarker
+          key={truck.id}
+          center={truck.position}
+          radius={5}
+          pathOptions={{
+            fillColor: truck.state === 'swapping' ? '#ff6b00' : '#39ff14',
+            fillOpacity: 1,
+            color: '#fff',
+            weight: 2
+          }}
+        >
+          <Tooltip permanent={false} direction="top">
+            <div className="text-xs">
+              <div className="font-bold">{truck.name}</div>
+              <div>Battery: {Math.round(truck.batteryLevel)}%</div>
+              <div>Status: {truck.state}</div>
+              <div>Swaps: {truck.swapsCompleted}</div>
+            </div>
+          </Tooltip>
+        </CircleMarker>
+      ))}
+
+      {/* City markers for US overview */}
+      {!selectedCity && Object.values(CITIES).map(city => (
+        <CircleMarker
+          key={city.id}
+          center={city.center}
+          radius={12}
+          pathOptions={{
+            fillColor: '#00f0ff',
+            fillOpacity: 0.9,
+            color: '#39ff14',
+            weight: 2
+          }}
+          eventHandlers={{
+            click: () => setSelectedCity(city.id)
+          }}
+        >
+          <Tooltip permanent={false} direction="top">
+            <div className="text-xs font-bold">{city.name}</div>
+          </Tooltip>
+        </CircleMarker>
       ))}
     </MapContainer>
   );
@@ -531,30 +796,77 @@ function DeliveryMap() {
 // ============================================================================
 
 function StatsHUD() {
-  const { stats, drones, pods, swarmBots } = useDelivery();
+  const { stats, drones, pods, swarmBots, trucks, selectedCity, setSelectedCity } = useDelivery();
+  const cityConfig = selectedCity ? CITIES[selectedCity] : null;
+
+  // Calculate totals for US view
+  const totalFleet = useMemo(() => {
+    return Object.values(CITIES).reduce((acc, city) => ({
+      drones: acc.drones + city.fleet.drones,
+      pods: acc.pods + city.fleet.pods,
+      swarmBots: acc.swarmBots + city.fleet.swarmBots,
+      hubs: acc.hubs + city.rooftopHubs.length + city.streetHubs.length
+    }), { drones: 0, pods: 0, swarmBots: 0, hubs: 0 });
+  }, []);
 
   return (
     <div className="absolute top-4 right-4 z-[1000]">
-      <div className="bg-[#0a0a12]/90 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-4 min-w-[200px]">
-        <h3 className="text-cyan-400 font-bold text-sm mb-3 flex items-center gap-2">
-          <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-          LA DELIVERY NETWORK
-        </h3>
+      <div className="bg-[#0a0a12]/90 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-4 min-w-[220px]">
+        {/* Header with back button */}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-cyan-400 font-bold text-sm flex items-center gap-2">
+            <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+            {selectedCity ? cityConfig?.name?.toUpperCase() : 'US DELIVERY NETWORK'}
+          </h3>
+          {selectedCity && (
+            <button
+              onClick={() => setSelectedCity(null)}
+              className="text-xs px-2 py-1 bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 rounded transition-colors"
+            >
+              ← US
+            </button>
+          )}
+        </div>
+
+        {/* City count for US view */}
+        {!selectedCity && (
+          <div className="mb-3 px-2 py-1.5 bg-gradient-to-r from-cyan-500/10 to-green-500/10 rounded border border-cyan-500/20">
+            <div className="text-xs text-gray-400">
+              Active Cities: <span className="text-cyan-400 font-bold">{Object.keys(CITIES).length}</span>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2 text-xs">
           {/* Fleet counts */}
           <div className="flex justify-between text-gray-400">
             <span>Drones</span>
-            <span className="text-cyan-400 font-mono">{stats.dronesFlying}/{drones.length}</span>
+            <span className="text-cyan-400 font-mono">
+              {stats.dronesFlying}/{selectedCity ? drones.filter(d => d.cityId === selectedCity).length : drones.length}
+            </span>
           </div>
           <div className="flex justify-between text-gray-400">
             <span>Pods</span>
-            <span className="text-green-400 font-mono">{stats.podsMoving}/{pods.length}</span>
+            <span className="text-green-400 font-mono">
+              {stats.podsMoving}/{selectedCity ? pods.filter(p => p.cityId === selectedCity).length : pods.length}
+            </span>
           </div>
           <div className="flex justify-between text-gray-400">
             <span>Swarm Bots</span>
-            <span className="text-pink-400 font-mono">{stats.swarmsDelivering}/{swarmBots.length}</span>
+            <span className="text-pink-400 font-mono">
+              {stats.swarmsDelivering}/{selectedCity ? swarmBots.filter(s => s.cityId === selectedCity).length : swarmBots.length}
+            </span>
           </div>
+
+          {/* Intercity Trucks - US view only */}
+          {!selectedCity && (
+            <div className="flex justify-between text-gray-400">
+              <span>🚛 Trucks</span>
+              <span className="text-orange-400 font-mono">
+                {trucks?.filter(t => t.state === 'driving').length || 0}/{trucks?.length || 0}
+              </span>
+            </div>
+          )}
 
           <div className="border-t border-gray-700 my-2" />
 
@@ -571,6 +883,17 @@ function StatsHUD() {
             <span>EK3 Load</span>
             <span className="text-emerald-400 font-mono">{stats.ek3Utilization}%</span>
           </div>
+
+          {/* Total hubs for US view */}
+          {!selectedCity && (
+            <>
+              <div className="border-t border-gray-700 my-2" />
+              <div className="flex justify-between text-gray-400">
+                <span>Total Hubs</span>
+                <span className="text-purple-400 font-mono">{totalFleet.hubs}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -582,13 +905,19 @@ function StatsHUD() {
 // ============================================================================
 
 function ZoneSelector() {
-  const { activeZone, setZone } = useDelivery();
-  const zones = Object.values(LA_ZONES);
+  const { activeZone, setZone, selectedCity } = useDelivery();
+
+  // Get zones from selected city, or show city list for US view
+  const cityConfig = selectedCity ? CITIES[selectedCity] : null;
+  const zones = cityConfig ? Object.values(cityConfig.zones) : [];
+
+  // Don't show zone selector in US view
+  if (!selectedCity) return null;
 
   return (
     <div className="absolute top-4 left-[272px] z-[1000]">
       <div className="bg-[#0a0a12]/90 backdrop-blur-sm border border-purple-500/30 rounded-lg p-3">
-        <div className="text-purple-400 text-xs font-bold mb-2">ZONES</div>
+        <div className="text-purple-400 text-xs font-bold mb-2">{cityConfig?.shortName} ZONES</div>
         <div className="flex flex-wrap gap-2">
           {zones.map(zone => (
             <button
@@ -610,11 +939,130 @@ function ZoneSelector() {
 }
 
 // ============================================================================
+// Decision Result Toast
+// ============================================================================
+
+function DecisionToast({ toast }) {
+  if (!toast) return null;
+
+  const vehicleEmoji = {
+    drone: '🚁',
+    pod: '🚐',
+    swarmbot: '🤖'
+  }[toast.vehicleType] || '🚀';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      className="absolute top-20 left-1/2 -translate-x-1/2 z-[1100]"
+    >
+      <div
+        className="bg-[#0a0a12]/95 backdrop-blur-md border rounded-xl px-6 py-4 shadow-2xl min-w-[400px]"
+        style={{ borderColor: `${toast.color}60` }}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-3">
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
+            style={{ background: `${toast.color}20` }}
+          >
+            {vehicleEmoji}
+          </div>
+          <div>
+            <div className="text-white font-semibold">{toast.title}</div>
+            <div className="text-xs text-gray-400">{toast.vehicleId}</div>
+          </div>
+          <div className="ml-auto">
+            <CheckCircle className="w-6 h-6 text-green-400" />
+          </div>
+        </div>
+
+        {/* Action taken */}
+        <div
+          className="rounded-lg px-4 py-3 mb-2"
+          style={{ background: `${toast.color}15` }}
+        >
+          <div className="text-xs text-gray-400 mb-1">Action Taken</div>
+          <div className="font-medium" style={{ color: toast.color }}>{toast.action}</div>
+        </div>
+
+        {/* Effect */}
+        <div className="text-sm text-gray-300">
+          <span className="text-gray-500">Result:</span> {toast.effect}
+        </div>
+
+        {/* Progress bar */}
+        <div className="mt-4 h-1 bg-gray-800 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: '100%' }}
+            animate={{ width: '0%' }}
+            transition={{ duration: 8, ease: 'linear' }}
+            className="h-full rounded-full"
+            style={{ background: toast.color }}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================================================
 // Controls
 // ============================================================================
 
 function SimulationControls() {
-  const { isRunning, speed, setRunning, setSpeed } = useDelivery();
+  const { isRunning, speed, setRunning, setSpeed, drones, pods, swarmBots, addScenario, setFocusedVehicle } = useDelivery();
+
+  // Manual scenario trigger with map focus
+  const triggerScenario = useCallback(() => {
+    const scenarioTypes = Object.values(SCENARIO_TYPES);
+    const randomType = scenarioTypes[Math.floor(Math.random() * scenarioTypes.length)];
+    const config = SCENARIO_CONFIG[randomType];
+
+    if (!config) {
+      console.error('No config found for scenario type:', randomType);
+      return;
+    }
+
+    const allVehicles = [
+      ...(drones || []).map(v => ({ ...v, vehicleType: 'drone' })),
+      ...(pods || []).map(v => ({ ...v, vehicleType: 'pod' })),
+      ...(swarmBots || []).map(v => ({ ...v, vehicleType: 'swarmbot' }))
+    ];
+
+    const eligibleVehicles = allVehicles.filter(v =>
+      config.vehicleTypes.includes(v.vehicleType)
+    );
+
+    if (eligibleVehicles.length > 0) {
+      const vehicle = eligibleVehicles[Math.floor(Math.random() * eligibleVehicles.length)];
+
+      // Focus map on vehicle
+      setFocusedVehicle({
+        id: vehicle.id,
+        type: vehicle.vehicleType,
+        position: vehicle.position
+      });
+
+      // Add scenario to queue (shows modal)
+      const scenario = {
+        id: `scenario-${Date.now()}`,
+        type: randomType,
+        vehicleId: vehicle.id,
+        vehicleType: vehicle.vehicleType,
+        config,
+        status: 'pending',
+        createdAt: Date.now(),
+        expiresAt: Date.now() + ((config.timer || 30) * 1000)
+      };
+      console.log('Adding scenario:', scenario);
+      addScenario(scenario);
+    } else {
+      console.log('No eligible vehicles for', randomType, 'requires:', config.vehicleTypes);
+    }
+  }, [drones, pods, swarmBots, addScenario, setFocusedVehicle]);
 
   return (
     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000]">
@@ -645,6 +1093,18 @@ function SimulationControls() {
             </button>
           ))}
         </div>
+
+        {/* Divider */}
+        <div className="w-px h-6 bg-gray-700" />
+
+        {/* Manual Scenario Trigger */}
+        <button
+          onClick={triggerScenario}
+          className="px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-all flex items-center gap-2 text-xs font-medium"
+        >
+          <AlertTriangle size={14} />
+          Trigger Scenario
+        </button>
 
         {/* Status */}
         <div className="flex items-center gap-2 text-xs">
@@ -2213,6 +2673,39 @@ function DeliveryKorAllThingPanel() {
 
 function DeliveryEngineWrapper({ children }) {
   const ctx = useDelivery();
+  const ctxRef = useRef(ctx);
+  useEffect(() => { ctxRef.current = ctx; }, [ctx]);
+
+  // Scenario generation is now manual - use "Trigger Scenario" button
+
+  // Handle scenario triggers from engine (for emergency events)
+  const handleScenarioTrigger = useCallback((scenarioData) => {
+    // Check if we already have this type of scenario for this vehicle
+    const existingScenario = ctx.scenarioQueue?.find(s =>
+      s.vehicleId === scenarioData.vehicleId &&
+      s.type === scenarioData.type &&
+      s.status === 'pending'
+    );
+    if (existingScenario) return;
+
+    // Limit to 2 active scenarios
+    const activeCount = ctx.scenarioQueue?.filter(s => s.status === 'pending').length || 0;
+    if (activeCount >= 2) return;
+
+    const config = scenarioData.config || SCENARIO_CONFIG[scenarioData.type];
+    if (!config) return;
+
+    ctx.addScenario({
+      id: `scenario-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: scenarioData.type,
+      vehicleId: scenarioData.vehicleId,
+      vehicleType: scenarioData.vehicleType,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (config.timer * 1000),
+      status: 'pending',
+      config
+    });
+  }, [ctx]);
 
   useDeliveryEngine({
     isRunning: ctx.isRunning,
@@ -2222,13 +2715,95 @@ function DeliveryEngineWrapper({ children }) {
     swarmBots: ctx.swarmBots,
     rooftopHubs: ctx.rooftopHubs,
     streetHubs: ctx.streetHubs,
-    droneCorridors: DRONE_CORRIDORS,
-    podRoutes: POD_ROUTES,
-    swarmZones: SWARM_ZONES,
+    droneCorridors: Object.values(CITIES).flatMap(c => c.droneCorridors || []),
+    podRoutes: Object.values(CITIES).flatMap(c => c.podRoutes || []),
+    swarmZones: Object.values(CITIES).flatMap(c => c.swarmZones || []),
     updateDrones: ctx.updateDrones,
     updatePods: ctx.updatePods,
-    updateSwarmBots: ctx.updateSwarmBots
+    updateSwarmBots: ctx.updateSwarmBots,
+    onScenarioTrigger: handleScenarioTrigger
   });
+
+  // Truck animation - intercity heavy-duty network
+  useEffect(() => {
+    if (!ctx.isRunning) return;
+
+    const interval = setInterval(() => {
+      const currentCtx = ctxRef.current;
+      if (!currentCtx.trucks || currentCtx.trucks.length === 0) return;
+
+      const updatedTrucks = currentCtx.trucks.map(truck => {
+        const corridor = INTERSTATE_CORRIDORS[
+          Object.keys(INTERSTATE_CORRIDORS).find(k =>
+            INTERSTATE_CORRIDORS[k].id === truck.corridorId
+          )
+        ];
+        if (!corridor) return truck;
+
+        // Handle swapping state
+        if (truck.state === 'swapping') {
+          // Finish swapping after a few ticks
+          if (Math.random() < 0.05 * currentCtx.speed) {
+            return {
+              ...truck,
+              state: 'driving',
+              batteryLevel: 95 + Math.random() * 5,
+              swapsCompleted: truck.swapsCompleted + 1
+            };
+          }
+          return truck;
+        }
+
+        // Move truck along corridor
+        const moveSpeed = 0.0003 * currentCtx.speed * truck.direction;
+        let newProgress = truck.progress + moveSpeed;
+
+        // Bounce at ends
+        let newDirection = truck.direction;
+        if (newProgress >= 1) {
+          newProgress = 1;
+          newDirection = -1;
+        } else if (newProgress <= 0) {
+          newProgress = 0;
+          newDirection = 1;
+        }
+
+        // Drain battery
+        let newBattery = truck.batteryLevel - (0.02 * currentCtx.speed);
+
+        // Check if needs swap (low battery near station)
+        let newState = truck.state;
+        if (newBattery < 25 && Math.random() < 0.1) {
+          newState = 'swapping';
+          newBattery = truck.batteryLevel; // Hold during swap
+        }
+
+        // Interpolate position
+        const waypointIndex = Math.floor(newProgress * (corridor.waypoints.length - 1));
+        const localProgress = (newProgress * (corridor.waypoints.length - 1)) - waypointIndex;
+        const wp1 = corridor.waypoints[waypointIndex];
+        const wp2 = corridor.waypoints[Math.min(waypointIndex + 1, corridor.waypoints.length - 1)];
+        const newPosition = [
+          wp1[0] + (wp2[0] - wp1[0]) * localProgress,
+          wp1[1] + (wp2[1] - wp1[1]) * localProgress
+        ];
+
+        return {
+          ...truck,
+          progress: newProgress,
+          position: newPosition,
+          direction: newDirection,
+          batteryLevel: Math.max(5, newBattery),
+          state: newState,
+          totalMiles: truck.totalMiles + (currentCtx.speed * 0.1)
+        };
+      });
+
+      currentCtx.updateTrucks(updatedTrucks);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [ctx.isRunning]);
 
   return children;
 }
@@ -2238,7 +2813,150 @@ function DeliveryEngineWrapper({ children }) {
 // ============================================================================
 
 function LADeliveryContent() {
-  const { selectedItem } = useDelivery();
+  const ctx = useDelivery();
+
+  // Safety check - show loading if context not ready
+  if (!ctx) {
+    return (
+      <div className="min-h-screen bg-[#030308] flex items-center justify-center text-cyan-400">
+        Loading delivery network...
+      </div>
+    );
+  }
+
+  const {
+    selectedItem,
+    scenarioQueue,
+    drones,
+    pods,
+    swarmBots,
+    rooftopHubs,
+    streetHubs,
+    focusedVehicle,
+    decisionToast,
+    removeScenario,
+    updateDrones,
+    updatePods,
+    updateSwarmBots,
+    setVehiclePriority,
+    addDecisionHistory,
+    setFocusedVehicle,
+    clearFocusedVehicle,
+    setSelectedCity,
+    showDecisionToast,
+    clearDecisionToast
+  } = ctx;
+
+  // Track last focused scenario to avoid re-focusing
+  const lastFocusedScenarioRef = useRef(null);
+
+  // Auto-focus on vehicle when new scenario appears
+  useEffect(() => {
+    const activeScenarios = scenarioQueue?.filter(s => s.status === 'pending') || [];
+    if (activeScenarios.length === 0) {
+      // No active scenarios - clear focus after delay
+      if (focusedVehicle) {
+        const timeout = setTimeout(() => {
+          clearFocusedVehicle();
+        }, 2000);
+        return () => clearTimeout(timeout);
+      }
+      return;
+    }
+
+    // Get current scenario (first pending)
+    const currentScenario = activeScenarios[0];
+
+    // Don't re-focus if same scenario
+    if (lastFocusedScenarioRef.current === currentScenario.id) return;
+    lastFocusedScenarioRef.current = currentScenario.id;
+
+    // Find the vehicle
+    const allVehicles = [
+      ...(drones || []).map(v => ({ ...v, vehicleType: 'drone' })),
+      ...(pods || []).map(v => ({ ...v, vehicleType: 'pod' })),
+      ...(swarmBots || []).map(v => ({ ...v, vehicleType: 'swarmbot' }))
+    ];
+    const vehicle = allVehicles.find(v => v.id === currentScenario.vehicleId);
+
+    if (vehicle?.position) {
+      setFocusedVehicle({
+        id: vehicle.id,
+        type: currentScenario.vehicleType,
+        position: vehicle.position
+      });
+
+      // Return to global view after 10 seconds
+      const timeout = setTimeout(() => {
+        clearFocusedVehicle();
+      }, 10000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [scenarioQueue, drones, pods, swarmBots, focusedVehicle, setFocusedVehicle, clearFocusedVehicle]);
+
+  // Handle decision made by user or AI
+  const handleDecision = useCallback((scenarioId, optionId, wasAI) => {
+    const scenario = scenarioQueue?.find(s => s.id === scenarioId);
+    if (!scenario) return;
+
+    // Get the chosen option details
+    const chosenOption = scenario.config?.options?.find(o => o.id === optionId);
+
+    // Apply the decision effect to simulation
+    applyDecisionEffect(scenario, optionId, {
+      drones,
+      pods,
+      swarmBots,
+      rooftopHubs,
+      streetHubs,
+      updateDrones,
+      updatePods,
+      updateSwarmBots,
+      setVehiclePriority,
+      addDecisionHistory
+    });
+
+    // Remove the scenario
+    removeScenario(scenarioId);
+
+    // Show decision result toast
+    showDecisionToast({
+      title: scenario.config?.title || 'Decision Made',
+      action: chosenOption?.label || optionId,
+      effect: chosenOption?.ifChosen || 'Action applied',
+      vehicleId: scenario.vehicleId,
+      vehicleType: scenario.vehicleType,
+      color: scenario.config?.color || '#00f0ff'
+    });
+
+    // Clear toast and return to global view after 8 seconds
+    setTimeout(() => {
+      clearDecisionToast();
+      clearFocusedVehicle();
+      setSelectedCity(null);
+    }, 8000);
+  }, [scenarioQueue, drones, pods, swarmBots, rooftopHubs, streetHubs,
+      updateDrones, updatePods, updateSwarmBots, setVehiclePriority,
+      addDecisionHistory, removeScenario, clearFocusedVehicle, setSelectedCity,
+      showDecisionToast, clearDecisionToast]);
+
+  // Handle scenario dismissed
+  const handleDismiss = useCallback((scenarioId) => {
+    removeScenario(scenarioId);
+    // Stay focused for 5 seconds, then return to global USA view
+    setTimeout(() => {
+      clearFocusedVehicle();
+      setSelectedCity(null);
+    }, 5000);
+  }, [removeScenario, clearFocusedVehicle, setSelectedCity]);
+
+  // Collect all vehicles for decision HUD
+  const allVehicles = useMemo(() => [
+    ...(drones || []),
+    ...(pods || []),
+    ...(swarmBots || [])
+  ], [drones, pods, swarmBots]);
 
   return (
     <DeliveryEngineWrapper>
@@ -2258,12 +2976,17 @@ function LADeliveryContent() {
         {/* Title */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000]">
           <h1 className="text-lg font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Los Angeles Autonomous Delivery Network
+            US Autonomous Delivery Network
           </h1>
           <p className="text-center text-xs text-gray-500 mt-1">
             Powered by EK3 Modular Charging Infrastructure
           </p>
         </div>
+
+        {/* Decision Result Toast */}
+        <AnimatePresence>
+          {decisionToast && <DecisionToast toast={decisionToast} />}
+        </AnimatePresence>
 
         {/* Map */}
         <DeliveryMap />
@@ -2272,6 +2995,14 @@ function LADeliveryContent() {
         <ZoneSelector />
         <StatsHUD />
         <SimulationControls />
+
+        {/* Decision HUD (Bottom, when scenarios pending) */}
+        <DeliveryDecisionHUD
+          scenarios={scenarioQueue || []}
+          vehicles={allVehicles}
+          onDecision={handleDecision}
+          onDismiss={handleDismiss}
+        />
 
         {/* Vehicle Detail Panel (Right side, when selected) */}
         <AnimatePresence>

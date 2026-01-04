@@ -17,3 +17,4 @@ web/dist/
 # OS files
 .DS_Store
 Thumbs.db
+deploy-ftp.ps1

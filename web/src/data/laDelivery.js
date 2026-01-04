@@ -10,6 +10,50 @@ export const VEHICLE_TYPES = {
   SWARM_BOT: 'swarmbot' // Sidewalk micro-delivery robot
 };
 
+// Delivery priority levels
+export const DELIVERY_PRIORITY = {
+  STANDARD: 'standard',   // Default - green
+  EXPRESS: 'express',     // 2hr guarantee - blue
+  PRIORITY: 'priority',   // 1hr, hub queue skip - orange
+  EMERGENCY: 'emergency'  // Medical/urgent, instant dispatch - red
+};
+
+// Priority metadata for UI
+export const PRIORITY_CONFIG = {
+  [DELIVERY_PRIORITY.STANDARD]: {
+    label: 'Standard',
+    color: '#39ff14',       // Neon green
+    bgColor: 'rgba(57, 255, 20, 0.15)',
+    icon: 'Package',
+    queueWeight: 1,
+    description: 'Regular delivery'
+  },
+  [DELIVERY_PRIORITY.EXPRESS]: {
+    label: 'Express',
+    color: '#00f0ff',       // Cyan
+    bgColor: 'rgba(0, 240, 255, 0.15)',
+    icon: 'Zap',
+    queueWeight: 2,
+    description: '2-hour delivery'
+  },
+  [DELIVERY_PRIORITY.PRIORITY]: {
+    label: 'Priority',
+    color: '#ff6b00',       // Orange
+    bgColor: 'rgba(255, 107, 0, 0.15)',
+    icon: 'Star',
+    queueWeight: 5,
+    description: '1-hour, queue skip'
+  },
+  [DELIVERY_PRIORITY.EMERGENCY]: {
+    label: 'Emergency',
+    color: '#ff006e',       // Neon pink/red
+    bgColor: 'rgba(255, 0, 110, 0.15)',
+    icon: 'AlertTriangle',
+    queueWeight: 10,
+    description: 'Medical/urgent'
+  }
+};
+
 // Vehicle states
 export const DELIVERY_STATES = {
   // Common states

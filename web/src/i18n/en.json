@@ -8,7 +8,13 @@
     "timeline": "Development",
     "team": "Vision",
     "contact": "Contact",
-    "simulation": "Simulation"
+    "simulation": "Simulation",
+    "simulations": "Simulations",
+    "busCharging": "Bus Charging",
+    "laDelivery": "LA Delivery",
+    "patent": "Patents",
+    "internal": "Internal",
+    "jezgroDev": "JEZGRO Dev"
   },
   "simulation": {
     "title": "System Simulation",

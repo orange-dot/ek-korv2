@@ -184,19 +184,19 @@ Central AI orchestrates charging for entire bus fleet, optimizing for:
         `,
       },
       {
-        id: 'ek-rtos',
-        title: 'EK-RTOS Microkernel',
+        id: 'jezgro',
+        title: 'JEZGRO Microkernel',
         disclosureId: 'EK-2026-006',
         date: '2026-01-04',
         status: 'disclosed',
-        summary: 'MINIX-Inspired Microkernel RTOS for Fault-Tolerant Power Electronics with MPU Isolation',
+        summary: 'MINIX-Inspired Microkernel for Fault-Tolerant Power Electronics with MPU Isolation',
         content: `
 ## Innovation
 
-A microkernel RTOS that brings MINIX reliability principles to embedded power electronics using MPU instead of MMU.
+**JEZGRO** (Serbian for "kernel/core") - a microkernel that brings MINIX reliability principles to embedded power electronics using MPU instead of MMU.
 
 ### MINIX Mapping
-| MINIX Concept | EK-RTOS Implementation |
+| MINIX Concept | JEZGRO Implementation |
 |---------------|------------------------|
 | MMU isolation | MPU regions (no MMU needed) |
 | User-space servers | Unprivileged service tasks |
@@ -218,11 +218,97 @@ A microkernel RTOS that brings MINIX reliability principles to embedded power el
 - **Layer 3**: User services (Thermal, Swarm, Audit, OCPP)
 
 ### vs. FreeRTOS
-| Aspect | FreeRTOS | EK-RTOS |
+| Aspect | FreeRTOS | JEZGRO |
 |--------|----------|---------|
 | Fault isolation | None | Full MPU |
 | Bug in logging | System crash | Logger restarts |
 | Service update | Full reflash | Single service |
+        `,
+      },
+      {
+        id: 'v2g-control',
+        title: 'V2G Control System',
+        disclosureId: 'EK-2026-007',
+        date: '2026-01-04',
+        status: 'disclosed',
+        summary: 'Decentralized V2G Control with Per-Module Grid Synchronization and Hot-Swap Capability',
+        content: `
+## Core Innovation
+
+Each 3kW EK3 module contains complete V2G capability with local PLL and droop control, enabling hot-swap during active V2G operation without grid service interruption.
+
+### Per-Module Control
+- **Local PLL**: Independent grid phase/frequency tracking
+- **P(f) Droop**: Automatic frequency regulation per module
+- **Q(V) Droop**: Local voltage support without central coordination
+- **Current Controller**: Decoupled power tracking
+
+### Key Features
+- **No Single Point of Failure**: Module failure = 0.3% capacity loss
+- **Hot-Swap During V2G**: Swap modules while providing grid services
+- **Sub-100ms Response**: Each module responds to local measurement
+- **Grid Code Compliance**: Per-module ENTSO-E/VDE compliance
+
+### ISO 15118-20 BPT Integration
+| Mode | Description |
+|------|-------------|
+| Scheduled | Pre-planned V2G discharge periods |
+| Dynamic | Real-time power changes for frequency regulation |
+
+### Hot-Swap Sequence
+1. Robot identifies failed module
+2. Remaining modules increase output (N-1)
+3. Module removed at zero power
+4. New module inserted, PLL locks
+5. Grid service: NEVER INTERRUPTED
+        `,
+      },
+      {
+        id: 'v2g-ai-ml',
+        title: 'V2G AI/ML Optimization',
+        disclosureId: 'EK-2026-008',
+        date: '2026-01-04',
+        status: 'disclosed',
+        summary: 'AI/ML-Based Predictive Optimization for V2G Fleet Operations with Edge Deployment',
+        content: `
+## Multi-Layer ML System
+
+Predictive V2G optimization deployed from edge to cloud for intelligent fleet participation in grid services.
+
+### Architecture Layers
+- **Edge (Per-Module, <100ms)**: Frequency prediction, anomaly detection
+- **Depot (Per-Station, <1s)**: Fleet aggregation, priority allocation
+- **Cloud (Fleet-Wide, <10s)**: DR optimization, price arbitrage
+
+### Key Innovations
+
+**1. Grid Frequency Prediction**
+- ML model predicts frequency 1-5 minutes ahead
+- Proactive preparation before grid events
+- 30-60 second head start on competition
+
+**2. Battery Degradation Protection**
+| Factor | How Used |
+|--------|----------|
+| Cycle wear | Cost per kWh cycled |
+| Temperature | Penalty for hot operation |
+| C-rate | High-rate cycling cost |
+
+**3. Priority-Based Fleet Allocation**
+- Score each vehicle for V2G suitability
+- Factors: SoC margin, departure time, battery health
+- Protect vehicles with early departures
+
+**4. Edge ML Deployment**
+- Quantized models on microcontrollers
+- <100ms inference latency
+- Works during internet outages
+- Privacy-preserving: data stays local
+
+### Decision Framework
+- Revenue > Degradation cost → APPROVE V2G
+- Net benefit negative → REJECT
+- Battery health <80% → EXCLUDE
         `,
       },
     ],

@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  engine:
+    build: ./engine
+    container_name: ek-simulator-engine
+    depends_on:
+      - redis
+      - mongo
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://mongo:27017/eksim
+      - TICK_RATE=100ms
+      - TIME_SCALE=1
+    networks:
+      - eksim
+
+  api:
+    build: ./api
+    container_name: ek-simulator-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - mongo
+      - engine
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://mongo:27017/eksim
+      - PORT=8000
+    networks:
+      - eksim
+
+  redis:
+    image: redis:7-alpine
+    container_name: ek-simulator-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - eksim
+
+  mongo:
+    image: mongo:7
+    container_name: ek-simulator-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=eksim
+    networks:
+      - eksim
+
+networks:
+  eksim:
+    driver: bridge
+
+volumes:
+  mongodata:

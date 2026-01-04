@@ -9,6 +9,12 @@ import {
   getNearestHub,
   HUB_TYPES
 } from '../data/laDelivery';
+import { SCENARIO_TYPES, SCENARIO_CONFIG } from '../data/laDecisionScenarios';
+import {
+  SWARM_STREET_GRID,
+  getNearestStreet,
+  getRandomTargetOnStreet
+} from '../data/routes/swarmRoutes';
 
 // Simulation constants
 const LOW_BATTERY_THRESHOLD = 20;
@@ -398,12 +404,7 @@ export function useDeliveryEngine({
       updateSwarmBots(updatedBots);
     }
 
-    // Random scenario triggers for demo
-    if (Math.random() < 0.0002 * currentSpeed) {
-      const scenarios = ['WEATHER_GROUNDING', 'HIGH_DEMAND_ZONE', 'HANDOFF_FAILURE', 'PACKAGE_PRIORITY'];
-      const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-      onScenarioTrigger?.(randomScenario);
-    }
+    // Scenario triggers now manual - removed automatic triggering
   }, [updateDronePhysics, updatePodPhysics, updateSwarmBotPhysics, updateDrones, updatePods, updateSwarmBots, onScenarioTrigger]);
 
   // Run animation frame

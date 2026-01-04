@@ -8,7 +8,13 @@
     "timeline": "Razvoj",
     "team": "Vizija",
     "contact": "Kontakt",
-    "simulation": "Simulacija"
+    "simulation": "Simulacija",
+    "simulations": "Simulacije",
+    "busCharging": "Punjenje autobusa",
+    "laDelivery": "LA Dostava",
+    "patent": "Patenti",
+    "internal": "Interno",
+    "jezgroDev": "JEZGRO Dev"
   },
   "simulation": {
     "title": "Simulacija Sistema",

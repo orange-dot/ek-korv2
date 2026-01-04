@@ -8,6 +8,7 @@ import PatentPage from './pages/PatentPage';
 import PatentPortfolioPage from './pages/PatentPortfolioPage';
 import PitchPage from './pages/PitchPage';
 import StrategyPage from './pages/StrategyPage';
+import JezgroDevPage from './pages/JezgroDevPage';
 
 function App() {
   return (
@@ -26,11 +27,13 @@ function App() {
       />
       <Route path="/simulation" element={<SimulationPage />} />
       <Route path="/la-demo" element={<LADeliveryPage />} />
+      <Route path="/la-delivery" element={<LADeliveryPage />} />
       <Route path="/gv-demo" element={<LADeliveryPage />} />
       <Route path="/patent" element={<PatentPage />} />
       <Route path="/patent-portfolio" element={<PatentPortfolioPage />} />
       <Route path="/pitch" element={<PitchPage />} />
       <Route path="/strategy" element={<StrategyPage />} />
+      <Route path="/jezgro-dev" element={<JezgroDevPage />} />
     </Routes>
   );
 }
