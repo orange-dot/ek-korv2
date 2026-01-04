@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import { useSimulation } from '../../context/SimulationContext';
+import { useSimulation, ROBOT_STATES } from '../../context/SimulationContext';
 import { useSimulationEngine } from '../../hooks/useSimulationEngine';
 import BusMarker from './map/BusMarker';
 import ChargingStationMarker from './map/ChargingStationMarker';
 import RoutePolyline from './map/RoutePolyline';
+import RobotMarker from './map/RobotMarker';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet default icon issue
@@ -64,6 +65,32 @@ export default function SimulationMap() {
       {/* Buses */}
       {buses.map(bus => (
         <BusMarker key={bus.id} bus={bus} />
+      ))}
+
+      {/* Robot markers - only show when not idle */}
+      {chargingStations.map(station => (
+        <>
+          {station.hasRobotA && station.robotAStatus !== ROBOT_STATES.IDLE && (
+            <RobotMarker
+              key={`robot-a-${station.id}`}
+              station={station}
+              robotId="A"
+              status={station.robotAStatus}
+              targetBusId={station.robotATargetBus}
+              progress={station.robotAProgress}
+            />
+          )}
+          {station.hasRobotB && station.robotBStatus !== ROBOT_STATES.IDLE && (
+            <RobotMarker
+              key={`robot-b-${station.id}`}
+              station={station}
+              robotId="B"
+              status={station.robotBStatus}
+              targetBusId={station.robotBTargetBus}
+              progress={station.robotBProgress}
+            />
+          )}
+        </>
       ))}
     </MapContainer>
   );

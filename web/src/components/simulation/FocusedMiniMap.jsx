@@ -46,16 +46,19 @@ export default function FocusedMiniMap({ busId, scenarioType }) {
   }, null)?.station;
 
   return (
-    <div className="relative w-full h-full rounded-xl overflow-hidden border border-cyan-500/30">
+    <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-cyan-500/50 shadow-2xl shadow-cyan-500/20">
+      {/* Glow effect */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/30 via-purple-500/20 to-cyan-500/30 rounded-2xl blur-xl opacity-50 -z-10" />
+
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] bg-gradient-to-b from-black/80 to-transparent p-3">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-cyan-500/20 flex items-center justify-center">
-            <MapPin className="w-3 h-3 text-cyan-400" />
+      <div className="absolute top-0 left-0 right-0 z-[1000] bg-gradient-to-b from-black/90 via-black/70 to-transparent p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
+            <MapPin className="w-5 h-5 text-cyan-400" />
           </div>
           <div>
-            <div className="text-[10px] text-cyan-400 uppercase tracking-wider">Lokacija</div>
-            <div className="text-sm font-bold text-white">{bus?.name || 'Bus'}</div>
+            <div className="text-xs text-cyan-400 uppercase tracking-wider font-medium">Lokacija Autobusa</div>
+            <div className="text-lg font-bold text-white">{bus?.name || 'Bus'}</div>
           </div>
         </div>
       </div>
@@ -130,10 +133,18 @@ export default function FocusedMiniMap({ busId, scenarioType }) {
       </MapContainer>
 
       {/* Alert overlay */}
-      <div className="absolute bottom-3 left-3 right-3 z-[1000]">
-        <div className="flex items-center gap-2 bg-amber-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-amber-500/30">
-          <AlertTriangle className="w-4 h-4 text-amber-400 animate-pulse" />
-          <span className="text-xs text-amber-200">Autobus zahteva odluku</span>
+      <div className="absolute bottom-4 left-4 right-4 z-[1000]">
+        <div className="flex items-center justify-between gap-3 bg-amber-500/20 backdrop-blur-md rounded-xl px-4 py-3 border border-amber-500/40">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/30 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-amber-400 animate-pulse" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-amber-200">Čeka se odluka</div>
+              <div className="text-xs text-amber-400/70">Autobus zahteva intervenciju</div>
+            </div>
+          </div>
+          <div className="w-3 h-3 rounded-full bg-amber-500 animate-pulse" />
         </div>
       </div>
 

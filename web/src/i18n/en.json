@@ -398,8 +398,8 @@
       "success": "Message sent successfully!"
     },
     "info": {
-      "email": "bojan.janjatovic@gmail.com",
-      "address": "Vojislava Ilica 8, Kikinda, North Banat, Serbia"
+      "email": "bojan@elektrokombinacija.com",
+      "address": "Vojislava Ilića 8, Kikinda, Serbia"
     }
   },
   "robots": {
@@ -466,5 +466,11 @@
   "footer": {
     "copyright": "© 2026 ELEKTROKOMBINACIJA. All rights reserved.",
     "tagline": "Predictive diagnostics for EV chargers."
+  },
+  "protected": {
+    "patentPortfolio": "Patent Portfolio",
+    "pitch": "Investor Presentation",
+    "confidential": "CONFIDENTIAL - AUTHORIZED RECIPIENTS ONLY",
+    "backToHome": "Back to home"
   }
 }

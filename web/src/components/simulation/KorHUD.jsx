@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import { useSimulation, BUS_STATES } from '../../context/SimulationContext';
 import FocusedMiniMap from './FocusedMiniMap';
+import { applyDecisionEffect, handleDecisionTimeout } from '../../utils/decisionEffects';
 
 // Scenario types
 const SCENARIO_TYPES = {
@@ -367,20 +368,50 @@ function DecisionModal({ decision, onAction, onTimeout, onFlowComplete }) {
   const config = SCENARIOS[decision.type];
   const Icon = config?.icon || AlertTriangle;
 
-  // Flow animation when option is selected
+  // Use refs to avoid stale closure issues
+  const flowStepRef = useRef(0);
+  const selectedOptionRef = useRef(null);
+  const onFlowCompleteRef = useRef(onFlowComplete);
+
+  // Keep refs in sync
+  useEffect(() => {
+    flowStepRef.current = flowStep;
+  }, [flowStep]);
+
+  useEffect(() => {
+    selectedOptionRef.current = selectedOption;
+  }, [selectedOption]);
+
+  useEffect(() => {
+    onFlowCompleteRef.current = onFlowComplete;
+  }, [onFlowComplete]);
+
+  // Flow animation when option is selected - FIXED: no flowStep in dependencies
   useEffect(() => {
     if (!selectedOption) return;
 
     const stepDuration = 800;
+    const totalSteps = FLOW_STEPS.length;
+
     const progressInterval = setInterval(() => {
       setFlowProgress(p => {
+        const currentStep = flowStepRef.current;
+
         if (p >= 100) {
-          if (flowStep < FLOW_STEPS.length - 1) {
-            setFlowStep(s => s + 1);
+          if (currentStep < totalSteps - 1) {
+            // Move to next step
+            const nextStep = currentStep + 1;
+            flowStepRef.current = nextStep;
+            setFlowStep(nextStep);
             return 0;
           } else {
+            // All steps complete
             clearInterval(progressInterval);
-            setTimeout(() => onFlowComplete(selectedOption), 500);
+            setTimeout(() => {
+              if (onFlowCompleteRef.current && selectedOptionRef.current) {
+                onFlowCompleteRef.current(selectedOptionRef.current);
+              }
+            }, 500);
             return 100;
           }
         }
@@ -389,7 +420,7 @@ function DecisionModal({ decision, onAction, onTimeout, onFlowComplete }) {
     }, stepDuration / 20);
 
     return () => clearInterval(progressInterval);
-  }, [selectedOption, flowStep, onFlowComplete]);
+  }, [selectedOption]); // Only depend on selectedOption
 
   useEffect(() => {
     if (selectedOption) return; // Stop timer when option is selected
@@ -422,26 +453,25 @@ function DecisionModal({ decision, onAction, onTimeout, onFlowComplete }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-center justify-center decision-modal-overlay"
-      style={{ pointerEvents: 'auto', zIndex: 9999 }}
+      className="absolute inset-y-0 right-0 left-[45%] flex items-center justify-center decision-modal-overlay px-4"
+      style={{ pointerEvents: 'none', zIndex: 100 }}
     >
-      {/* Backdrop - clicks close nothing, just visual */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+      {/* NO full backdrop - main map stays visible */}
 
-      {/* Pulsing borders - visual only */}
-      <div className={`absolute inset-4 border-2 ${colors.border} rounded-2xl opacity-30 animate-pulse pointer-events-none`} />
-
-      {/* Two-column layout - Map left, Modal+Info right */}
-      <div className="relative z-10 flex items-stretch gap-4 mx-4 max-w-6xl w-full max-h-[80vh]">
-        {/* Left - Focused Mini Map */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="hidden lg:block w-96 h-[500px] flex-shrink-0"
-        >
-          <FocusedMiniMap busId={decision.busId} scenarioType={decision.type} />
-        </motion.div>
+      {/* Content container - fills available space on right */}
+      <div className="relative flex items-stretch gap-4 h-[90vh] max-h-[800px] flex-1 max-w-[900px]" style={{ pointerEvents: 'auto' }}>
+        {/* Left - Focused Mini Map - LARGE, fills space */}
+        {!selectedOption && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ delay: 0.1 }}
+            className="flex-1 min-w-[300px] h-full"
+          >
+            <FocusedMiniMap busId={decision.busId} scenarioType={decision.type} />
+          </motion.div>
+        )}
 
         {/* Right - Modal + Visualizations stacked */}
         <div className="flex flex-col gap-3 flex-1 max-w-xl">
@@ -4306,7 +4336,43 @@ function StationDetailModal({ station, buses, onClose }) {
 
 // KorHUD - Main HUD
 export default function KorHUD() {
-  const { buses, routes, city, isRunning, speed, setSpeed, selectedItem, selectItem, clearSelection, chargingStations, pendingDecision, setPendingDecision, clearPendingDecision } = useSimulation();
+  const {
+    buses,
+    routes,
+    city,
+    isRunning,
+    speed,
+    setSpeed,
+    selectedItem,
+    selectItem,
+    clearSelection,
+    chargingStations,
+    pendingDecision,
+    setPendingDecision,
+    clearPendingDecision,
+    // New decision actions
+    forceChargeBus,
+    triggerSwap,
+    dispatchRobot,
+    setBusState,
+    setBusPriority,
+    addBusDecisionHistory,
+    // KorAllThing orchestrator
+    addToScenarioQueue,
+    updateScenarioStatus,
+  } = useSimulation();
+
+  // Context object for decision effects
+  const simulationContext = {
+    buses,
+    chargingStations,
+    forceChargeBus,
+    triggerSwap,
+    dispatchRobot,
+    setBusState,
+    setBusPriority,
+    addBusDecisionHistory,
+  };
   const [decisions, setDecisions] = useState([]);
   const [activeModal, setActiveModal] = useState(null);
   const [activeFlow, setActiveFlow] = useState(null);
@@ -4319,6 +4385,7 @@ export default function KorHUD() {
   const lastMouseMoveRef = useRef(Date.now());
   const isMouseIdleRef = useRef(true);
   const simTimeRef = useRef(Date.now()); // Simulation time that advances with speed
+  const activeScenarioIdRef = useRef(null); // Track current scenario for KorAllThing
 
   // Track modal/flow state in ref - only block on actual modals, not item selection
   useEffect(() => {
@@ -4367,11 +4434,13 @@ export default function KorHUD() {
   const activeFlowRef = useRef(activeFlow);
   const busesRef = useRef(buses);
   const routesRef = useRef(routes);
+  const addToScenarioQueueRef = useRef(addToScenarioQueue);
 
   useEffect(() => { activeModalRef.current = activeModal; }, [activeModal]);
   useEffect(() => { activeFlowRef.current = activeFlow; }, [activeFlow]);
   useEffect(() => { busesRef.current = buses; }, [buses]);
   useEffect(() => { routesRef.current = routes; }, [routes]);
+  useEffect(() => { addToScenarioQueueRef.current = addToScenarioQueue; }, [addToScenarioQueue]);
 
   // Generate scenarios - simple fixed interval (uses refs to avoid restarting)
   useEffect(() => {
@@ -4399,6 +4468,15 @@ export default function KorHUD() {
         console.log('🚀 Triggering scenario:', scenario.type, 'for bus:', scenario.busId);
         setSpeed(1);
         setActiveModal(scenario);
+        // Add to KorAllThing scenario queue
+        addToScenarioQueueRef.current({
+          id: scenario.id,
+          type: scenario.type,
+          busId: scenario.busId,
+          busName: scenario.busName,
+          message: scenario.message,
+          status: 'pending',
+        });
         if (scenario.busId) {
           setPendingDecision({
             busId: scenario.busId,
@@ -4426,9 +4504,13 @@ export default function KorHUD() {
   const handleAction = useCallback((decision, actionId) => {
     const option = decision.options?.find(o => o.id === actionId);
     setActiveModal(null);
+    // Track scenario ID for KorAllThing
+    activeScenarioIdRef.current = decision.id;
+    // Update scenario status to active
+    updateScenarioStatus(decision.id, 'active');
     // Show the flow visualization
     setActiveFlow(option);
-  }, []);
+  }, [updateScenarioStatus]);
 
   const handleFlowComplete = useCallback(() => {
     if (activeFlow) {
@@ -4439,17 +4521,28 @@ export default function KorHUD() {
       }, ...prev].slice(0, 6));
       setStats(s => ({ ...s, approved: s.approved + 1 }));
     }
+    // Mark scenario as completed in KorAllThing
+    if (activeScenarioIdRef.current) {
+      updateScenarioStatus(activeScenarioIdRef.current, 'completed');
+      activeScenarioIdRef.current = null;
+    }
     setActiveFlow(null);
     // Clear bus highlighting when decision flow is complete
     clearPendingDecision();
-  }, [activeFlow, clearPendingDecision]);
+  }, [activeFlow, clearPendingDecision, updateScenarioStatus]);
 
   const handleTimeout = useCallback((decision) => {
     const recommended = decision.options?.find(o => o.recommended);
+    // Apply AI takeover effect to simulation
+    handleDecisionTimeout(decision, simulationContext);
+    // Mark scenario as timeout in KorAllThing
+    updateScenarioStatus(decision.id, 'timeout');
+    // Update stats
+    setStats(s => ({ ...s, timeout: s.timeout + 1 }));
     setActiveModal(null);
     // Show flow for auto-selected option
     setActiveFlow({ ...recommended, label: `AUTO: ${recommended?.label || 'Timeout'}`, isAuto: true });
-  }, []);
+  }, [simulationContext, updateScenarioStatus]);
 
   const handleExpand = useCallback((decision) => {
     setDecisions(prev => prev.filter(d => d.id !== decision.id));
@@ -4854,6 +4947,9 @@ export default function KorHUD() {
             onAction={handleAction}
             onTimeout={handleTimeout}
             onFlowComplete={(option) => {
+              // Apply the decision effect to simulation
+              applyDecisionEffect(activeModal, option, simulationContext);
+              // Update activity log
               setActivityLog(prev => [{
                 timestamp: Date.now(),
                 action: option.label,

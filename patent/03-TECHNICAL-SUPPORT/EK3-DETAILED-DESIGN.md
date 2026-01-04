@@ -879,9 +879,916 @@ OUTSOURCE CANDIDATES:
 
 ---
 
+## 10. Firmware Architecture
+
+### 10.1 RTOS Selection and Configuration
+
+```
+OPERATING SYSTEM: FreeRTOS
+═══════════════════════════════════════════════════════════════
+
+Why FreeRTOS:
+• Mature, proven in power electronics applications
+• STM32 HAL integration
+• Small footprint (~10KB Flash)
+• Preemptive scheduling
+• Active community, long-term support
+
+Alternative considered: Zephyr RTOS
+• Better security features (but more complex)
+• May consider for future versions
+
+KERNEL CONFIGURATION:
+─────────────────────────────────────────────────────────────
+• Scheduler: Preemptive with time-slicing
+• Tick rate: 1 kHz (1ms resolution)
+• Max priorities: 10 levels
+• Stack overflow detection: Enabled
+• Run-time stats: Enabled (debug builds)
+• Heap: heap_4 (coalescing, thread-safe)
+```
+
+### 10.2 Task Scheduling and Priorities
+
+```
+TASK PRIORITY ARCHITECTURE
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ PRIORITY    │ TASK                    │ PERIOD    │ WCET   │
+├─────────────┼─────────────────────────┼───────────┼────────┤
+│ P0 (ISR)    │ Safety ISR (OCP/OVP/OTP)│ Event     │ <1µs   │
+│ P1 (ISR)    │ PWM Control ISR         │ 6.67µs    │ <2µs   │
+│ P2 (ISR)    │ ADC Sampling ISR        │ 100µs     │ <5µs   │
+│ P3 (ISR)    │ CAN RX ISR              │ Event     │ <10µs  │
+├─────────────┼─────────────────────────┼───────────┼────────┤
+│ P4 (Task)   │ Power Control Task      │ 1ms       │ <100µs │
+│ P5 (Task)   │ Thermal Management      │ 10ms      │ <500µs │
+│ P6 (Task)   │ Swarm Coordination      │ 100ms     │ <5ms   │
+│ P7 (Task)   │ Heartbeat TX            │ 1000ms    │ <1ms   │
+│ P8 (Task)   │ Logging Task            │ Background│ N/A    │
+│ P9 (Task)   │ Diagnostics/Idle        │ Idle      │ N/A    │
+└─────────────────────────────────────────────────────────────┘
+
+WCET = Worst Case Execution Time
+
+DEADLINE GUARANTEES:
+─────────────────────────────────────────────────────────────
+• Power control loop: <100µs response to load change
+• CAN message processing: <1ms from RX to action
+• Fault response (OCP/OVP): <1µs (hardware-assisted)
+• Thermal derating: <100ms to reduce power
+
+
+WATCHDOG STRATEGY
+═══════════════════════════════════════════════════════════════
+
+1. IWDG (Independent Watchdog)
+   • Timeout: 100ms
+   • Fed by main loop
+   • Resets MCU if firmware hangs
+
+2. WWDG (Window Watchdog)
+   • Used for time-critical sections
+   • Detects early or late execution
+   • For power control task timing verification
+
+3. Application Watchdog
+   • Software watchdog for task health
+   • Each task checks in periodically
+   • Triggers safe shutdown before HW watchdog
+```
+
+### 10.3 Memory Partitioning
+
+```
+FLASH LAYOUT (512KB STM32G474)
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ ADDRESS       │ SIZE   │ CONTENT                           │
+├───────────────┼────────┼───────────────────────────────────┤
+│ 0x0800_0000   │ 16 KB  │ Bootloader                        │
+│ 0x0800_4000   │ 192 KB │ Application Slot A (active)       │
+│ 0x0803_4000   │ 192 KB │ Application Slot B (update)       │
+│ 0x0806_4000   │ 16 KB  │ Configuration Data                │
+│ 0x0806_8000   │ 64 KB  │ Audit Log (circular buffer)       │
+│ 0x0807_8000   │ 8 KB   │ OTP Keys (write-once)             │
+│ 0x0807_A000   │ 24 KB  │ Reserved for future               │
+└─────────────────────────────────────────────────────────────┘
+
+
+RAM LAYOUT (128KB)
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ REGION        │ SIZE   │ PURPOSE                           │
+├───────────────┼────────┼───────────────────────────────────┤
+│ Task Stacks   │ 32 KB  │ 8 tasks × 4KB each                │
+│ FreeRTOS Heap │ 32 KB  │ Dynamic allocation                │
+│ DMA Buffers   │ 16 KB  │ ADC, CAN, aligned to 32 bytes     │
+│ CAN TX/RX     │ 4 KB   │ Message queues                    │
+│ Static Data   │ 16 KB  │ Global variables, state           │
+│ Stack Guard   │ 4 KB   │ Overflow detection zone           │
+│ Reserved      │ 24 KB  │ Future expansion                  │
+└─────────────────────────────────────────────────────────────┘
+
+
+MPU CONFIGURATION (Memory Protection Unit)
+═══════════════════════════════════════════════════════════════
+
+The STM32G4 MPU is configured to enforce memory protection:
+
+┌─────────────────────────────────────────────────────────────┐
+│ REGION │ ADDRESS RANGE          │ PERMISSIONS              │
+├────────┼────────────────────────┼──────────────────────────┤
+│ 0      │ 0x0800_0000-0x0807_FFFF│ Flash: RO + Execute      │
+│ 1      │ 0x2000_0000-0x2001_FFFF│ RAM: RW + No Execute     │
+│ 2      │ 0x4000_0000-0x5FFF_FFFF│ Peripherals: RW + Device │
+│ 3      │ Stack guard area       │ No Access (trap)         │
+│ 4      │ OTP keys region        │ RO after provisioning    │
+└─────────────────────────────────────────────────────────────┘
+
+Benefits:
+• Prevents code execution from RAM (security)
+• Detects stack overflow before corruption
+• Protects keys from accidental overwrite
+```
+
+### 10.4 Secure Boot Chain
+
+```
+BOOT SEQUENCE
+═══════════════════════════════════════════════════════════════
+
+    ┌─────────────────────────────────────────────────────────┐
+    │                      POWER ON                            │
+    └─────────────────────────┬───────────────────────────────┘
+                              ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │              ST ROM BOOTLOADER                           │
+    │  • Checks RDP (Read-out Protection) level               │
+    │  • Checks Option Bytes                                   │
+    │  • Jumps to user bootloader                             │
+    └─────────────────────────┬───────────────────────────────┘
+                              ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │            CUSTOM BOOTLOADER (16KB)                      │
+    │  • Verify application signature (Ed25519 or ECDSA)      │
+    │  • Check version counter (anti-rollback)                │
+    │  • Select active slot (A or B)                          │
+    │  • Handle firmware update if pending                    │
+    └─────────────────────────┬───────────────────────────────┘
+                              ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │               APPLICATION (Slot A or B)                  │
+    │  • FreeRTOS kernel initialization                       │
+    │  • Hardware initialization                              │
+    │  • Start all tasks                                      │
+    └─────────────────────────────────────────────────────────┘
+
+
+FIRMWARE SIGNING
+═══════════════════════════════════════════════════════════════
+
+Algorithm: Ed25519 (preferred) or ECDSA-P256
+
+Signature Location:
+┌─────────────────────────────────────────────────────────────┐
+│ OFFSET  │ SIZE   │ CONTENT                                 │
+├─────────┼────────┼─────────────────────────────────────────┤
+│ 0x00    │ 4      │ Magic number (0x454B3033 = "EK03")      │
+│ 0x04    │ 4      │ Firmware version (major.minor.patch)    │
+│ 0x08    │ 4      │ Build timestamp                         │
+│ 0x0C    │ 4      │ Firmware size (excluding header)        │
+│ 0x10    │ 32     │ SHA-256 hash of firmware                │
+│ 0x30    │ 64     │ Ed25519 signature                       │
+│ 0x70    │ 16     │ Reserved                                │
+│ 0x80    │ ...    │ Firmware binary starts here             │
+└─────────────────────────────────────────────────────────────┘
+
+Key Storage:
+• Public key: Stored in OTP (one-time programmable) during manufacturing
+• Private key: NEVER on device, only in secure build server
+
+
+ANTI-ROLLBACK PROTECTION
+═══════════════════════════════════════════════════════════════
+
+Mechanism: Version counter in OTP fuses
+
+┌─────────────────────────────────────────────────────────────┐
+│ OTP FUSE │ BIT VALUE │ MINIMUM ALLOWED VERSION             │
+├──────────┼───────────┼─────────────────────────────────────┤
+│ Fuse 0   │ 0         │ Version ≥ 1                         │
+│ Fuse 1   │ 0         │ Version ≥ 2                         │
+│ Fuse 2   │ 0         │ Version ≥ 3                         │
+│ ...      │ ...       │ ...                                 │
+│ Fuse 31  │ 0         │ Version ≥ 32                        │
+└─────────────────────────────────────────────────────────────┘
+
+• Each major security update burns one fuse
+• Fuses are one-way (cannot unburn)
+• 32 major updates possible over product lifetime
+```
+
+### 10.5 Firmware Update (OTA)
+
+```
+A/B UPDATE MECHANISM
+═══════════════════════════════════════════════════════════════
+
+    CURRENT STATE                    AFTER UPDATE
+    ─────────────                    ────────────
+    ┌─────────────┐                 ┌─────────────┐
+    │  Slot A     │◀── Active      │  Slot A     │   (old)
+    │  v1.2.3     │                 │  v1.2.3     │
+    └─────────────┘                 └─────────────┘
+    ┌─────────────┐                 ┌─────────────┐
+    │  Slot B     │    (old)       │  Slot B     │◀── Active
+    │  v1.2.0     │                 │  v1.3.0     │
+    └─────────────┘                 └─────────────┘
+
+Benefits:
+• Never bricked: if new firmware fails, revert to old
+• Atomic update: complete or nothing
+• Power-fail safe: can resume interrupted update
+
+
+UPDATE PROTOCOL (via CAN)
+═══════════════════════════════════════════════════════════════
+
+1. INITIATE
+   Station Controller → Module:
+   {cmd: UPDATE_START, version: "1.3.0", size: 187654, chunks: 733}
+
+2. TRANSFER
+   Station Controller → Module (733 times):
+   {cmd: UPDATE_CHUNK, seq: N, data: [256 bytes], crc16: 0xABCD}
+
+   Module → Station Controller (after each):
+   {ack: UPDATE_CHUNK, seq: N, status: OK|RETRY|ABORT}
+
+3. VERIFY
+   Module: Calculate SHA-256, verify signature
+   Module → Station Controller:
+   {status: VERIFY_OK|VERIFY_FAIL}
+
+4. COMMIT
+   Station Controller → Module:
+   {cmd: UPDATE_COMMIT}
+   Module: Mark new slot as active, reboot
+
+5. CONFIRM
+   After reboot, new firmware sends:
+   {status: UPDATE_COMPLETE, version: "1.3.0"}
+
+
+ROLLBACK PROCEDURE
+═══════════════════════════════════════════════════════════════
+
+Automatic rollback triggers:
+• New firmware fails to boot 3 times
+• New firmware fails self-test
+• Watchdog timeout during boot
+
+Manual rollback:
+• Station Controller sends: {cmd: ROLLBACK}
+• Module reboots to previous slot
+```
+
+---
+
+## 11. CAN-FD Communication Protocol
+
+### 11.1 Physical Layer
+
+```
+CAN-FD CONFIGURATION
+═══════════════════════════════════════════════════════════════
+
+Standard: ISO 11898-1:2015 (CAN-FD)
+
+Bit Rates:
+• Arbitration phase: 1 Mbps
+• Data phase: 5 Mbps
+
+Bus Topology:
+• Single bus, multi-drop
+• Max 64 nodes per bus (practical limit)
+• Termination: 120Ω at each end
+
+Transceiver: TJA1443 (NXP)
+• CAN-FD capable up to 5 Mbps
+• 5V tolerant, 3.3V logic compatible
+• ESD protection integrated
+• Standby mode for power saving
+
+
+DUAL CAN BUS REDUNDANCY
+═══════════════════════════════════════════════════════════════
+
+Each module has TWO CAN-FD interfaces:
+
+┌─────────────────────────────────────────────────────────────┐
+│                         MODULE                              │
+│  ┌─────────────┐              ┌─────────────┐              │
+│  │   CAN-A     │              │   CAN-B     │              │
+│  │  (Primary)  │              │  (Backup)   │              │
+│  └──────┬──────┘              └──────┬──────┘              │
+└─────────┼────────────────────────────┼─────────────────────┘
+          │                            │
+    ══════╧════════════          ══════╧════════════
+       CAN-A BUS                    CAN-B BUS
+    (Normal operations)          (Heartbeat + failover)
+
+Failover Protocol:
+• CAN-A: All normal traffic
+• CAN-B: Heartbeat only (1 Hz) during normal operation
+• If CAN-A error frames > 10 in 100ms → switch to CAN-B
+• Switchover time: <10ms
+• Recovery: Manual switchback after CAN-A verified OK
+```
+
+### 11.2 Message Format
+
+```
+CAN-FD EXTENDED ID STRUCTURE (29-bit)
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ BITS      │ FIELD         │ DESCRIPTION                    │
+├───────────┼───────────────┼────────────────────────────────┤
+│ 28-26     │ Priority      │ 0=highest, 7=lowest            │
+│ 25-24     │ Message Type  │ 0=cmd, 1=status, 2=event, 3=fw │
+│ 23-16     │ Source ID     │ Module slot number (0-255)     │
+│ 15-8      │ Dest ID       │ Target (0xFF=broadcast)        │
+│ 7-0       │ Message Code  │ Specific message identifier    │
+└─────────────────────────────────────────────────────────────┘
+
+
+PAYLOAD STRUCTURE (64 bytes CAN-FD)
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ BYTE      │ FIELD         │ DESCRIPTION                    │
+├───────────┼───────────────┼────────────────────────────────┤
+│ 0         │ Version       │ Protocol version (currently 1) │
+│ 1-4       │ Timestamp     │ Unix timestamp (32-bit)        │
+│ 5-6       │ Sequence      │ Message sequence number        │
+│ 7         │ Flags         │ Bit flags (auth, priority)     │
+│ 8-55      │ Payload       │ Message-specific data          │
+│ 56-63     │ CMAC          │ AES-128-CMAC (if authenticated)│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 11.3 Message Types
+
+```
+MESSAGE CATALOG
+═══════════════════════════════════════════════════════════════
+
+HEARTBEAT (0x01xx) - Status reporting
+─────────────────────────────────────
+ID: 0x0100 + slot_number
+Period: 1000ms
+Payload:
+  [0]:     State (BOOT, STANDBY, ACTIVE, DEGRADED, FAULT)
+  [1-2]:   Output power (W, uint16)
+  [3-4]:   Output voltage (mV, uint16)
+  [5-6]:   Output current (mA, uint16)
+  [7]:     Junction temperature (°C, int8)
+  [8]:     Ambient temperature (°C, int8)
+  [9]:     Efficiency (%, 0-100)
+  [10-11]: ESR estimate (mΩ, uint16)
+  [12]:    RUL (Remaining Useful Life, %)
+  [13]:    Fan speed (%, 0-100)
+  [14]:    Anomaly score (0-255)
+  [15]:    Fault code (0=none)
+
+
+POWER COMMAND (0x02xx) - Control commands
+─────────────────────────────────────────
+ID: 0x0200 + target_slot
+Commands:
+  0x01: POWER_ON
+  0x02: POWER_OFF
+  0x03: SET_POWER {power_limit: uint16}
+  0x04: SET_VOLTAGE {voltage_mv: uint16}
+  0x05: SET_CURRENT {current_ma: uint16}
+  0x06: ENTER_STANDBY
+  0x07: PREPARE_SWAP (safe shutdown)
+
+Response:
+  ACK with status, or NACK with error code
+
+
+SYNC (0x050) - Time synchronization
+───────────────────────────────────
+ID: 0x050 (broadcast)
+Period: 100ms from Station Controller
+Payload:
+  [0-3]: Unix timestamp (seconds)
+  [4-5]: Milliseconds
+  [6]:   Epoch counter (for split-brain prevention)
+
+
+THERMAL SHARE (0x03xx) - Thermal coordination
+─────────────────────────────────────────────
+ID: 0x0300 + slot_number
+Period: 100ms
+Payload:
+  [0]:   Current temperature (°C)
+  [1]:   Requested derating (%, 0=none)
+  [2]:   Thermal headroom (°C available)
+
+Purpose: Modules share thermal state for swarm load balancing
+
+
+FAULT ALERT (0x7FF) - Critical fault
+────────────────────────────────────
+ID: 0x7FF (highest priority)
+Payload:
+  [0]:   Source slot
+  [1]:   Fault type (OCP, OVP, OTP, COMM, HW)
+  [2]:   Severity (1-5, 5=critical)
+  [3-6]: Timestamp
+  [7-14]: Fault-specific data
+
+
+ELECTION (0x010) - Leader election (Raft)
+─────────────────────────────────────────
+ID: 0x010 (high priority)
+Messages:
+  REQUEST_VOTE, VOTE_GRANTED, APPEND_ENTRIES, HEARTBEAT
+See Swarm Intelligence documentation for Raft protocol details
+```
+
+### 11.4 Message Authentication (CMAC)
+
+```
+AES-128-CMAC AUTHENTICATION
+═══════════════════════════════════════════════════════════════
+
+Why CMAC:
+• Hardware accelerated on STM32G4 (AES peripheral)
+• 128-bit security level
+• Small overhead (8 bytes truncated MAC)
+• Proven standard (NIST SP 800-38B)
+
+Which messages are authenticated:
+• POWER_COMMAND (all commands)
+• FIRMWARE_UPDATE
+• FACTORY_RESET
+• CONFIG_CHANGE
+
+NOT authenticated (performance):
+• HEARTBEAT
+• SYNC
+• THERMAL_SHARE
+
+
+CMAC CALCULATION
+═══════════════════════════════════════════════════════════════
+
+Input to CMAC:
+┌─────────────────────────────────────────────────────────────┐
+│ CAN_ID (4 bytes) | Sequence (2 bytes) | Payload (48 bytes) │
+└─────────────────────────────────────────────────────────────┘
+
+Key: Per-module 128-bit key, derived from master key + module_id
+
+Truncation: Full 128-bit CMAC truncated to 64 bits (8 bytes)
+           Stored in bytes 56-63 of CAN-FD payload
+
+
+REPLAY PROTECTION
+═══════════════════════════════════════════════════════════════
+
+Mechanism: Sequence numbers + timestamp window
+
+┌─────────────────────────────────────────────────────────────┐
+│ CHECK                │ ACTION IF FAILED                    │
+├──────────────────────┼─────────────────────────────────────┤
+│ Sequence > last_seq  │ Reject (replay attack)              │
+│ Timestamp ± 5 sec    │ Reject (too old or clock skew)      │
+│ CMAC valid           │ Reject (tampered message)           │
+│ Source authorized    │ Reject (permission denied)          │
+└─────────────────────────────────────────────────────────────┘
+
+After 65535 messages: Sequence wraps, epoch increments
+```
+
+---
+
+## 12. Connector Specification
+
+### 12.1 Mechanical Design
+
+```
+20-PIN BLIND-MATE CONNECTOR
+═══════════════════════════════════════════════════════════════
+
+Type: High-density power + signal hybrid
+Recommendation: TE Connectivity MULTIGIG RT or equivalent
+
+Physical Properties:
+• Total pins: 20
+• Power pins: 16 (30A each)
+• Signal pins: 4
+• Mating cycles: >10,000 (for robotic swap)
+• Insertion force: <50N
+• Keying: Yes (prevents wrong orientation)
+
+
+KEYING SYSTEM
+═══════════════════════════════════════════════════════════════
+
+Module Type Keying:
+┌─────────────────────────────────────────────────────────────┐
+│ KEY CODE │ MODULE TYPE                                      │
+├──────────┼──────────────────────────────────────────────────┤
+│ A        │ EK3 Standard (DC/DC 3.3kW)                       │
+│ B        │ EK3-PFC (AC/DC with PFC)                         │
+│ C        │ EK3-V2G (Bidirectional)                          │
+│ D        │ Reserved for future                              │
+└─────────────────────────────────────────────────────────────┘
+
+Mechanical Implementation:
+• Asymmetric key pin pattern
+• Physical notch on housing
+• Prevents inserting wrong module type into slot
+```
+
+### 12.2 Pin Assignment
+
+```
+20-PIN CONNECTOR PINOUT
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ PIN │ SIGNAL       │ DESCRIPTION              │ CURRENT    │
+├─────┼──────────────┼──────────────────────────┼────────────┤
+│  1  │ DC_IN+       │ DC bus positive          │ 30A        │
+│  2  │ DC_IN+       │ DC bus positive          │ 30A        │
+│  3  │ DC_IN+       │ DC bus positive          │ 30A        │
+│  4  │ DC_IN+       │ DC bus positive          │ 30A        │
+│  5  │ DC_IN-       │ DC bus negative          │ 30A        │
+│  6  │ DC_IN-       │ DC bus negative          │ 30A        │
+│  7  │ DC_IN-       │ DC bus negative          │ 30A        │
+│  8  │ DC_IN-       │ DC bus negative          │ 30A        │
+├─────┼──────────────┼──────────────────────────┼────────────┤
+│  9  │ DC_OUT+      │ Output positive          │ 30A        │
+│ 10  │ DC_OUT+      │ Output positive          │ 30A        │
+│ 11  │ DC_OUT+      │ Output positive          │ 30A        │
+│ 12  │ DC_OUT+      │ Output positive          │ 30A        │
+│ 13  │ DC_OUT-      │ Output negative          │ 30A        │
+│ 14  │ DC_OUT-      │ Output negative          │ 30A        │
+│ 15  │ DC_OUT-      │ Output negative          │ 30A        │
+│ 16  │ DC_OUT-      │ Output negative          │ 30A        │
+├─────┼──────────────┼──────────────────────────┼────────────┤
+│ 17  │ CAN_H        │ CAN-FD High              │ Signal     │
+│ 18  │ CAN_L        │ CAN-FD Low               │ Signal     │
+│ 19  │ MOD_PRESENT  │ Module present detect    │ Signal     │
+│ 20  │ GND_SIG      │ Signal ground            │ Signal     │
+└─────────────────────────────────────────────────────────────┘
+
+Note: 4 pins paralleled for each power rail provides:
+• 120A total capacity (4 × 30A)
+• Redundancy if one contact degrades
+• Lower contact resistance
+```
+
+### 12.3 Insertion Sequence
+
+```
+PRE-CHARGE SEQUENCING (Arc Prevention)
+═══════════════════════════════════════════════════════════════
+
+Pin lengths are staggered to control connection order:
+
+    FIRST ────────────────────────────────────── LAST
+    ←──────────────────────────────────────────────→
+
+    │ GND (Pin 20)      - Longest pin, connects first
+    │ Signal (17-19)    - Connect second
+    │ DC_IN- (5-8)      - Connect third
+    │ DC_IN+ (1-4)      - Connect fourth
+    │ DC_OUT- (13-16)   - Connect fifth
+    │ DC_OUT+ (9-12)    - Shortest pins, connect last
+    ▼
+
+Length Differences:
+• Ground: +3mm (first contact)
+• Signal: +2mm
+• Input negative: +1mm
+• Input positive: 0mm (reference)
+• Output: -1mm (last contact)
+
+This sequence ensures:
+1. Ground established before any power
+2. No arcing on high-current contacts
+3. Communication established before power transfer
+```
+
+### 12.4 ESD Protection
+
+```
+CONNECTOR ESD PROTECTION
+═══════════════════════════════════════════════════════════════
+
+SIGNAL PINS (17-20):
+• TVS diodes: SMBJ5.0CA (bidirectional, 5V clamping)
+• ESD rating: ±15kV contact, ±25kV air discharge
+• Response time: <1ns
+
+POWER PINS (1-16):
+• MOV varistors: S14K275 (275V clamping)
+• Surge rating: 4500A (8/20µs)
+• Also provides transient suppression
+
+GROUND PIN:
+• Star grounding to chassis
+• Low impedance path to earth
+• Bypass capacitor: 100nF ceramic
+```
+
+---
+
+## 13. Security Model
+
+### 13.1 Trust Boundaries
+
+```
+TRUST BOUNDARY ARCHITECTURE
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│                      TRUST LEVELS                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  LEVEL 0: HARDWARE (Non-bypassable)                         │
+│  ════════════════════════════════                           │
+│  • Hardware OCP/OVP/OTP circuits                            │
+│  • Analog comparators, not firmware controlled              │
+│  • Cannot be disabled by any software                       │
+│  • Secure boot ROM (ST factory)                             │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 1: KERNEL FIRMWARE (Minimal, signed)                 │
+│  ══════════════════════════════════════════                 │
+│  • Bootloader (signature verification)                      │
+│  • Fault handlers                                           │
+│  • Power stage control (LLC switching)                      │
+│  • CAN-FD driver                                            │
+│  • Cryptographic operations                                 │
+│  Size: ~20KB, rarely updated, extensively tested            │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 2: SERVICES (Isolated, sandboxed)                    │
+│  ═══════════════════════════════════════                    │
+│  • Health monitoring                                        │
+│  • Thermal management                                       │
+│  • Swarm coordination                                       │
+│  • Logging                                                  │
+│  • OTA update handler                                       │
+│  Bugs here cannot compromise Level 0/1                      │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  LEVEL 3: EXTERNAL (Authenticated, rate-limited)            │
+│  ═══════════════════════════════════════════════            │
+│  • Commands from Station Controller                         │
+│  • Firmware updates                                         │
+│  • Configuration changes                                    │
+│  All require CMAC authentication + RBAC check               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 13.2 Role-Based Access Control (RBAC)
+
+```
+RBAC PERMISSION MATRIX
+═══════════════════════════════════════════════════════════════
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ PERMISSION          │ MODULE │ STATION │ MAINT │ CLOUD │ FACTORY      │
+│                     │ PEER   │ CTRL    │       │       │              │
+├─────────────────────┼────────┼─────────┼───────┼───────┼──────────────┤
+│ READ_STATUS         │   ✓    │    ✓    │   ✓   │   ✓   │      ✓       │
+│ READ_TELEMETRY      │   ✓    │    ✓    │   ✓   │   ✓   │      ✓       │
+│ READ_LOGS           │   ✗    │    ✓    │   ✓   │   ✓   │      ✓       │
+├─────────────────────┼────────┼─────────┼───────┼───────┼──────────────┤
+│ SET_POWER           │   ✗    │    ✓    │   ✓   │   ✗   │      ✓       │
+│ SET_VOLTAGE         │   ✗    │    ✓    │   ✓   │   ✗   │      ✓       │
+│ SHUTDOWN            │   ✗    │    ✓    │   ✓   │   ✓   │      ✓       │
+├─────────────────────┼────────┼─────────┼───────┼───────┼──────────────┤
+│ CONFIG_CHANGE       │   ✗    │    ✗    │   ✓   │   ✗   │      ✓       │
+│ FIRMWARE_UPDATE     │   ✗    │    ✗    │   ✗   │   ✓   │      ✓       │
+│ FACTORY_RESET       │   ✗    │    ✗    │   ✗   │   ✗   │      ✓       │
+│ KEY_ROTATION        │   ✗    │    ✗    │   ✗   │   ✗   │      ✓       │
+├─────────────────────┼────────┼─────────┼───────┼───────┼──────────────┤
+│ THERMAL_SHARE       │   ✓    │    ✗    │   ✗   │   ✗   │      ✗       │
+│ ELECTION_VOTE       │   ✓    │    ✗    │   ✗   │   ✗   │      ✗       │
+└────────────────────────────────────────────────────────────────────────┘
+
+Role Assignment:
+• MODULE_PEER: Other EK3 modules (same rack)
+• STATION_CONTROLLER: Local station controller
+• MAINTENANCE: On-site technician with auth token
+• CLOUD_ADMIN: Remote cloud with certificate
+• FACTORY: Manufacturing provisioning
+```
+
+### 13.3 Key Management
+
+```
+KEY HIERARCHY
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│                     ROOT KEY (Factory)                       │
+│            Stored in HSM, never exported                     │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          ▼               ▼               ▼
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ DEPOT KEY       │ │ SIGNING KEY     │ │ RECOVERY KEY    │
+│ (per depot)     │ │ (firmware)      │ │ (emergency)     │
+└────────┬────────┘ └─────────────────┘ └─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ MODULE KEY      │
+│ (per module)    │ ← Derived: HKDF(DEPOT_KEY, module_serial)
+│ Stored in OTP   │
+└─────────────────┘
+
+
+KEY ROTATION
+═══════════════════════════════════════════════════════════════
+
+Module keys can be rotated:
+1. New key generated: HKDF(DEPOT_KEY, module_serial, rotation_counter)
+2. Encrypted with old key, sent to module
+3. Module decrypts, stores in OTP (new slot)
+4. ACK sent, old key slot invalidated
+
+Rotation triggers:
+• Scheduled: Every 12 months
+• On-demand: After security incident
+• Module transfer: New depot key
+
+
+KEY STORAGE ON MODULE
+═══════════════════════════════════════════════════════════════
+
+STM32G4 Secure Storage:
+• Option Bytes: RDP Level 2 (permanent read protection)
+• OTP area: Module key, public keys for signature verification
+• Backup SRAM: Session keys (cleared on tamper)
+
+Key slots:
+┌─────────────────────────────────────────────────────────────┐
+│ SLOT │ KEY TYPE              │ SIZE   │ WRITEABLE          │
+├──────┼───────────────────────┼────────┼────────────────────┤
+│ 0    │ Module key (current)  │ 16B    │ Once (OTP)         │
+│ 1    │ Module key (previous) │ 16B    │ Once (OTP)         │
+│ 2    │ Firmware signing pub  │ 32B    │ Once (OTP)         │
+│ 3    │ Depot public key      │ 32B    │ Factory only       │
+│ 4-7  │ Reserved              │ 64B    │ -                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 14. Audit Logging
+
+### 14.1 Log Storage
+
+```
+AUDIT LOG FLASH STORAGE
+═══════════════════════════════════════════════════════════════
+
+Location: 0x0806_8000 - 0x0807_7FFF (64KB)
+Type: Circular buffer (oldest entries overwritten)
+
+Log Entry Format:
+┌─────────────────────────────────────────────────────────────┐
+│ OFFSET │ SIZE  │ FIELD                                     │
+├────────┼───────┼───────────────────────────────────────────┤
+│ 0      │ 4     │ Timestamp (Unix seconds)                  │
+│ 4      │ 2     │ Sequence number                           │
+│ 6      │ 1     │ Event type                                │
+│ 7      │ 1     │ Severity (1-5)                            │
+│ 8      │ 24    │ Event-specific data                       │
+├────────┼───────┼───────────────────────────────────────────┤
+│ 32     │ -     │ Total entry size: 32 bytes                │
+└─────────────────────────────────────────────────────────────┘
+
+Capacity: 64KB / 32 bytes = 2048 entries
+Retention: ~7 days at normal event rate
+```
+
+### 14.2 Event Types
+
+```
+LOGGED EVENT TYPES
+═══════════════════════════════════════════════════════════════
+
+POWER EVENTS (0x1x):
+  0x10: POWER_ON
+  0x11: POWER_OFF
+  0x12: OUTPUT_ENABLED
+  0x13: OUTPUT_DISABLED
+  0x14: POWER_LIMIT_CHANGE {old_limit, new_limit}
+
+STATE TRANSITIONS (0x2x):
+  0x20: STATE_CHANGE {old_state, new_state, reason}
+  0x21: DEGRADED_ENTER {reason_code}
+  0x22: DEGRADED_EXIT
+
+FAULT EVENTS (0x3x):
+  0x30: FAULT_OCP {current_ma, threshold_ma}
+  0x31: FAULT_OVP {voltage_mv, threshold_mv}
+  0x32: FAULT_OTP {temp_c, threshold_c}
+  0x33: FAULT_COMM {error_count, last_error}
+  0x34: FAULT_CLEARED {fault_type}
+
+SECURITY EVENTS (0x4x):
+  0x40: AUTH_SUCCESS {role, source_id}
+  0x41: AUTH_FAILURE {role, source_id, reason}
+  0x42: CMAC_INVALID {message_id}
+  0x43: REPLAY_DETECTED {sequence, expected}
+  0x44: TAMPER_ALERT {type}
+
+UPDATE EVENTS (0x5x):
+  0x50: FW_UPDATE_START {version, size}
+  0x51: FW_UPDATE_COMPLETE {version}
+  0x52: FW_UPDATE_FAILED {error_code}
+  0x53: FW_ROLLBACK {from_version, to_version}
+
+SWAP EVENTS (0x6x):
+  0x60: SWAP_REQUESTED {reason}
+  0x61: SWAP_PREPARE
+  0x62: SWAP_COMPLETE
+  0x63: SWAP_CANCELLED {reason}
+```
+
+### 14.3 Log Synchronization
+
+```
+LOG UPLOAD PROTOCOL
+═══════════════════════════════════════════════════════════════
+
+Periodic sync (every 5 minutes):
+1. Module → Station Controller: LOG_SYNC_REQUEST
+2. Station sends last known sequence number
+3. Module sends all entries since that sequence
+4. Entries encoded as CBOR (compact binary)
+5. Station ACKs, module marks as synced
+
+Batch format:
+{
+  "module_id": "EK3-00001234",
+  "batch_seq": 42,
+  "entries": [
+    {"ts": 1735900800, "seq": 1000, "type": 0x10, "sev": 2, "data": "..."},
+    {"ts": 1735900801, "seq": 1001, "type": 0x20, "sev": 2, "data": "..."},
+    ...
+  ]
+}
+
+
+RETENTION POLICY
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ LOCATION           │ RETENTION     │ PURPOSE               │
+├────────────────────┼───────────────┼───────────────────────┤
+│ Module flash       │ ~7 days       │ Local buffer          │
+│ Station Controller │ 90 days       │ Operational analysis  │
+│ Depot Controller   │ 1 year        │ Maintenance records   │
+│ Cloud              │ 2 years       │ Compliance, warranty  │
+└─────────────────────────────────────────────────────────────┘
+
+Security events (0x4x): Extended retention (5 years)
+Fault events (0x3x): Extended retention (3 years)
+```
+
+---
+
 ## References
 
 - Infineon Application Note: "Design Guide for LLC Converters"
 - Texas Instruments: "SiC Gate Driver Design"
 - Würth Elektronik: "Planar Transformer Design Guide"
 - IEC 62477-1: Safety requirements for power electronic converter systems
+- NIST SP 800-38B: Recommendation for Block Cipher Modes of Operation: CMAC
+- ISO 11898-1:2015: Road vehicles - CAN-FD specification
+- FreeRTOS Reference Manual
+- STM32G4 Reference Manual (RM0440)

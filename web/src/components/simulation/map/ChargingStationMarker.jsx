@@ -1,16 +1,29 @@
 import { useMemo } from 'react';
 import { Marker } from 'react-leaflet';
 import L from 'leaflet';
-import { useSimulation } from '../../../context/SimulationContext';
+import { useSimulation, ROBOT_STATES } from '../../../context/SimulationContext';
 
 function getStatusColor(station) {
   if (station.busesCharging.length > 0) return '#22c55e'; // active
   return '#64748b'; // idle
 }
 
+function getRobotColor(status) {
+  if (status === ROBOT_STATES.ACTIVE) return '#22c55e';
+  if (status === ROBOT_STATES.DISPATCHED || status === ROBOT_STATES.CONNECTING) return '#f59e0b';
+  if (status === ROBOT_STATES.SWAPPING) return '#7c3aed';
+  return '#64748b';
+}
+
 export default function ChargingStationMarker({ station }) {
   const { selectItem } = useSimulation();
   const statusColor = getStatusColor(station);
+
+  // Robot status indicators
+  const robotAActive = station.hasRobotA && station.robotAStatus !== ROBOT_STATES.IDLE;
+  const robotBActive = station.hasRobotB && station.robotBStatus !== ROBOT_STATES.IDLE;
+  const robotAColor = getRobotColor(station.robotAStatus);
+  const robotBColor = getRobotColor(station.robotBStatus);
 
   const icon = useMemo(() => {
     return L.divIcon({
@@ -36,6 +49,7 @@ export default function ChargingStationMarker({ station }) {
               </circle>
             ` : ''}
           </svg>
+
           <!-- Charging points badge (occupied/total) -->
           <div style="
             position: absolute;
@@ -50,13 +64,55 @@ export default function ChargingStationMarker({ station }) {
             min-width: 16px;
             text-align: center;
           ">${station.busesCharging.length}/${station.chargingPoints}</div>
+
+          <!-- Robot A indicator (left side) -->
+          ${station.hasRobotA ? `
+            <div style="
+              position: absolute;
+              bottom: -6px;
+              left: -6px;
+              width: 18px;
+              height: 18px;
+              background: ${robotAActive ? robotAColor : '#1e293b'};
+              border: 2px solid ${station.robotAStatus === ROBOT_STATES.IDLE ? '#64748b' : robotAColor};
+              border-radius: 4px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 9px;
+              font-weight: bold;
+              color: white;
+              ${robotAActive ? 'box-shadow: 0 0 6px ' + robotAColor + ';' : ''}
+            ">A</div>
+          ` : ''}
+
+          <!-- Robot B indicator (right side) -->
+          ${station.hasRobotB ? `
+            <div style="
+              position: absolute;
+              bottom: -6px;
+              right: -6px;
+              width: 18px;
+              height: 18px;
+              background: ${robotBActive ? robotBColor : '#1e293b'};
+              border: 2px solid ${station.robotBStatus === ROBOT_STATES.IDLE ? '#64748b' : robotBColor};
+              border-radius: 4px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 9px;
+              font-weight: bold;
+              color: white;
+              ${robotBActive ? 'box-shadow: 0 0 6px ' + robotBColor + ';' : ''}
+            ">B</div>
+          ` : ''}
         </div>
       `,
       iconSize: [40, 40],
       iconAnchor: [20, 20],
       popupAnchor: [0, -20],
     });
-  }, [station.busesCharging.length, station.chargingPoints, statusColor]);
+  }, [station.busesCharging.length, station.chargingPoints, statusColor, station.hasRobotA, station.hasRobotB, station.robotAStatus, station.robotBStatus, robotAActive, robotBActive, robotAColor, robotBColor]);
 
   const handleClick = () => {
     selectItem('station', station.id);
