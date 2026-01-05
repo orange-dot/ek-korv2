@@ -1,9 +1,18 @@
-# Swarm Intelligence za Multi-Modul Sisteme
+# ROJ: Distribuirana Inteligencija za Multi-Modul Sisteme
+
+## Šta je ROJ?
+
+**ROJ** je Elektrokombinacija sistem za distribuiranu inteligenciju. Kao što JEZGRO (kernel) imenuje naš mikrokernel OS, ROJ imenuje naš sloj za koordinaciju roja.
+
+Ime odražava:
+- **Distribuiranu prirodu**: Kao pčele u roju, svaki modul je autonoman
+- **Kolektivnu inteligenciju**: Jednostavna pravila stvaraju složeno, optimalno ponašanje
+- **Srpsko poreklo**: Konzistentno sa JEZGRO brendingom
 
 ## Filozofija: Distribuirana Inteligencija
 
 ```
-CENTRALIZOVANI SISTEM            ELEKTROKOMBINACIJA SWARM
+CENTRALIZOVANI SISTEM            ELEKTROKOMBINACIJA ROJ
 ────────────────────────────────────────────────────────────
 Jedan kontroler                →    Svaki modul = mozak
 Single point of failure       →    Nema single point
@@ -15,12 +24,12 @@ Scheduled maintenance         →    Self-healing
 
 ---
 
-## 1. Swarm Arhitektura
+## 1. ROJ Arhitektura
 
 ### Koncept
 
 ```
-TRADICIONALNO                    SWARM INTELLIGENCE
+TRADICIONALNO                    ROJ INTELIGENCIJA
 ─────────────────────────────────────────────────────────────
 
     ┌─────────────┐                 ┌─────┐
@@ -43,7 +52,7 @@ TRADICIONALNO                    SWARM INTELLIGENCE
                                     • Self-heals
 ```
 
-### Swarm Topologija
+### ROJ Topologija
 
 ```
 FULLY CONNECTED MESH
@@ -86,7 +95,7 @@ LEADER (elected):
 FOLLOWER:
 • Local optimization
 • Reports status to peers
-• Executes swarm decisions
+• Executes ROJ decisions
 • Can promote to leader if needed
 
 STANDBY:
@@ -177,13 +186,13 @@ MESSAGE TYPES:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              SWARM APPLICATION LAYER                    │
+│              ROJ APPLICATION LAYER                      │
 │  • Load balancing                                       │
 │  • Thermal coordination                                 │
 │  • Fault handling                                       │
 │  • Leader election                                      │
 ├─────────────────────────────────────────────────────────┤
-│              SWARM TRANSPORT LAYER                      │
+│              ROJ TRANSPORT LAYER                        │
 │  • Message serialization                                │
 │  • Acknowledgment handling                              │
 │  • Retry logic                                          │
@@ -403,14 +412,14 @@ SCENARIO 4: Module replacement
 • New module powers up
 • Auto-discovers network
 • Downloads configuration from peers
-• Joins swarm seamlessly
+• Joins ROJ seamlessly
 
 Time for new module integration: <30 seconds
 ```
 
 ---
 
-## 5. Swarm Algorithms
+## 5. ROJ Algoritmi
 
 ### Consensus Protocol (Raft-inspired)
 
@@ -495,7 +504,7 @@ Communication per iteration: O(n) messages
 ### Emergent Behavior
 
 ```
-EMERGENT SWARM BEHAVIORS
+EMERGENTNA ROJ PONAŠANJA
 ────────────────────────
 
 1. LOAD FOLLOWING
@@ -557,9 +566,9 @@ PLUG & PLAY PROCEDURE
    • Begins soft-start power injection
 
 5. Full operation
-   • Participates in swarm optimization
+   • Participates in ROJ optimization
    • Reports status, receives commands
-   • Full member of swarm
+   • Full member of ROJ
 
 Total time: <60 seconds
 User intervention: None
@@ -581,7 +590,7 @@ UNPLANNED REMOVAL (hot unplug)
 ──────────────────────────────
 1. Module suddenly disappears
 2. Heartbeat timeout detected (150ms)
-3. Swarm initiates fault redistribution
+3. ROJ initiates fault redistribution
 4. System continues at reduced capacity
 5. No user intervention needed
 ```
@@ -609,24 +618,24 @@ HIERARCHICAL SCALING
 
 For very large systems (>1 MW):
 
-Level 1: Module swarms (up to 20 modules each)
-Level 2: Swarm-of-swarms (up to 10 swarms)
-Level 3: Site controller (optional)
+Level 1: Modul ROJ-evi (do 20 modula svaki)
+Level 2: ROJ-od-ROJ-eva (do 10 ROJ-eva)
+Level 3: Site kontroler (opciono)
 
          ┌─────────────────────────────────┐
-         │        SITE CONTROLLER          │
-         │        (optional)               │
+         │        SITE KONTROLER           │
+         │        (opciono)                │
          └───────────┬─────────────────────┘
                      │
         ┌────────────┼────────────┐
         ▼            ▼            ▼
    ┌─────────┐  ┌─────────┐  ┌─────────┐
-   │ Swarm 1 │  │ Swarm 2 │  │ Swarm 3 │
+   │  ROJ 1  │  │  ROJ 2  │  │  ROJ 3  │
    │ 600 kW  │  │ 600 kW  │  │ 600 kW  │
    │20×EK30  │  │20×EK30  │  │20×EK30  │
    └─────────┘  └─────────┘  └─────────┘
 
-Total: 1.8 MW with full swarm benefits
+Total: 1.8 MW sa punim ROJ benefitima
 ```
 
 ---
@@ -636,13 +645,13 @@ Total: 1.8 MW with full swarm benefits
 ### Software Architecture
 
 ```
-SWARM MODULE SOFTWARE
-─────────────────────
+ROJ MODULE SOFTVER
+──────────────────
 
 ┌────────────────────────────────────────────────────────────┐
 │                    APPLICATION LAYER                        │
 │  ┌────────────────────────────────────────────────────┐   │
-│  │              SWARM COORDINATOR                      │   │
+│  │              ROJ KOORDINATOR                        │   │
 │  │  • Leader election                                  │   │
 │  │  • Distributed optimization                         │   │
 │  │  • Fault handling                                   │   │
@@ -716,18 +725,18 @@ Timeout watchdogs for stuck states
 
 ---
 
-## 8. Bill of Materials - Swarm
+## 8. Lista Materijala - ROJ
 
 | Komponenta | Specifikacija | Qty | Unit Price | Total |
 |------------|---------------|-----|------------|-------|
-| CAN-FD Transceiver | TJA1443 or equivalent | 1 | €3 | €3 |
-| CAN-FD Controller | Integrated in MCU | - | - | €0 |
+| CAN-FD Transceiver | TJA1443 ili ekvivalent | 1 | €3 | €3 |
+| CAN-FD Controller | Integrisan u MCU | - | - | €0 |
 | Termination Resistor | 120Ω, 1% | 2 | €0.10 | €0.20 |
-| CAN Connector | DB9 or M12 | 2 | €5 | €10 |
-| CAN Cable | Shielded twisted pair, 5m | 1 | €10 | €10 |
+| CAN Konektor | DB9 ili M12 | 2 | €5 | €10 |
+| CAN Kabl | Oklopljeni twisted pair, 5m | 1 | €10 | €10 |
 | Status LED | RGB, addressable | 1 | €1 | €1 |
-| ID DIP Switch | 4-position (or software ID) | 1 | €1 | €1 |
-| **TOTAL Swarm per module** | | | | **€25.20** |
+| ID DIP Switch | 4-pozicioni (ili softverski ID) | 1 | €1 | €1 |
+| **UKUPNO ROJ po modulu** | | | | **€25.20** |
 
 ---
 
@@ -736,10 +745,10 @@ Timeout watchdogs for stuck states
 ### 9.1 Dual CAN Bus Design
 
 ```
-WHY DUAL CAN?
-─────────────
-• CAN bus is single point of failure
-• Wire break → swarm loses coordination
+ZAŠTO DUAL CAN?
+───────────────
+• CAN bus je single point of failure
+• Prekid žice → ROJ gubi koordinaciju
 • Critical for safety and reliability
 
 DUAL CAN ARCHITECTURE
@@ -992,7 +1001,7 @@ BOM ADDITION FOR DUAL CAN
 | Termination (share) | 0.25           | €2.00      | €0.50  |
 | **Additional cost** |                |            | **€6** |
 
-Total swarm cost with dual CAN: €25.20 + €6.00 = €31.20 per module
+Ukupna ROJ cena sa dual CAN: €25.20 + €6.00 = €31.20 po modulu
 ```
 
 ### 9.5 Software Configuration
@@ -1055,6 +1064,387 @@ void DualCAN_Failover(DualCAN_t *dcan) {
     CAN_Transmit(dcan->backup, &msg);
 }
 ```
+
+---
+
+## 10. ROJ Inteligencija za Baterije (EK-BAT)
+
+ROJ paradigma prirodno se proširuje sa modula punjača (EK3) na module baterija vozila (EK-BAT). Svaki modul baterije je autonomni agent sa ugrađenim BMS-om koji učestvuje u većoj ROJ mreži.
+
+### 10.1 Modul Baterije kao ROJ Agent
+
+```
+ROJ PUNJAČA                          ROJ BATERIJA
+────────────────────────────────────────────────────────────────────
+EK3 moduli punjača               →    EK-BAT moduli baterija
+Optimizacija snage               →    Optimizacija SOC/SOH
+Termalna koordinacija            →    Balansiranje ćelija kroz flotu
+Droop kontrola                   →    V2G učešće
+Senziranje napona DC sabirnice   →    Praćenje zdravlja baterije
+Robot zamenjuje module punjača   →    Robot zamenjuje baterije
+
+KOMBINOVANI EKOSISTEM:
+
+        ┌──────────────────────────────────────────────────────────┐
+        │                    SWAP STANICA                          │
+        │   ┌─────────────────────────────────────────────────┐   │
+        │   │          ROJ MODULA PUNJAČA                      │   │
+        │   │   ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │   │
+        │   │   │ EK3 │  │ EK3 │  │ EK3 │  │ EK3 │  ...       │   │
+        │   │   └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │   │
+        │   │      └────────┴────────┴────────┘                │   │
+        │   │               │ CAN-FD                           │   │
+        │   └───────────────┼──────────────────────────────────┘   │
+        │                   │                                      │
+        │                   ▼                                      │
+        │   ┌─────────────────────────────────────────────────┐   │
+        │   │          ROJ MODULA BATERIJA (POOL)              │   │
+        │   │   ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │   │
+        │   │   │BAT-1│  │BAT-2│  │BAT-3│  │BAT-4│  ...       │   │
+        │   │   │ 85% │  │ 70% │  │ 95% │  │ 60% │  (SOC)     │   │
+        │   │   └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │   │
+        │   │      └────────┴────────┴────────┘                │   │
+        │   │               │ CAN-FD (Roj baterija)            │   │
+        │   └───────────────┼──────────────────────────────────┘   │
+        │                   │                                      │
+        └───────────────────┼──────────────────────────────────────┘
+                            │
+                     VOZILA DOLAZE
+                     BATERIJE SE MENJAJU
+```
+
+### 10.2 Distribuirana BMS Arhitektura
+
+```
+TRADICIONALNI BMS                    ROJ BMS (EK-BAT)
+────────────────────────────────────────────────────────────────────
+Centralni BMS po vozilu          →    Svaki modul ima pun BMS
+Proprietary protokoli            →    Otvoreni CAN-FD protokol
+Fiksna baterija = fiksno vozilo  →    Bilo koja baterija → bilo koje vozilo
+Kvar = zarobljeno vozilo         →    Kvar = zamena na novi modul
+
+MOGUĆNOSTI EK-BAT BMS (po modulu):
+──────────────────────────────────
+• Praćenje napona ćelija (±1mV)
+• Praćenje temperature ćelija (8 tačaka)
+• SOC estimacija (Kulonsko brojanje + Kalman)
+• SOH estimacija (impedansna spektroskopija)
+• Aktivno balansiranje (ćelija-do-ćelije)
+• Termalno upravljanje (pumpa/ventil)
+• CAN-FD komunikacija (5 Mbps)
+• Učešće u roju (izbor lidera)
+• V2G spremnost (bidirekciona kontrola)
+• Prediktivna analitika zdravlja (edge AI)
+
+BMS HARDVER:
+────────────
+Glavni MCU: STM32G474RET6 (isti kao EK3!)
+AFE: BQ76952 (16 ćelija, TI)
+Senziranje struje: INA240 (bidirekcioni)
+Temperatura: NTC × 8, ±0,5°C
+Izolacija: ISO7741 (4 kanala)
+Memorija: 1MB Flash, 128KB SRAM
+AI akcelerator: Integrisani FPU + CORDIC
+```
+
+### 10.3 Optimizacija Baterijskog Pool-a
+
+```
+CILJEVI ROJ OPTIMIZACIJE
+──────────────────────────
+
+minimize: f(dispatch) =
+    w₁ × Σ(SOC_target - SOC_i)² +     # SOC izjednačavanje
+    w₂ × Σ(1/SOH_i) × P_dispatch_i +   # Očuvanje slabih baterija
+    w₃ × Σ(T_i - T_optimal)² +         # Termalna optimizacija
+    w₄ × Σ(cycles_i × P_i) +           # Balansiranje habanja
+    w₅ × Σ(d_stanica - d_vozilo)       # Minimizacija udaljenosti
+
+ograničenja:
+    Σ SOC_dispatched ≥ energy_potrebna_za_rutu
+    SOC_i ∈ [SOC_min, SOC_max]
+    T_i ≤ T_limit
+    n_dispatched ≤ kapacitet_vozila
+
+
+ALGORITAM DISPEČINGA (Greedy-Optimal):
+──────────────────────────────────────
+
+function selectBatteriesForVehicle(vehicle, pool):
+    required_energy = vehicle.route.energy_kwh
+    candidates = pool.filter(b → b.SOC > SOC_min and b.available)
+
+    # Boduj svaku bateriju (niže = bolje)
+    for battery in candidates:
+        score = 0
+        score += α × abs(battery.SOC - SOC_optimal)     # Preferiraj srednji SOC
+        score += β × (1 - battery.SOH)                   # Izbegavaj degradirane
+        score += γ × (battery.temp - 25°C)²             # Preferiraj sobnu temp
+        score += δ × battery.total_cycles / 4000        # Balansiranje habanja
+        battery.dispatch_score = score
+
+    # Selektuj top N baterija koje zadovoljavaju energetski zahtev
+    selected = []
+    candidates.sortBy(dispatch_score)
+
+    for battery in candidates:
+        selected.add(battery)
+        if sum(b.energy_available for b in selected) >= required_energy:
+            break
+
+    return selected
+
+
+PRIMER: Gradska autobuska flota (10 autobusa, 50 baterija pool)
+───────────────────────────────────────────────────────────────
+
+Stanje pool-a:
+┌─────────┬─────────┬─────────┬──────────┬────────────────────┐
+│ Baterija│ SOC (%) │ SOH (%) │ Temp (°C)│ Bodovi             │
+├─────────┼─────────┼─────────┼──────────┼────────────────────┤
+│ BAT-12  │ 82      │ 98      │ 28       │ 0.15 (odlično)     │
+│ BAT-07  │ 85      │ 96      │ 25       │ 0.18               │
+│ BAT-23  │ 90      │ 95      │ 30       │ 0.22               │
+│ BAT-41  │ 95      │ 92      │ 32       │ 0.28 (prepuna)     │
+│ BAT-03  │ 65      │ 88      │ 35       │ 0.45 (degradirana) │
+│ BAT-19  │ 40      │ 75      │ 22       │ 0.82 (nizak SOH)   │
+└─────────┴─────────┴─────────┴──────────┴────────────────────┘
+
+Autobus #5 treba 80 kWh za rutu:
+• Algoritam bira: BAT-12 + BAT-07 (50 kWh × 85% prosek = 85 kWh)
+• Izbegava: BAT-19 (nizak SOH), BAT-41 (zahtevalo bi duboko pražnjenje)
+• Rezultat: Optimalno korišćenje baterija kroz flotu
+```
+
+### 10.4 Komunikacija Vozilo-Stanica
+
+```
+SEKVENCA KOMUNIKACIJE ZA ZAMENU BATERIJA
+────────────────────────────────────────
+
+Dolazak vozila → Pregovaranje o zameni → Razmena baterija → Odlazak
+
+DETALJNA SEKVENCA:
+
+T-2min: Vozilo emituje nameru dolaska (preko LTE/5G)
+        MSG: {vehicle_id, ETA, route_next, energy_needed, battery_count}
+
+T-1min: Stanica odgovara sa planom zamene
+        MSG: {station_id, bay_assignment, batteries_reserved[]}
+        Stanica rezerviše optimalne baterije iz pool-a
+
+T-0:    Vozilo dolazi na poziciju
+        Fizička konekcija: CAN-FD + interlock
+
+T+10s:  BMS rukovanje
+        BMS vozila ↔ BMS stanice ↔ BMS baterija (roj)
+        Razmena: SOC, SOH, termalno stanje, autentifikacija
+
+T+30s:  Robot počinje uklanjanje
+        Stare baterije ulaze u pool (za punjenje)
+        Nove baterije se montiraju na vozilo
+
+T+5min: Zamena završena
+        Finalna BMS sinhronizacija, autorizacija odlaska vozila
+
+POSLE ZAMENE:
+        Stare baterije se pridružuju roju stanice
+        Počinje punjenje preko EK3 roja punjača
+        Spremne za sledeće vozilo za ~30 min
+
+
+CAN-FD TIPOVI PORUKA (Proširenje za roj baterija):
+──────────────────────────────────────────────────
+
+7. BATTERY_STATUS (1 Hz, po modulu)
+   ID: 0x400 + battery_id
+   Payload: [SOC%, SOH%, Tj_max, Tj_avg, voltage, current, fault_code]
+   Svrha: Agregacija statusa pool-a
+
+8. DISPATCH_REQUEST (na dolazak vozila)
+   ID: 0x500
+   Payload: [vehicle_id, energy_kwh, count, priority, route_hash]
+   Svrha: Inicijacija selekcije baterija
+
+9. DISPATCH_ASSIGN (odgovor na zahtev)
+   ID: 0x501
+   Payload: [battery_ids[], SOC[], bay_number, ETA_ready]
+   Svrha: Potvrda alokacije baterija
+
+10. V2G_COMMAND (zahtev mrežnog operatora)
+    ID: 0x600
+    Payload: [power_kw, duration_s, price_kwh, grid_frequency]
+    Svrha: V2G zahtev za učešće roja baterija
+```
+
+### 10.5 V2G Integracija
+
+```
+ROJ BATERIJA KAO VIRTUELNA ELEKTRANA
+────────────────────────────────────
+
+Baterijski pool na swap stanici pruža mrežne usluge:
+
+┌────────────────────────────────────────────────────────────────────┐
+│                         MREŽNI OPERATOR                             │
+│                              │                                      │
+│                     ┌────────▼────────┐                            │
+│                     │  SIGNAL MREŽE   │                            │
+│                     │  (frekv, cena)  │                            │
+│                     └────────┬────────┘                            │
+│                              │                                      │
+│   ┌──────────────────────────▼───────────────────────────────────┐ │
+│   │                  SWAP STANICA                                 │ │
+│   │                                                               │ │
+│   │   ┌───────────────────────────────────────────────────────┐  │ │
+│   │   │              ROJ EK3 PUNJAČA (BIDIREKCIONI)           │  │ │
+│   │   │         ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │  │ │
+│   │   │         │ EK3 │  │ EK3 │  │ EK3 │  │ EK3 │            │  │ │
+│   │   │         │ V2G │  │ V2G │  │ V2G │  │ V2G │            │  │ │
+│   │   │         └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │  │ │
+│   │   │            └────────┴────────┴────────┘               │  │ │
+│   │   │                      │                                 │  │ │
+│   │   └──────────────────────┼─────────────────────────────────┘  │ │
+│   │                          │ DC sabirnica                       │ │
+│   │   ┌──────────────────────┼─────────────────────────────────┐  │ │
+│   │   │              ROJ BATERIJA (V2G SPREMAN)                │  │ │
+│   │   │         ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │  │ │
+│   │   │         │BAT-1│  │BAT-2│  │BAT-3│  │BAT-4│            │  │ │
+│   │   │         │ 80% │  │ 75% │  │ 90% │  │ 65% │            │  │ │
+│   │   │         └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │  │ │
+│   │   │            │        │        │        │                │  │ │
+│   │   │    DOSTUPNO ZA V2G:     REZERVISANO ZA VOZILA:        │  │ │
+│   │   │    BAT-2, BAT-4         BAT-1, BAT-3                   │  │ │
+│   │   │    140 kWh kapacitet    170 kWh rezervisano            │  │ │
+│   │   │                                                        │  │ │
+│   │   └────────────────────────────────────────────────────────┘  │ │
+│   │                                                               │ │
+│   └───────────────────────────────────────────────────────────────┘ │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+MODEL PRIHODA OD V2G:
+─────────────────────
+Pool od 50 baterija na autobuskom depou
+• Prosečno 50% baterija dostupno za V2G
+• 25 × 50 kWh × 0,5 dostupnost = 625 kWh skladištenje
+• Smanjenje vršnog opterećenja: 4h/dan × 365 dana × €0,15/kWh = €137k/god
+• Regulacija frekvencije: €50k/godišnje dodatno
+
+Kriterijumi za V2G učešće (po bateriji):
+• SOC > 30% (rezerva za hitni dispatch)
+• SOH > 80% (zaštita zdravih baterija)
+• Nije rezervisana za vozilo u naredna 2 sata
+• Termalno stanje normalno
+```
+
+### 10.6 Emergentna Ponašanja Roja Baterija
+
+```
+EMERGENTNA PONAŠANJA (Roj baterija)
+───────────────────────────────────
+
+1. SOC IZJEDNAČAVANJE
+   • Baterije sa visokim SOC → pružaju V2G
+   • Baterije sa niskim SOC → prioritetno punjenje
+   • Rezultat: Pool održava uniformnu spremnost
+
+2. TERMALNO PREBACIVANJE OPTEREĆENJA
+   • Vruće baterije → standby (hlađenje)
+   • Hladne baterije → punjenje/V2G
+   • Toplota distribuirana kroz vreme
+
+3. SELEKCIJA ZASNOVANA NA ZDRAVLJU
+   • Baterije visokog SOH → zahtevne rute (brda, duge)
+   • Baterije niskog SOH → lake rute (ravne, kratke)
+   • Životni vek baterija maksimiziran kroz flotu
+
+4. PREDIKTIVNO POZICIONIRANJE
+   • Učenje obrazaca dolaska vozila
+   • Prethodno pozicioniranje za jutarnji šic
+   • Anticipacija skokova cene struje
+
+5. IZOLACIJA KVAROVA
+   • Slaba ćelija detektovana u BAT-15
+   • Automatsko isključenje iz dispečinga
+   • Upozorenje za održavanje
+   • Nijedno vozilo ne ostaje zarobljeno
+
+
+POREĐENJE: Tradicionalni vs ROJ BMS
+───────────────────────────────────
+
+| Aspekt                | Tradicionalni      | ROJ BMS             |
+|-----------------------|--------------------|---------------------|
+| Donošenje odluka      | Centralizovano     | Distribuirano       |
+| Single point of fail  | Da (centralni BMS) | Ne                  |
+| Skalabilnost          | Ograničena         | Linearna            |
+| Iskorišćenje baterija | Individualno       | Optimizovano za fl. |
+| V2G koordinacija      | Po vozilu          | Na nivou pool-a     |
+| Rukovanje kvarovima   | Ručno              | Automatsko          |
+| Dodavanje nove bater. | Konfiguracija      | Plug & play         |
+| Optimizacija zdravlja | Po bateriji        | Kroz celu flotu     |
+```
+
+---
+
+## 11. SWARM CORE Specifikacija
+
+SWARM CORE je formalna specifikacija ROJ koordinacije za celu JEZGRO porodicu proizvoda. Definiše zajedničku implementaciju koju svi uređaji (EK3, BAT, ROB, GW, RACK) koriste za koordinaciju roja.
+
+### 11.1 ROJ_COORD Servis
+
+ROJ_COORD servis je runtime komponenta koja implementira SWARM CORE. Sastoji se od pet ključnih komponenti:
+
+| Komponenta | Svrha |
+|------------|-------|
+| **Policy Engine** | Čuva parametre, bira režim ponašanja (istraživanje/eksploatacija) |
+| **Quorum Engine** | Pokreće odluke sa unakrsnom inhibicijom |
+| **Stigmergy Store** | Lokalna mapa tagova sa TTL i eksponencijalnim opadanjem |
+| **Task Allocator** | Distribucija zadataka i resursa |
+| **Health/Trust** | Detekcija anomalija i izolacija agenata |
+
+### 11.2 Protokol Poruka
+
+SWARM CORE definiše šest CAN-FD tipova poruka za koordinaciju:
+
+| Tip | ID Opseg | Frekvencija | Svrha |
+|-----|----------|-------------|-------|
+| `ROJ_HEARTBEAT` | 0x510 + node | 1-2 Hz | Prisutnost + osnovne metrike |
+| `ROJ_STATE` | 0x520 + node | 0.5 Hz | Prošireni snimak stanja |
+| `ROJ_TASK_CLAIM` | 0x540 | Po potrebi | Zahtevi za zadatke/resurse |
+| `ROJ_VOTE` | 0x550 | Po potrebi | Kvorum glasanje |
+| `ROJ_TAG` | 0x560 | 1-5 Hz | Stigmergy tagovi |
+| `ROJ_ALERT` | 0x5FF | Događaj | Kritične notifikacije |
+
+### 11.3 Algoritmi Koordinacije
+
+**Kvorum Glasanje:**
+```
+Q = max(quorum_min, quorum_ratio × active_nodes)
+
+if votes_yes >= Q and votes_yes > votes_no:
+    decision = ACCEPT
+elif timeout and votes_yes < Q:
+    decision = REJECT
+```
+
+**Stigmergija (Tag + Opadanje):**
+```
+tag.value(t+dt) = tag.value(t) × exp(-dt / tau)
+```
+Tagovi eksponencijalno opadaju sa konfigurabilnim poluvremenom. Istek TTL-a uklanja tag.
+
+**Topološka Koordinacija:**
+- Svaki agent održava k suseda (podrazumevano k=6-7)
+- Lista se osvežava na osnovu kvaliteta veze i svežine podataka
+- Obezbeđuje stabilnost nezavisno od gustine mreže
+
+### 11.4 Povezani Dokumenti
+
+Za kompletnu specifikaciju, videti:
+- `tehnika/inzenjersko/sr/rojno-jezgro/00-core-spec.md` (EK-TECH-027)
+- `tehnika/inzenjersko/sr/rojno-jezgro/01-detaljni-dokument.md` (EK-TECH-028)
 
 ---
 

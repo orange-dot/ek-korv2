@@ -1,0 +1,102 @@
+# =============================================================================
+# JEZGRO ESP32-S3 Renode Test Scenario
+# =============================================================================
+# PARTIAL SUPPORT: ESP32-S3 emulation has limitations
+# - Xtensa LX7 CPU: Supported
+# - Basic peripherals: Supported
+# - WiFi/BLE: NOT SUPPORTED (use Wokwi or real HW)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Machine Setup
+# -----------------------------------------------------------------------------
+
+mach create "jezgro-esp32"
+machine LoadPlatformDescription @esp32s3.repl
+
+# -----------------------------------------------------------------------------
+# Console Configuration
+# -----------------------------------------------------------------------------
+
+showAnalyzer uart0
+
+logLevel 3
+logLevel 3 uart0
+
+# -----------------------------------------------------------------------------
+# Firmware Loading
+# -----------------------------------------------------------------------------
+
+$firmware ?= @../build-esp32/jezgro_esp32.elf
+
+echo ""
+echo "=========================================="
+echo "  JEZGRO ESP32-S3 Simulation"
+echo "=========================================="
+echo ""
+echo "WARNING: This is PARTIAL emulation!"
+echo "         WiFi/BLE are NOT supported"
+echo "         Use Wokwi for WiFi testing"
+echo ""
+
+echo "Loading firmware: $firmware"
+sysbus LoadELF $firmware
+
+# -----------------------------------------------------------------------------
+# Test Macros
+# -----------------------------------------------------------------------------
+
+macro reset
+"""
+    sysbus LoadELF $firmware
+    cpu0 Reset
+"""
+
+macro smoke_test
+"""
+    echo "Starting ESP32-S3 smoke test..."
+    start
+    sleep 5
+    pause
+    echo "Smoke test complete"
+"""
+
+macro can_test
+"""
+    echo "Testing TWAI (CAN) controller..."
+    start
+    sleep 3
+    pause
+    echo "TWAI test complete"
+"""
+
+# -----------------------------------------------------------------------------
+# Ready Message
+# -----------------------------------------------------------------------------
+
+echo ""
+echo "=========================================="
+echo "  Simulation Ready (Limited)"
+echo "=========================================="
+echo ""
+echo "What WORKS:"
+echo "  - CPU execution (Xtensa LX7)"
+echo "  - UART output"
+echo "  - GPIO"
+echo "  - Timers"
+echo "  - TWAI (CAN)"
+echo ""
+echo "What DOES NOT work:"
+echo "  - WiFi"
+echo "  - Bluetooth/BLE"
+echo "  - Some advanced peripherals"
+echo ""
+echo "For WiFi testing, use:"
+echo "  - Wokwi (https://wokwi.com)"
+echo "  - Real hardware"
+echo ""
+echo "Commands:"
+echo "  start / pause / quit"
+echo "  runMacro smoke_test"
+echo "  runMacro can_test"
+echo ""

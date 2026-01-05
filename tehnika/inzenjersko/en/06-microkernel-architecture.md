@@ -31,7 +31,7 @@ We apply these principles to EV charging infrastructure:
 | OS Concept | Power Electronics Equivalent |
 |------------|------------------------------|
 | Kernel | Hardware protection circuits (OCP, OVP, OTP) + core LLC control |
-| User processes | Health monitoring, thermal management, swarm coordination |
+| User processes | Health monitoring, thermal management, ROJ coordination |
 | IPC (Inter-Process Communication) | CAN-FD message passing between modules |
 | Process isolation | Galvanic isolation + separate MCU per module |
 | Graceful degradation | N-1 redundancy, wide power striping |
@@ -656,7 +656,7 @@ No dedicated "spare" modules. Instead, all modules run slightly below capacity a
 
 | Document | Description |
 |----------|-------------|
-| `tehnika/05-swarm-intelligence.md` | Swarm coordination protocols |
+| `tehnika/05-ROJ-intelligence.md` | Swarm coordination protocols |
 | `tehnika/11-security-model.md` | Security and trust model |
 | `tehnika/12-audit-logging.md` | Audit logging and forensics |
 | `tehnika/13-hardware-security.md` | Hardware security and HSM |

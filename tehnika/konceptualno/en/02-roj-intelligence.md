@@ -1,9 +1,18 @@
-# Swarm Intelligence for Multi-Module Systems
+# ROJ: Distributed Intelligence for Multi-Module Systems
+
+## What is ROJ?
+
+**ROJ** (Serbian for "swarm" - as in bee swarm) is Elektrokombinacija's distributed intelligence system. Like JEZGRO (kernel) names our microkernel OS, ROJ names our swarm coordination layer.
+
+The name reflects:
+- **Distributed nature**: Like bees in a swarm, each module is autonomous
+- **Collective intelligence**: Simple rules create complex, optimal behavior
+- **Serbian origin**: Consistent with JEZGRO branding
 
 ## Philosophy: Distributed Intelligence
 
 ```
-CENTRALIZED SYSTEM              ELEKTROKOMBINACIJA SWARM
+CENTRALIZED SYSTEM              ELEKTROKOMBINACIJA ROJ
 ────────────────────────────────────────────────────────────
 Single controller              →    Each module = brain
 Single point of failure       →    No single point
@@ -15,12 +24,12 @@ Scheduled maintenance         →    Self-healing
 
 ---
 
-## 1. Swarm Architecture
+## 1. ROJ Architecture
 
 ### Concept
 
 ```
-TRADITIONAL                     SWARM INTELLIGENCE
+TRADITIONAL                     ROJ INTELLIGENCE
 ─────────────────────────────────────────────────────────────
 
     ┌─────────────┐                 ┌─────┐
@@ -43,7 +52,7 @@ TRADITIONAL                     SWARM INTELLIGENCE
                                     • Self-heals
 ```
 
-### Swarm Topology
+### ROJ Topology
 
 ```
 FULLY CONNECTED MESH
@@ -86,7 +95,7 @@ LEADER (elected):
 FOLLOWER:
 • Local optimization
 • Reports status to peers
-• Executes swarm decisions
+• Executes ROJ decisions
 • Can promote to leader if needed
 
 STANDBY:
@@ -177,13 +186,13 @@ MESSAGE TYPES:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              SWARM APPLICATION LAYER                    │
+│              ROJ APPLICATION LAYER                       │
 │  • Load balancing                                       │
 │  • Thermal coordination                                 │
 │  • Fault handling                                       │
 │  • Leader election                                      │
 ├─────────────────────────────────────────────────────────┤
-│              SWARM TRANSPORT LAYER                      │
+│              ROJ TRANSPORT LAYER                         │
 │  • Message serialization                                │
 │  • Acknowledgment handling                              │
 │  • Retry logic                                          │
@@ -403,14 +412,14 @@ SCENARIO 4: Module replacement
 • New module powers up
 • Auto-discovers network
 • Downloads configuration from peers
-• Joins swarm seamlessly
+• Joins ROJ seamlessly
 
 Time for new module integration: <30 seconds
 ```
 
 ---
 
-## 5. Swarm Algorithms
+## 5. ROJ Algorithms
 
 ### Consensus Protocol (Raft-inspired)
 
@@ -495,8 +504,8 @@ Communication per iteration: O(n) messages
 ### Emergent Behavior
 
 ```
-EMERGENT SWARM BEHAVIORS
-────────────────────────
+EMERGENT ROJ BEHAVIORS
+──────────────────────
 
 1. LOAD FOLLOWING
    • No central command
@@ -557,9 +566,9 @@ PLUG & PLAY PROCEDURE
    • Begins soft-start power injection
 
 5. Full operation
-   • Participates in swarm optimization
+   • Participates in ROJ optimization
    • Reports status, receives commands
-   • Full member of swarm
+   • Full member of ROJ
 
 Total time: <60 seconds
 User intervention: None
@@ -581,7 +590,7 @@ UNPLANNED REMOVAL (hot unplug)
 ──────────────────────────────
 1. Module suddenly disappears
 2. Heartbeat timeout detected (150ms)
-3. Swarm initiates fault redistribution
+3. ROJ initiates fault redistribution
 4. System continues at reduced capacity
 5. No user intervention needed
 ```
@@ -609,8 +618,8 @@ HIERARCHICAL SCALING
 
 For very large systems (>1 MW):
 
-Level 1: Module swarms (up to 20 modules each)
-Level 2: Swarm-of-swarms (up to 10 swarms)
+Level 1: Module ROJs (up to 20 modules each)
+Level 2: ROJ-of-ROJs (up to 10 ROJs)
 Level 3: Site controller (optional)
 
          ┌─────────────────────────────────┐
@@ -621,12 +630,12 @@ Level 3: Site controller (optional)
         ┌────────────┼────────────┐
         ▼            ▼            ▼
    ┌─────────┐  ┌─────────┐  ┌─────────┐
-   │ Swarm 1 │  │ Swarm 2 │  │ Swarm 3 │
+   │  ROJ 1  │  │  ROJ 2  │  │  ROJ 3  │
    │ 600 kW  │  │ 600 kW  │  │ 600 kW  │
    │20×EK30  │  │20×EK30  │  │20×EK30  │
    └─────────┘  └─────────┘  └─────────┘
 
-Total: 1.8 MW with full swarm benefits
+Total: 1.8 MW with full ROJ benefits
 ```
 
 ---
@@ -636,13 +645,13 @@ Total: 1.8 MW with full swarm benefits
 ### Software Architecture
 
 ```
-SWARM MODULE SOFTWARE
-─────────────────────
+ROJ MODULE SOFTWARE
+───────────────────
 
 ┌────────────────────────────────────────────────────────────┐
 │                    APPLICATION LAYER                        │
 │  ┌────────────────────────────────────────────────────┐   │
-│  │              SWARM COORDINATOR                      │   │
+│  │              ROJ COORDINATOR                        │   │
 │  │  • Leader election                                  │   │
 │  │  • Distributed optimization                         │   │
 │  │  • Fault handling                                   │   │
@@ -716,7 +725,7 @@ Timeout watchdogs for stuck states
 
 ---
 
-## 8. Bill of Materials - Swarm
+## 8. Bill of Materials - ROJ
 
 | Component | Specification | Qty | Unit Price | Total |
 |-----------|---------------|-----|------------|-------|
@@ -727,7 +736,388 @@ Timeout watchdogs for stuck states
 | CAN Cable | Shielded twisted pair, 5m | 1 | €10 | €10 |
 | Status LED | RGB, addressable | 1 | €1 | €1 |
 | ID DIP Switch | 4-position (or software ID) | 1 | €1 | €1 |
-| **TOTAL Swarm per module** | | | | **€25.20** |
+| **TOTAL ROJ per module** | | | | **€25.20** |
+
+---
+
+## 9. Battery ROJ Intelligence (EK-BAT)
+
+The ROJ intelligence paradigm extends naturally from charger modules (EK3) to vehicle battery modules (EK-BAT). Each battery module is an autonomous agent with onboard BMS that participates in a larger ROJ network.
+
+### 9.1 Battery Module as ROJ Agent
+
+```
+CHARGER ROJ                          BATTERY ROJ
+────────────────────────────────────────────────────────────────────
+EK3 charger modules              →    EK-BAT battery modules
+Power optimization               →    SOC/SOH optimization
+Thermal coordination             →    Cell balancing across fleet
+Droop control                    →    V2G participation
+DC bus voltage sensing           →    Battery health monitoring
+Robot swaps charger modules      →    Robot swaps batteries
+
+COMBINED ECOSYSTEM:
+
+        ┌──────────────────────────────────────────────────────────┐
+        │                    SWAP STATION                          │
+        │   ┌─────────────────────────────────────────────────┐   │
+        │   │          CHARGER MODULE ROJ                      │   │
+        │   │   ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │   │
+        │   │   │ EK3 │  │ EK3 │  │ EK3 │  │ EK3 │  ...       │   │
+        │   │   └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │   │
+        │   │      └────────┴────────┴────────┘                │   │
+        │   │               │ CAN-FD                           │   │
+        │   └───────────────┼──────────────────────────────────┘   │
+        │                   │                                      │
+        │                   ▼                                      │
+        │   ┌─────────────────────────────────────────────────┐   │
+        │   │          BATTERY MODULE ROJ (POOL)               │   │
+        │   │   ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │   │
+        │   │   │BAT-1│  │BAT-2│  │BAT-3│  │BAT-4│  ...       │   │
+        │   │   │ 85% │  │ 70% │  │ 95% │  │ 60% │  (SOC)     │   │
+        │   │   └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │   │
+        │   │      └────────┴────────┴────────┘                │   │
+        │   │               │ CAN-FD (Battery ROJ)             │   │
+        │   └───────────────┼──────────────────────────────────┘   │
+        │                   │                                      │
+        └───────────────────┼──────────────────────────────────────┘
+                            │
+                     VEHICLES ARRIVE
+                     BATTERIES SWAPPED
+```
+
+### 9.2 Distributed BMS Architecture
+
+```
+TRADITIONAL BMS                      ROJ BMS (EK-BAT)
+────────────────────────────────────────────────────────────────────
+Central BMS per vehicle         →    Each module has full BMS
+Proprietary protocols           →    Open CAN-FD protocol
+Fixed battery = fixed vehicle   →    Any battery → any vehicle
+Failure = stranded vehicle      →    Failure = swap to new module
+
+EK-BAT BMS CAPABILITIES (per module):
+─────────────────────────────────────
+• Cell voltage monitoring (±1mV)
+• Cell temperature monitoring (8 points)
+• SOC estimation (Coulomb counting + Kalman)
+• SOH estimation (impedance spectroscopy)
+• Active balancing (cell-to-cell)
+• Thermal management (pump/valve control)
+• CAN-FD communication (5 Mbps)
+• ROJ participation (leader election)
+• V2G ready (bidirectional control)
+• Predictive health analytics (edge AI)
+
+BMS HARDWARE:
+─────────────
+Main MCU: STM32G474RET6 (same as EK3!)
+AFE: BQ76952 (16 cell, TI)
+Current sense: INA240 (bidirectional)
+Temperature: NTC × 8, ±0.5°C
+Isolation: ISO7741 (4-channel)
+Memory: 1MB Flash, 128KB SRAM
+AI accelerator: Integrated FPU + CORDIC
+```
+
+### 9.3 Battery Pool Optimization
+
+```
+ROJ OPTIMIZATION OBJECTIVES
+───────────────────────────
+
+minimize: f(dispatch) =
+    w₁ × Σ(SOC_target - SOC_i)² +     # SOC equalization
+    w₂ × Σ(1/SOH_i) × P_dispatch_i +   # Preserve weak batteries
+    w₃ × Σ(T_i - T_optimal)² +         # Thermal optimization
+    w₄ × Σ(cycles_i × P_i) +           # Wear leveling
+    w₅ × Σ(d_station - d_vehicle)      # Distance minimization
+
+subject to:
+    Σ SOC_dispatched ≥ route_energy_required
+    SOC_i ∈ [SOC_min, SOC_max]
+    T_i ≤ T_limit
+    n_dispatched ≤ vehicle_capacity
+
+
+DISPATCH ALGORITHM (Greedy-Optimal):
+────────────────────────────────────
+
+function selectBatteriesForVehicle(vehicle, pool):
+    required_energy = vehicle.route.energy_kwh
+    candidates = pool.filter(b → b.SOC > SOC_min and b.available)
+
+    # Score each battery (lower = better)
+    for battery in candidates:
+        score = 0
+        score += α × abs(battery.SOC - SOC_optimal)     # Prefer mid-SOC
+        score += β × (1 - battery.SOH)                   # Avoid degraded
+        score += γ × (battery.temp - 25°C)²             # Prefer room temp
+        score += δ × battery.total_cycles / 4000        # Wear leveling
+        battery.dispatch_score = score
+
+    # Select top N batteries that meet energy requirement
+    selected = []
+    candidates.sortBy(dispatch_score)
+
+    for battery in candidates:
+        selected.add(battery)
+        if sum(b.energy_available for b in selected) >= required_energy:
+            break
+
+    return selected
+
+
+EXAMPLE: City Bus Fleet (10 buses, 50 battery pool)
+──────────────────────────────────────────────────
+
+Pool state:
+┌─────────┬─────────┬─────────┬──────────┬────────────────────┐
+│ Battery │ SOC (%) │ SOH (%) │ Temp (°C)│ Score              │
+├─────────┼─────────┼─────────┼──────────┼────────────────────┤
+│ BAT-12  │ 82      │ 98      │ 28       │ 0.15 (excellent)   │
+│ BAT-07  │ 85      │ 96      │ 25       │ 0.18               │
+│ BAT-23  │ 90      │ 95      │ 30       │ 0.22               │
+│ BAT-41  │ 95      │ 92      │ 32       │ 0.28 (too full)    │
+│ BAT-03  │ 65      │ 88      │ 35       │ 0.45 (degraded)    │
+│ BAT-19  │ 40      │ 75      │ 22       │ 0.82 (low SOH)     │
+└─────────┴─────────┴─────────┴──────────┴────────────────────┘
+
+Bus #5 needs 80 kWh for route:
+• Algorithm selects: BAT-12 + BAT-07 (50 kWh each × 85% avg = 85 kWh)
+• Avoids: BAT-19 (low SOH), BAT-41 (would need to discharge deeply)
+• Result: Optimal battery utilization across fleet
+```
+
+### 9.4 Vehicle-Station Communication
+
+```
+BATTERY SWAP COMMUNICATION SEQUENCE
+───────────────────────────────────
+
+Vehicle Arrival → Swap Negotiation → Battery Exchange → Departure
+
+DETAILED SEQUENCE:
+
+T-2min: Vehicle broadcasts arrival intent (over LTE/5G)
+        MSG: {vehicle_id, ETA, route_next, energy_needed, battery_count}
+
+T-1min: Station responds with swap plan
+        MSG: {station_id, bay_assignment, batteries_reserved[]}
+        Station reserves optimal batteries from pool
+
+T-0:    Vehicle arrives at bay
+        Physical connection: CAN-FD + interlock
+
+T+10s:  BMS handshake
+        Vehicle BMS ↔ Station BMS ↔ Battery BMSs (ROJ)
+        Exchange: SOC, SOH, thermal state, authentication
+
+T+30s:  Robot begins removal
+        Old batteries enter pool (for charging)
+        New batteries mounted to vehicle
+
+T+5min: Swap complete
+        Final BMS sync, vehicle departure authorization
+
+POST-SWAP:
+        Old batteries join station ROJ
+        Begin charging via EK3 charger ROJ
+        Ready for next vehicle in ~30 min
+
+
+CAN-FD MESSAGE TYPES (Battery ROJ Extension):
+─────────────────────────────────────────────
+
+7. BATTERY_STATUS (1 Hz, per module)
+   ID: 0x400 + battery_id
+   Payload: [SOC%, SOH%, Tj_max, Tj_avg, voltage, current, fault_code]
+   Purpose: Pool status aggregation
+
+8. DISPATCH_REQUEST (on vehicle arrival)
+   ID: 0x500
+   Payload: [vehicle_id, energy_kwh, count, priority, route_hash]
+   Purpose: Initiate battery selection
+
+9. DISPATCH_ASSIGN (response to request)
+   ID: 0x501
+   Payload: [battery_ids[], SOC[], bay_number, ETA_ready]
+   Purpose: Confirm battery allocation
+
+10. V2G_COMMAND (grid operator request)
+    ID: 0x600
+    Payload: [power_kw, duration_s, price_kwh, grid_frequency]
+    Purpose: V2G participation request to battery ROJ
+```
+
+### 9.5 V2G Integration
+
+```
+BATTERY ROJ AS VIRTUAL POWER PLANT
+──────────────────────────────────
+
+Battery pool at swap station provides grid services:
+
+┌────────────────────────────────────────────────────────────────────┐
+│                         GRID OPERATOR                               │
+│                              │                                      │
+│                     ┌────────▼────────┐                            │
+│                     │  GRID SIGNAL    │                            │
+│                     │  (freq, price)  │                            │
+│                     └────────┬────────┘                            │
+│                              │                                      │
+│   ┌──────────────────────────▼───────────────────────────────────┐ │
+│   │                  SWAP STATION                                 │ │
+│   │                                                               │ │
+│   │   ┌───────────────────────────────────────────────────────┐  │ │
+│   │   │              EK3 CHARGER ROJ (BIDIRECTIONAL)          │  │ │
+│   │   │         ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │  │ │
+│   │   │         │ EK3 │  │ EK3 │  │ EK3 │  │ EK3 │            │  │ │
+│   │   │         │ V2G │  │ V2G │  │ V2G │  │ V2G │            │  │ │
+│   │   │         └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │  │ │
+│   │   │            └────────┴────────┴────────┘               │  │ │
+│   │   │                      │                                 │  │ │
+│   │   └──────────────────────┼─────────────────────────────────┘  │ │
+│   │                          │ DC Bus                             │ │
+│   │   ┌──────────────────────┼─────────────────────────────────┐  │ │
+│   │   │              BATTERY ROJ (V2G READY)                   │  │ │
+│   │   │         ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │  │ │
+│   │   │         │BAT-1│  │BAT-2│  │BAT-3│  │BAT-4│            │  │ │
+│   │   │         │ 80% │  │ 75% │  │ 90% │  │ 65% │            │  │ │
+│   │   │         └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │  │ │
+│   │   │            │        │        │        │                │  │ │
+│   │   │    AVAILABLE FOR V2G:    RESERVED FOR VEHICLES:       │  │ │
+│   │   │    BAT-2, BAT-4          BAT-1, BAT-3                  │  │ │
+│   │   │    140 kWh capacity      170 kWh reserved              │  │ │
+│   │   │                                                        │  │ │
+│   │   └────────────────────────────────────────────────────────┘  │ │
+│   │                                                               │ │
+│   └───────────────────────────────────────────────────────────────┘ │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+V2G REVENUE MODEL:
+──────────────────
+50-battery pool at bus depot
+• Average 50% batteries available for V2G
+• 25 × 50 kWh × 0.5 availability = 625 kWh storage
+• Peak shaving: 4 hours/day × 365 days × €0.15/kWh = €137k/year
+• Frequency regulation: €50k/year additional
+
+V2G participation criteria (per battery):
+• SOC > 30% (reserve for emergency dispatch)
+• SOH > 80% (protect healthy batteries)
+• Not reserved for vehicle within 2 hours
+• Thermal state normal
+```
+
+### 9.6 Emergent Battery ROJ Behaviors
+
+```
+EMERGENT BEHAVIORS (Battery ROJ)
+────────────────────────────────
+
+1. SOC EQUALIZATION
+   • Batteries with high SOC → provide V2G
+   • Batteries with low SOC → priority charging
+   • Result: Pool maintains uniform readiness
+
+2. THERMAL LOAD SHIFTING
+   • Hot batteries → standby (cooling)
+   • Cool batteries → charging/V2G
+   • Heat distributed across time
+
+3. HEALTH-BASED SELECTION
+   • High-SOH batteries → demanding routes (hills, long)
+   • Low-SOH batteries → easy routes (flat, short)
+   • Fleet-wide battery life maximized
+
+4. PREDICTIVE POSITIONING
+   • Learn vehicle arrival patterns
+   • Pre-position batteries for morning rush
+   • Anticipate grid price spikes
+
+5. FAULT ISOLATION
+   • Weak cell detected in BAT-15
+   • Automatic exclusion from dispatch
+   • Alert for maintenance
+   • No vehicle stranded
+
+
+COMPARISON: Traditional vs ROJ BMS
+──────────────────────────────────
+
+| Aspect                | Traditional        | ROJ BMS             |
+|-----------------------|--------------------|--------------------|
+| Decision making       | Centralized        | Distributed         |
+| Single point failure  | Yes (central BMS)  | No                  |
+| Scalability           | Limited            | Linear              |
+| Battery utilization   | Individual         | Fleet-optimized     |
+| V2G coordination      | Per-vehicle        | Pool-level          |
+| Failure handling      | Manual             | Automatic           |
+| Add new battery       | Configuration      | Plug & play         |
+| Health optimization   | Per-battery        | Fleet-wide          |
+```
+
+---
+
+## 10. SWARM CORE Specification
+
+SWARM CORE is the formal specification of ROJ coordination for the entire JEZGRO product family. It defines the shared implementation that all devices (EK3, BAT, ROB, GW, RACK) use for swarm coordination.
+
+### 10.1 ROJ_COORD Service
+
+The ROJ_COORD service is the runtime component that implements SWARM CORE. It consists of five key components:
+
+| Component | Purpose |
+|-----------|---------|
+| **Policy Engine** | Stores parameters, selects behavior mode (explore/exploit) |
+| **Quorum Engine** | Drives decisions with cross-inhibition |
+| **Stigmergy Store** | Local tag map with TTL and exponential decay |
+| **Task Allocator** | Task and resource distribution |
+| **Health/Trust** | Anomaly detection and agent isolation |
+
+### 10.2 Message Protocol
+
+SWARM CORE defines six CAN-FD message types for coordination:
+
+| Type | ID Range | Frequency | Purpose |
+|------|----------|-----------|---------|
+| `ROJ_HEARTBEAT` | 0x510 + node | 1-2 Hz | Presence + basic metrics |
+| `ROJ_STATE` | 0x520 + node | 0.5 Hz | Extended state snapshot |
+| `ROJ_TASK_CLAIM` | 0x540 | On-demand | Task/resource requests |
+| `ROJ_VOTE` | 0x550 | On-demand | Quorum voting |
+| `ROJ_TAG` | 0x560 | 1-5 Hz | Stigmergy tags |
+| `ROJ_ALERT` | 0x5FF | Event | Critical notifications |
+
+### 10.3 Coordination Algorithms
+
+**Quorum Voting:**
+```
+Q = max(quorum_min, quorum_ratio × active_nodes)
+
+if votes_yes >= Q and votes_yes > votes_no:
+    decision = ACCEPT
+elif timeout and votes_yes < Q:
+    decision = REJECT
+```
+
+**Stigmergy (Tag + Decay):**
+```
+tag.value(t+dt) = tag.value(t) × exp(-dt / tau)
+```
+Tags decay exponentially with configurable half-life. TTL expiry removes the tag.
+
+**Topological Coordination:**
+- Each agent maintains k neighbors (default k=6-7)
+- List refreshed based on link quality and freshness
+- Provides stability independent of network density
+
+### 10.4 Related Documents
+
+For complete specification, see:
+- `tehnika/inzenjersko/en/rojno-jezgro/00-core-spec.md` (EK-TECH-027)
+- `tehnika/inzenjersko/en/rojno-jezgro/01-detaljni-dokument.md` (EK-TECH-028)
 
 ---
 

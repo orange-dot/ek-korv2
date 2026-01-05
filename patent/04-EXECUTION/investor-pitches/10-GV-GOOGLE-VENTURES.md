@@ -152,7 +152,7 @@ Modular "blade server" architecture for EV charging:
 • Hot-swappable during operation (graceful degradation)
 • Robotic swap station—no human intervention
 • Fleet logistics: buses transport spare modules
-• AI swarm coordination across depot
+• AI ROJ coordination across depot
 
 THE CLIMEWORKS PARALLEL
 ───────────────────────
@@ -338,7 +338,7 @@ MODULAR ARCHITECTURE + AUTONOMOUS MAINTENANCE
 THE TECHNOLOGY:
 • EK3 Module: 3.3kW, 200×320×44mm, hot-swappable
 • Power: 900V SiC MOSFETs, LLC topology, 97%+ efficiency
-• Comms: CAN-FD @ 5Mbps, swarm coordination
+• Comms: CAN-FD @ 5Mbps, ROJ coordination
 • Scale: Same module from 3kW to 3MW
 
 THE CLIMEWORKS PARALLEL:
@@ -375,7 +375,7 @@ TECHNOLOGY READINESS
 HARD ENGINEERING MOAT:
 • Power electronics expertise (SiC, LLC topology)
 • Robotics integration for harsh environments
-• Real-time swarm coordination
+• Real-time ROJ coordination
 • Others would need 18-24 months to replicate
 ```
 

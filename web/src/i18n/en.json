@@ -14,7 +14,8 @@
     "laDelivery": "LA Delivery",
     "patent": "Patents",
     "internal": "Internal",
-    "jezgroDev": "JEZGRO Dev"
+    "jezgroDev": "JEZGRO Dev",
+    "roj": "ROJ"
   },
   "simulation": {
     "title": "System Simulation",

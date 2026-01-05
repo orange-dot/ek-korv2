@@ -212,6 +212,224 @@ Degraded module goes to refurbishment
 
 ---
 
+## Multi-Vehicle Support: Buses, Trucks, and Vans
+
+The swap station concept extends beyond buses to all heavy commercial vehicles. Each vehicle type has specific battery configurations optimized for the small-battery-frequent-swap paradigm.
+
+### Vehicle-Specific Battery Configurations
+
+```
+VEHICLE BATTERY CONFIGURATIONS
+═══════════════════════════════════════════════════════════════════════════
+
+CITY BUS (12m):
+├── Battery: 2 × EK-BAT-50 (100 kWh total)
+├── Weight: 600 kg
+├── Location: Center underbody
+├── Swap time: 5 minutes
+├── Range: 100-120 km
+└── Daily swaps: 3-4
+
+REGIONAL BUS (15m):
+├── Battery: 3 × EK-BAT-50 (150 kWh total)
+├── Weight: 900 kg
+├── Location: Rear underbody
+├── Swap time: 6 minutes
+├── Range: 150-180 km
+└── Daily swaps: 2-3
+
+DELIVERY VAN (eSprinter class):
+├── Battery: 2 × EK-BAT-25 (50 kWh total)
+├── Weight: 300 kg
+├── Location: Rear axle underbody
+├── Swap time: 3 minutes
+├── Range: 80-100 km
+└── Daily swaps: 2-3
+
+URBAN TRUCK (7.5-16 ton):
+├── Battery: 2 × EK-BAT-50 (100 kWh total)
+├── Weight: 600 kg
+├── Location: Side-mounted (both sides)
+├── Swap time: 6 minutes
+├── Range: 80-100 km
+└── Daily swaps: 1-2
+
+LONG-HAUL TRUCK (40 ton):
+├── Battery: 4 × EK-BAT-100 (400 kWh total)
+├── Weight: 2,400 kg
+├── Location: Side-mounted (2 per side)
+├── Swap time: 10 minutes (parallel swap)
+├── Range: 200-250 km
+└── Highway swaps: 3-4 per 800 km trip
+```
+
+### City Bus Swap Station Layout
+
+```
+CITY BUS SWAP STATION
+═══════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         BUS SWAP LANE                                    │
+│                                                                         │
+│    ═══════════════════════════════════════════════════════════════     │
+│                                                                         │
+│                    ┌─────────────────────────┐                          │
+│                    │         BUS (12m)        │                          │
+│                    │   ┌────────┐ ┌────────┐ │                          │
+│                    │   │EK-BAT  │ │EK-BAT  │ │                          │
+│                    │   │  -50   │ │  -50   │ │  2 × 50 kWh = 100 kWh    │
+│                    │   └────────┘ └────────┘ │                          │
+│                    └─────────────────────────┘                          │
+│                              │                                          │
+│                    ┌─────────▼─────────┐                                │
+│                    │   GANTRY ROBOT    │ (drops from above)             │
+│                    │   Payload: 400 kg │                                │
+│                    └───────────────────┘                                │
+│                                                                         │
+│    ┌────────────────────────────────────────────────────────────────┐  │
+│    │              BATTERY STORAGE (20 positions)                     │  │
+│    │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ...   │  │
+│    │  │ FULL │ │ FULL │ │ CHG  │ │ CHG  │ │ CHG  │ │EMPTY │       │  │
+│    │  │50kWh │ │50kWh │ │50kWh │ │50kWh │ │50kWh │ │      │       │  │
+│    │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘ └──────┘       │  │
+│    └────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│    ┌────────────────────────────────────────────────────────────────┐  │
+│    │              EK3 MODULE RACK (for charger maintenance)          │  │
+│    │  [EK3] [EK3] [EK3] [EK3] [EK3] [EK3] [Reserve] [Reserve]       │  │
+│    └────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+WORKFLOW:
+1. Bus arrives, positions over swap pit
+2. Gantry robot unlocks and lowers battery modules
+3. Fresh batteries raised and locked
+4. Total time: 5 minutes
+```
+
+### Delivery Van Urban Hub
+
+```
+URBAN DELIVERY HUB (5-lane capacity)
+═══════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         DELIVERY HUB                                     │
+│                                                                         │
+│    ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐                         │
+│    │ VAN │  │ VAN │  │ VAN │  │ VAN │  │ VAN │                         │
+│    │ #1  │  │ #2  │  │ #3  │  │ #4  │  │ #5  │                         │
+│    │[BAT]│  │[BAT]│  │[BAT]│  │[BAT]│  │[BAT]│                         │
+│    └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘                         │
+│       │        │        │        │        │                             │
+│    ═══▼════════▼════════▼════════▼════════▼═══════════════════════     │
+│                    MOBILE ROBOT TRACK                                   │
+│    ═══════════════════════════════════════════════════════════════     │
+│                              │                                          │
+│                    ┌─────────▼─────────┐                                │
+│                    │   MOBILE ROBOT    │ (moves on track)               │
+│                    │   Payload: 200 kg │                                │
+│                    └───────────────────┘                                │
+│                                                                         │
+│    ┌────────────────────────────────────────────────────────────────┐  │
+│    │              BATTERY STORAGE (50 × EK-BAT-25)                   │  │
+│    │  ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ... │  │
+│    │  │25kW│ │25kW│ │25kW│ │CHG │ │CHG │ │CHG │ │CHG │ │    │     │  │
+│    │  └────┘ └────┘ └────┘ └────┘ └────┘ └────┘ └────┘ └────┘     │  │
+│    └────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│    Also serves as PACKAGE SORTING point (dual purpose)                  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+DAILY OPERATION:
+• Morning: Full batteries loaded at depot
+• Midday: Swap at urban hub (3 min) + package exchange
+• Evening: Return to depot, overnight charging
+• Swaps per van: 2-3 daily
+```
+
+### Highway Truck Swap Station
+
+```
+HIGHWAY TRUCK SWAP STATION
+═══════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    HIGHWAY REST AREA + SWAP STATION                      │
+│                                                                         │
+│    ┌─────────────────────────────────────────────────────────────┐     │
+│    │                      TRUCK BAY                                │     │
+│    │   ┌─────────────────────────────────────────────────────┐   │     │
+│    │   │                    TRUCK (40t)                       │   │     │
+│    │   │  ┌──────┐ ┌──────┐          ┌──────┐ ┌──────┐       │   │     │
+│    │   │  │BAT-1 │ │BAT-2 │          │BAT-3 │ │BAT-4 │       │   │     │
+│    │   │  │100kWh│ │100kWh│  TRAILER │100kWh│ │100kWh│       │   │     │
+│    │   │  └──────┘ └──────┘          └──────┘ └──────┘       │   │     │
+│    │   │   LEFT      LEFT              RIGHT    RIGHT         │   │     │
+│    │   └─────────────────────────────────────────────────────┘   │     │
+│    └─────────────────────────────────────────────────────────────┘     │
+│           │           │           │           │                         │
+│    ┌──────▼───────────▼───────────▼───────────▼──────────────────┐    │
+│    │           PARALLEL 4-ARM ROBOT SYSTEM                        │    │
+│    │    [ARM-1]    [ARM-2]    [ARM-3]    [ARM-4]                 │    │
+│    │    Left-F     Left-R     Right-F    Right-R                 │    │
+│    └─────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+│    ┌─────────────────────────────────────────────────────────────┐    │
+│    │           BATTERY STORAGE (100+ × EK-BAT-100)                │    │
+│    │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ... │    │
+│    │  │100kWh│ │100kWh│ │100kWh│ │ CHG  │ │ CHG  │ │ CHG  │     │    │
+│    │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │    │
+│    └─────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+│    SPACING: ~200 km between stations on highway network                 │
+│    CAPACITY: ~50 trucks/day per station                                 │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+PARALLEL SWAP PROCESS (10 minutes total):
+├── Minute 0-2: Truck positions, 4 arms align
+├── Minute 2-4: All 4 batteries unlocked simultaneously
+├── Minute 4-6: All 4 batteries lowered
+├── Minute 6-8: Fresh batteries raised
+├── Minute 8-10: Locking, verification, departure
+└── Driver rest: Can continue during swap (remains in cab)
+```
+
+### Quantitative Comparison: Swap vs. Charging
+
+```
+CITY BUS FLEET (50 buses, daily operation)
+═══════════════════════════════════════════════════════════════════════════
+
+                          DEPOT CHARGING        FREQUENT SWAP
+                          ──────────────        ─────────────
+Battery per bus           400 kWh               100 kWh
+Battery weight            2,400 kg              600 kg
+Extra passengers          0                     +18 per bus
+Daily charging time       2-3 hours             15 min (3×5 min swaps)
+Vehicle availability      14-16 h/day           20+ h/day
+Grid connection (depot)   10 MW peak            250 kW smooth
+Demand charges            €15,000/month         €2,000/month
+
+LONG-HAUL TRUCK (800 km route)
+═══════════════════════════════════════════════════════════════════════════
+
+                          MCS CHARGING (1 MW)   HIGHWAY SWAP
+                          ──────────────────    ────────────
+Battery capacity          600 kWh               400 kWh (4×100)
+Charging/swap stops       2 stops               3-4 stops
+Time per stop             30-45 min             10 min
+Total stop time           60-90 min             30-40 min
+Grid per station          1 MW                  500 kW
+Driver compliance         Complex scheduling    Simple: swap + rest separate
+```
+
+---
+
 ## Mechanical Design of EK Module for Robotic Handling
 
 ### Requirements for Robot-Friendly Module

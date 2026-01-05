@@ -9,6 +9,8 @@ import PatentPortfolioPage from './pages/PatentPortfolioPage';
 import PitchPage from './pages/PitchPage';
 import StrategyPage from './pages/StrategyPage';
 import JezgroDevPage from './pages/JezgroDevPage';
+import RojIntelligencePage from './pages/RojIntelligencePage';
+import SimulatorDemoPage from './pages/SimulatorDemoPage';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
       <Route path="/pitch" element={<PitchPage />} />
       <Route path="/strategy" element={<StrategyPage />} />
       <Route path="/jezgro-dev" element={<JezgroDevPage />} />
+      <Route path="/roj" element={<RojIntelligencePage />} />
+      <Route path="/simulator-demo" element={<SimulatorDemoPage />} />
     </Routes>
   );
 }

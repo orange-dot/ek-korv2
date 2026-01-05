@@ -969,7 +969,7 @@ This section describes how JEZGRO integrates with the EK3 modular charging syste
 | 2 | SAFETY_MONITOR | CRITICAL | 1 KB | 4 KB | 50 ms | Hardware protection |
 | 3 | CAN_HANDLER | HIGH | 2 KB | 8 KB | 100 ms | CAN-FD protocol |
 | 4 | THERMAL_MGR | MEDIUM | 2 KB | 8 KB | 500 ms | Thermal management |
-| 5 | SWARM_COORD | MEDIUM | 4 KB | 16 KB | 1000 ms | Swarm intelligence |
+| 5 | ROJ_COORD | MEDIUM | 4 KB | 16 KB | 1000 ms | Swarm intelligence |
 | 6 | AUDIT_LOGGER | LOW | 4 KB | 16 KB | 2000 ms | Event logging |
 
 **Total RAM Usage:** ~78 KB (of 128 KB available)
@@ -992,7 +992,7 @@ void jezgro_ek3_init(void) {
 
     // 4. Non-critical services
     service_create(SVC_THERMAL_MGR, thermal_manager_main);
-    service_create(SVC_SWARM_COORD, swarm_coordinator_main);
+    service_create(SVC_ROJ_COORD, swarm_coordinator_main);
     service_create(SVC_AUDIT_LOGGER, audit_logger_main);
 
     // 5. Start scheduler
@@ -1098,7 +1098,7 @@ For teams currently using FreeRTOS, JEZGRO provides a migration path:
 | `tehnika/05-swarm-intelligence.md` | Swarm algorithms (run as JEZGRO service) |
 | `tehnika/11-security-model.md` | Trust boundaries (implemented via MPU) |
 | `tehnika/12-audit-logging.md` | Audit service (JEZGRO service example) |
-| `tehnika/16-custom-rack-system.md` | Hardware microkernel (JEZGRO firmware partner) |
+| `tehnika/inzenjersko/en/15-custom-rack-system.md` | Rack controller runs JEZGRO (Section 10), hardware microkernel |
 | `patent/01-IP-FOUNDATION/06-invention-disclosure-jezgro.md` | Patent claims |
 
 ---
@@ -2630,12 +2630,32 @@ PHASE 6: OPERATIONAL
 
 ## 15. References
 
+### 15.1 JEZGRO Product Family
+
+This document describes JEZGRO-EK3, the charging module variant. JEZGRO runs across multiple device types in the Elektrokombinacija ecosystem:
+
+| Document | Variant | Description |
+|----------|---------|-------------|
+| EK-TECH-021 | Overview | [JEZGRO Product Family](21-jezgro-product-family.md) - Unified kernel philosophy |
+| EK-TECH-022 | JEZGRO-BAT | [Battery BMS Firmware](22-jezgro-bat.md) - Cell monitoring, balancing, SOC/SOH |
+| EK-TECH-023 | JEZGRO-ROB | [Robot Controller Firmware](23-jezgro-rob.md) - Motion control, safety |
+| EK-TECH-024 | JEZGRO-GW | [Gateway Firmware](24-jezgro-gw.md) - V2G, ISO 15118, OCPP |
+| EK-TECH-025 | Adapters | [Adapter Devices](25-adapter-devices.md) - EK-ADAPT product line |
+| EK-TECH-026 | Hardware | [Hardware Platforms](26-jezgro-hw-platforms.md) - PCB, MCU, connectors |
+
+### 15.2 Related Technical Documents
+
 | Document | Description |
 |----------|-------------|
 | EK-TECH-010 | Microkernel Architecture Concepts |
 | EK-TECH-014 | Firmware Architecture (FreeRTOS reference) |
 | EK-TECH-011 | Security Model |
 | EK-TECH-005 | Swarm Intelligence |
+
+### 15.3 External References
+
+| Document | Description |
+|----------|-------------|
 | ARM DDI0403E | Cortex-M4 Technical Reference Manual |
 | ARM DDI0439D | Cortex-M4 MPU Programming Guide |
 
@@ -2649,3 +2669,4 @@ PHASE 6: OPERATIONAL
 | 1.1 | 2026-01-04 | Elektrokombinacija Engineering | Added MPU isolation, IPC protocol, EK3 integration |
 | 1.2 | 2026-01-04 | Elektrokombinacija Engineering | Complete API reference, build system, linker script |
 | 2.0 | 2026-01-04 | Elektrokombinacija Engineering | Added Fault Handling, Driver Model, Boot sections |
+| 2.1 | 2026-01-04 | Elektrokombinacija Engineering | Added JEZGRO Product Family cross-references |

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import { useSimulation, ROBOT_STATES } from '../../context/SimulationContext';
+import { useSimulation, ROBOT_STATES, SIM_MODES } from '../../context/SimulationContext';
 import { useSimulationEngine } from '../../hooks/useSimulationEngine';
 import BusMarker from './map/BusMarker';
 import ChargingStationMarker from './map/ChargingStationMarker';
@@ -31,11 +31,17 @@ function MapController() {
   return null;
 }
 
-export default function SimulationMap() {
-  const { buses, routes, chargingStations, city } = useSimulation();
-
-  // Initialize simulation engine
+// Wrapper component to conditionally run JS simulation engine
+function LocalSimulationEngine() {
+  const { mode } = useSimulation();
+  // Only run JS engine in local mode
   useSimulationEngine();
+  return null;
+}
+
+export default function SimulationMap() {
+  const { buses, routes, chargingStations, city, mode } = useSimulation();
+  const isLocalMode = mode === SIM_MODES.LOCAL;
 
   return (
     <MapContainer
@@ -45,6 +51,9 @@ export default function SimulationMap() {
       style={{ background: '#0a0a0f' }}
     >
       <MapController />
+
+      {/* Run JS simulation engine only in local mode */}
+      {isLocalMode && <LocalSimulationEngine />}
 
       {/* Dark theme tiles */}
       <TileLayer

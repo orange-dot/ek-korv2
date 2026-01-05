@@ -262,6 +262,49 @@ export function useDeliveryEngine({
     return newPod;
   }, [getPodRouteById]);
 
+  // Helper to get street route for a swarm bot
+  const getSwarmStreetRoute = useCallback((bot) => {
+    if (!bot.currentStreet || !bot.zoneId) return null;
+    const zone = SWARM_STREET_GRID[bot.zoneId];
+    if (!zone || !zone.streets) return null;
+    return zone.streets.find(s => s.id === bot.currentStreet);
+  }, []);
+
+  // Helper to interpolate position along a street route
+  const interpolateStreetPosition = useCallback((street, progress) => {
+    if (!street || !street.coordinates || street.coordinates.length < 2) return null;
+    const coords = street.coordinates;
+    const clampedProgress = Math.max(0, Math.min(1, progress));
+
+    // Calculate total distance and find segment
+    let totalDist = 0;
+    const segmentDists = [];
+    for (let i = 0; i < coords.length - 1; i++) {
+      const dx = coords[i + 1][0] - coords[i][0];
+      const dy = coords[i + 1][1] - coords[i][1];
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      segmentDists.push(dist);
+      totalDist += dist;
+    }
+
+    // Find target distance
+    const targetDist = clampedProgress * totalDist;
+    let accDist = 0;
+
+    for (let i = 0; i < segmentDists.length; i++) {
+      if (accDist + segmentDists[i] >= targetDist) {
+        const segProgress = (targetDist - accDist) / segmentDists[i];
+        return [
+          coords[i][0] + (coords[i + 1][0] - coords[i][0]) * segProgress,
+          coords[i][1] + (coords[i + 1][1] - coords[i][1]) * segProgress
+        ];
+      }
+      accDist += segmentDists[i];
+    }
+
+    return coords[coords.length - 1];
+  }, []);
+
   // Update swarm bots
   const updateSwarmBotPhysics = useCallback((bot, deltaSpeed, allBots) => {
     const physics = VEHICLE_PHYSICS[VEHICLE_TYPES.SWARM_BOT];
@@ -270,8 +313,30 @@ export function useDeliveryEngine({
     switch (bot.state) {
       case DELIVERY_STATES.SWARMING:
       case DELIVERY_STATES.EN_ROUTE: {
-        // Move toward target
-        if (bot.targetPosition) {
+        // Route-based movement (new: follow street grid)
+        const street = getSwarmStreetRoute(bot);
+        if (street && bot.routeProgress !== undefined) {
+          // Move along street route
+          let newProgress = bot.routeProgress + physics.speedMultiplier * deltaSpeed * (bot.routeDirection || 1);
+
+          // Check if arrived at end
+          if (newProgress >= 1) {
+            newBot.state = DELIVERY_STATES.DELIVERING;
+            newBot.routeProgress = 1;
+          } else if (newProgress <= 0) {
+            newBot.routeProgress = 0;
+            newBot.routeDirection = 1;
+          } else {
+            newBot.routeProgress = newProgress;
+          }
+
+          // Update position from street route
+          const newPos = interpolateStreetPosition(street, newBot.routeProgress);
+          if (newPos) {
+            newBot.position = newPos;
+          }
+        } else if (bot.targetPosition) {
+          // Vector-based fallback (original behavior)
           const dx = bot.targetPosition[0] - bot.position[0];
           const dy = bot.targetPosition[1] - bot.position[1];
           const dist = Math.sqrt(dx * dx + dy * dy);
@@ -292,6 +357,8 @@ export function useDeliveryEngine({
 
         if (newBot.batteryLevel < LOW_BATTERY_THRESHOLD) {
           newBot.state = DELIVERY_STATES.RETURNING;
+          // Reset route for return journey
+          newBot.routeDirection = -1;
         }
         break;
       }
@@ -302,14 +369,32 @@ export function useDeliveryEngine({
           newBot.state = DELIVERY_STATES.RETURNING;
           newBot.packages = 0;
           newBot.deliveryProgress = 0;
+          // Set up return route
+          newBot.routeDirection = -1;
           onDeliveryComplete?.('swarmbot', bot.id);
         }
         break;
       }
 
       case DELIVERY_STATES.RETURNING: {
-        // Return to base hub
-        if (bot.basePosition) {
+        // Route-based return (follow street back)
+        const street = getSwarmStreetRoute(bot);
+        if (street && bot.routeProgress !== undefined) {
+          // Move back along street route
+          let newProgress = bot.routeProgress + physics.speedMultiplier * deltaSpeed * (bot.routeDirection || -1);
+
+          if (newProgress <= 0) {
+            newBot.state = DELIVERY_STATES.CHARGING;
+            newBot.routeProgress = 0;
+          } else {
+            newBot.routeProgress = newProgress;
+            const newPos = interpolateStreetPosition(street, newBot.routeProgress);
+            if (newPos) {
+              newBot.position = newPos;
+            }
+          }
+        } else if (bot.basePosition) {
+          // Vector-based fallback
           const dx = bot.basePosition[0] - bot.position[0];
           const dy = bot.basePosition[1] - bot.position[1];
           const dist = Math.sqrt(dx * dx + dy * dy);
@@ -333,6 +418,9 @@ export function useDeliveryEngine({
         if (newBot.batteryLevel >= 90) {
           // Ready for next delivery
           newBot.state = DELIVERY_STATES.IDLE;
+          // Clear route for next trip
+          newBot.currentStreet = null;
+          newBot.routeProgress = undefined;
         }
         break;
       }
@@ -342,12 +430,35 @@ export function useDeliveryEngine({
         if (Math.random() < 0.002 * speedRef.current) {
           newBot.state = DELIVERY_STATES.SWARMING;
           newBot.packages = Math.floor(Math.random() * 3) + 1;
-          // Random target within zone
-          const offset = 0.005;
-          newBot.targetPosition = [
-            bot.basePosition[0] + (Math.random() - 0.5) * offset * 2,
-            bot.basePosition[1] + (Math.random() - 0.5) * offset * 2
-          ];
+
+          // Try to assign a street route from zone
+          if (bot.zoneId) {
+            const nearestStreet = getNearestStreet(bot.basePosition, bot.zoneId);
+            if (nearestStreet) {
+              newBot.currentStreet = nearestStreet.id;
+              newBot.routeProgress = 0;
+              newBot.routeDirection = 1;
+              // Target is end of street
+              const coords = nearestStreet.coordinates;
+              if (coords && coords.length > 0) {
+                newBot.targetPosition = coords[coords.length - 1];
+              }
+            } else {
+              // Fallback: random target within zone
+              const offset = 0.005;
+              newBot.targetPosition = [
+                bot.basePosition[0] + (Math.random() - 0.5) * offset * 2,
+                bot.basePosition[1] + (Math.random() - 0.5) * offset * 2
+              ];
+            }
+          } else {
+            // Fallback: random target within zone
+            const offset = 0.005;
+            newBot.targetPosition = [
+              bot.basePosition[0] + (Math.random() - 0.5) * offset * 2,
+              bot.basePosition[1] + (Math.random() - 0.5) * offset * 2
+            ];
+          }
         }
         break;
       }
@@ -367,7 +478,7 @@ export function useDeliveryEngine({
     }
 
     return newBot;
-  }, [onDeliveryComplete]);
+  }, [onDeliveryComplete, getSwarmStreetRoute, interpolateStreetPosition]);
 
   // Main update loop
   const updateSimulation = useCallback((deltaTime) => {

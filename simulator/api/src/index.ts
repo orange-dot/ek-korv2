@@ -3,7 +3,7 @@ import fastifyWebsocket from '@fastify/websocket';
 import fastifyCors from '@fastify/cors';
 import { Redis } from 'ioredis';
 import type { WebSocket } from 'ws';
-import type { SimulationState, Module, Bus, Station } from './types/index.js';
+import type { SimulationState, Module, Bus, Station, SimulationMetrics } from './types/index.js';
 
 // Configuration
 const PORT = parseInt(process.env.PORT || '8000', 10);
@@ -19,6 +19,7 @@ let simState: SimulationState | null = null;
 let modules: Module[] = [];
 let buses: Bus[] = [];
 let stations: Station[] = [];
+let metrics: SimulationMetrics | null = null;
 
 // WebSocket clients
 const wsClients = new Set<WebSocket>();
@@ -29,7 +30,7 @@ const redisSub = new Redis(REDIS_URL);
 
 // Subscribe to simulation events
 async function setupRedisSubscription() {
-  await redisSub.subscribe('sim:state', 'sim:module', 'sim:bus', 'sim:station');
+  await redisSub.subscribe('sim:state', 'sim:module', 'sim:bus', 'sim:station', 'sim:metrics');
 
   redisSub.on('message', (channel: string, message: string) => {
     try {
@@ -47,6 +48,9 @@ async function setupRedisSubscription() {
           break;
         case 'sim:station':
           stations = data as Station[];
+          break;
+        case 'sim:metrics':
+          metrics = data as SimulationMetrics;
           break;
       }
 
@@ -130,6 +134,41 @@ async function registerRoutes() {
     return station;
   });
 
+  // Metrics - aggregated demo/pitch metrics
+  fastify.get('/api/metrics', async () => {
+    return metrics || {
+      simulatedHours: 0,
+      realTimeSeconds: 0,
+      systemUptime: 0,
+      moduleUptime: 0,
+      faultsDetected: 0,
+      faultsRecovered: 0,
+      mtbfHours: 0,
+      mttrMinutes: 0,
+      avgEfficiency: 0,
+      peakEfficiency: 0,
+      totalEnergyKwh: 0,
+      energyLossKwh: 0,
+      modulesReplaced: 0,
+      downtimeMinutes: 0,
+      downtimeAvoided: 0,
+      costSavingsUsd: 0,
+      busesCharged: 0,
+      swapsCompleted: 0,
+      avgChargeTimeMin: 0,
+      avgSwapTimeSec: 0,
+      fleetSoc: 0,
+      v2gEventsCount: 0,
+      v2gEnergyKwh: 0,
+      v2gRevenueUsd: 0,
+      gridFreqMin: 50,
+      gridFreqMax: 50,
+      loadBalanceScore: 0,
+      thermalBalance: 0,
+      redundancyLevel: 0,
+    };
+  });
+
   // Simulation control (publish to Redis for Go engine to receive)
   fastify.post<{ Body: { action: string; value?: number } }>(
     '/api/simulation/control',
@@ -137,6 +176,100 @@ async function registerRoutes() {
       const { action, value } = request.body;
       await redis.publish('sim:control', JSON.stringify({ action, value }));
       return { success: true, action, value };
+    }
+  );
+
+  // Inject fault into a module
+  fastify.post<{ Body: { moduleId: string; faultType: number; severity: number } }>(
+    '/api/simulation/inject-fault',
+    async (request) => {
+      const { moduleId, faultType, severity } = request.body;
+      await redis.publish(
+        'sim:control',
+        JSON.stringify({ action: 'injectFault', moduleId, faultType, severity })
+      );
+      return { success: true, moduleId, faultType, severity };
+    }
+  );
+
+  // Set module power
+  fastify.post<{ Body: { moduleId: string; power: number } }>(
+    '/api/simulation/set-module-power',
+    async (request) => {
+      const { moduleId, power } = request.body;
+      await redis.publish(
+        'sim:control',
+        JSON.stringify({ action: 'setModulePower', moduleId, power })
+      );
+      return { success: true, moduleId, power };
+    }
+  );
+
+  // Distribute rack power
+  fastify.post<{ Body: { rackId: string; power: number } }>(
+    '/api/simulation/distribute-rack-power',
+    async (request) => {
+      const { rackId, power } = request.body;
+      await redis.publish(
+        'sim:control',
+        JSON.stringify({ action: 'distributeRackPower', rackId, power })
+      );
+      return { success: true, rackId, power };
+    }
+  );
+
+  // Queue bus for swap
+  fastify.post<{ Body: { busId: string; stationId: string } }>(
+    '/api/simulation/queue-bus-swap',
+    async (request) => {
+      const { busId, stationId } = request.body;
+      await redis.publish(
+        'sim:control',
+        JSON.stringify({ action: 'queueBusForSwap', busId, stationId })
+      );
+      return { success: true, busId, stationId };
+    }
+  );
+
+  // Demo scenarios
+  fastify.post<{ Body: { scenario: string } }>(
+    '/api/simulation/scenario',
+    async (request) => {
+      const { scenario } = request.body;
+
+      switch (scenario) {
+        case 'normal':
+          // Normal day: moderate load, no faults
+          await redis.publish('sim:control', JSON.stringify({ action: 'setTimeScale', value: 10 }));
+          break;
+
+        case 'peak':
+          // Peak demand: high power usage
+          await redis.publish('sim:control', JSON.stringify({ action: 'distributeRackPower', rackId: 'rack-0', power: 250000 }));
+          break;
+
+        case 'module-failure':
+          // Single module failure - swarm redistributes
+          await redis.publish('sim:control', JSON.stringify({ action: 'injectFault', moduleId: 'module-42', faultType: 2, severity: 1.0 }));
+          break;
+
+        case 'cascade':
+          // Multiple failures - stress test swarm intelligence
+          for (let i = 40; i < 45; i++) {
+            await redis.publish('sim:control', JSON.stringify({ action: 'injectFault', moduleId: `module-${i}`, faultType: 1, severity: 0.8 }));
+          }
+          break;
+
+        case 'v2g-response':
+          // Grid frequency dip - V2G response
+          await redis.publish('sim:control', JSON.stringify({ action: 'triggerV2G', frequency: 49.8 }));
+          break;
+
+        default:
+          return { success: false, error: 'Unknown scenario' };
+      }
+
+      return { success: true, scenario };
     }
   );
 

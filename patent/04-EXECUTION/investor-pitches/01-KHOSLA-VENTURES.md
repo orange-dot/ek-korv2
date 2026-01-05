@@ -234,7 +234,7 @@ THE BREAKTHROUGH:
 • Hot-swappable during operation
 • Autonomous robotic maintenance station
 • Fleet logistics: buses transport spare modules
-• AI swarm coordination across depot
+• AI ROJ coordination across depot
 
 MAIN TECH ECONOMICS (not clean tech subsidies):
 • 80% lower OPEX vs traditional maintenance
@@ -247,7 +247,7 @@ MAIN TECH ECONOMICS (not clean tech subsidies):
 HIGH TECHNICAL RISK:
 • Complex power electronics (900V SiC, LLC topology)
 • Robotics integration for module handling
-• Swarm coordination algorithms
+• ROJ coordination algorithms
 • Hard engineering others avoid
 
 LOW MARKET RISK:

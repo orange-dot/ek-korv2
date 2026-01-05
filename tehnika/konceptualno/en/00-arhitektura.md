@@ -149,7 +149,7 @@ Purpose: Scaled version for commercial applications
 2. **02-ai-ml-sistem.md** - Edge AI hardware (STM32N6 NPU), digital twin architecture, predictive maintenance, self-tuning control, anomaly detection, fleet learning
 3. **03-thermal-management.md** - Liquid cooling system, coldplate design, junction temperature estimation, AI thermal control, safety features
 4. **04-v2g-grid.md** - ISO 15118-20 implementation, bidirectional topology, grid services (frequency/voltage regulation), grid codes compliance
-5. **05-swarm-intelligence.md** - Distributed architecture, CAN-FD communication, load balancing algorithms, fault tolerance, scalability
+5. **05-ROJ-intelligence.md** - Distributed architecture, CAN-FD communication, load balancing algorithms, fault tolerance, scalability
 6. **06-bom-cost.md** - Complete BOM for EK3 and EK30, cost breakdown, pricing strategy, TCO analysis, R&D investment
 7. **07-konkurencija.md** - Competition analysis, reliability crisis in industry (2025 data), competitive advantage
 8. **08-swap-station.md** - Robotic EK module swap + battery swap for buses, fleet-integrated maintenance, patentable concept
@@ -239,6 +239,59 @@ Mesh-active controllers      →    Swarm intelligence
 
 HP bought 3PAR for $2.35B (2010) - PROVEN CONCEPT!
 ```
+
+### 8. Extended Modularity: Vehicle Batteries (EK-BAT)
+```
+The same radical modularity applies to VEHICLE BATTERIES:
+
+CHARGER MODULARITY                 BATTERY MODULARITY
+─────────────────────────────────────────────────────────────
+EK3 (3kW) charger modules     →    EK-BAT vehicle battery modules
+Robot swaps charger modules   →    Robot swaps vehicle batteries
+Distributed sparing           →    Shared battery pool
+Swarm intelligence            →    BMS ROJ coordination
+
+RESULT: ONE ECOSYSTEM FOR BOTH INFRASTRUCTURE AND VEHICLES
+```
+
+**EK-BAT Module Family:**
+
+| Module | Capacity | Weight | Vehicles |
+|--------|----------|--------|----------|
+| EK-BAT-25 | 25 kWh | 150 kg | Vans, small trucks |
+| EK-BAT-50 | 50 kWh | 300 kg | Buses, medium trucks |
+| EK-BAT-100 | 100 kWh | 600 kg | Heavy buses, long-haul trucks |
+
+**Key Benefits:**
+- Weight savings: 1,800-2,700 kg freed for payload
+- 5-minute swap vs 2-hour charging
+- 37× more energy per kg of battery material (shallow cycling)
+- Same swap station handles batteries AND charger modules
+
+### 9. From Charging to Swapping
+```
+PARADIGM SHIFT FOR HEAVY VEHICLES:
+
+TRADITIONAL                        ELEKTROKOMBINACIJA
+─────────────────────────────────────────────────────────────
+Large 400kWh battery          →    Small 100kWh battery
+2-hour charging               →    5-minute swap
+Vehicle downtime: hours       →    Vehicle downtime: minutes
+Heavy battery = less cargo    →    Light battery = more cargo
+Single deep cycle/day         →    Multiple shallow cycles
+Depot charging (10 MW peak)   →    Distributed swap (250 kW smooth)
+```
+
+**Vehicle-Specific Battery Sizing:**
+
+| Vehicle | Traditional | Small + Swap | Weight Saved | Swap Frequency |
+|---------|-------------|--------------|--------------|----------------|
+| City Bus | 400 kWh | 100 kWh | 1,800 kg | Every 100 km |
+| Regional Bus | 500 kWh | 150 kWh | 2,100 kg | Every 150 km |
+| Delivery Van | 150 kWh | 50 kWh | 600 kg | 2-3× daily |
+| Long-haul Truck | 600 kWh | 150 kWh × 4 | 2,700 kg | Every 200 km |
+
+See **04-small-battery-philosophy.md** for detailed analysis.
 
 ## Target Specifications
 

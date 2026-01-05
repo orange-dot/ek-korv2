@@ -875,3 +875,10 @@ func (g *Grid) GetV2GStatus() (enabled bool, power float64, moduleCount int) {
 	defer g.mu.RUnlock()
 	return g.data.V2GEnabled, g.data.V2GPower, len(g.v2gModules)
 }
+
+// SetFrequency manually sets grid frequency (for V2G demo)
+func (g *Grid) SetFrequency(frequency float64) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.data.Frequency = frequency
+}

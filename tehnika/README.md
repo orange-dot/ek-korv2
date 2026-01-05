@@ -27,8 +27,9 @@ High-level architecture, philosophy, and strategic overview.
 |----|----|----|
 | [00-arhitektura](konceptualno/en/00-arhitektura.md) | [00-arhitektura](konceptualno/sr/00-arhitektura.md) | System architecture philosophy |
 | [01-v2g-grid](konceptualno/en/01-v2g-grid.md) | [01-v2g-grid](konceptualno/sr/01-v2g-grid.md) | V2G and grid integration concepts |
-| [02-swarm-intelligence](konceptualno/en/02-swarm-intelligence.md) | [02-swarm-intelligence](konceptualno/sr/02-swarm-intelligence.md) | Swarm intelligence for fleet coordination |
+| [02-roj-intelligence](konceptualno/en/02-roj-intelligence.md) | [02-roj-intelligence](konceptualno/sr/02-roj-intelligence.md) | ROJ distributed intelligence for fleet coordination |
 | [03-konkurencija](konceptualno/en/03-konkurencija.md) | [03-konkurencija](konceptualno/sr/03-konkurencija.md) | Competitive analysis |
+| [04-small-battery-philosophy](konceptualno/en/04-small-battery-philosophy.md) | [04-small-battery-philosophy](konceptualno/sr/04-small-battery-philosophy.md) | **NEW** Small batteries + frequent swaps paradigm |
 
 ---
 
@@ -57,6 +58,8 @@ Detailed specifications, equations, control algorithms, and implementation-ready
 | [11-v2g-ai-ml](inzenjersko/en/11-v2g-ai-ml.md) | [11-v2g-ai-ml](inzenjersko/sr/11-v2g-ai-ml.md) | AI/ML for V2G optimization |
 | [13-firmware-architecture](inzenjersko/en/13-firmware-architecture.md) | [13-firmware-architecture](inzenjersko/sr/13-firmware-architecture.md) | STM32G474 firmware design |
 | [16-jezgro](inzenjersko/en/16-jezgro.md) | [16-jezgro](inzenjersko/sr/16-jezgro.md) | Core kernel system |
+| [rojno-jezgro-core-spec](inzenjersko/en/rojno-jezgro/00-core-spec.md) | [rojno-jezgro-core-spec](inzenjersko/sr/rojno-jezgro/00-core-spec.md) | ROJNO JEZGRO core spec (swarm core) |
+| [rojno-jezgro-detalji](inzenjersko/en/rojno-jezgro/01-detaljni-dokument.md) | [rojno-jezgro-detalji](inzenjersko/sr/rojno-jezgro/01-detaljni-dokument.md) | Detailed ROJNO JEZGRO design for further development |
 
 ### Security / Bezbednost
 
@@ -102,7 +105,8 @@ Detailed specifications for all EK3 module components.
 
 **For newcomers / Za početnike:**
 1. Start with [00-arhitektura](konceptualno/en/00-arhitektura.md) for system philosophy
-2. Read [SPECIFICATIONS](inzenjersko/en/SPECIFICATIONS.md) for key parameters
+2. Read [04-small-battery-philosophy](konceptualno/en/04-small-battery-philosophy.md) for battery swap paradigm
+3. Read [SPECIFICATIONS](inzenjersko/en/SPECIFICATIONS.md) for key parameters
 
 **For developers / Za programere:**
 1. [06-microkernel-architecture](inzenjersko/en/06-microkernel-architecture.md) for firmware structure
@@ -119,7 +123,7 @@ Detailed specifications for all EK3 module components.
 
 | Category | EN | SR | Total |
 |----------|----|----|-------|
-| Conceptual | 4 | 4 | 8 |
-| Engineering (main) | 16 | 16 | 32 |
+| Conceptual | 5 | 5 | 10 |
+| Engineering (main) | 18 | 18 | 36 |
 | Components | 14 | 14 | 28 |
-| **Total** | **34** | **34** | **68** |
+| **Total** | **37** | **37** | **74** |

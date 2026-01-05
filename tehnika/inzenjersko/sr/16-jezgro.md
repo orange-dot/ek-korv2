@@ -581,7 +581,7 @@ Ova sekcija opisuje kako se JEZGRO integrise sa EK3 modularnim sistemom punjenja
 | 2 | SAFETY_MONITOR | KRITICAN | 1 KB | 4 KB | 50 ms | Hardverska zastita |
 | 3 | CAN_HANDLER | VISOK | 2 KB | 8 KB | 100 ms | CAN-FD protokol |
 | 4 | THERMAL_MGR | SREDNJI | 2 KB | 8 KB | 500 ms | Termalno upravljanje |
-| 5 | SWARM_COORD | SREDNJI | 4 KB | 16 KB | 1000 ms | Swarm inteligencija |
+| 5 | ROJ_COORD | SREDNJI | 4 KB | 16 KB | 1000 ms | Swarm inteligencija |
 | 6 | AUDIT_LOGGER | NIZAK | 4 KB | 16 KB | 2000 ms | Evidentiranje |
 
 **Ukupna Potrosnja RAM-a:** ~78 KB (od 128 KB dostupno)
@@ -638,6 +638,7 @@ Stanični Kontroler                        EK3 Modul
 | `tehnika/14-firmware-architecture.md` | FreeRTOS osnova |
 | `tehnika/05-swarm-intelligence.md` | Swarm algoritmi |
 | `tehnika/11-security-model.md` | Trust granice |
+| `tehnika/inzenjersko/sr/15-custom-rack-system.md` | Rack kontroler koristi JEZGRO (Sekcija 10), hardverski mikrokernel |
 | `patent/01-IP-FOUNDATION/06-invention-disclosure-jezgro.md` | Patent |
 
 ---
@@ -898,12 +899,32 @@ FAZA 6: OPERATIVAN
 
 ## 15. Reference
 
+### 15.1 JEZGRO Porodica Proizvoda
+
+Ovaj dokument opisuje JEZGRO-EK3, varijantu za module za punjenje. JEZGRO radi na više tipova uređaja u Elektrokombinacija ekosistemu:
+
+| Dokument | Varijanta | Opis |
+|----------|-----------|------|
+| EK-TECH-021 | Pregled | [JEZGRO Porodica Proizvoda](21-jezgro-product-family.md) - Filozofija unificiranog kernela |
+| EK-TECH-022 | JEZGRO-BAT | [BMS Firmver za Baterije](22-jezgro-bat.md) - Nadzor ćelija, balansiranje, SOC/SOH |
+| EK-TECH-023 | JEZGRO-ROB | [Firmver Kontrolera Robota](23-jezgro-rob.md) - Kontrola pokreta, bezbednost |
+| EK-TECH-024 | JEZGRO-GW | [Firmver Gateway-a](24-jezgro-gw.md) - V2G, ISO 15118, OCPP |
+| EK-TECH-025 | Adapteri | [Adapter Uređaji](25-adapter-devices.md) - EK-ADAPT linija proizvoda |
+| EK-TECH-026 | Hardver | [Hardverske Platforme](26-jezgro-hw-platforms.md) - PCB, MCU, konektori |
+
+### 15.2 Povezani Tehnički Dokumenti
+
 | Dokument | Opis |
 |----------|------|
 | EK-TECH-010 | Koncepti mikrokernel arhitekture |
 | EK-TECH-014 | Arhitektura firmvera (FreeRTOS referenca) |
 | EK-TECH-011 | Bezbednosni model |
 | EK-TECH-005 | Swarm inteligencija |
+
+### 15.3 Eksterne Reference
+
+| Dokument | Opis |
+|----------|------|
 | ARM DDI0403E | Cortex-M4 tehnička referenca |
 | ARM DDI0439D | Cortex-M4 MPU vodič za programiranje |
 
@@ -917,3 +938,4 @@ FAZA 6: OPERATIVAN
 | 1.1 | 2026-01-04 | Elektrokombinacija Inženjering | Dodato MPU izolacija, IPC protokol, EK3 integracija |
 | 1.2 | 2026-01-04 | Elektrokombinacija Inženjering | Referenca na API i build sistem (detalji u EN verziji) |
 | 2.0 | 2026-01-04 | Elektrokombinacija Inženjering | Rukovanje greškama, model drajvera, boot sekcije |
+| 2.1 | 2026-01-04 | Elektrokombinacija Inženjering | Dodate reference na JEZGRO porodicu proizvoda |

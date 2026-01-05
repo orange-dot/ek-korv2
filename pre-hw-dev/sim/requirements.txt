@@ -1,0 +1,8 @@
+# JEZGRO Simulation Dependencies
+
+# CAN bus support (optional on Windows)
+python-can>=4.0.0
+
+# For advanced visualization (optional)
+# matplotlib>=3.5.0
+# numpy>=1.20.0

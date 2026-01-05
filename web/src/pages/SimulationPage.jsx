@@ -1,22 +1,42 @@
 import { AnimatePresence } from 'framer-motion';
-import { SimulationProvider, useSimulation } from '../context/SimulationContext';
+import { SimulationProvider, useSimulation, SIM_MODES } from '../context/SimulationContext';
 import SimulationMap from '../components/simulation/SimulationMap';
 import SimulationControls from '../components/simulation/SimulationControls';
 import CitySelector from '../components/simulation/CitySelector';
 import KorHUD from '../components/simulation/KorHUD';
 import BusDetailPanel from '../components/simulation/BusDetailPanel';
 import KorAllThingPanel from '../components/simulation/KorAllThingPanel';
+import ModuleGridPanel from '../components/simulation/ModuleGridPanel';
+import ConnectionStatus from '../components/simulation/ConnectionStatus';
 
 // Inner component to access simulation context
 function SimulationContent() {
-  const { selectedItem, korAllThingExpanded } = useSimulation();
+  const { selectedItem, korAllThingExpanded, mode } = useSimulation();
+  const isLive = mode === SIM_MODES.LIVE;
 
   return (
     <div className="h-screen w-screen bg-[#050508] overflow-hidden relative flex">
+      {/* Top Status Bar */}
+      <div className="absolute top-0 left-0 right-0 z-50 p-4 flex items-center justify-between pointer-events-none">
+        <div className="pointer-events-auto">
+          <ConnectionStatus />
+        </div>
+        <div className="pointer-events-auto">
+          <CitySelector />
+        </div>
+      </div>
+
       {/* KorAllThing Panel - LEFT SIDE (always visible) */}
       <div className="relative z-40 flex-shrink-0 h-full">
         <KorAllThingPanel />
       </div>
+
+      {/* Module Grid Panel - LEFT SIDE (live mode only, collapsible) */}
+      {isLive && (
+        <div className="relative z-35 flex-shrink-0 h-full">
+          <ModuleGridPanel />
+        </div>
+      )}
 
       {/* Main Content Area - Map + Dynamic Content */}
       <AnimatePresence>
@@ -44,13 +64,8 @@ function SimulationContent() {
 
             {/* Dynamic Content - RIGHT SIDE (stats, decisions, panels) */}
             <div className="flex-1 relative">
-              {/* City Selector - top right */}
-              <div className="absolute top-4 right-4 z-30">
-                <CitySelector />
-              </div>
-
               {/* KorHUD Overlay - the main dynamic content */}
-              <div className="absolute inset-0 z-20 pointer-events-none">
+              <div className="absolute inset-0 z-20 pointer-events-none pt-16">
                 <KorHUD />
               </div>
 

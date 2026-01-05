@@ -36,7 +36,7 @@ Current concept: **EK3 (3.3kW modules)** that combine for any power level (3kW t
 tehnika/
 ├── README.md              # Navigation and index
 ├── konceptualno/          # Conceptual documentation
-│   ├── en/                # English (architecture, V2G concepts, swarm, competition)
+│   ├── en/                # English (architecture, V2G concepts, ROJ, competition)
 │   └── sr/                # Serbian translations
 ├── inzenjersko/           # Engineering documentation
 │   ├── en/                # English (specs, power electronics, thermal, firmware)
@@ -107,7 +107,7 @@ Available skills for project work:
 ### Design
 - `/robot-design` - Robotic swap system specifications
 - `/v2g-design` - Vehicle-to-Grid functionality
-- `/swarm-design` - Swarm intelligence for module coordination
+- `/roj-design` - ROJ distributed intelligence for module coordination
 - `/ai-ml` - AI/ML for predictive maintenance
 
 ### Standards & Compliance

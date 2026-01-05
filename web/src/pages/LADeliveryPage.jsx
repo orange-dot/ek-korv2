@@ -437,6 +437,7 @@ function DeliveryProvider({ children }) {
             packages: Math.random() > 0.5 ? Math.floor(Math.random() * 3) + 1 : 0,
             targetPosition: null,
             zone: zone.zone,
+            zoneId: `swarm-zone-${zone.zone}`, // For route-based movement
             baseHub: zone.baseHub,
             priority: Object.values(DELIVERY_PRIORITY)[Math.floor(Math.random() * 4)] || DELIVERY_PRIORITY.STANDARD,
             missionQueue: generateMissionQueue('swarmbot', zone.zone),

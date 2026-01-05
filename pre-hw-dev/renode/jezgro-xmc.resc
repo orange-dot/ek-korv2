@@ -1,0 +1,167 @@
+# =============================================================================
+# JEZGRO XMC4400 Renode Test Scenario
+# =============================================================================
+# EXPERIMENTAL: Custom platform for Infineon XMC4400
+# ARM Cortex-M4F core is emulated, HRPWM is stubbed
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Machine Setup
+# -----------------------------------------------------------------------------
+
+mach create "jezgro-xmc"
+machine LoadPlatformDescription @xmc4400.repl
+
+# -----------------------------------------------------------------------------
+# Console Configuration
+# -----------------------------------------------------------------------------
+
+showAnalyzer usic0_ch0
+
+logLevel 3
+logLevel 3 usic0_ch0
+logLevel 2 hrpwm0  # Show HRPWM activity
+
+# -----------------------------------------------------------------------------
+# Firmware Loading
+# -----------------------------------------------------------------------------
+
+$firmware ?= @../build-xmc/jezgro_xmc.elf
+
+echo ""
+echo "=========================================="
+echo "  JEZGRO XMC4400 Simulation"
+echo "=========================================="
+echo ""
+echo "EXPERIMENTAL PLATFORM"
+echo "• ARM Cortex-M4F core: Fully emulated"
+echo "• HRPWM (150ps): Stub with logging"
+echo "• CAN: Basic register model"
+echo "• VADC: Returns mid-scale values"
+echo ""
+
+echo "Loading firmware: $firmware"
+sysbus LoadELF $firmware
+
+# -----------------------------------------------------------------------------
+# Memory Info
+# -----------------------------------------------------------------------------
+
+echo ""
+echo "Memory Map:"
+sysbus WhatIsAt 0x0C000000   # PFLASH
+sysbus WhatIsAt 0x08000000   # PFLASH alias
+sysbus WhatIsAt 0x20000000   # DSRAM
+
+# -----------------------------------------------------------------------------
+# Test Macros
+# -----------------------------------------------------------------------------
+
+macro reset
+"""
+    sysbus LoadELF $firmware
+    cpu Reset
+"""
+
+macro smoke_test
+"""
+    echo "Starting XMC4400 smoke test..."
+    start
+    sleep 5
+    pause
+    echo "Smoke test complete"
+    echo "CPU state:"
+    cpu PC
+"""
+
+macro hrpwm_test
+"""
+    echo "Testing HRPWM peripheral..."
+    echo "Watch for HRPWM log messages during execution"
+    start
+    sleep 3
+    pause
+    echo "HRPWM test complete"
+"""
+
+macro can_test
+"""
+    echo "Testing CAN peripheral..."
+    start
+    sleep 3
+    pause
+"""
+
+# GDB Server
+macro start_gdb
+"""
+    echo "Starting GDB server on port 3333..."
+    machine StartGdbServer 3333
+    echo "Connect with: arm-none-eabi-gdb -ex 'target remote :3333'"
+"""
+
+# -----------------------------------------------------------------------------
+# HRPWM Helper Commands
+# -----------------------------------------------------------------------------
+
+# Simulate HRPWM register write for testing
+macro set_hrpwm_freq
+"""
+    echo "Setting HRPWM frequency..."
+    sysbus WriteDoubleWord 0x40028104 0x0000012C  # ~400 kHz
+    echo "HRPWM compare value set"
+"""
+
+# Read HRPWM status
+macro read_hrpwm
+"""
+    echo "HRPWM HRCSTRG: "
+    sysbus ReadDoubleWord 0x40028000
+    echo "HRPWM CH0 CC: "
+    sysbus ReadDoubleWord 0x40028104
+"""
+
+# -----------------------------------------------------------------------------
+# ADC Helper Commands
+# -----------------------------------------------------------------------------
+
+macro read_adc
+"""
+    echo "ADC Channel 0 Result:"
+    sysbus ReadDoubleWord 0x40004300
+    echo "ADC Channel 1 Result:"
+    sysbus ReadDoubleWord 0x40004304
+"""
+
+# -----------------------------------------------------------------------------
+# Ready Message
+# -----------------------------------------------------------------------------
+
+echo ""
+echo "=========================================="
+echo "  Simulation Ready"
+echo "=========================================="
+echo ""
+echo "What WORKS:"
+echo "  ✓ CPU execution (ARM Cortex-M4F)"
+echo "  ✓ UART output (USIC0)"
+echo "  ✓ Basic timers (CCU4/CCU8)"
+echo "  ✓ GPIO"
+echo "  ✓ SysTick"
+echo ""
+echo "What is STUBBED:"
+echo "  ~ HRPWM (registers + logging, no waveforms)"
+echo "  ~ CAN (basic registers)"
+echo "  ~ VADC (returns mid-scale values)"
+echo ""
+echo "Commands:"
+echo "  start / pause / quit"
+echo "  runMacro smoke_test"
+echo "  runMacro hrpwm_test"
+echo "  runMacro can_test"
+echo "  runMacro start_gdb"
+echo ""
+echo "HRPWM Debugging:"
+echo "  runMacro set_hrpwm_freq"
+echo "  runMacro read_hrpwm"
+echo ""

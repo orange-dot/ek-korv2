@@ -111,7 +111,7 @@ The name "JEZGRO" is Serbian for "kernel" or "core" - reflecting both its minima
 +-------------------------------------------------------------+
 |   USER SERVICES (Unprivileged, MPU-isolated)                |
 |   +---------+ +---------+ +---------+ +---------+           |
-|   |Thermal  | |  Swarm  | |  Audit  | |  OCPP   |           |
+|   |Thermal  | |  ROJ    | |  Audit  | |  OCPP   |           |
 |   | Manager | |  Coord. | |  Logger | | Gateway |           |
 |   +----+----+ +----+----+ +----+----+ +----+----+           |
 |        +----------+-----------+-----------+                  |

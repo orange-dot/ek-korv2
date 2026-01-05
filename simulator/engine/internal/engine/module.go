@@ -26,8 +26,9 @@ type EK3Module struct {
 	reliabilityMetrics models.ReliabilityMetrics
 
 	// Internal state
-	targetPower float64
-	lastUpdate  time.Time
+	targetPower  float64
+	lastUpdate   time.Time
+	faultTracked bool // For metrics: tracks if fault has been counted
 }
 
 // NewEK3Module creates a new EK3 module with physical models

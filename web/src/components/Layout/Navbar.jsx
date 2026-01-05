@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X, Zap, Globe, Play, ChevronDown, FileText, Lock, Cpu } from 'lucide-react';
+import { Menu, X, Zap, Globe, Play, ChevronDown, FileText, Lock, Cpu, Hexagon } from 'lucide-react';
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
@@ -80,7 +80,7 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
+                onBlur={() => setTimeout(() => setDropdownOpen(false), 300)}
                 className="flex items-center space-x-1 px-4 py-1.5 rounded-full bg-accent-cyan/10 border border-accent-cyan hover:bg-accent-cyan/20 transition-colors"
               >
                 <Play className="w-4 h-4 text-accent-cyan" />
@@ -128,6 +128,16 @@ export default function Navbar() {
               <Lock className="w-3 h-3" />
               <Cpu className="w-4 h-4" />
               <span className="text-sm font-medium">{t('nav.jezgroDev')}</span>
+            </Link>
+
+            {/* ROJ Link (Protected) */}
+            <Link
+              to="/roj"
+              className="flex items-center space-x-1 px-3 py-1.5 text-slate-300 hover:text-accent-cyan transition-colors"
+            >
+              <Lock className="w-3 h-3" />
+              <Hexagon className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('nav.roj')}</span>
             </Link>
 
             {/* Language Toggle */}
@@ -218,6 +228,15 @@ export default function Navbar() {
               <Lock className="w-3 h-3" />
               <Cpu className="w-4 h-4" />
               <span>{t('nav.jezgroDev')}</span>
+            </Link>
+            <Link
+              to="/roj"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center space-x-2 text-slate-300 hover:text-accent-cyan py-2"
+            >
+              <Lock className="w-3 h-3" />
+              <Hexagon className="w-4 h-4" />
+              <span>{t('nav.roj')}</span>
             </Link>
           </div>
         </motion.div>

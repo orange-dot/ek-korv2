@@ -1,0 +1,661 @@
+// =============================================================================
+// STM32G474 Full Platform Description for Renode
+// JEZGRO Development - Primary Target
+// =============================================================================
+// This is the FULLY SUPPORTED simulation target
+// Renode provides excellent Cortex-M4 emulation
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// CPU Core - ARM Cortex-M4F with FPU
+// -----------------------------------------------------------------------------
+cpu: CPU.CortexM @ sysbus
+    cpuType: "cortex-m4f"
+    nvic: nvic
+    cpuFrequency: 170000000
+
+// -----------------------------------------------------------------------------
+// Nested Vectored Interrupt Controller
+// -----------------------------------------------------------------------------
+nvic: IRQControllers.NVIC @ sysbus 0xE000E000
+    priorityMask: 0xF0
+    systickFrequency: 170000000
+    -> cpu@0
+
+// -----------------------------------------------------------------------------
+// Memory Regions
+// -----------------------------------------------------------------------------
+
+// Main Flash - 512 KB (Bank 1 + Bank 2)
+flash: Memory.MappedMemory @ sysbus 0x08000000
+    size: 0x80000
+
+// SRAM1 - 80 KB (main working memory)
+sram1: Memory.MappedMemory @ sysbus 0x20000000
+    size: 0x14000
+
+// SRAM2 - 16 KB (can be retained in standby)
+sram2: Memory.MappedMemory @ sysbus 0x20014000
+    size: 0x4000
+
+// CCM SRAM - 32 KB (core coupled, no DMA access, fastest)
+ccmram: Memory.MappedMemory @ sysbus 0x10000000
+    size: 0x8000
+
+// Option bytes (simplified)
+optionbytes: Memory.MappedMemory @ sysbus 0x1FFF7800
+    size: 0x100
+
+// System memory (bootloader ROM)
+sysmem: Memory.MappedMemory @ sysbus 0x1FFF0000
+    size: 0x7000
+
+// -----------------------------------------------------------------------------
+// UARTs - Full STM32 UART model
+// -----------------------------------------------------------------------------
+
+// USART1 - Debug console (PA9/PA10)
+usart1: UART.STM32F7_USART @ sysbus 0x40013800
+    frequency: 170000000
+    -> nvic@37
+
+// USART2 - Secondary (PA2/PA3)
+usart2: UART.STM32F7_USART @ sysbus 0x40004400
+    frequency: 170000000
+    -> nvic@38
+
+// USART3 - (PB10/PB11)
+usart3: UART.STM32F7_USART @ sysbus 0x40004800
+    frequency: 170000000
+    -> nvic@39
+
+// LPUART1 - Low power UART
+lpuart1: UART.STM32F7_USART @ sysbus 0x40008000
+    frequency: 170000000
+    -> nvic@91
+
+// -----------------------------------------------------------------------------
+// Timers
+// -----------------------------------------------------------------------------
+
+// TIM1 - Advanced control timer (PWM, motor control)
+timer1: Timers.STM32_Timer @ sysbus 0x40012C00
+    frequency: 170000000
+    initialLimit: 0xFFFF
+    -> nvic@27
+
+// TIM2 - General purpose 32-bit
+timer2: Timers.STM32_Timer @ sysbus 0x40000000
+    frequency: 170000000
+    initialLimit: 0xFFFFFFFF
+    -> nvic@28
+
+// TIM3 - General purpose 16-bit
+timer3: Timers.STM32_Timer @ sysbus 0x40000400
+    frequency: 170000000
+    initialLimit: 0xFFFF
+    -> nvic@29
+
+// TIM4 - General purpose 16-bit
+timer4: Timers.STM32_Timer @ sysbus 0x40000800
+    frequency: 170000000
+    initialLimit: 0xFFFF
+    -> nvic@30
+
+// TIM6 - Basic timer (DAC trigger)
+timer6: Timers.STM32_Timer @ sysbus 0x40001000
+    frequency: 170000000
+    initialLimit: 0xFFFF
+    -> nvic@54
+
+// TIM7 - Basic timer
+timer7: Timers.STM32_Timer @ sysbus 0x40001400
+    frequency: 170000000
+    initialLimit: 0xFFFF
+    -> nvic@55
+
+// TIM15 - General purpose
+timer15: Timers.STM32_Timer @ sysbus 0x40014000
+    frequency: 170000000
+    initialLimit: 0xFFFF
+    -> nvic@24
+
+// TIM16 - General purpose
+timer16: Timers.STM32_Timer @ sysbus 0x40014400
+    frequency: 170000000
+    initialLimit: 0xFFFF
+    -> nvic@25
+
+// SysTick - System timer
+systick: Timers.CortexM_SysTick @ sysbus 0xE000E010
+    frequency: 170000000
+
+// -----------------------------------------------------------------------------
+// GPIO Ports
+// -----------------------------------------------------------------------------
+
+gpioA: GPIOPort.STM32_GPIOPort @ sysbus 0x48000000
+    numberOfPins: 16
+    [0-15] -> gpioManager@[0-15]
+
+gpioB: GPIOPort.STM32_GPIOPort @ sysbus 0x48000400
+    numberOfPins: 16
+    [0-15] -> gpioManager@[16-31]
+
+gpioC: GPIOPort.STM32_GPIOPort @ sysbus 0x48000800
+    numberOfPins: 16
+    [0-15] -> gpioManager@[32-47]
+
+gpioD: GPIOPort.STM32_GPIOPort @ sysbus 0x48000C00
+    numberOfPins: 16
+    [0-15] -> gpioManager@[48-63]
+
+gpioE: GPIOPort.STM32_GPIOPort @ sysbus 0x48001000
+    numberOfPins: 16
+    [0-15] -> gpioManager@[64-79]
+
+gpioF: GPIOPort.STM32_GPIOPort @ sysbus 0x48001400
+    numberOfPins: 16
+    [0-15] -> gpioManager@[80-95]
+
+gpioG: GPIOPort.STM32_GPIOPort @ sysbus 0x48001800
+    numberOfPins: 16
+    [0-15] -> gpioManager@[96-111]
+
+gpioManager: GPIOPort.GPIOManager @ sysbus
+
+// -----------------------------------------------------------------------------
+// DMA Controllers
+// -----------------------------------------------------------------------------
+
+dma1: DMA.STM32DMA @ sysbus 0x40020000
+    [0-7] -> nvic@[11-17, 47]
+
+dma2: DMA.STM32DMA @ sysbus 0x40020400
+    [0-7] -> nvic@[56-60, 68-70]
+
+// -----------------------------------------------------------------------------
+// ADC (Analog-to-Digital Converters)
+// -----------------------------------------------------------------------------
+
+// ADC1 - Main ADC for current/voltage sensing
+adc1: Python.PythonPeripheral @ sysbus 0x50000000
+    size: 0x100
+    initable: true
+    script: '''
+if request.isInit:
+    ISR = 0x00000000
+    CR = 0x20000000  # DEEPPWD
+    CFGR = 0x00000000
+    DR = 0x00000000
+    adc_values = [2048] * 19  # Mid-scale for all channels
+
+if request.isRead:
+    if request.offset == 0x00:    # ISR
+        request.value = ISR
+    elif request.offset == 0x08:  # CR
+        request.value = CR
+    elif request.offset == 0x0C:  # CFGR
+        request.value = CFGR
+    elif request.offset == 0x40:  # DR
+        request.value = DR
+    else:
+        request.value = 0
+
+if request.isWrite:
+    if request.offset == 0x00:    # ISR
+        ISR = request.value
+    elif request.offset == 0x08:  # CR
+        CR = request.value
+    elif request.offset == 0x0C:  # CFGR
+        CFGR = request.value
+'''
+
+// ADC2
+adc2: Python.PythonPeripheral @ sysbus 0x50000100
+    size: 0x100
+    initable: true
+    script: '''
+if request.isInit:
+    DR = 2048
+if request.isRead:
+    if request.offset == 0x40:
+        request.value = DR
+    else:
+        request.value = 0
+'''
+
+// -----------------------------------------------------------------------------
+// DAC (Digital-to-Analog Converters)
+// -----------------------------------------------------------------------------
+
+dac1: Python.PythonPeripheral @ sysbus 0x50000800
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    CR = 0x00000000
+    DHR12R1 = 0
+    DHR12R2 = 0
+if request.isRead:
+    if request.offset == 0x00:
+        request.value = CR
+    elif request.offset == 0x08:
+        request.value = DHR12R1
+    elif request.offset == 0x14:
+        request.value = DHR12R2
+    else:
+        request.value = 0
+if request.isWrite:
+    if request.offset == 0x00:
+        CR = request.value
+    elif request.offset == 0x08:
+        DHR12R1 = request.value
+    elif request.offset == 0x14:
+        DHR12R2 = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// FDCAN (CAN-FD Controller) - Stub for protocol development
+// -----------------------------------------------------------------------------
+
+fdcan1: Python.PythonPeripheral @ sysbus 0x40006400
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    CCCR = 0x00000001   # INIT mode
+    NBTP = 0x00000000   # Nominal bit timing
+    DBTP = 0x00000000   # Data bit timing
+    TEST = 0x00000000
+    PSR = 0x00000707    # Protocol status
+    ECR = 0x00000000    # Error counter
+    IR = 0x00000000     # Interrupt register
+    IE = 0x00000000     # Interrupt enable
+    TXBAR = 0x00000000  # TX buffer add request
+    TXBCR = 0x00000000  # TX buffer cancel request
+    TXEFS = 0x00000000  # TX event FIFO status
+    RXFS = 0x00000000   # RX FIFO status
+    log("FDCAN1: Initialized in INIT mode")
+
+if request.isRead:
+    if request.offset == 0x00:     # CCCR
+        request.value = CCCR
+    elif request.offset == 0x0C:   # DBTP
+        request.value = DBTP
+    elif request.offset == 0x10:   # TEST
+        request.value = TEST
+    elif request.offset == 0x1C:   # NBTP
+        request.value = NBTP
+    elif request.offset == 0x40:   # PSR
+        request.value = PSR
+    elif request.offset == 0x44:   # ECR
+        request.value = ECR
+    elif request.offset == 0x50:   # IR
+        request.value = IR
+    elif request.offset == 0x54:   # IE
+        request.value = IE
+    else:
+        request.value = 0
+
+if request.isWrite:
+    if request.offset == 0x00:     # CCCR
+        old_cccr = CCCR
+        CCCR = request.value
+        if (old_cccr & 0x01) and not (request.value & 0x01):
+            log("FDCAN1: Exiting INIT mode - Normal operation")
+        elif not (old_cccr & 0x01) and (request.value & 0x01):
+            log("FDCAN1: Entering INIT mode")
+    elif request.offset == 0x0C:
+        DBTP = request.value
+        log(f"FDCAN1: Data bit timing = 0x{request.value:08X}")
+    elif request.offset == 0x1C:
+        NBTP = request.value
+        log(f"FDCAN1: Nominal bit timing = 0x{request.value:08X}")
+    elif request.offset == 0x54:
+        IE = request.value
+'''
+
+fdcan2: Python.PythonPeripheral @ sysbus 0x40006800
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    CCCR = 0x00000001
+if request.isRead:
+    if request.offset == 0x00:
+        request.value = CCCR
+    else:
+        request.value = 0
+if request.isWrite:
+    if request.offset == 0x00:
+        CCCR = request.value
+'''
+
+// FDCAN Message RAM (shared between FDCAN1 and FDCAN2)
+fdcan_ram: Memory.MappedMemory @ sysbus 0x4000A400
+    size: 0x2800
+
+// -----------------------------------------------------------------------------
+// SPI Controllers
+// -----------------------------------------------------------------------------
+
+spi1: SPI.STM32SPI @ sysbus 0x40013000
+    -> nvic@35
+
+spi2: SPI.STM32SPI @ sysbus 0x40003800
+    -> nvic@36
+
+spi3: SPI.STM32SPI @ sysbus 0x40003C00
+    -> nvic@51
+
+// -----------------------------------------------------------------------------
+// I2C Controllers
+// -----------------------------------------------------------------------------
+
+i2c1: I2C.STM32F4_I2C @ sysbus 0x40005400
+    EventInterrupt -> nvic@31
+    ErrorInterrupt -> nvic@32
+
+i2c2: I2C.STM32F4_I2C @ sysbus 0x40005800
+    EventInterrupt -> nvic@33
+    ErrorInterrupt -> nvic@34
+
+i2c3: I2C.STM32F4_I2C @ sysbus 0x40007800
+    EventInterrupt -> nvic@72
+    ErrorInterrupt -> nvic@73
+
+// -----------------------------------------------------------------------------
+// Reset and Clock Control (RCC)
+// -----------------------------------------------------------------------------
+
+rcc: Python.PythonPeripheral @ sysbus 0x40021000
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    # Power-on reset values
+    CR = 0x00000063          # HSI on, ready
+    ICSCR = 0x40000000       # HSI calibration
+    CFGR = 0x00000000        # HSI as system clock
+    PLLCFGR = 0x00001000     # PLL config
+    CIER = 0x00000000        # Clock interrupt enable
+    CIFR = 0x00000000        # Clock interrupt flag
+    AHB1ENR = 0x00000100     # Flash enabled
+    AHB2ENR = 0x00000000
+    AHB3ENR = 0x00000000
+    APB1ENR1 = 0x00000000
+    APB1ENR2 = 0x00000000
+    APB2ENR = 0x00000000
+    log("RCC: Reset complete, HSI active")
+
+if request.isRead:
+    if request.offset == 0x00:     # CR
+        request.value = CR | 0x02000000  # PLL ready if enabled
+    elif request.offset == 0x04:   # ICSCR
+        request.value = ICSCR
+    elif request.offset == 0x08:   # CFGR
+        # Return SWS (bits 5:3) = SW (bits 2:0) to show clock switch complete
+        sw = CFGR & 0x07
+        request.value = CFGR | (sw << 3)
+    elif request.offset == 0x0C:   # PLLCFGR
+        request.value = PLLCFGR
+    elif request.offset == 0x48:   # AHB1ENR
+        request.value = AHB1ENR
+    elif request.offset == 0x4C:   # AHB2ENR
+        request.value = AHB2ENR
+    elif request.offset == 0x50:   # AHB3ENR
+        request.value = AHB3ENR
+    elif request.offset == 0x58:   # APB1ENR1
+        request.value = APB1ENR1
+    elif request.offset == 0x5C:   # APB1ENR2
+        request.value = APB1ENR2
+    elif request.offset == 0x60:   # APB2ENR
+        request.value = APB2ENR
+    else:
+        request.value = 0
+
+if request.isWrite:
+    if request.offset == 0x00:     # CR
+        CR = request.value
+        if request.value & 0x01000000:  # PLLON
+            log("RCC: PLL enabled")
+    elif request.offset == 0x08:   # CFGR
+        CFGR = request.value
+        sw = request.value & 0x07
+        if sw == 0:
+            log("RCC: System clock = HSI")
+        elif sw == 1:
+            log("RCC: System clock = HSE")
+        elif sw == 2:
+            log("RCC: System clock = PLL")
+        elif sw == 3:
+            log("RCC: System clock = PLL")
+    elif request.offset == 0x0C:   # PLLCFGR
+        PLLCFGR = request.value
+    elif request.offset == 0x48:   # AHB1ENR
+        AHB1ENR = request.value
+    elif request.offset == 0x4C:   # AHB2ENR
+        AHB2ENR = request.value
+    elif request.offset == 0x50:   # AHB3ENR
+        AHB3ENR = request.value
+    elif request.offset == 0x58:   # APB1ENR1
+        APB1ENR1 = request.value
+    elif request.offset == 0x5C:   # APB1ENR2
+        APB1ENR2 = request.value
+    elif request.offset == 0x60:   # APB2ENR
+        APB2ENR = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// Flash Controller
+// -----------------------------------------------------------------------------
+
+flash_ctrl: Python.PythonPeripheral @ sysbus 0x40022000
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    ACR = 0x00000600     # Latency = 0, caches disabled
+    SR = 0x00000000      # Status
+    CR = 0x00000000      # Control
+if request.isRead:
+    if request.offset == 0x00:     # ACR
+        request.value = ACR
+    elif request.offset == 0x10:   # SR
+        request.value = SR
+    elif request.offset == 0x14:   # CR
+        request.value = CR
+    else:
+        request.value = 0
+if request.isWrite:
+    if request.offset == 0x00:
+        ACR = request.value
+    elif request.offset == 0x14:
+        CR = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// Power Control
+// -----------------------------------------------------------------------------
+
+pwr: Python.PythonPeripheral @ sysbus 0x40007000
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    CR1 = 0x00000200     # VOS = Range 1
+    CR2 = 0x00000000
+    CR3 = 0x00008000
+    CR4 = 0x00000000
+    SR1 = 0x00000000
+    SR2 = 0x00000000     # VOSF clear = voltage ready
+if request.isRead:
+    if request.offset == 0x00:
+        request.value = CR1
+    elif request.offset == 0x04:
+        request.value = CR2
+    elif request.offset == 0x08:
+        request.value = CR3
+    elif request.offset == 0x0C:
+        request.value = CR4
+    elif request.offset == 0x10:
+        request.value = SR1
+    elif request.offset == 0x14:
+        request.value = SR2
+    else:
+        request.value = 0
+if request.isWrite:
+    if request.offset == 0x00:
+        CR1 = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// Independent Watchdog (IWDG)
+// -----------------------------------------------------------------------------
+
+iwdg: Python.PythonPeripheral @ sysbus 0x40003000
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    KR = 0x00000000
+    PR = 0x00000000
+    RLR = 0x00000FFF
+    SR = 0x00000000
+if request.isRead:
+    if request.offset == 0x0C:   # SR
+        request.value = SR
+    else:
+        request.value = 0
+if request.isWrite:
+    if request.offset == 0x00:   # KR
+        KR = request.value
+        if request.value == 0xAAAA:
+            pass  # Reload
+        elif request.value == 0x5555:
+            pass  # Enable write
+        elif request.value == 0xCCCC:
+            log("IWDG: Watchdog started")
+'''
+
+// -----------------------------------------------------------------------------
+// System Configuration
+// -----------------------------------------------------------------------------
+
+syscfg: Python.PythonPeripheral @ sysbus 0x40010000
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    MEMRMP = 0x00000000
+    CFGR1 = 0x7C000001
+    EXTICR = [0, 0, 0, 0]
+if request.isRead:
+    if request.offset == 0x00:
+        request.value = MEMRMP
+    elif request.offset == 0x04:
+        request.value = CFGR1
+    else:
+        request.value = 0
+if request.isWrite:
+    if request.offset == 0x00:
+        MEMRMP = request.value
+    elif request.offset == 0x04:
+        CFGR1 = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// HRTIM (High Resolution Timer) - Stub for PWM development
+// -----------------------------------------------------------------------------
+
+hrtim: Python.PythonPeripheral @ sysbus 0x40016800
+    size: 0x800
+    initable: true
+    script: '''
+if request.isInit:
+    MCR = 0x00000000     # Master control
+    MDIER = 0x00000000   # Master DMA/interrupt enable
+    log("HRTIM: Initialized (stub mode)")
+if request.isRead:
+    request.value = 0
+if request.isWrite:
+    pass
+'''
+
+// -----------------------------------------------------------------------------
+// CORDIC (Trigonometric Accelerator)
+// -----------------------------------------------------------------------------
+
+cordic: Python.PythonPeripheral @ sysbus 0x40020C00
+    size: 0x400
+    initable: true
+    script: '''
+import math
+
+if request.isInit:
+    CSR = 0x00000000     # Control/status
+    WDATA = 0x00000000   # Write data
+    RDATA = 0x00000000   # Read data
+
+if request.isRead:
+    if request.offset == 0x00:    # CSR
+        request.value = CSR | 0x80000000  # RRDY always set
+    elif request.offset == 0x08:  # RDATA
+        request.value = RDATA
+    else:
+        request.value = 0
+
+if request.isWrite:
+    if request.offset == 0x00:    # CSR
+        CSR = request.value
+    elif request.offset == 0x04:  # WDATA
+        WDATA = request.value
+        # Simple sine/cosine calculation (q1.31 format)
+        func = (CSR >> 0) & 0x0F
+        if func == 0:  # Cosine
+            angle = (WDATA / 2147483648.0) * math.pi
+            RDATA = int(math.cos(angle) * 2147483647) & 0xFFFFFFFF
+        elif func == 1:  # Sine
+            angle = (WDATA / 2147483648.0) * math.pi
+            RDATA = int(math.sin(angle) * 2147483647) & 0xFFFFFFFF
+'''
+
+// -----------------------------------------------------------------------------
+// Bus Tags
+// -----------------------------------------------------------------------------
+
+sysbus:
+    init:
+        Tag <0x40000000, 0x400003FF> "TIM2"
+        Tag <0x40000400, 0x400007FF> "TIM3"
+        Tag <0x40000800, 0x40000BFF> "TIM4"
+        Tag <0x40001000, 0x400013FF> "TIM6"
+        Tag <0x40001400, 0x400017FF> "TIM7"
+        Tag <0x40003000, 0x400033FF> "IWDG"
+        Tag <0x40003800, 0x40003BFF> "SPI2"
+        Tag <0x40003C00, 0x40003FFF> "SPI3"
+        Tag <0x40004400, 0x400047FF> "USART2"
+        Tag <0x40004800, 0x40004BFF> "USART3"
+        Tag <0x40005400, 0x400057FF> "I2C1"
+        Tag <0x40005800, 0x40005BFF> "I2C2"
+        Tag <0x40006400, 0x400067FF> "FDCAN1"
+        Tag <0x40006800, 0x40006BFF> "FDCAN2"
+        Tag <0x40007000, 0x400073FF> "PWR"
+        Tag <0x40007800, 0x40007BFF> "I2C3"
+        Tag <0x40008000, 0x400083FF> "LPUART1"
+        Tag <0x40010000, 0x400103FF> "SYSCFG"
+        Tag <0x40012C00, 0x40012FFF> "TIM1"
+        Tag <0x40013000, 0x400133FF> "SPI1"
+        Tag <0x40013800, 0x40013BFF> "USART1"
+        Tag <0x40014000, 0x400143FF> "TIM15"
+        Tag <0x40014400, 0x400147FF> "TIM16"
+        Tag <0x40016800, 0x40016FFF> "HRTIM"
+        Tag <0x40020000, 0x400203FF> "DMA1"
+        Tag <0x40020400, 0x400207FF> "DMA2"
+        Tag <0x40020C00, 0x40020FFF> "CORDIC"
+        Tag <0x40021000, 0x400213FF> "RCC"
+        Tag <0x40022000, 0x400223FF> "FLASH"
+        Tag <0x48000000, 0x5FFFFFFF> "GPIO/AHB2"
+        Tag <0x50000000, 0x500003FF> "ADC1/ADC2"
+        Tag <0x50000800, 0x50000BFF> "DAC1"

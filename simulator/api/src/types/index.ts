@@ -140,4 +140,51 @@ export const EVENTS = {
   ROBOT_STATE: 'sim:robot',
   GRID_STATE: 'sim:grid',
   ALERT: 'sim:alert',
+  METRICS: 'sim:metrics',
 } as const;
+
+// Aggregated metrics for demo/pitch dashboard
+export interface SimulationMetrics {
+  // Time
+  simulatedHours: number;
+  realTimeSeconds: number;
+
+  // Uptime & Reliability
+  systemUptime: number;      // 0-100%
+  moduleUptime: number;      // Average module uptime %
+  faultsDetected: number;
+  faultsRecovered: number;
+  mtbfHours: number;         // Mean time between failures
+  mttrMinutes: number;       // Mean time to repair
+
+  // Efficiency
+  avgEfficiency: number;     // 0-100%
+  peakEfficiency: number;
+  totalEnergyKwh: number;
+  energyLossKwh: number;
+
+  // Cost Savings (vs traditional)
+  modulesReplaced: number;
+  downtimeMinutes: number;
+  downtimeAvoided: number;   // Minutes saved by hot-swap
+  costSavingsUsd: number;    // Estimated savings
+
+  // Fleet Performance
+  busesCharged: number;
+  swapsCompleted: number;
+  avgChargeTimeMin: number;
+  avgSwapTimeSec: number;
+  fleetSoc: number;          // Average fleet SoC
+
+  // V2G Performance
+  v2gEventsCount: number;
+  v2gEnergyKwh: number;      // Energy exported to grid
+  v2gRevenueUsd: number;
+  gridFreqMin: number;       // Minimum frequency seen
+  gridFreqMax: number;       // Maximum frequency seen
+
+  // Swarm Intelligence
+  loadBalanceScore: number;  // 0-100 (100 = perfect distribution)
+  thermalBalance: number;    // Temperature spread across modules
+  redundancyLevel: number;   // Available spare capacity %
+}

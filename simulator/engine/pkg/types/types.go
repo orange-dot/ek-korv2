@@ -206,11 +206,73 @@ type CANMessage struct {
 
 // Event types for pub/sub
 const (
-	EventSimState    = "sim:state"
-	EventModuleState = "sim:module"
-	EventBusState    = "sim:bus"
+	EventSimState     = "sim:state"
+	EventModuleState  = "sim:module"
+	EventBusState     = "sim:bus"
 	EventStationState = "sim:station"
-	EventRobotState  = "sim:robot"
-	EventGridState   = "sim:grid"
-	EventAlert       = "sim:alert"
+	EventRobotState   = "sim:robot"
+	EventGridState    = "sim:grid"
+	EventAlert        = "sim:alert"
+	EventControl      = "sim:control" // Control commands from API
+	EventMetrics      = "sim:metrics" // Aggregated metrics for dashboard
 )
+
+// ControlCommand represents a control command from the API
+type ControlCommand struct {
+	Action    string  `json:"action"`             // start, stop, pause, resume, setTimeScale, injectFault, triggerV2G
+	Value     float64 `json:"value,omitempty"`    // For setTimeScale
+	ModuleID  string  `json:"moduleId,omitempty"` // For injectFault, setModulePower
+	FaultType int     `json:"faultType,omitempty"` // For injectFault
+	Severity  float64 `json:"severity,omitempty"` // For injectFault
+	Power     float64 `json:"power,omitempty"`    // For setModulePower
+	RackID    string  `json:"rackId,omitempty"`   // For distributeRackPower
+	BusID     string  `json:"busId,omitempty"`    // For queueBusForSwap
+	StationID string  `json:"stationId,omitempty"` // For queueBusForSwap
+	Frequency float64 `json:"frequency,omitempty"` // For triggerV2G (grid frequency)
+}
+
+// SimulationMetrics represents aggregated metrics for demo/pitch
+type SimulationMetrics struct {
+	// Time
+	SimulatedHours   float64 `json:"simulatedHours"`
+	RealTimeSeconds  float64 `json:"realTimeSeconds"`
+
+	// Uptime & Reliability
+	SystemUptime     float64 `json:"systemUptime"`      // 0-100%
+	ModuleUptime     float64 `json:"moduleUptime"`      // Average module uptime %
+	FaultsDetected   int     `json:"faultsDetected"`
+	FaultsRecovered  int     `json:"faultsRecovered"`
+	MTBFHours        float64 `json:"mtbfHours"`         // Mean time between failures
+	MTTRMinutes      float64 `json:"mttrMinutes"`       // Mean time to repair
+
+	// Efficiency
+	AvgEfficiency    float64 `json:"avgEfficiency"`     // 0-100%
+	PeakEfficiency   float64 `json:"peakEfficiency"`
+	TotalEnergyKWh   float64 `json:"totalEnergyKwh"`
+	EnergyLossKWh    float64 `json:"energyLossKwh"`
+
+	// Cost Savings (vs traditional)
+	ModulesReplaced  int     `json:"modulesReplaced"`
+	DowntimeMinutes  float64 `json:"downtimeMinutes"`
+	DowntimeAvoided  float64 `json:"downtimeAvoided"`   // Minutes saved by hot-swap
+	CostSavingsUSD   float64 `json:"costSavingsUsd"`    // Estimated savings
+
+	// Fleet Performance
+	BusesCharged     int     `json:"busesCharged"`
+	SwapsCompleted   int     `json:"swapsCompleted"`
+	AvgChargeTimeMin float64 `json:"avgChargeTimeMin"`
+	AvgSwapTimeSec   float64 `json:"avgSwapTimeSec"`
+	FleetSOC         float64 `json:"fleetSoc"`          // Average fleet SoC
+
+	// V2G Performance
+	V2GEventsCount   int     `json:"v2gEventsCount"`
+	V2GEnergyKWh     float64 `json:"v2gEnergyKwh"`      // Energy exported to grid
+	V2GRevenueUSD    float64 `json:"v2gRevenueUsd"`
+	GridFreqMin      float64 `json:"gridFreqMin"`       // Minimum frequency seen
+	GridFreqMax      float64 `json:"gridFreqMax"`       // Maximum frequency seen
+
+	// Swarm Intelligence
+	LoadBalanceScore float64 `json:"loadBalanceScore"`  // 0-100 (100 = perfect distribution)
+	ThermalBalance   float64 `json:"thermalBalance"`    // Temperature spread across modules
+	RedundancyLevel  float64 `json:"redundancyLevel"`   // Available spare capacity %
+}

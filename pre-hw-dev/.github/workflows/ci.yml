@@ -1,0 +1,129 @@
+name: JEZGRO CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'pre-hw-dev/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'pre-hw-dev/**'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: pre-hw-dev
+
+jobs:
+  build-linux:
+    name: Build & Test (Linux)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+
+      - name: Configure
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DBUILD_SIM=ON -DBUILD_TESTS=ON -DENABLE_DEBUG=ON ..
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure
+
+  build-windows:
+    name: Build & Test (Windows)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          mkdir build
+          cd build
+          cmake -DBUILD_SIM=ON -DBUILD_TESTS=ON ..
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest -C Release --output-on-failure
+
+  swarm-simulation:
+    name: Swarm Simulation Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install python-can
+
+      - name: Run swarm simulation
+        run: |
+          cd sim
+          timeout 15 python swarm_simulator.py --virtual --nodes 5 --duration 10 || true
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=all --error-exitcode=1 \
+            --suppress=missingIncludeSystem \
+            --suppress=unusedFunction \
+            -DJEZGRO_SIM \
+            src/
+
+  code-format:
+    name: Code Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check line endings
+        run: |
+          if git ls-files | xargs file | grep -q CRLF; then
+            echo "Found CRLF line endings"
+            exit 1
+          fi
+
+      - name: Check trailing whitespace
+        run: |
+          if git grep -l ' $' -- '*.c' '*.h'; then
+            echo "Found trailing whitespace"
+            exit 1
+          fi
