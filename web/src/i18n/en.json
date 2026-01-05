@@ -16,7 +16,8 @@
     "internal": "Internal",
     "jezgroDev": "JEZGRO Dev",
     "roj": "ROJ",
-    "quickPitch": "Quick Pitch"
+    "quickPitch": "Quick Pitch",
+    "v2g": "V2G"
   },
   "simulation": {
     "title": "System Simulation",

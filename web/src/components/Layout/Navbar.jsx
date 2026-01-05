@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X, Zap, Globe, Play, ChevronDown, FileText, Lock, Cpu, Hexagon } from 'lucide-react';
+import { Menu, X, Zap, Globe, Play, ChevronDown, FileText, Lock, Cpu, Hexagon, ArrowLeftRight } from 'lucide-react';
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
@@ -149,6 +149,16 @@ export default function Navbar() {
               <span className="text-sm font-medium">{t('nav.roj')}</span>
             </Link>
 
+            {/* V2G Link (Protected) */}
+            <Link
+              to="/v2g"
+              className="flex items-center space-x-1 px-3 py-1.5 text-slate-300 hover:text-green-400 transition-colors"
+            >
+              <Lock className="w-3 h-3" />
+              <ArrowLeftRight className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('nav.v2g')}</span>
+            </Link>
+
             {/* Language Toggle */}
             <button
               onClick={toggleLanguage}
@@ -254,6 +264,15 @@ export default function Navbar() {
               <Lock className="w-3 h-3" />
               <Hexagon className="w-4 h-4" />
               <span>{t('nav.roj')}</span>
+            </Link>
+            <Link
+              to="/v2g"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center space-x-2 text-slate-300 hover:text-green-400 py-2"
+            >
+              <Lock className="w-3 h-3" />
+              <ArrowLeftRight className="w-4 h-4" />
+              <span>{t('nav.v2g')}</span>
             </Link>
           </div>
         </motion.div>
