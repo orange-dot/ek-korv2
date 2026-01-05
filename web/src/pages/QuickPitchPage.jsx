@@ -366,7 +366,7 @@ export default function QuickPitchPage() {
               className="mb-16"
             >
               <h3 className="text-center text-xl font-bold text-slate-400 mb-6">
-                {isSr ? 'POREĐENJE SA KONKURENCIJOM' : 'VS COMPETITION'}
+                {isSr ? 'POREĐENJE' : 'COMPARISON'}
               </h3>
 
               <div className="overflow-x-auto">
