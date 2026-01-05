@@ -24,6 +24,7 @@ export function useSimulatorConnection(options = {}) {
   const [modules, setModules] = useState([]);
   const [buses, setBuses] = useState([]);
   const [stations, setStations] = useState([]);
+  const [gridState, setGridState] = useState(null);
   const [metrics, setMetrics] = useState(null);
 
   // WebSocket ref
@@ -64,6 +65,9 @@ export function useSimulatorConnection(options = {}) {
               break;
             case 'sim:station':
               setStations(msg.data || []);
+              break;
+            case 'sim:grid':
+              setGridState(msg.data);
               break;
             case 'sim:metrics':
               setMetrics(msg.data);
@@ -233,6 +237,7 @@ export function useSimulatorConnection(options = {}) {
     modules,
     buses,
     stations,
+    gridState,
     metrics,
 
     // Control functions

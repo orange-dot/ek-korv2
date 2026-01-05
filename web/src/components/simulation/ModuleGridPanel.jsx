@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Cpu, Thermometer, Zap, Activity } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Cpu, Thermometer, Zap, Activity, ArrowUp, ArrowDown } from 'lucide-react';
 import { useSimulation, SIM_MODES } from '../../context/SimulationContext';
 import { getModuleStateColor, getModuleStateLabel, aggregateModuleStats } from '../../adapters/simulatorAdapter';
+import GridFrequencyIndicator from './GridFrequencyIndicator';
 
 /**
  * Collapsible panel showing 84-slot module grid visualization.
- * Shows module states, power output, and thermal status.
+ * Shows module states, power output, thermal status, and V2G activity.
  */
 export default function ModuleGridPanel() {
-  const { mode, modules } = useSimulation();
+  const { mode, modules, gridState } = useSimulation();
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedModule, setSelectedModule] = useState(null);
 
@@ -32,6 +33,13 @@ export default function ModuleGridPanel() {
 
   const stats = aggregateModuleStats(modules);
 
+  // V2G state
+  const v2gEnabled = gridState?.v2gEnabled ?? false;
+  const v2gPower = gridState?.v2gPower ?? 0;
+
+  // Count V2G active modules
+  const v2gActiveCount = modules.filter(m => m.state === 'v2g').length;
+
   // Get Tailwind color class for module state
   const getColorClass = (mod) => {
     const color = getModuleStateColor(mod);
@@ -46,6 +54,17 @@ export default function ModuleGridPanel() {
       'slate-600': 'bg-slate-600',
     };
     return colorMap[color] || 'bg-slate-600';
+  };
+
+  // Check if module is in V2G mode (for special styling)
+  const isV2GModule = (mod) => mod.state === 'v2g';
+
+  // Get power direction indicator
+  const getPowerDirection = (mod) => {
+    if (!mod.powerOut) return null;
+    if (mod.state === 'v2g') return 'export'; // V2G = exporting to grid
+    if (mod.state === 'active' && mod.powerOut > 0) return 'import'; // Charging = importing from grid
+    return null;
   };
 
   return (
@@ -101,19 +120,32 @@ export default function ModuleGridPanel() {
 
               {/* Module Grid (7 rows x 12 columns) */}
               <div className="grid grid-cols-12 gap-0.5 mb-4">
-                {slots.map((mod, i) => (
-                  <motion.button
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.003 }}
-                    onClick={() => setSelectedModule(selectedModule === i ? null : i)}
-                    className={`aspect-square rounded-sm ${getColorClass(mod)}
-                      hover:ring-1 hover:ring-white/50 transition-all
-                      ${selectedModule === i ? 'ring-2 ring-white' : ''}`}
-                    title={`Slot ${i}: ${getModuleStateLabel(mod.state)}`}
-                  />
-                ))}
+                {slots.map((mod, i) => {
+                  const isV2G = isV2GModule(mod);
+                  const powerDir = getPowerDirection(mod);
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.003 }}
+                      onClick={() => setSelectedModule(selectedModule === i ? null : i)}
+                      className={`aspect-square rounded-sm ${getColorClass(mod)}
+                        hover:ring-1 hover:ring-white/50 transition-all relative
+                        ${selectedModule === i ? 'ring-2 ring-white' : ''}
+                        ${isV2G ? 'shadow-lg shadow-purple-500/50 animate-pulse' : ''}`}
+                      title={`Slot ${i}: ${getModuleStateLabel(mod.state)}`}
+                    >
+                      {/* Power direction indicator */}
+                      {powerDir === 'export' && (
+                        <ArrowUp className="absolute inset-0 w-full h-full p-0.5 text-white/80" />
+                      )}
+                      {powerDir === 'import' && (
+                        <ArrowDown className="absolute inset-0 w-full h-full p-0.5 text-white/50" />
+                      )}
+                    </motion.button>
+                  );
+                })}
               </div>
 
               {/* Stats */}
@@ -208,6 +240,38 @@ export default function ModuleGridPanel() {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* Grid Frequency Indicator (V2G) */}
+              {gridState && (
+                <div className="mb-4">
+                  <GridFrequencyIndicator gridState={gridState} compact={false} />
+                </div>
+              )}
+
+              {/* V2G Stats (when active) */}
+              {v2gEnabled && (
+                <div className="bg-purple-500/20 border border-purple-500/50 rounded-lg p-3 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-purple-400 text-sm font-medium">V2G Active</span>
+                    <span className="text-purple-300 text-xs">
+                      {v2gActiveCount} modules
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {v2gPower < 0 ? (
+                      <ArrowUp className="w-4 h-4 text-purple-400 animate-pulse" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-cyan-400" />
+                    )}
+                    <span className="text-white font-mono text-lg">
+                      {Math.abs(v2gPower / 1000).toFixed(1)} kW
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {v2gPower < 0 ? 'to grid' : 'from grid'}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Fault indicator */}
               {stats.faulted > 0 && (

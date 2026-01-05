@@ -501,6 +501,11 @@ func (s *Simulation) publishState() {
 	stationsJSON, _ := json.Marshal(stations)
 	s.redis.Publish(ctx, types.EventStationState, stationsJSON)
 
+	// Publish grid state (for V2G visualization)
+	gridState := s.GetGrid()
+	gridJSON, _ := json.Marshal(gridState)
+	s.redis.Publish(ctx, types.EventGridState, gridJSON)
+
 	// Publish metrics (every 10th tick to reduce traffic)
 	if s.tickCount%10 == 0 {
 		metrics := s.GetMetrics()

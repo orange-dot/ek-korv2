@@ -3,7 +3,7 @@ import fastifyWebsocket from '@fastify/websocket';
 import fastifyCors from '@fastify/cors';
 import { Redis } from 'ioredis';
 import type { WebSocket } from 'ws';
-import type { SimulationState, Module, Bus, Station, SimulationMetrics } from './types/index.js';
+import type { SimulationState, Module, Bus, Station, Grid, SimulationMetrics } from './types/index.js';
 
 // Configuration
 const PORT = parseInt(process.env.PORT || '8000', 10);
@@ -19,6 +19,7 @@ let simState: SimulationState | null = null;
 let modules: Module[] = [];
 let buses: Bus[] = [];
 let stations: Station[] = [];
+let gridState: Grid | null = null;
 let metrics: SimulationMetrics | null = null;
 
 // WebSocket clients
@@ -30,7 +31,7 @@ const redisSub = new Redis(REDIS_URL);
 
 // Subscribe to simulation events
 async function setupRedisSubscription() {
-  await redisSub.subscribe('sim:state', 'sim:module', 'sim:bus', 'sim:station', 'sim:metrics');
+  await redisSub.subscribe('sim:state', 'sim:module', 'sim:bus', 'sim:station', 'sim:grid', 'sim:metrics');
 
   redisSub.on('message', (channel: string, message: string) => {
     try {
@@ -48,6 +49,9 @@ async function setupRedisSubscription() {
           break;
         case 'sim:station':
           stations = data as Station[];
+          break;
+        case 'sim:grid':
+          gridState = data as Grid;
           break;
         case 'sim:metrics':
           metrics = data as SimulationMetrics;
@@ -132,6 +136,17 @@ async function registerRoutes() {
       return reply.code(404).send({ error: 'Station not found' });
     }
     return station;
+  });
+
+  // Grid state (for V2G visualization)
+  fastify.get('/api/grid', async () => {
+    return gridState || {
+      frequency: 50.0,
+      voltage: 400.0,
+      loadDemand: 0,
+      v2gEnabled: false,
+      v2gPower: 0,
+    };
   });
 
   // Metrics - aggregated demo/pitch metrics

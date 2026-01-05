@@ -102,6 +102,7 @@ function getInitialStateForCity(cityId) {
     mode: SIM_MODES.LOCAL, // 'local' | 'live'
     modules: [], // EK3 module data from live simulator
     liveSimState: null, // State from Go engine
+    gridState: null, // Grid state for V2G visualization
     metrics: null, // Metrics from Go engine
   };
 }
@@ -139,6 +140,7 @@ const ACTIONS = {
   SET_MODE: 'SET_MODE',
   SET_MODULES: 'SET_MODULES',
   SET_LIVE_SIM_STATE: 'SET_LIVE_SIM_STATE',
+  SET_GRID_STATE: 'SET_GRID_STATE',
   SET_METRICS: 'SET_METRICS',
   SET_LIVE_BUSES: 'SET_LIVE_BUSES',
   SET_LIVE_STATIONS: 'SET_LIVE_STATIONS',
@@ -357,6 +359,9 @@ function simulationReducer(state, action) {
     case ACTIONS.SET_LIVE_SIM_STATE:
       return { ...state, liveSimState: action.payload };
 
+    case ACTIONS.SET_GRID_STATE:
+      return { ...state, gridState: action.payload };
+
     case ACTIONS.SET_METRICS:
       return { ...state, metrics: action.payload };
 
@@ -424,11 +429,16 @@ export function SimulationProvider({ children }) {
       dispatch({ type: ACTIONS.SET_LIVE_SIM_STATE, payload: adaptSimState(simulator.simState) });
     }
 
+    // Update grid state (for V2G visualization)
+    if (simulator.gridState) {
+      dispatch({ type: ACTIONS.SET_GRID_STATE, payload: simulator.gridState });
+    }
+
     // Update metrics
     if (simulator.metrics) {
       dispatch({ type: ACTIONS.SET_METRICS, payload: simulator.metrics });
     }
-  }, [state.mode, simulator.modules, simulator.buses, simulator.stations, simulator.simState, simulator.metrics]);
+  }, [state.mode, simulator.modules, simulator.buses, simulator.stations, simulator.simState, simulator.gridState, simulator.metrics]);
 
   // Auto-fallback on disconnect (when in live mode)
   useEffect(() => {
