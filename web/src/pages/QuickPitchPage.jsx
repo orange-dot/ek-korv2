@@ -413,7 +413,7 @@ export default function QuickPitchPage() {
               <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 text-center">
                 <Calendar className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
                 <p className="text-4xl font-black text-white">2027</p>
-                <p className="text-slate-400">{isSr ? 'EXPO Beograd' : 'EXPO Belgrade'}</p>
+                <p className="text-slate-400">{isSr ? 'MVP Lansiranje' : 'MVP Launch'}</p>
               </div>
 
               <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 text-center">
@@ -446,7 +446,7 @@ export default function QuickPitchPage() {
                 <ChevronRight className="w-8 h-8 text-slate-600" />
                 <div>
                   <p className="text-5xl font-black text-purple-400">2027</p>
-                  <p className="text-slate-400">MVP @ EXPO</p>
+                  <p className="text-slate-400">{isSr ? 'MVP Lansiranje' : 'MVP Launch'}</p>
                 </div>
               </div>
 
