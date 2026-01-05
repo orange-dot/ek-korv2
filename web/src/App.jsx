@@ -11,6 +11,7 @@ import StrategyPage from './pages/StrategyPage';
 import JezgroDevPage from './pages/JezgroDevPage';
 import RojIntelligencePage from './pages/RojIntelligencePage';
 import SimulatorDemoPage from './pages/SimulatorDemoPage';
+import QuickPitchPage from './pages/QuickPitchPage';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
       <Route path="/jezgro-dev" element={<JezgroDevPage />} />
       <Route path="/roj" element={<RojIntelligencePage />} />
       <Route path="/simulator-demo" element={<SimulatorDemoPage />} />
+      <Route path="/quick" element={<QuickPitchPage />} />
     </Routes>
   );
 }

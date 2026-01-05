@@ -111,6 +111,15 @@ export default function Navbar() {
               )}
             </div>
 
+            {/* Quick Pitch Link */}
+            <Link
+              to="/quick"
+              className="flex items-center space-x-1 px-3 py-1.5 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/50 rounded-full text-cyan-400 hover:text-white hover:border-cyan-400 transition-colors"
+            >
+              <Zap className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('nav.quickPitch')}</span>
+            </Link>
+
             {/* Patent Link */}
             <Link
               to="/patent"
@@ -212,6 +221,14 @@ export default function Navbar() {
                 <span>{t('nav.laDelivery')}</span>
               </Link>
             </div>
+            <Link
+              to="/quick"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center space-x-2 text-cyan-400 py-2 font-medium"
+            >
+              <Zap className="w-4 h-4" />
+              <span>{t('nav.quickPitch')}</span>
+            </Link>
             <Link
               to="/patent"
               onClick={() => setIsOpen(false)}
