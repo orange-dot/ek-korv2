@@ -3,7 +3,7 @@ import fastifyWebsocket from '@fastify/websocket';
 import fastifyCors from '@fastify/cors';
 import { Redis } from 'ioredis';
 import type { WebSocket } from 'ws';
-import type { SimulationState, Module, Bus, Station, Grid, SimulationMetrics } from './types/index.js';
+import type { SimulationState, Module, Bus, Station, Grid, SimulationMetrics, DeliverySimulationState, Drone, DeliveryPod, SwarmBot, DeliveryHub, Package as DeliveryPackage, DeliveryMetrics } from './types/index.js';
 
 // Configuration
 const PORT = parseInt(process.env.PORT || '8000', 10);
@@ -22,6 +22,15 @@ let stations: Station[] = [];
 let gridState: Grid | null = null;
 let metrics: SimulationMetrics | null = null;
 
+// LA Delivery state cache
+let deliveryState: DeliverySimulationState | null = null;
+let drones: Drone[] = [];
+let pods: DeliveryPod[] = [];
+let swarmBots: SwarmBot[] = [];
+let deliveryHubs: DeliveryHub[] = [];
+let packages: DeliveryPackage[] = [];
+let deliveryMetrics: DeliveryMetrics | null = null;
+
 // WebSocket clients
 const wsClients = new Set<WebSocket>();
 
@@ -31,7 +40,10 @@ const redisSub = new Redis(REDIS_URL);
 
 // Subscribe to simulation events
 async function setupRedisSubscription() {
-  await redisSub.subscribe('sim:state', 'sim:module', 'sim:bus', 'sim:station', 'sim:grid', 'sim:metrics');
+  await redisSub.subscribe(
+    'sim:state', 'sim:module', 'sim:bus', 'sim:station', 'sim:grid', 'sim:metrics',
+    'delivery:state', 'delivery:drone', 'delivery:pod', 'delivery:swarmbot', 'delivery:hub', 'delivery:package', 'delivery:metrics'
+  );
 
   redisSub.on('message', (channel: string, message: string) => {
     try {
@@ -55,6 +67,34 @@ async function setupRedisSubscription() {
           break;
         case 'sim:metrics':
           metrics = data as SimulationMetrics;
+          break;
+        // LA Delivery channels
+        case 'delivery:state':
+          deliveryState = data as DeliverySimulationState;
+          drones = deliveryState.drones || [];
+          pods = deliveryState.pods || [];
+          swarmBots = deliveryState.swarmBots || [];
+          deliveryHubs = deliveryState.hubs || [];
+          packages = deliveryState.packages || [];
+          deliveryMetrics = deliveryState.metrics || null;
+          break;
+        case 'delivery:drone':
+          drones = data as Drone[];
+          break;
+        case 'delivery:pod':
+          pods = data as DeliveryPod[];
+          break;
+        case 'delivery:swarmbot':
+          swarmBots = data as SwarmBot[];
+          break;
+        case 'delivery:hub':
+          deliveryHubs = data as DeliveryHub[];
+          break;
+        case 'delivery:package':
+          packages = data as DeliveryPackage[];
+          break;
+        case 'delivery:metrics':
+          deliveryMetrics = data as DeliveryMetrics;
           break;
       }
 
@@ -288,21 +328,220 @@ async function registerRoutes() {
     }
   );
 
+  // ===== LA Delivery Endpoints =====
+
+  // Get full delivery simulation state
+  fastify.get('/api/delivery', async () => {
+    return deliveryState || {
+      running: false,
+      simTime: 0,
+      timeScale: 1,
+      drones: [],
+      pods: [],
+      swarmBots: [],
+      hubs: [],
+      packages: [],
+      corridors: [],
+      routes: [],
+      zones: [],
+      metrics: {
+        totalDrones: 0,
+        activeDrones: 0,
+        totalPods: 0,
+        activePods: 0,
+        totalSwarmBots: 0,
+        activeSwarmBots: 0,
+        pendingDeliveries: 0,
+        inTransitDeliveries: 0,
+        completedDeliveries: 0,
+        avgDeliveryTime: 0,
+        avgDroneSOC: 0,
+        avgPodSOC: 0,
+        avgSwarmBotSOC: 0,
+        chargingCount: 0,
+        fleetUtilization: 0,
+        handoffSuccessRate: 0,
+      },
+    };
+  });
+
+  // Get drones
+  fastify.get('/api/delivery/drones', async () => {
+    return drones;
+  });
+
+  fastify.get<{ Params: { id: string } }>('/api/delivery/drones/:id', async (request, reply) => {
+    const drone = drones.find((d) => d.id === request.params.id);
+    if (!drone) {
+      return reply.code(404).send({ error: 'Drone not found' });
+    }
+    return drone;
+  });
+
+  // Get pods
+  fastify.get('/api/delivery/pods', async () => {
+    return pods;
+  });
+
+  fastify.get<{ Params: { id: string } }>('/api/delivery/pods/:id', async (request, reply) => {
+    const pod = pods.find((p) => p.id === request.params.id);
+    if (!pod) {
+      return reply.code(404).send({ error: 'Pod not found' });
+    }
+    return pod;
+  });
+
+  // Get swarm bots
+  fastify.get('/api/delivery/swarmbots', async () => {
+    return swarmBots;
+  });
+
+  fastify.get<{ Params: { id: string } }>('/api/delivery/swarmbots/:id', async (request, reply) => {
+    const bot = swarmBots.find((b) => b.id === request.params.id);
+    if (!bot) {
+      return reply.code(404).send({ error: 'SwarmBot not found' });
+    }
+    return bot;
+  });
+
+  // Get hubs
+  fastify.get('/api/delivery/hubs', async () => {
+    return deliveryHubs;
+  });
+
+  fastify.get<{ Params: { id: string } }>('/api/delivery/hubs/:id', async (request, reply) => {
+    const hub = deliveryHubs.find((h) => h.id === request.params.id);
+    if (!hub) {
+      return reply.code(404).send({ error: 'Hub not found' });
+    }
+    return hub;
+  });
+
+  // Get packages
+  fastify.get('/api/delivery/packages', async () => {
+    return packages;
+  });
+
+  fastify.get<{ Params: { id: string } }>('/api/delivery/packages/:id', async (request, reply) => {
+    const pkg = packages.find((p) => p.id === request.params.id);
+    if (!pkg) {
+      return reply.code(404).send({ error: 'Package not found' });
+    }
+    return pkg;
+  });
+
+  // Get delivery metrics
+  fastify.get('/api/delivery/metrics', async () => {
+    return deliveryMetrics || {
+      totalDrones: 0,
+      activeDrones: 0,
+      totalPods: 0,
+      activePods: 0,
+      totalSwarmBots: 0,
+      activeSwarmBots: 0,
+      pendingDeliveries: 0,
+      inTransitDeliveries: 0,
+      completedDeliveries: 0,
+      avgDeliveryTime: 0,
+      avgDroneSOC: 0,
+      avgPodSOC: 0,
+      avgSwarmBotSOC: 0,
+      chargingCount: 0,
+      fleetUtilization: 0,
+      handoffSuccessRate: 0,
+    };
+  });
+
+  // Delivery simulation control
+  fastify.post<{ Body: { action: string; value?: unknown } }>(
+    '/api/delivery/control',
+    async (request) => {
+      const { action, value } = request.body;
+      await redis.publish('delivery:control', JSON.stringify({ action, value }));
+      return { success: true, action, value };
+    }
+  );
+
+  // Add a new package
+  fastify.post<{ Body: { priority: string; origin: { lat: number; lng: number }; destination: { lat: number; lng: number }; weight: number; size: string } }>(
+    '/api/delivery/packages',
+    async (request) => {
+      const { priority, origin, destination, weight, size } = request.body;
+      await redis.publish('delivery:control', JSON.stringify({
+        action: 'addPackage',
+        priority,
+        origin,
+        destination,
+        weight,
+        size,
+      }));
+      return { success: true };
+    }
+  );
+
+  // Dispatch drone manually
+  fastify.post<{ Body: { droneId: string; packageId: string } }>(
+    '/api/delivery/dispatch-drone',
+    async (request) => {
+      const { droneId, packageId } = request.body;
+      await redis.publish('delivery:control', JSON.stringify({
+        action: 'dispatchDrone',
+        vehicleId: droneId,
+        packageId,
+      }));
+      return { success: true, droneId, packageId };
+    }
+  );
+
   // WebSocket endpoint
-  fastify.get('/ws/simulation', { websocket: true }, (socket, _req) => {
-    const ws = socket as unknown as WebSocket;
+  fastify.get('/ws/simulation', { websocket: true }, (connection, _req) => {
+    const ws = connection.socket;
     fastify.log.info('WebSocket client connected');
     wsClients.add(ws);
 
-    // Send current state on connect
+    // Send all current state on connect
+    const timestamp = new Date().toISOString();
+
     if (simState) {
-      ws.send(
-        JSON.stringify({
-          type: 'sim:state',
-          data: simState,
-          timestamp: new Date().toISOString(),
-        })
-      );
+      ws.send(JSON.stringify({ type: 'sim:state', data: simState, timestamp }));
+    }
+    if (buses.length > 0) {
+      ws.send(JSON.stringify({ type: 'sim:bus', data: buses, timestamp }));
+    }
+    if (stations.length > 0) {
+      ws.send(JSON.stringify({ type: 'sim:station', data: stations, timestamp }));
+    }
+    if (modules.length > 0) {
+      ws.send(JSON.stringify({ type: 'sim:module', data: modules, timestamp }));
+    }
+    if (gridState) {
+      ws.send(JSON.stringify({ type: 'sim:grid', data: gridState, timestamp }));
+    }
+    if (metrics) {
+      ws.send(JSON.stringify({ type: 'sim:metrics', data: metrics, timestamp }));
+    }
+
+    // Send delivery state on connect
+    if (deliveryState) {
+      ws.send(JSON.stringify({ type: 'delivery:state', data: deliveryState, timestamp }));
+    }
+    if (drones.length > 0) {
+      ws.send(JSON.stringify({ type: 'delivery:drone', data: drones, timestamp }));
+    }
+    if (pods.length > 0) {
+      ws.send(JSON.stringify({ type: 'delivery:pod', data: pods, timestamp }));
+    }
+    if (swarmBots.length > 0) {
+      ws.send(JSON.stringify({ type: 'delivery:swarmbot', data: swarmBots, timestamp }));
+    }
+    if (deliveryHubs.length > 0) {
+      ws.send(JSON.stringify({ type: 'delivery:hub', data: deliveryHubs, timestamp }));
+    }
+    if (packages.length > 0) {
+      ws.send(JSON.stringify({ type: 'delivery:package', data: packages, timestamp }));
+    }
+    if (deliveryMetrics) {
+      ws.send(JSON.stringify({ type: 'delivery:metrics', data: deliveryMetrics, timestamp }));
     }
 
     ws.on('message', (message: Buffer) => {

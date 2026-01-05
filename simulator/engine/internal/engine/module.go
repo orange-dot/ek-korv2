@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/elektrokombinacija/simulator/internal/control"
 	"github.com/elektrokombinacija/simulator/internal/models"
 	"github.com/elektrokombinacija/simulator/pkg/types"
 )
@@ -21,6 +22,13 @@ type EK3Module struct {
 	electricalModel *models.ElectricalModel
 	faultPredictor  *models.BayesianFaultPredictor
 	rulEstimator    *models.RULEstimator
+
+	// V2G control (advanced mode)
+	v2gController   *control.V2GController
+	v2gEnabled      bool
+	gridVoltageABC  [3]float64 // Simulated grid voltages
+	gridCurrentABC  [3]float64 // Measured grid currents
+	gridFrequency   float64    // Grid frequency for V2G
 
 	// Reliability metrics
 	reliabilityMetrics models.ReliabilityMetrics
@@ -79,6 +87,11 @@ func NewEK3Module(index int, rackID string, slotIndex int) *EK3Module {
 
 	// Set initial electrical model voltage
 	m.electricalModel.SetOutputVoltage(m.data.Voltage)
+
+	// Initialize V2G controller (advanced mode, disabled by default)
+	m.v2gController = control.NewV2GController()
+	m.v2gEnabled = false
+	m.gridFrequency = 50.0 // 50 Hz nominal
 
 	return m
 }
@@ -197,7 +210,13 @@ func (m *EK3Module) tickCharging(dt float64) {
 
 // tickV2G handles V2G discharge with droop control
 func (m *EK3Module) tickV2G(dt float64) {
-	// Similar to charging but with negative power flow
+	// Use advanced V2G controller if enabled
+	if m.v2gEnabled && m.v2gController != nil {
+		m.tickV2GAdvanced(dt)
+		return
+	}
+
+	// Simple V2G mode (similar to charging but with negative power flow)
 	m.electricalModel.SetOutputVoltage(m.data.Voltage)
 	m.electricalModel.SetDegradation(m.data.RdsOnRatio, m.data.ESRRatio)
 
@@ -217,6 +236,43 @@ func (m *EK3Module) tickV2G(dt float64) {
 	elecState := m.electricalModel.CalculatePower(m.data.PowerOut)
 	m.data.Efficiency = elecState.Eta
 	m.data.Current = -elecState.Iout // Negative for discharge
+
+	// Update thermal model
+	thermalState := m.thermalModel.Update(m.data.PowerOut, m.data.Efficiency, dt)
+	m.updateFromThermalState(thermalState)
+}
+
+// tickV2GAdvanced handles V2G with full control system simulation
+func (m *EK3Module) tickV2GAdvanced(dt float64) {
+	// Generate simulated 3-phase grid voltages (400V, 50Hz)
+	theta := m.v2gController.GetPLL().GetTheta()
+	amplitude := 400.0 * math.Sqrt(2) / math.Sqrt(3) // Phase voltage amplitude
+	m.gridVoltageABC[0], m.gridVoltageABC[1], m.gridVoltageABC[2] =
+		control.GenerateTestSignal(amplitude, m.gridFrequency, theta+0.01) // Small phase error
+
+	// Run V2G controller
+	output := m.v2gController.Update(
+		m.gridVoltageABC,
+		m.gridCurrentABC,
+		m.data.Voltage, // DC bus voltage
+		m.data.Current,
+		m.data.TempJunction,
+		dt,
+	)
+
+	// Update module state from controller output
+	m.data.PowerOut = math.Abs(output.ActivePower)
+	m.data.Efficiency = 0.96 // Controller doesn't track efficiency directly
+	if output.ActivePower < 0 {
+		m.data.Current = -output.ActivePower / m.data.Voltage // V2G export
+	} else {
+		m.data.Current = output.ActivePower / m.data.Voltage // Charging
+	}
+
+	// Update grid currents (simulated measurement)
+	m.gridCurrentABC[0] = m.data.Current / 3
+	m.gridCurrentABC[1] = m.data.Current / 3
+	m.gridCurrentABC[2] = m.data.Current / 3
 
 	// Update thermal model
 	thermalState := m.thermalModel.Update(m.data.PowerOut, m.data.Efficiency, dt)
@@ -349,12 +405,13 @@ func (m *EK3Module) checkTransitions() {
 		m.data.State = types.ModuleStateMarkedForReplace
 	}
 
-	// Check Bayesian fault predictions
-	topFaults := m.faultPredictor.GetTopFaults(1)
-	if len(topFaults) > 0 && topFaults[0].Probability > 0.7 {
-		// High probability of imminent fault
-		m.data.State = types.ModuleStateMarkedForReplace
-	}
+	// Bayesian fault prediction disabled for now - needs tuning
+	// The normalized posteriors easily exceed threshold even for healthy modules
+	// TODO: Tune symptom weights and thresholds based on real operational data
+	// topFaults := m.faultPredictor.GetTopFaults(1)
+	// if len(topFaults) > 0 && topFaults[0].Probability > 0.95 {
+	// 	m.data.State = types.ModuleStateMarkedForReplace
+	// }
 }
 
 // SetTargetPower sets the target power output
@@ -449,5 +506,67 @@ func (m *EK3Module) HandleMessage(msg types.CANMessage) {
 			m.data.State = types.ModuleStateIdle
 			m.targetPower = 0
 		}
+	case "EnableV2G":
+		m.v2gEnabled = true
+		if m.v2gController != nil {
+			m.v2gController.SetMode(control.V2GModeStandby)
+		}
+	case "DisableV2G":
+		m.v2gEnabled = false
+	case "SetGridFrequency":
+		if freq, ok := msg.Payload["frequency"].(float64); ok {
+			m.gridFrequency = freq
+		}
+	}
+}
+
+// EnableV2GMode enables advanced V2G control
+func (m *EK3Module) EnableV2GMode() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.v2gEnabled = true
+	if m.v2gController != nil {
+		m.v2gController.SetMode(control.V2GModeStandby)
+	}
+}
+
+// DisableV2GMode disables advanced V2G control
+func (m *EK3Module) DisableV2GMode() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.v2gEnabled = false
+}
+
+// SetGridFrequency sets the simulated grid frequency for V2G
+func (m *EK3Module) SetGridFrequency(freq float64) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.gridFrequency = freq
+
+	// Trigger droop response if V2G is active
+	if m.v2gEnabled && m.v2gController != nil {
+		m.v2gController.SetPowerSetpoint(-m.targetPower, 0) // Negative for export
+	}
+}
+
+// GetV2GStatus returns V2G controller status
+func (m *EK3Module) GetV2GStatus() map[string]interface{} {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if m.v2gController == nil {
+		return nil
+	}
+
+	p, q := m.v2gController.GetPower()
+	return map[string]interface{}{
+		"enabled":      m.v2gEnabled,
+		"mode":         m.v2gController.GetMode().String(),
+		"gridSync":     m.v2gController.IsGridSynced(),
+		"frequency":    m.v2gController.GetFrequency(),
+		"activePower":  p,
+		"reactivePower": q,
+		"thermalLimit": m.v2gController.GetThermalLimit(),
+		"faults":       uint32(m.v2gController.GetFaults()),
 	}
 }

@@ -141,7 +141,172 @@ export const EVENTS = {
   GRID_STATE: 'sim:grid',
   ALERT: 'sim:alert',
   METRICS: 'sim:metrics',
+  // Delivery events
+  DELIVERY_STATE: 'delivery:state',
+  DELIVERY_DRONE: 'delivery:drone',
+  DELIVERY_POD: 'delivery:pod',
+  DELIVERY_SWARMBOT: 'delivery:swarmbot',
+  DELIVERY_HUB: 'delivery:hub',
+  DELIVERY_PACKAGE: 'delivery:package',
+  DELIVERY_METRICS: 'delivery:metrics',
+  DELIVERY_CONTROL: 'delivery:control',
 } as const;
+
+// ===== LA Delivery Types =====
+
+export type DeliveryVehicleType = 'pod' | 'drone' | 'swarmbot';
+
+export type DeliveryState =
+  | 'idle'
+  | 'charging'
+  | 'swapping'
+  | 'en_route'
+  | 'arriving'
+  | 'flying'
+  | 'landing'
+  | 'hovering'
+  | 'taking_off'
+  | 'handoff_waiting'
+  | 'handoff_active'
+  | 'swarming'
+  | 'delivering'
+  | 'returning'
+  | 'loading'
+  | 'unloading'
+  | 'dispatching';
+
+export type DeliveryPriority = 'standard' | 'express' | 'priority' | 'emergency';
+
+export type HubType = 'rooftop_hub' | 'street_hub' | 'handoff_point';
+
+export interface Drone {
+  id: string;
+  state: DeliveryState;
+  position: Position;
+  altitude: number;
+  speed: number;
+  heading: number;
+  batterySoc: number;
+  packageId?: string;
+  corridorId?: string;
+  homeHubId: string;
+  targetPos?: Position;
+  routeIndex: number;
+}
+
+export interface DeliveryPod {
+  id: string;
+  state: DeliveryState;
+  position: Position;
+  speed: number;
+  heading: number;
+  batterySoc: number;
+  capacity: number;
+  packageIds: string[];
+  swarmBotIds: string[];
+  routeId?: string;
+  homeHubId: string;
+  routeIndex: number;
+}
+
+export interface SwarmBot {
+  id: string;
+  state: DeliveryState;
+  position: Position;
+  speed: number;
+  heading: number;
+  batterySoc: number;
+  packageId?: string;
+  parentPodId?: string;
+  homeHubId: string;
+  targetPos?: Position;
+  zoneId?: string;
+}
+
+export interface DeliveryHub {
+  id: string;
+  name: string;
+  type: HubType;
+  position: Position;
+  capacity: number;
+  occupied: number;
+  queueLength: number;
+  chargingPower: number;
+  avgWaitTime: number;
+}
+
+export interface Package {
+  id: string;
+  priority: DeliveryPriority;
+  origin: Position;
+  destination: Position;
+  weight: number;
+  size: string;
+  status: string;
+  vehicleId?: string;
+  vehicleType?: DeliveryVehicleType;
+  createdAt: number;
+  deliveredAt?: number;
+  etaMinutes?: number;
+}
+
+export interface DroneCorridor {
+  id: string;
+  name: string;
+  waypoints: Position[];
+  altitude: number;
+  width: number;
+  speedLimit: number;
+}
+
+export interface PodRoute {
+  id: string;
+  name: string;
+  waypoints: Position[];
+  length: number;
+}
+
+export interface SwarmZone {
+  id: string;
+  name: string;
+  center: Position;
+  radius: number;
+  hubId: string;
+}
+
+export interface DeliveryMetrics {
+  totalDrones: number;
+  activeDrones: number;
+  totalPods: number;
+  activePods: number;
+  totalSwarmBots: number;
+  activeSwarmBots: number;
+  pendingDeliveries: number;
+  inTransitDeliveries: number;
+  completedDeliveries: number;
+  avgDeliveryTime: number;
+  avgDroneSOC: number;
+  avgPodSOC: number;
+  avgSwarmBotSOC: number;
+  chargingCount: number;
+  fleetUtilization: number;
+  handoffSuccessRate: number;
+}
+
+export interface DeliverySimulationState {
+  running: boolean;
+  simTime: number;
+  timeScale: number;
+  drones: Drone[];
+  pods: DeliveryPod[];
+  swarmBots: SwarmBot[];
+  hubs: DeliveryHub[];
+  packages: Package[];
+  corridors: DroneCorridor[];
+  routes: PodRoute[];
+  zones: SwarmZone[];
+  metrics: DeliveryMetrics;
+}
 
 // Aggregated metrics for demo/pitch dashboard
 export interface SimulationMetrics {
