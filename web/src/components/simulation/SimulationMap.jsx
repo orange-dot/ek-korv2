@@ -19,14 +19,20 @@ L.Icon.Default.mergeOptions({
 
 function MapController() {
   const map = useMap();
-  const { city } = useSimulation();
+  const { city, mode, buses } = useSimulation();
 
-  // Update map view when city changes
+  // Update map view when city changes (local mode) or buses arrive (live mode)
   useEffect(() => {
-    if (city) {
+    if (mode === SIM_MODES.LIVE && buses.length > 0) {
+      // In live mode, center on first bus with valid position
+      const busWithPos = buses.find(b => b.position?.lat && b.position?.lng);
+      if (busWithPos) {
+        map.setView([busWithPos.position.lat, busWithPos.position.lng], 13, { animate: true });
+      }
+    } else if (city) {
       map.setView(city.center, city.zoom, { animate: true });
     }
-  }, [city, map]);
+  }, [city, mode, buses.length > 0, map]);
 
   return null;
 }

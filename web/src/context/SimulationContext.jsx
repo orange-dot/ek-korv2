@@ -11,7 +11,7 @@ export const SIM_MODES = {
   LIVE: 'live',
 };
 
-const AUTO_FALLBACK_DELAY = 3000; // 3 seconds before switching to local on disconnect
+const AUTO_FALLBACK_DELAY = 10000; // 10 seconds before switching to local on disconnect
 
 // Bus states
 export const BUS_STATES = {
@@ -167,14 +167,16 @@ function simulationReducer(state, action) {
     case ACTIONS.CHANGE_CITY: {
       const newCityId = action.payload;
       const newCity = getCity(newCityId);
+      // In Live mode, don't regenerate buses - they come from simulator
+      const shouldKeepBuses = state.mode === SIM_MODES.LIVE && state.buses.length > 0;
       return {
         ...state,
         isRunning: true,
         cityId: newCityId,
         city: newCity,
-        buses: generateBuses(newCity),
+        buses: shouldKeepBuses ? state.buses : generateBuses(newCity),
         routes: newCity.routes,
-        chargingStations: initializeStations(newCity),
+        chargingStations: shouldKeepBuses ? state.chargingStations : initializeStations(newCity),
         selectedItem: null,
       };
     }

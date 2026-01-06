@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/elektrokombinacija/simulator/internal/battery"
 	"github.com/elektrokombinacija/simulator/internal/models"
 	"github.com/elektrokombinacija/simulator/pkg/types"
 )
@@ -157,7 +158,7 @@ type Bus struct {
 }
 
 // NewBus creates a new bus with battery model
-func NewBus(index int) *Bus {
+func NewBus(index int, cityCenter types.Position) *Bus {
 	routes := []string{"31", "52", "65", "83", "95"}
 	routeLengths := []float64{15, 22, 18, 25, 20} // km
 
@@ -168,10 +169,10 @@ func NewBus(index int) *Bus {
 	batterySpecs := models.DefaultBusBatterySpecs()
 	battery := models.NewBatteryModel(batterySpecs, initialSoC)
 
-	// Random starting position in Belgrade
+	// Random starting position around city center
 	pos := types.Position{
-		Lat: 44.7866 + rand.Float64()*0.1,
-		Lng: 20.4489 + rand.Float64()*0.1,
+		Lat: cityCenter.Lat - 0.05 + rand.Float64()*0.1,
+		Lng: cityCenter.Lng - 0.05 + rand.Float64()*0.1,
 	}
 
 	b := &Bus{
@@ -837,6 +838,32 @@ func (g *Grid) calculateV2GResponse() {
 	// Limit to available capacity
 	maxCapacity := g.totalV2GCapacity
 	g.data.V2GPower = math.Max(-maxCapacity, math.Min(maxCapacity, g.data.V2GPower))
+
+	// Set module states based on V2G activity
+	// V2G active when frequency deviation exceeds deadband (50 mHz)
+	const deadband = 0.05 // Hz
+	freqDeviation := math.Abs(g.data.Frequency - 50.0)
+	v2gActive := freqDeviation > deadband && g.data.V2GPower != 0
+
+	for _, m := range g.v2gModules {
+		m.mu.Lock()
+		if v2gActive {
+			// Only transition healthy modules to V2G
+			if m.data.State == types.ModuleStateIdle || m.data.State == types.ModuleStateCharging {
+				m.data.State = types.ModuleStateV2G
+				// Set power proportional to V2G demand
+				perModulePower := math.Abs(g.data.V2GPower) / moduleCount
+				m.targetPower = math.Min(perModulePower, 3600) // Cap at max module power
+			}
+		} else {
+			// Return V2G modules to idle when event ends
+			if m.data.State == types.ModuleStateV2G {
+				m.data.State = types.ModuleStateIdle
+				m.targetPower = 0
+			}
+		}
+		m.mu.Unlock()
+	}
 }
 
 // RegisterV2GModule registers a module for V2G
@@ -881,4 +908,283 @@ func (g *Grid) SetFrequency(frequency float64) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	g.data.Frequency = frequency
+}
+
+// ============================================================================
+// BatteryPackEntity - EK-BAT swappable battery pack
+// ============================================================================
+
+// BatteryPackEntity wraps the full battery pack simulation
+type BatteryPackEntity struct {
+	mu   sync.RWMutex
+	data types.BatteryPack
+
+	// Full battery model
+	pack    *battery.Pack
+	bms     *battery.BMS
+	thermal *battery.ThermalModel
+
+	// Location tracking
+	location    string // "station-XX", "bus-XXX", "inventory"
+	stationID   string
+	busID       string
+
+	// Charging state
+	isCharging     bool
+	chargePower    float64 // W
+	chargeProgress float64 // 0-100%
+
+	// Ambient conditions
+	ambientTemp float64
+}
+
+// NewBatteryPackEntity creates a new battery pack entity
+func NewBatteryPackEntity(id string, packType battery.PackType) *BatteryPackEntity {
+	pack := battery.NewPack(id, packType)
+	bms := battery.NewBMS(pack)
+	thermalCfg := battery.DefaultThermalConfig()
+	thermal := battery.NewThermalModel(pack, thermalCfg)
+
+	spec := battery.GetPackSpec(packType)
+
+	return &BatteryPackEntity{
+		data: types.BatteryPack{
+			ID:             id,
+			Type:           spec.Type.String(),
+			State:          types.BatteryPackStateIdle,
+			SOC:            pack.SOC,
+			SOH:            pack.SOH,
+			Voltage:        pack.Voltage,
+			Current:        0,
+			Power:          0,
+			Temperature:    pack.Temperature,
+			CapacityKWh:    spec.NominalCapacity,
+			CycleCount:     int(pack.CycleCount),
+			CellVoltageMin: pack.CellVoltageMin,
+			CellVoltageMax: pack.CellVoltageMax,
+			CellTempMin:    pack.CellTempMin,
+			CellTempMax:    pack.CellTempMax,
+			Location:       "inventory",
+		},
+		pack:        pack,
+		bms:         bms,
+		thermal:     thermal,
+		location:    "inventory",
+		ambientTemp: 25,
+	}
+}
+
+func (b *BatteryPackEntity) ID() string             { return b.data.ID }
+func (b *BatteryPackEntity) Type() types.EntityType { return types.EntityBatteryPack }
+func (b *BatteryPackEntity) State() interface{}     { return b.data }
+
+// GetData returns current battery pack data
+func (b *BatteryPackEntity) GetData() types.BatteryPack {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return b.data
+}
+
+// Tick advances the battery pack simulation
+func (b *BatteryPackEntity) Tick(dt time.Duration) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	dtSeconds := dt.Seconds()
+
+	// Update BMS
+	b.bms.Update(dtSeconds)
+
+	// Determine current based on state
+	var current float64
+	switch b.data.State {
+	case types.BatteryPackStateCharging:
+		// Get max charge power from pack
+		maxPower := b.pack.GetMaxChargePower()
+		if b.chargePower > 0 {
+			maxPower = math.Min(b.chargePower, maxPower)
+		}
+		// Apply BMS limits
+		if b.bms.AllowedChargeCurrent > 0 && b.pack.Voltage > 0 {
+			bmsLimit := b.bms.AllowedChargeCurrent * b.pack.Voltage
+			maxPower = math.Min(maxPower, bmsLimit)
+		}
+		// Calculate charging current (negative = charging in pack convention)
+		if b.pack.Voltage > 0 {
+			current = -maxPower / b.pack.Voltage
+		}
+		b.data.Power = -maxPower
+		b.data.Current = current
+
+	case types.BatteryPackStateDischarging:
+		// Calculate discharge current based on power demand
+		if b.pack.Voltage > 0 && b.chargePower > 0 {
+			maxPower := math.Min(b.chargePower, b.pack.GetMaxDischargePower())
+			// Apply BMS limits
+			if b.bms.AllowedDischargeCurrent > 0 {
+				bmsLimit := b.bms.AllowedDischargeCurrent * b.pack.Voltage
+				maxPower = math.Min(maxPower, bmsLimit)
+			}
+			current = maxPower / b.pack.Voltage
+			b.data.Power = maxPower
+			b.data.Current = current
+		}
+
+	case types.BatteryPackStateSwapping:
+		// No current flow during swap
+		current = 0
+		b.data.Power = 0
+		b.data.Current = 0
+
+	default:
+		// Idle - small self-discharge
+		current = 0.001 // Very small leakage
+		b.data.Power = 0
+		b.data.Current = 0
+	}
+
+	// Update battery pack
+	b.pack.Update(current, b.ambientTemp, dtSeconds)
+
+	// Update thermal model
+	b.thermal.Update(b.ambientTemp, dtSeconds)
+
+	// Sync data from pack
+	b.data.SOC = b.pack.SOC
+	b.data.SOH = b.pack.SOH
+	b.data.Voltage = b.pack.Voltage
+	b.data.Temperature = b.pack.Temperature
+	b.data.CycleCount = int(b.pack.CycleCount)
+	b.data.CellVoltageMin = b.pack.CellVoltageMin
+	b.data.CellVoltageMax = b.pack.CellVoltageMax
+	b.data.CellTempMin = b.pack.CellTempMin
+	b.data.CellTempMax = b.pack.CellTempMax
+
+	// Get thermal stats
+	thermalStats := b.thermal.GetStats()
+	b.data.CoolantTemp = thermalStats.CoolantTempOut
+	b.data.HeaterActive = thermalStats.HeaterActive
+
+	// Check for state transitions
+	if b.data.State == types.BatteryPackStateCharging && b.pack.SOC >= 95 {
+		b.data.State = types.BatteryPackStateIdle
+		b.isCharging = false
+	}
+
+	// Check BMS faults
+	bmsFaults := b.bms.GetFaults()
+	if bmsFaults != 0 {
+		b.data.State = types.BatteryPackStateFaulted
+		b.data.FaultCode = uint32(bmsFaults)
+	}
+
+	// Update health status
+	b.data.IsHealthy = b.pack.IsHealthy() && bmsFaults == 0
+}
+
+// StartCharging starts charging the battery
+func (b *BatteryPackEntity) StartCharging(power float64) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if b.data.State == types.BatteryPackStateFaulted {
+		return
+	}
+
+	b.data.State = types.BatteryPackStateCharging
+	b.isCharging = true
+	b.chargePower = power
+}
+
+// StopCharging stops charging
+func (b *BatteryPackEntity) StopCharging() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if b.data.State == types.BatteryPackStateCharging {
+		b.data.State = types.BatteryPackStateIdle
+	}
+	b.isCharging = false
+	b.chargePower = 0
+}
+
+// StartDischarging starts V2G discharge
+func (b *BatteryPackEntity) StartDischarging(power float64) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if b.data.State == types.BatteryPackStateFaulted {
+		return
+	}
+
+	b.data.State = types.BatteryPackStateDischarging
+	b.chargePower = power
+}
+
+// StopDischarging stops V2G discharge
+func (b *BatteryPackEntity) StopDischarging() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if b.data.State == types.BatteryPackStateDischarging {
+		b.data.State = types.BatteryPackStateIdle
+	}
+	b.chargePower = 0
+}
+
+// StartSwap marks battery as being swapped
+func (b *BatteryPackEntity) StartSwap() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.data.State = types.BatteryPackStateSwapping
+	b.chargePower = 0
+}
+
+// CompleteSwap completes the swap operation
+func (b *BatteryPackEntity) CompleteSwap(newLocation, newBusID, newStationID string) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.location = newLocation
+	b.busID = newBusID
+	b.stationID = newStationID
+	b.data.Location = newLocation
+	b.data.State = types.BatteryPackStateIdle
+}
+
+// SetAmbientTemp sets ambient temperature for thermal simulation
+func (b *BatteryPackEntity) SetAmbientTemp(temp float64) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.ambientTemp = temp
+	b.thermal.SetAmbientTemp(temp)
+}
+
+// GetPack returns the underlying battery pack model
+func (b *BatteryPackEntity) GetPack() *battery.Pack {
+	return b.pack
+}
+
+// GetBMS returns the BMS
+func (b *BatteryPackEntity) GetBMS() *battery.BMS {
+	return b.bms
+}
+
+// GetThermalModel returns thermal model
+func (b *BatteryPackEntity) GetThermalModel() *battery.ThermalModel {
+	return b.thermal
+}
+
+// ClearFaults clears BMS faults
+func (b *BatteryPackEntity) ClearFaults() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.bms.ClearFaults()
+	b.data.FaultCode = 0
+	if b.pack.IsHealthy() {
+		b.data.State = types.BatteryPackStateIdle
+		b.data.IsHealthy = true
+	}
 }

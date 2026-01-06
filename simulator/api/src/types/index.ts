@@ -99,6 +99,65 @@ export interface Robot {
   cycleTime: number;
 }
 
+// ===== Battery Pack Types =====
+
+export type BatteryPackType = 'EK-BAT-25' | 'EK-BAT-50' | 'EK-BAT-100';
+
+export type BatteryPackState =
+  | 'idle'
+  | 'charging'
+  | 'discharging'
+  | 'swapping'
+  | 'balancing'
+  | 'faulted';
+
+export interface BatteryPack {
+  id: string;
+  type: string;
+  state: BatteryPackState;
+  location: string;
+  slotIndex: number;
+
+  // Capacity and energy
+  capacityKwh: number;
+  soc: number;
+  soh: number;
+
+  // Electrical
+  voltage: number;
+  current: number;
+  power: number;
+  maxChargePower: number;
+  maxDischargePower: number;
+
+  // Thermal
+  temperature: number;
+  cellTempMin: number;
+  cellTempMax: number;
+  coolantTemp: number;
+  coolingActive: boolean;
+  heaterActive: boolean;
+
+  // Cell balance
+  cellVoltageMin: number;
+  cellVoltageMax: number;
+  cellImbalance: number;
+  balancingActive: boolean;
+
+  // Statistics
+  cycleCount: number;
+  energyIn: number;
+  energyOut: number;
+  operatingHours: number;
+  lastSwapTime: string;
+
+  // Health & status
+  isHealthy: boolean;
+  bmsOnline: boolean;
+  contactorClosed: boolean;
+  faultCode: number;
+}
+
 export interface Grid {
   frequency: number;
   voltage: number;
@@ -139,6 +198,7 @@ export const EVENTS = {
   STATION_STATE: 'sim:station',
   ROBOT_STATE: 'sim:robot',
   GRID_STATE: 'sim:grid',
+  BATTERY_PACK_STATE: 'sim:battery_pack',
   ALERT: 'sim:alert',
   METRICS: 'sim:metrics',
   // Delivery events

@@ -186,8 +186,11 @@ func DefaultArrheniusParams() ArrheniusParams {
 }
 
 // CalculateAccelerationFactor returns aging acceleration factor
-// Based on Arrhenius equation: AF = exp(Ea/k * (1/T - 1/T0))
+// Based on Arrhenius equation: AF = exp(Ea/k * (1/T0 - 1/T))
 // Higher temperature = higher AF = faster aging
+// At reference temp T0 (105°C): AF = 1.0
+// At lower temps: AF < 1 (slower aging)
+// At higher temps: AF > 1 (faster aging)
 func CalculateAccelerationFactor(params ArrheniusParams, tempC float64) float64 {
 	T := tempC + 273.15 // Convert to Kelvin
 
@@ -196,7 +199,8 @@ func CalculateAccelerationFactor(params ArrheniusParams, tempC float64) float64 
 		return 1.0
 	}
 
-	exponent := params.Ea / params.K * (1/T - 1/params.T0)
+	// Correct Arrhenius: AF = rate(T)/rate(T0) = exp(Ea/k * (1/T0 - 1/T))
+	exponent := params.Ea / params.K * (1/params.T0 - 1/T)
 	return math.Exp(exponent)
 }
 

@@ -45,8 +45,12 @@ func main() {
 		}
 	}
 
-	log.Printf("Configuration: TickRate=%v, TimeScale=%.1f, Modules=%d, Buses=%d",
-		cfg.TickRate, cfg.TimeScale, cfg.ModuleCount, cfg.BusCount)
+	if city := os.Getenv("CITY"); city != "" {
+		cfg.City = city
+	}
+
+	log.Printf("Configuration: City=%s, TickRate=%v, TimeScale=%.1f, Modules=%d, Buses=%d",
+		cfg.City, cfg.TickRate, cfg.TimeScale, cfg.ModuleCount, cfg.BusCount)
 
 	// Create simulation
 	sim, err := engine.NewSimulation(cfg)

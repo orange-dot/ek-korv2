@@ -26,6 +26,7 @@ const ROBOT_STATES = {
 const BUS_STATE_MAP = {
   parked: BUS_STATES.WAITING,
   driving: BUS_STATES.DRIVING,
+  at_stop: BUS_STATES.DRIVING, // Brief stop at bus stop
   charging: BUS_STATES.CHARGING,
   swapping: BUS_STATES.SWAPPING,
   waiting: BUS_STATES.WAITING,

@@ -6,13 +6,14 @@ import "time"
 type EntityType string
 
 const (
-	EntityModule  EntityType = "module"
-	EntityRack    EntityType = "rack"
-	EntityBus     EntityType = "bus"
-	EntityStation EntityType = "station"
-	EntityRobot   EntityType = "robot"
-	EntityGrid    EntityType = "grid"
-	EntityFleet   EntityType = "fleet"
+	EntityModule      EntityType = "module"
+	EntityRack        EntityType = "rack"
+	EntityBus         EntityType = "bus"
+	EntityStation     EntityType = "station"
+	EntityRobot       EntityType = "robot"
+	EntityGrid        EntityType = "grid"
+	EntityFleet       EntityType = "fleet"
+	EntityBatteryPack EntityType = "battery_pack"
 )
 
 // ModuleState represents the state of an EK3 module
@@ -161,6 +162,75 @@ type Robot struct {
 	CycleTime float64    `json:"cycleTime"` // seconds
 }
 
+// BatteryPackType represents battery pack model
+type BatteryPackType string
+
+const (
+	BatteryPackTypeEKBAT25  BatteryPackType = "EK-BAT-25"  // 25 kWh, van
+	BatteryPackTypeEKBAT50  BatteryPackType = "EK-BAT-50"  // 50 kWh, city bus
+	BatteryPackTypeEKBAT100 BatteryPackType = "EK-BAT-100" // 100 kWh, truck
+)
+
+// BatteryPackState represents battery pack state
+type BatteryPackState string
+
+const (
+	BatteryPackStateIdle        BatteryPackState = "idle"
+	BatteryPackStateCharging    BatteryPackState = "charging"
+	BatteryPackStateDischarging BatteryPackState = "discharging"
+	BatteryPackStateSwapping    BatteryPackState = "swapping"
+	BatteryPackStateBalancing   BatteryPackState = "balancing"
+	BatteryPackStateFaulted     BatteryPackState = "faulted"
+)
+
+// BatteryPack represents an EK-BAT swappable battery pack
+type BatteryPack struct {
+	ID              string           `json:"id"`
+	Type            string           `json:"type"`            // Pack type string from spec
+	State           BatteryPackState `json:"state"`
+	Location        string           `json:"location"`        // "vehicle:bus-001" or "station:station-001"
+	SlotIndex       int              `json:"slotIndex"`       // Position in rack or vehicle
+
+	// Capacity and energy
+	CapacityKWh     float64 `json:"capacityKwh"`     // kWh nominal
+	SOC             float64 `json:"soc"`             // 0-100%
+	SOH             float64 `json:"soh"`             // 0-100%
+
+	// Electrical
+	Voltage         float64 `json:"voltage"`         // V (pack voltage)
+	Current         float64 `json:"current"`         // A (+ = discharge)
+	Power           float64 `json:"power"`           // W
+	MaxChargePower  float64 `json:"maxChargePower"`  // W (current limit)
+	MaxDischargePower float64 `json:"maxDischargePower"` // W
+
+	// Thermal
+	Temperature     float64 `json:"temperature"`     // °C average cell temp
+	CellTempMin     float64 `json:"cellTempMin"`     // °C coldest cell
+	CellTempMax     float64 `json:"cellTempMax"`     // °C hottest cell
+	CoolantTemp     float64 `json:"coolantTemp"`     // °C
+	CoolingActive   bool    `json:"coolingActive"`
+	HeaterActive    bool    `json:"heaterActive"`
+
+	// Cell balance
+	CellVoltageMin  float64 `json:"cellVoltageMin"`  // V
+	CellVoltageMax  float64 `json:"cellVoltageMax"`  // V
+	CellImbalance   float64 `json:"cellImbalance"`   // mV max spread
+	BalancingActive bool    `json:"balancingActive"`
+
+	// Statistics
+	CycleCount      int     `json:"cycleCount"`      // Full equivalent cycles
+	EnergyIn        float64 `json:"energyIn"`        // kWh lifetime charged
+	EnergyOut       float64 `json:"energyOut"`       // kWh lifetime discharged
+	OperatingHours  float64 `json:"operatingHours"`
+	LastSwapTime    string  `json:"lastSwapTime"`    // ISO timestamp
+
+	// Health & status
+	IsHealthy       bool    `json:"isHealthy"`
+	BMSOnline       bool    `json:"bmsOnline"`
+	ContactorClosed bool    `json:"contactorClosed"`
+	FaultCode       uint32  `json:"faultCode"`
+}
+
 // Grid represents the electrical grid state
 type Grid struct {
 	Frequency    float64 `json:"frequency"`    // Hz (50 nominal)
@@ -206,15 +276,16 @@ type CANMessage struct {
 
 // Event types for pub/sub
 const (
-	EventSimState     = "sim:state"
-	EventModuleState  = "sim:module"
-	EventBusState     = "sim:bus"
-	EventStationState = "sim:station"
-	EventRobotState   = "sim:robot"
-	EventGridState    = "sim:grid"
-	EventAlert        = "sim:alert"
-	EventControl      = "sim:control" // Control commands from API
-	EventMetrics      = "sim:metrics" // Aggregated metrics for dashboard
+	EventSimState         = "sim:state"
+	EventModuleState      = "sim:module"
+	EventBusState         = "sim:bus"
+	EventStationState     = "sim:station"
+	EventRobotState       = "sim:robot"
+	EventGridState        = "sim:grid"
+	EventBatteryPackState = "sim:battery_pack"
+	EventAlert            = "sim:alert"
+	EventControl          = "sim:control" // Control commands from API
+	EventMetrics          = "sim:metrics" // Aggregated metrics for dashboard
 )
 
 // ControlCommand represents a control command from the API
