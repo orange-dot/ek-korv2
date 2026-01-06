@@ -2368,7 +2368,10 @@ function DeliveryKorAllThingPanel() {
     swarmBots: localSwarmBots,
     stats,
     updateScenario,
-    showDecisionToast
+    showDecisionToast,
+    clearDecisionToast,
+    clearFocusedVehicle,
+    setSelectedCity
   } = useDelivery();
 
   // Connect to backend simulation
@@ -2396,15 +2399,23 @@ function DeliveryKorAllThingPanel() {
       completedAt: Date.now()
     });
 
-    // Show toast notification
+    // Show decision result toast with proper fields
     showDecisionToast({
-      id: `toast-${Date.now()}`,
-      type: 'success',
-      title: option.label,
-      message: option.ifChosen || 'Decision applied',
-      duration: 3000
+      title: scenario.config?.title || 'Decision Made',
+      action: option.label,
+      effect: option.ifChosen || 'Action applied',
+      vehicleId: scenario.vehicleId,
+      vehicleType: scenario.vehicleType,
+      color: scenario.config?.color || '#00f0ff'
     });
-  }, [updateScenario, showDecisionToast]);
+
+    // Clear toast and return to global view after 5 seconds
+    setTimeout(() => {
+      clearDecisionToast();
+      clearFocusedVehicle();
+      setSelectedCity(null);
+    }, 5000);
+  }, [updateScenario, showDecisionToast, clearDecisionToast, clearFocusedVehicle, setSelectedCity]);
 
   // Handle scenario completion (after action flow animation)
   const handleScenarioComplete = useCallback((scenario) => {

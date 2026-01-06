@@ -197,7 +197,8 @@ func NewSimulation(cfg Config) (*Simulation, error) {
 	// Initialize LA Delivery simulation
 	deliveryConfig := delivery.DefaultDeliveryConfig()
 	sim.deliverySimulation = delivery.NewDeliverySimulation(deliveryConfig)
-	log.Println("LA Delivery simulation initialized with", deliveryConfig.NumDrones, "drones,",
+	sim.deliverySimulation.Start() // Start the delivery simulation
+	log.Println("LA Delivery simulation initialized and started with", deliveryConfig.NumDrones, "drones,",
 		deliveryConfig.NumPods, "pods,", deliveryConfig.NumSwarmBots, "swarm bots")
 
 	// Start control command listener
