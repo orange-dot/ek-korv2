@@ -111,7 +111,7 @@ Ime "JEZGRO" odrazava i minimalnu filozofiju dizajna i srpsko poreklo sistema.
 +-------------------------------------------------------------+
 |   KORISNICKI SERVISI (Neprivilegovani, MPU-izolovani)       |
 |   +---------+ +---------+ +---------+ +---------+           |
-|   |Termalni | |  Swarm  | |  Audit  | |  OCPP   |           |
+|   |Termalni | |  ROJ    | |  Audit  | |  OCPP   |           |
 |   | Menadzer| |  Koord. | |  Logger | | Gateway |           |
 |   +----+----+ +----+----+ +----+----+ +----+----+           |
 |        +----------+-----------+-----------+                  |

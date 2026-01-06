@@ -1,0 +1,398 @@
+// =============================================================================
+// Infineon XMC4400 Platform Description for Renode
+// JEZGRO Development - HRPWM Power Electronics
+// =============================================================================
+// EXPERIMENTAL: Custom platform for XMC4400 (ARM Cortex-M4F)
+// Not officially supported by Renode, but Cortex-M4 core works
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// CPU Core - ARM Cortex-M4F with FPU (same as STM32)
+// -----------------------------------------------------------------------------
+cpu: CPU.CortexM @ sysbus
+    cpuType: "cortex-m4f"
+    nvic: nvic
+    cpuFrequency: 120000000  // 120 MHz
+
+// -----------------------------------------------------------------------------
+// Nested Vectored Interrupt Controller
+// -----------------------------------------------------------------------------
+nvic: IRQControllers.NVIC @ sysbus 0xE000E000
+    priorityMask: 0xF0
+    systickFrequency: 120000000
+    -> cpu@0
+
+// -----------------------------------------------------------------------------
+// Memory Regions (XMC4400-F100K512)
+// -----------------------------------------------------------------------------
+
+// Program Flash (PFLASH) - 512 KB at 0x0C000000
+// Note: XMC maps flash differently than STM32
+pflash: Memory.MappedMemory @ sysbus 0x0C000000
+    size: 0x80000  // 512 KB
+
+// Also map at 0x08000000 for compatibility with standard ARM tools
+pflash_alias: Memory.MappedMemory @ sysbus 0x08000000
+    size: 0x80000
+
+// DSRAM1 - 16 KB
+dsram1: Memory.MappedMemory @ sysbus 0x20000000
+    size: 0x4000  // 16 KB
+
+// DSRAM2 - 16 KB
+dsram2: Memory.MappedMemory @ sysbus 0x20004000
+    size: 0x4000  // 16 KB
+
+// PSRAM - 48 KB (Program SRAM)
+psram: Memory.MappedMemory @ sysbus 0x1FFE8000
+    size: 0xC000  // 48 KB
+
+// Peripheral RAM
+pram: Memory.MappedMemory @ sysbus 0x24000000
+    size: 0x4000
+
+// -----------------------------------------------------------------------------
+// System Control Unit (SCU)
+// -----------------------------------------------------------------------------
+scu: Python.PythonPeripheral @ sysbus 0x50004000
+    size: 0x1000
+    initable: true
+    script: '''
+if request.isInit:
+    CLKSTAT = 0x00000000
+    PLLSTAT = 0x00000002   # PLL locked
+    SYSCLKCR = 0x00010000  # System clock from PLL
+    CPUCLKCR = 0x00000000
+    PBCLKCR = 0x00000000
+    CCUCLKCR = 0x00000000
+    log("SCU: Initialized, PLL locked")
+
+if request.isRead:
+    if request.offset == 0x10:    # CLKSTAT
+        request.value = CLKSTAT
+    elif request.offset == 0x14:  # PLLSTAT
+        request.value = PLLSTAT | 0x02  # Always report locked
+    elif request.offset == 0x60:  # SYSCLKCR
+        request.value = SYSCLKCR
+    elif request.offset == 0x64:  # CPUCLKCR
+        request.value = CPUCLKCR
+    elif request.offset == 0x68:  # PBCLKCR
+        request.value = PBCLKCR
+    elif request.offset == 0x74:  # CCUCLKCR
+        request.value = CCUCLKCR
+    else:
+        request.value = 0
+
+if request.isWrite:
+    if request.offset == 0x60:
+        SYSCLKCR = request.value
+    elif request.offset == 0x64:
+        CPUCLKCR = request.value
+    elif request.offset == 0x68:
+        PBCLKCR = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// USIC - Universal Serial Interface Channel (UART mode)
+// -----------------------------------------------------------------------------
+
+// USIC0 Channel 0 - Debug UART
+usic0_ch0: UART.STM32F7_USART @ sysbus 0x40030000
+    frequency: 120000000
+    -> nvic@84
+
+// USIC0 Channel 1
+usic0_ch1: UART.STM32F7_USART @ sysbus 0x40030200
+    frequency: 120000000
+    -> nvic@85
+
+// USIC1 Channel 0
+usic1_ch0: UART.STM32F7_USART @ sysbus 0x48020000
+    frequency: 120000000
+    -> nvic@86
+
+// USIC1 Channel 1
+usic1_ch1: UART.STM32F7_USART @ sysbus 0x48020200
+    frequency: 120000000
+    -> nvic@87
+
+// -----------------------------------------------------------------------------
+// CCU4 - Capture/Compare Unit 4 (Basic PWM)
+// -----------------------------------------------------------------------------
+
+// CCU40 - Timer module
+ccu40: Timers.STM32_Timer @ sysbus 0x4000C000
+    frequency: 120000000
+    initialLimit: 0xFFFF
+    -> nvic@21
+
+// CCU41
+ccu41: Timers.STM32_Timer @ sysbus 0x40010000
+    frequency: 120000000
+    initialLimit: 0xFFFF
+    -> nvic@22
+
+// -----------------------------------------------------------------------------
+// CCU8 - Capture/Compare Unit 8 (Advanced PWM for motor control)
+// -----------------------------------------------------------------------------
+
+// CCU80 - Timer module
+ccu80: Timers.STM32_Timer @ sysbus 0x40020000
+    frequency: 120000000
+    initialLimit: 0xFFFF
+    -> nvic@25
+
+// CCU81
+ccu81: Timers.STM32_Timer @ sysbus 0x40024000
+    frequency: 120000000
+    initialLimit: 0xFFFF
+    -> nvic@26
+
+// -----------------------------------------------------------------------------
+// HRPWM - High Resolution PWM (150ps)
+// =============================================================================
+// This is the KEY peripheral for power electronics!
+// 150ps resolution for LLC/DAB frequency control
+// =============================================================================
+hrpwm0: Python.PythonPeripheral @ sysbus 0x40028000
+    size: 0x4000
+    initable: true
+    script: '''
+if request.isInit:
+    # HRPWM Control registers
+    HRCSTRG = 0x00000000   # Global HR start
+    HRCCFG = 0x00000000    # Global config
+    HRCSTSG = 0x00000000   # Shadow transfer
+
+    # Per-channel registers (4 channels)
+    CSG = [0x00000000] * 4  # Comparator slope gen
+    CC = [0x00000000] * 4   # Compare value
+    PL = [0x00000000] * 4   # Passive level
+    SPC = [0x00000000] * 4  # Slope control
+
+    log("HRPWM0: Initialized (150ps resolution)")
+    log("HRPWM0: 4 channels available")
+
+if request.isRead:
+    ch = (request.offset >> 8) & 0x3  # Channel from offset
+
+    if request.offset == 0x00:      # HRCSTRG
+        request.value = HRCSTRG
+    elif request.offset == 0x04:    # HRCCFG
+        request.value = HRCCFG
+    elif request.offset == 0x08:    # HRCSTSG
+        request.value = HRCSTSG
+    elif (request.offset & 0xFF) == 0x00:  # CSGx
+        request.value = CSG[ch]
+    elif (request.offset & 0xFF) == 0x04:  # CCx
+        request.value = CC[ch]
+    elif (request.offset & 0xFF) == 0x08:  # PLx
+        request.value = PL[ch]
+    else:
+        request.value = 0
+
+if request.isWrite:
+    ch = (request.offset >> 8) & 0x3
+
+    if request.offset == 0x00:      # HRCSTRG
+        HRCSTRG = request.value
+        if request.value & 0x01:
+            log("HRPWM0: Global start triggered")
+    elif request.offset == 0x04:    # HRCCFG
+        HRCCFG = request.value
+        hrclk = (request.value >> 0) & 0x7
+        log(f"HRPWM0: Clock config = {hrclk}")
+    elif (request.offset & 0xFF) == 0x04:  # CCx
+        CC[ch] = request.value
+        # Log frequency if this looks like a period value
+        if request.value > 0:
+            freq_khz = 120000 / request.value
+            log(f"HRPWM0 CH{ch}: Compare = {request.value} (~{freq_khz:.1f} kHz)")
+'''
+
+// -----------------------------------------------------------------------------
+// VADC - Versatile ADC (4x 12-bit, 70ns)
+// -----------------------------------------------------------------------------
+vadc: Python.PythonPeripheral @ sysbus 0x40004000
+    size: 0x4000
+    initable: true
+    script: '''
+if request.isInit:
+    CLC = 0x00000003       # Clock control
+    GLOBCFG = 0x00000000   # Global config
+    GLOBICLASS = [0, 0]    # Input class
+
+    # ADC channels - simulate mid-scale readings
+    RESULT = [2048] * 16
+    log("VADC: Initialized (4x 12-bit ADC, 70ns)")
+
+if request.isRead:
+    if request.offset == 0x00:      # CLC
+        request.value = CLC
+    elif request.offset == 0x80:    # GLOBCFG
+        request.value = GLOBCFG
+    elif request.offset >= 0x300 and request.offset < 0x340:  # RESULTx
+        ch = (request.offset - 0x300) >> 2
+        request.value = RESULT[ch] | 0x80000000  # Valid flag
+    else:
+        request.value = 0
+
+if request.isWrite:
+    if request.offset == 0x00:
+        CLC = request.value
+    elif request.offset == 0x80:
+        GLOBCFG = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// CAN - MultiCAN (2 nodes)
+// -----------------------------------------------------------------------------
+can: Python.PythonPeripheral @ sysbus 0x48014000
+    size: 0x4000
+    initable: true
+    script: '''
+if request.isInit:
+    CLC = 0x00000003
+    MCR = 0x00000000
+    PANCTR = 0x00000000
+
+    # Node registers
+    NCR = [0x00000041, 0x00000041]  # Init mode
+    NSR = [0x00000000, 0x00000000]  # Status
+    NBTR = [0x00000000, 0x00000000] # Bit timing
+
+    log("CAN: Initialized (2 nodes)")
+
+if request.isRead:
+    if request.offset == 0x00:      # CLC
+        request.value = CLC
+    elif request.offset == 0x04:    # MCR
+        request.value = MCR
+    elif request.offset >= 0x200 and request.offset < 0x300:  # Node 0
+        reg = (request.offset - 0x200) >> 2
+        if reg == 0:
+            request.value = NCR[0]
+        elif reg == 1:
+            request.value = NSR[0]
+        elif reg == 2:
+            request.value = NBTR[0]
+        else:
+            request.value = 0
+    elif request.offset >= 0x300 and request.offset < 0x400:  # Node 1
+        reg = (request.offset - 0x300) >> 2
+        if reg == 0:
+            request.value = NCR[1]
+        elif reg == 1:
+            request.value = NSR[1]
+        else:
+            request.value = 0
+    else:
+        request.value = 0
+
+if request.isWrite:
+    if request.offset == 0x00:
+        CLC = request.value
+    elif request.offset >= 0x200 and request.offset < 0x300:
+        node = 0
+        reg = (request.offset - 0x200) >> 2
+        if reg == 0:
+            old_ncr = NCR[0]
+            NCR[0] = request.value
+            if (old_ncr & 0x01) and not (request.value & 0x01):
+                log("CAN Node 0: Exiting init mode")
+        elif reg == 2:
+            NBTR[0] = request.value
+            log(f"CAN Node 0: Bit timing = 0x{request.value:08X}")
+    elif request.offset >= 0x300 and request.offset < 0x400:
+        reg = (request.offset - 0x300) >> 2
+        if reg == 0:
+            NCR[1] = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// GPIO Ports
+// -----------------------------------------------------------------------------
+
+// PORT0
+port0: GPIOPort.STM32_GPIOPort @ sysbus 0x48028000
+    numberOfPins: 16
+    [0-15] -> gpioManager@[0-15]
+
+// PORT1
+port1: GPIOPort.STM32_GPIOPort @ sysbus 0x48028100
+    numberOfPins: 16
+    [0-15] -> gpioManager@[16-31]
+
+// PORT2
+port2: GPIOPort.STM32_GPIOPort @ sysbus 0x48028200
+    numberOfPins: 16
+    [0-15] -> gpioManager@[32-47]
+
+// PORT3
+port3: GPIOPort.STM32_GPIOPort @ sysbus 0x48028300
+    numberOfPins: 16
+    [0-15] -> gpioManager@[48-63]
+
+// PORT14 (Analog pins)
+port14: GPIOPort.STM32_GPIOPort @ sysbus 0x48028E00
+    numberOfPins: 16
+    [0-15] -> gpioManager@[64-79]
+
+gpioManager: GPIOPort.GPIOManager @ sysbus
+
+// -----------------------------------------------------------------------------
+// SysTick Timer (standard Cortex-M)
+// -----------------------------------------------------------------------------
+systick: Timers.CortexM_SysTick @ sysbus 0xE000E010
+    frequency: 120000000
+
+// -----------------------------------------------------------------------------
+// WDT - Watchdog Timer
+// -----------------------------------------------------------------------------
+wdt: Python.PythonPeripheral @ sysbus 0x50008000
+    size: 0x100
+    initable: true
+    script: '''
+if request.isInit:
+    CTR = 0x00000000
+    WLB = 0x00000000
+    WUB = 0xFFFFFFFF
+    STS = 0x00000000
+if request.isRead:
+    if request.offset == 0x04:
+        request.value = STS
+    else:
+        request.value = 0
+if request.isWrite:
+    if request.offset == 0x00:
+        CTR = request.value
+'''
+
+// -----------------------------------------------------------------------------
+// DMA (GPDMA)
+// -----------------------------------------------------------------------------
+gpdma0: DMA.STM32DMA @ sysbus 0x50014000
+    [0-7] -> nvic@[105-112]
+
+gpdma1: DMA.STM32DMA @ sysbus 0x50018000
+    [0-3] -> nvic@[113-116]
+
+// -----------------------------------------------------------------------------
+// Bus Tags
+// -----------------------------------------------------------------------------
+sysbus:
+    init:
+        Tag <0x40004000, 0x40007FFF> "VADC"
+        Tag <0x4000C000, 0x4000FFFF> "CCU40"
+        Tag <0x40010000, 0x40013FFF> "CCU41"
+        Tag <0x40020000, 0x40023FFF> "CCU80"
+        Tag <0x40024000, 0x40027FFF> "CCU81"
+        Tag <0x40028000, 0x4002BFFF> "HRPWM0"
+        Tag <0x40030000, 0x40033FFF> "USIC0"
+        Tag <0x48014000, 0x48017FFF> "CAN"
+        Tag <0x48020000, 0x48023FFF> "USIC1"
+        Tag <0x48028000, 0x4802FFFF> "PORTS"
+        Tag <0x50004000, 0x50007FFF> "SCU"
+        Tag <0x50008000, 0x500080FF> "WDT"
+        Tag <0x50014000, 0x50017FFF> "GPDMA0"
+        Tag <0x50018000, 0x5001BFFF> "GPDMA1"

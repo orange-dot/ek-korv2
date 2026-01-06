@@ -1,0 +1,191 @@
+# =============================================================================
+# JEZGRO STM32G474 Renode Test Scenario
+# =============================================================================
+# Full-featured simulation for JEZGRO kernel development
+# Supports: Unit tests, integration tests, debugging
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Machine Setup
+# -----------------------------------------------------------------------------
+
+mach create "jezgro-stm32"
+machine LoadPlatformDescription @stm32g474-full.repl
+
+# -----------------------------------------------------------------------------
+# Console Configuration
+# -----------------------------------------------------------------------------
+
+# Show UART output in analyzer window
+showAnalyzer usart1
+
+# Set logging levels
+logLevel 3           # Default: warnings only
+logLevel 3 usart1    # UART output
+
+# -----------------------------------------------------------------------------
+# Firmware Loading
+# -----------------------------------------------------------------------------
+
+# Default firmware path (can be overridden from command line)
+$firmware ?= @../build-arm/jezgro_firmware.elf
+
+echo ""
+echo "=========================================="
+echo "  JEZGRO STM32G474 Simulation"
+echo "=========================================="
+echo ""
+
+# Check if firmware exists and load it
+echo "Loading firmware: $firmware"
+sysbus LoadELF $firmware
+
+# -----------------------------------------------------------------------------
+# Debug Hooks
+# -----------------------------------------------------------------------------
+
+# Add hook to capture kernel output
+usart1 AddLineHook "JEZGRO" "Kernel: "
+usart1 AddLineHook "ERROR" "ERROR: "
+usart1 AddLineHook "ASSERT" "ASSERT: "
+usart1 AddLineHook "TEST" "Test: "
+
+# Memory map information
+echo ""
+echo "Memory Map:"
+sysbus WhatIsAt 0x08000000
+sysbus WhatIsAt 0x20000000
+sysbus WhatIsAt 0x10000000
+
+# -----------------------------------------------------------------------------
+# Test Macros
+# -----------------------------------------------------------------------------
+
+# Reset the CPU and reload firmware
+macro reset
+"""
+    sysbus LoadELF $firmware
+    cpu Reset
+"""
+
+# Run basic smoke test (5 seconds)
+macro smoke_test
+"""
+    echo "Starting smoke test..."
+    start
+    sleep 5
+    pause
+    echo "Smoke test complete"
+    echo "CPU state:"
+    cpu PC
+"""
+
+# Run full test suite (30 seconds)
+macro full_test
+"""
+    echo "Starting full test suite..."
+    start
+    sleep 30
+    pause
+    echo "Full test complete"
+"""
+
+# Run scheduler stress test
+macro scheduler_test
+"""
+    echo "Scheduler stress test..."
+    start
+    sleep 10
+    pause
+    echo "Tasks executed:"
+    # Check task counters in memory if implemented
+"""
+
+# Run IPC test
+macro ipc_test
+"""
+    echo "IPC message passing test..."
+    start
+    sleep 5
+    pause
+"""
+
+# Single step execution
+macro step_debug
+"""
+    cpu Step 100
+    cpu PC
+"""
+
+# -----------------------------------------------------------------------------
+# GDB Server Configuration
+# -----------------------------------------------------------------------------
+
+macro start_gdb
+"""
+    echo "Starting GDB server on port 3333..."
+    machine StartGdbServer 3333
+    echo "Connect with: arm-none-eabi-gdb -ex 'target remote :3333' firmware.elf"
+"""
+
+# -----------------------------------------------------------------------------
+# Performance Monitoring
+# -----------------------------------------------------------------------------
+
+macro perf_start
+"""
+    echo "Starting performance monitoring..."
+    cpu PerformanceInMips
+"""
+
+macro perf_report
+"""
+    cpu PerformanceInMips
+    echo "Performance report generated"
+"""
+
+# -----------------------------------------------------------------------------
+# Peripheral Interaction
+# -----------------------------------------------------------------------------
+
+# Simulate ADC input (e.g., current sensing)
+macro set_adc1_value
+"""
+    # Write to ADC data register (simulated)
+    sysbus WriteDoubleWord 0x50000040 0x0800
+    echo "ADC1 value set to 2048 (mid-scale)"
+"""
+
+# Toggle GPIO (e.g., LED)
+macro toggle_led
+"""
+    # Toggle PA5 (typically LED on Nucleo boards)
+    gpioA Toggle 5
+    echo "PA5 toggled"
+"""
+
+# -----------------------------------------------------------------------------
+# Ready Message
+# -----------------------------------------------------------------------------
+
+echo ""
+echo "=========================================="
+echo "  Simulation Ready"
+echo "=========================================="
+echo ""
+echo "Quick commands:"
+echo "  start              - Begin execution"
+echo "  pause              - Pause execution"
+echo "  quit               - Exit Renode"
+echo ""
+echo "Test macros:"
+echo "  runMacro smoke_test     - 5 second smoke test"
+echo "  runMacro full_test      - 30 second full test"
+echo "  runMacro scheduler_test - Scheduler stress test"
+echo "  runMacro ipc_test       - IPC message test"
+echo ""
+echo "Debug macros:"
+echo "  runMacro start_gdb      - Start GDB server (:3333)"
+echo "  runMacro reset          - Reset and reload firmware"
+echo "  runMacro step_debug     - Step 100 instructions"
+echo ""

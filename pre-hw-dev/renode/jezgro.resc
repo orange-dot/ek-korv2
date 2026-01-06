@@ -1,0 +1,55 @@
+# JEZGRO Renode Test Scenario
+
+# Create machine
+mach create "jezgro"
+
+# Load platform
+machine LoadPlatformDescription @stm32g474.repl
+
+# Configure UART output
+showAnalyzer usart1
+
+# Set up logging
+logLevel 3 usart1
+
+# Memory info
+echo "Memory map:"
+sysbus WhatIsAt 0x08000000
+sysbus WhatIsAt 0x20000000
+
+# Load firmware (path provided as argument or default)
+$firmware ?= @../build/jezgro_firmware.elf
+echo "Loading firmware: $firmware"
+
+# Try to load ELF
+sysbus LoadELF $firmware
+
+# Set up peripherals
+usart1 AddLineHook "JEZGRO" "Firmware output: "
+
+# Macro to start simulation
+macro reset
+"""
+    sysbus LoadELF $firmware
+"""
+
+macro run_test
+"""
+    start
+    sleep 5
+    pause
+    echo "Test complete"
+"""
+
+echo ""
+echo "JEZGRO Renode Simulation Ready"
+echo "================================"
+echo "Commands:"
+echo "  start         - Start simulation"
+echo "  pause         - Pause simulation"
+echo "  step          - Single step"
+echo "  quit          - Exit Renode"
+echo ""
+echo "To run test scenario:"
+echo "  runMacro run_test"
+echo ""

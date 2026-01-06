@@ -1,7 +1,7 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { Marker } from 'react-leaflet';
 import L from 'leaflet';
-import { useSimulation, BUS_STATES } from '../../../context/SimulationContext';
+import { useSimulation, BUS_STATES, SIM_MODES } from '../../../context/SimulationContext';
 import { interpolatePosition } from '../../../data/cities';
 
 function getBatteryColor(level) {
@@ -22,12 +22,26 @@ function getStateColor(state) {
 
 export default function BusMarker({ bus }) {
   const markerRef = useRef(null);
-  const { routes, selectItem, selectedItem, pendingDecision } = useSimulation();
+  const { routes, selectItem, selectedItem, pendingDecision, mode } = useSimulation();
 
   const route = routes.find(r => r.id === bus.routeId);
   const isSelected = selectedItem?.type === 'bus' && selectedItem?.id === bus.id;
   const hasPendingDecision = pendingDecision?.busId === bus.id;
-  const position = route ? interpolatePosition(route, bus.progress) : [44.815, 20.46];
+
+  // Calculate position based on mode
+  // Live mode: use direct lat/lng from bus.position
+  // Local mode: interpolate from route + progress
+  const position = useMemo(() => {
+    if (mode === SIM_MODES.LIVE && bus.position?.lat && bus.position?.lng) {
+      return [bus.position.lat, bus.position.lng];
+    }
+    // Local mode fallback
+    if (route) {
+      return interpolatePosition(route, bus.progress);
+    }
+    // Default position (city center fallback)
+    return [44.815, 20.46];
+  }, [mode, bus.position, bus.progress, route]);
 
   // Update marker position
   useEffect(() => {

@@ -120,7 +120,7 @@ ELEMENT 2: Blade Server Form Factor
 ELEMENT 3: Distributed Intelligence
 ─────────────────────────────────────────────────────────────
 • Svaki modul ima lokalni AI processor
-• Moduli komuniciraju peer-to-peer (swarm)
+• Moduli komuniciraju peer-to-peer (ROJ)
 • Nema single point of failure u kontroli
 • Plug & play - modul se sam konfiguriše
 

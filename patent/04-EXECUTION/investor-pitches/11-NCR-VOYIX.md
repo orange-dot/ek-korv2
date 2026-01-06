@@ -74,7 +74,7 @@ CONTROL SYSTEM
 ─────────────────────────────────────────────
 MCU:               STM32G474 (Cortex-M4F, 170MHz)
 Communication:     CAN-FD @ 5 Mbps
-Protocol:          Custom swarm coordination + OCPP 2.0.1
+Protocol:          Custom ROJ coordination + OCPP 2.0.1
 Safety:            IEC 61851, ISO 15118 compliance target
 
 THERMAL

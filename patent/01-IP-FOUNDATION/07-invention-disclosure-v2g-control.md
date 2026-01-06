@@ -415,7 +415,7 @@ Our combination of:
 • Per-module PLL and droop control
 • 3kW granularity for extreme redundancy
 • Hot-swap during active V2G operation
-• Swarm coordination without central controller
+• ROJ coordination without central controller
 • ISO 15118-20 BPT with dynamic limit updates
 
 ...appears to be NOVEL

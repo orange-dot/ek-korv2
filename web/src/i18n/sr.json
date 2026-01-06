@@ -14,7 +14,10 @@
     "laDelivery": "LA Dostava",
     "patent": "Patenti",
     "internal": "Interno",
-    "jezgroDev": "JEZGRO Dev"
+    "jezgroDev": "JEZGRO Dev",
+    "roj": "ROJ",
+    "quickPitch": "Brzi Pitch",
+    "v2g": "V2G"
   },
   "simulation": {
     "title": "Simulacija Sistema",

@@ -924,7 +924,7 @@ TASK PRIORITY ARCHITECTURE
 ├─────────────┼─────────────────────────┼───────────┼────────┤
 │ P4 (Task)   │ Power Control Task      │ 1ms       │ <100µs │
 │ P5 (Task)   │ Thermal Management      │ 10ms      │ <500µs │
-│ P6 (Task)   │ Swarm Coordination      │ 100ms     │ <5ms   │
+│ P6 (Task)   │ ROJ Coordination        │ 100ms     │ <5ms   │
 │ P7 (Task)   │ Heartbeat TX            │ 1000ms    │ <1ms   │
 │ P8 (Task)   │ Logging Task            │ Background│ N/A    │
 │ P9 (Task)   │ Diagnostics/Idle        │ Idle      │ N/A    │
@@ -1302,7 +1302,7 @@ Payload:
   [1]:   Requested derating (%, 0=none)
   [2]:   Thermal headroom (°C available)
 
-Purpose: Modules share thermal state for swarm load balancing
+Purpose: Modules share thermal state for ROJ load balancing
 
 
 FAULT ALERT (0x7FF) - Critical fault
@@ -1321,7 +1321,7 @@ ELECTION (0x010) - Leader election (Raft)
 ID: 0x010 (high priority)
 Messages:
   REQUEST_VOTE, VOTE_GRANTED, APPEND_ENTRIES, HEARTBEAT
-See Swarm Intelligence documentation for Raft protocol details
+See ROJ Intelligence documentation for Raft protocol details
 ```
 
 ### 11.4 Message Authentication (CMAC)
@@ -1551,7 +1551,7 @@ TRUST BOUNDARY ARCHITECTURE
 │  ═══════════════════════════════════════                    │
 │  • Health monitoring                                        │
 │  • Thermal management                                       │
-│  • Swarm coordination                                       │
+│  • ROJ coordination                                         │
 │  • Logging                                                  │
 │  • OTA update handler                                       │
 │  Bugs here cannot compromise Level 0/1                      │

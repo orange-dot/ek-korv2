@@ -1,7 +1,17 @@
-import { createContext, useContext, useReducer, useCallback } from 'react';
+import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react';
 import { cities, getCity } from '../data/cities';
+import { useSimulatorConnection } from '../hooks/useSimulatorConnection';
+import { adaptBuses, adaptStations, adaptModules, adaptSimState } from '../adapters/simulatorAdapter';
 
 const SimulationContext = createContext(null);
+
+// Simulation modes
+export const SIM_MODES = {
+  LOCAL: 'local',
+  LIVE: 'live',
+};
+
+const AUTO_FALLBACK_DELAY = 10000; // 10 seconds before switching to local on disconnect
 
 // Bus states
 export const BUS_STATES = {
@@ -88,6 +98,12 @@ function getInitialStateForCity(cityId) {
     korAllThingExpanded: false,
     scenarioQueue: [], // List of all scenarios (active, pending, completed)
     systemHealth: { status: 'healthy', modules: 0, active: 0 },
+    // Simulator integration
+    mode: SIM_MODES.LOCAL, // 'local' | 'live'
+    modules: [], // EK3 module data from live simulator
+    liveSimState: null, // State from Go engine
+    gridState: null, // Grid state for V2G visualization
+    metrics: null, // Metrics from Go engine
   };
 }
 
@@ -120,6 +136,14 @@ const ACTIONS = {
   ADD_TO_SCENARIO_QUEUE: 'ADD_TO_SCENARIO_QUEUE',
   UPDATE_SCENARIO_STATUS: 'UPDATE_SCENARIO_STATUS',
   CLEAR_SCENARIO_QUEUE: 'CLEAR_SCENARIO_QUEUE',
+  // Simulator mode actions
+  SET_MODE: 'SET_MODE',
+  SET_MODULES: 'SET_MODULES',
+  SET_LIVE_SIM_STATE: 'SET_LIVE_SIM_STATE',
+  SET_GRID_STATE: 'SET_GRID_STATE',
+  SET_METRICS: 'SET_METRICS',
+  SET_LIVE_BUSES: 'SET_LIVE_BUSES',
+  SET_LIVE_STATIONS: 'SET_LIVE_STATIONS',
 };
 
 // Reducer
@@ -143,14 +167,16 @@ function simulationReducer(state, action) {
     case ACTIONS.CHANGE_CITY: {
       const newCityId = action.payload;
       const newCity = getCity(newCityId);
+      // In Live mode, don't regenerate buses - they come from simulator
+      const shouldKeepBuses = state.mode === SIM_MODES.LIVE && state.buses.length > 0;
       return {
         ...state,
         isRunning: true,
         cityId: newCityId,
         city: newCity,
-        buses: generateBuses(newCity),
+        buses: shouldKeepBuses ? state.buses : generateBuses(newCity),
         routes: newCity.routes,
-        chargingStations: initializeStations(newCity),
+        chargingStations: shouldKeepBuses ? state.chargingStations : initializeStations(newCity),
         selectedItem: null,
       };
     }
@@ -325,6 +351,28 @@ function simulationReducer(state, action) {
     case ACTIONS.CLEAR_SCENARIO_QUEUE:
       return { ...state, scenarioQueue: [] };
 
+    // Simulator mode reducer cases
+    case ACTIONS.SET_MODE:
+      return { ...state, mode: action.payload };
+
+    case ACTIONS.SET_MODULES:
+      return { ...state, modules: action.payload };
+
+    case ACTIONS.SET_LIVE_SIM_STATE:
+      return { ...state, liveSimState: action.payload };
+
+    case ACTIONS.SET_GRID_STATE:
+      return { ...state, gridState: action.payload };
+
+    case ACTIONS.SET_METRICS:
+      return { ...state, metrics: action.payload };
+
+    case ACTIONS.SET_LIVE_BUSES:
+      return { ...state, buses: action.payload };
+
+    case ACTIONS.SET_LIVE_STATIONS:
+      return { ...state, chargingStations: action.payload };
+
     default:
       return state;
   }
@@ -333,6 +381,10 @@ function simulationReducer(state, action) {
 // Provider component
 export function SimulationProvider({ children }) {
   const [state, dispatch] = useReducer(simulationReducer, initialState);
+  const fallbackTimeoutRef = useRef(null);
+
+  // Connect to Go simulator (auto-connect disabled, we manage it manually)
+  const simulator = useSimulatorConnection({ autoConnect: false });
 
   const start = useCallback(() => dispatch({ type: ACTIONS.START }), []);
   const stop = useCallback(() => dispatch({ type: ACTIONS.STOP }), []);
@@ -344,6 +396,74 @@ export function SimulationProvider({ children }) {
   const clearSelection = useCallback(() => dispatch({ type: ACTIONS.CLEAR_SELECTION }), []);
   const setPendingDecision = useCallback((decision) => dispatch({ type: ACTIONS.SET_PENDING_DECISION, payload: decision }), []);
   const clearPendingDecision = useCallback(() => dispatch({ type: ACTIONS.CLEAR_PENDING_DECISION }), []);
+
+  // Mode switching
+  const setMode = useCallback((mode) => {
+    dispatch({ type: ACTIONS.SET_MODE, payload: mode });
+    if (mode === SIM_MODES.LIVE) {
+      simulator.connect();
+    } else {
+      simulator.disconnect();
+    }
+  }, [simulator]);
+
+  // Update state from live simulator
+  useEffect(() => {
+    if (state.mode !== SIM_MODES.LIVE) return;
+
+    // Update modules
+    if (simulator.modules?.length > 0) {
+      dispatch({ type: ACTIONS.SET_MODULES, payload: adaptModules(simulator.modules) });
+    }
+
+    // Update buses
+    if (simulator.buses?.length > 0) {
+      dispatch({ type: ACTIONS.SET_LIVE_BUSES, payload: adaptBuses(simulator.buses) });
+    }
+
+    // Update stations
+    if (simulator.stations?.length > 0) {
+      dispatch({ type: ACTIONS.SET_LIVE_STATIONS, payload: adaptStations(simulator.stations) });
+    }
+
+    // Update sim state
+    if (simulator.simState) {
+      dispatch({ type: ACTIONS.SET_LIVE_SIM_STATE, payload: adaptSimState(simulator.simState) });
+    }
+
+    // Update grid state (for V2G visualization)
+    if (simulator.gridState) {
+      dispatch({ type: ACTIONS.SET_GRID_STATE, payload: simulator.gridState });
+    }
+
+    // Update metrics
+    if (simulator.metrics) {
+      dispatch({ type: ACTIONS.SET_METRICS, payload: simulator.metrics });
+    }
+  }, [state.mode, simulator.modules, simulator.buses, simulator.stations, simulator.simState, simulator.gridState, simulator.metrics]);
+
+  // Auto-fallback on disconnect (when in live mode)
+  useEffect(() => {
+    if (state.mode === SIM_MODES.LIVE && !simulator.isConnected) {
+      // Start fallback timer
+      fallbackTimeoutRef.current = setTimeout(() => {
+        console.log('[Simulation] Auto-falling back to local mode');
+        dispatch({ type: ACTIONS.SET_MODE, payload: SIM_MODES.LOCAL });
+      }, AUTO_FALLBACK_DELAY);
+    } else {
+      // Clear timer if connected or not in live mode
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current);
+        fallbackTimeoutRef.current = null;
+      }
+    }
+
+    return () => {
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current);
+      }
+    };
+  }, [state.mode, simulator.isConnected]);
 
   // New decision action creators
   const forceChargeBus = useCallback((busId, stationId) =>
@@ -409,6 +529,16 @@ export function SimulationProvider({ children }) {
     addToScenarioQueue,
     updateScenarioStatus,
     clearScenarioQueue,
+    // Simulator integration
+    setMode,
+    isConnected: simulator.isConnected,
+    connectionError: simulator.connectionError,
+    // Simulator controls (for live mode)
+    sendSimCommand: simulator.sendCommand,
+    triggerSimScenario: simulator.triggerScenario,
+    injectFault: simulator.injectFault,
+    setModulePower: simulator.setModulePower,
+    distributeRackPower: simulator.distributeRackPower,
   };
 
   return (

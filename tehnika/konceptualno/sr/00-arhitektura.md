@@ -151,7 +151,7 @@ Svrha: Skalirana verzija za komercijalne primene
 2. **02-ai-ml-sistem.md** - Edge AI hardver (STM32N6 NPU), digital twin arhitektura, predictive maintenance, self-tuning kontrola, anomaly detection, fleet learning
 3. **03-thermal-management.md** - Liquid cooling sistem, coldplate dizajn, junction temperature estimacija, AI thermal control, safety features
 4. **04-v2g-grid.md** - ISO 15118-20 implementacija, bidirekciona topologija, grid services (frequency/voltage regulation), grid codes compliance
-5. **05-swarm-intelligence.md** - Distribuirana arhitektura, CAN-FD komunikacija, load balancing algoritmi, fault tolerance, scalability, **Dual CAN redundancy**
+5. **05-ROJ-intelligence.md** - Distribuirana arhitektura, CAN-FD komunikacija, load balancing algoritmi, fault tolerance, scalability, **Dual CAN redundancy**
 6. **06-bom-cost.md** - Kompletni BOM za EK3 i EK30, cost breakdown, pricing strategija, TCO analiza, R&D investment
 7. **07-konkurencija.md** - Analiza konkurencije, reliability kriza u industriji (podaci 2025), konkurentska prednost
 8. **08-swap-station.md** - Robotska zamena EK modula + battery swap za autobuse, fleet-integrated maintenance, patentabilni koncept
@@ -255,6 +255,59 @@ Mesh-active kontroleri       →    Swarm intelligence
 
 HP kupio 3PAR za $2.35B (2010) - DOKAZAN KONCEPT!
 ```
+
+### 8. Proširena modularnost: Baterije vozila (EK-BAT)
+```
+Ista radikalna modularnost primenjuje se na BATERIJE VOZILA:
+
+MODULARNOST PUNJAČA                MODULARNOST BATERIJE
+─────────────────────────────────────────────────────────────
+EK3 (3kW) moduli punjača      →    EK-BAT moduli baterija vozila
+Robot menja module punjača    →    Robot menja baterije vozila
+Distribuirana rezerva         →    Zajednički bazen baterija
+Swarm inteligencija           →    BMS koordinacija roja
+
+REZULTAT: JEDAN EKOSISTEM ZA INFRASTRUKTURU I VOZILA
+```
+
+**EK-BAT familija modula:**
+
+| Modul | Kapacitet | Težina | Vozila |
+|-------|-----------|--------|--------|
+| EK-BAT-25 | 25 kWh | 150 kg | Kombiji, mali kamioni |
+| EK-BAT-50 | 50 kWh | 300 kg | Autobusi, srednji kamioni |
+| EK-BAT-100 | 100 kWh | 600 kg | Teški autobusi, tegljači |
+
+**Ključne prednosti:**
+- Ušteda težine: 1.800-2.700 kg oslobođeno za teret
+- 5-minutna zamena umesto 2-satnog punjenja
+- 37× više energije po kg materijala baterije (plitko cikliranje)
+- Ista stanica za zamenu baterija I modula punjača
+
+### 9. Od punjenja do zamene
+```
+PROMENA PARADIGME ZA TEŠKA VOZILA:
+
+TRADICIONALNO                      ELEKTROKOMBINACIJA
+─────────────────────────────────────────────────────────────
+Velika baterija 400kWh        →    Mala baterija 100kWh
+2 sata punjenja               →    5 minuta zamene
+Zastoj vozila: sati           →    Zastoj vozila: minuti
+Teška baterija = manje tereta →    Laka baterija = više tereta
+Jedan dubok ciklus/dan        →    Više plitkih ciklusa
+Punjenje u depou (10 MW vrh)  →    Distribuirana zamena (250 kW ravno)
+```
+
+**Dimenzioniranje baterije po vozilu:**
+
+| Vozilo | Tradicionalno | Malo + zamena | Ušteda težine | Frekvencija zamene |
+|--------|---------------|---------------|---------------|---------------------|
+| Gradski autobus | 400 kWh | 100 kWh | 1.800 kg | Svakih 100 km |
+| Regionalni autobus | 500 kWh | 150 kWh | 2.100 kg | Svakih 150 km |
+| Dostavno vozilo | 150 kWh | 50 kWh | 600 kg | 2-3× dnevno |
+| Tegljač | 600 kWh | 150 kWh × 4 | 2.700 kg | Svakih 200 km |
+
+Vidi **04-small-battery-philosophy.md** za detaljnu analizu.
 
 ## Target Specifikacije
 

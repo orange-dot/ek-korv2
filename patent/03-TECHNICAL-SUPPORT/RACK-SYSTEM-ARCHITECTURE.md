@@ -704,10 +704,10 @@ PREDICTIVE CONTROL (Optional):
 ### 6.3 Thermal Migration
 
 ```
-THERMAL MIGRATION - SWARM BEHAVIOR
+THERMAL MIGRATION - ROJ BEHAVIOR
 ═══════════════════════════════════════════════════════════════
 
-When some modules run hotter than others, the swarm
+When some modules run hotter than others, the ROJ
 automatically redistributes load:
 
 MECHANISM:
@@ -758,7 +758,7 @@ Response:
 
 Recovery:
 • Robot swap scheduled
-• New module auto-discovers, joins swarm
+• New module auto-discovers, joins ROJ
 • Load rebalanced within seconds
 
 SCENARIO 2: Module Enters FAULT State

@@ -27,7 +27,7 @@ Minimal kernel (IPC,              Minimal backplane (power bus,
 scheduling, memory)               CAN routing only)
 
 User-space services               Module firmware (health,
-                                  swarm, logging)
+                                  ROJ coordination, logging)
 
 Message passing IPC               CAN-FD message protocol
 
@@ -77,7 +77,7 @@ TRUST BOUNDARY ARCHITECTURE
 │  ═══════════════════════════════════════                    │
 │  • Health monitoring                                        │
 │  • Thermal management                                       │
-│  • Swarm coordination                                       │
+│  • ROJ coordination                                         │
 │  • Audit logging                                            │
 │  • OTA update handler                                       │
 │  Bugs here cannot compromise Level 0/1                      │
@@ -122,6 +122,84 @@ PROTOCOL GUARANTEES:
 • Ordering: Per-source FIFO (sequence numbers)
 • Latency: <1ms for 64-byte message at 5 Mbps
 • Authentication: CMAC on security-critical messages
+```
+
+### 1.4 SWARM CORE Coordination (ROJ_COORD)
+
+```
+SWARM CORE - UNIFIED COORDINATION SPECIFICATION
+═══════════════════════════════════════════════════════════════
+
+SWARM CORE is the formal specification of ROJ (swarm) coordination
+for the entire JEZGRO product family. All devices run the same
+ROJ_COORD service with device-specific policy profiles.
+
+ARCHITECTURE:
+┌─────────────────────────────────────────────────────────────┐
+│                    SWARM CORE LIBRARY                        │
+├─────────────────────────────────────────────────────────────┤
+│  Policy Engine     │ Stores parameters, behavior mode       │
+│  Quorum Engine     │ Drives decisions, cross-inhibition     │
+│  Stigmergy Store   │ Local tag map with TTL and decay       │
+│  Task Allocator    │ Task and resource distribution         │
+│  Health/Trust      │ Anomaly detection, agent isolation     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                    ┌─────────┴─────────┐
+                    │    ROJ_COORD      │
+                    │     SERVICE       │
+                    └─────────┬─────────┘
+                              │
+            ┌─────────────────┼─────────────────┐
+            ▼                 ▼                 ▼
+       ┌─────────┐      ┌─────────┐      ┌─────────┐
+       │ EK3     │      │ BAT     │      │ ROB     │
+       │ Charger │      │ Battery │      │ Robot   │
+       └─────────┘      └─────────┘      └─────────┘
+
+CAN-FD MESSAGE TYPES (SWARM CORE):
+┌───────────────────┬────────────────┬─────────────────────────┐
+│ Type              │ ID Range       │ Purpose                 │
+├───────────────────┼────────────────┼─────────────────────────┤
+│ ROJ_HEARTBEAT     │ 0x510 + node   │ Presence + basic metrics│
+│ ROJ_STATE         │ 0x520 + node   │ Extended state snapshot │
+│ ROJ_TASK_CLAIM    │ 0x540          │ Task/resource requests  │
+│ ROJ_VOTE          │ 0x550          │ Quorum voting           │
+│ ROJ_TAG           │ 0x560          │ Stigmergy tags          │
+│ ROJ_ALERT         │ 0x5FF          │ Critical notifications  │
+└───────────────────┴────────────────┴─────────────────────────┘
+
+COORDINATION PRINCIPLES:
+─────────────────────────────────────
+• Quorum voting: Q = max(quorum_min, quorum_ratio × active_nodes)
+• Stigmergy: Tags with TTL and exponential decay
+• Topological: k-neighbors coordination (k=6-7 default)
+• Graceful degradation: System operates after 30% agent loss
+• Decision latency: Quorum reached in <500ms under normal load
+
+DEFAULT POLICY PROFILE:
+┌─────────────────────────┬─────────────────────────────────────┐
+│ Parameter               │ Value                               │
+├─────────────────────────┼─────────────────────────────────────┤
+│ k_neighbors             │ 6-7                                 │
+│ quorum_min              │ 3                                   │
+│ quorum_ratio_pct        │ 60%                                 │
+│ heartbeat_period_ms     │ 1000                                │
+│ gossip_period_ms        │ 500                                 │
+│ tag_ttl_ms              │ 5000                                │
+│ decay_half_life_ms      │ 2000                                │
+│ isolation_threshold_pct │ 30                                  │
+│ exploration_noise_pct   │ 2                                   │
+└─────────────────────────┴─────────────────────────────────────┘
+
+DEVICE-SPECIFIC PROFILES:
+• JEZGRO-EK3: Focus on load balancing, thermal coordination
+• JEZGRO-BAT: Focus on SOC/SOH, V2G participation
+• JEZGRO-ROB: Focus on motion coordination, safety zones
+• JEZGRO-GW:  Focus on grid signals, priority management
+
+Reference: tehnika/inzenjersko/en/rojno-jezgro/00-core-spec.md
+Reference: tehnika/inzenjersko/en/rojno-jezgro/01-detaljni-dokument.md
 ```
 
 ---

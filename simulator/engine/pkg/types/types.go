@@ -6,13 +6,14 @@ import "time"
 type EntityType string
 
 const (
-	EntityModule  EntityType = "module"
-	EntityRack    EntityType = "rack"
-	EntityBus     EntityType = "bus"
-	EntityStation EntityType = "station"
-	EntityRobot   EntityType = "robot"
-	EntityGrid    EntityType = "grid"
-	EntityFleet   EntityType = "fleet"
+	EntityModule      EntityType = "module"
+	EntityRack        EntityType = "rack"
+	EntityBus         EntityType = "bus"
+	EntityStation     EntityType = "station"
+	EntityRobot       EntityType = "robot"
+	EntityGrid        EntityType = "grid"
+	EntityFleet       EntityType = "fleet"
+	EntityBatteryPack EntityType = "battery_pack"
 )
 
 // ModuleState represents the state of an EK3 module
@@ -161,6 +162,75 @@ type Robot struct {
 	CycleTime float64    `json:"cycleTime"` // seconds
 }
 
+// BatteryPackType represents battery pack model
+type BatteryPackType string
+
+const (
+	BatteryPackTypeEKBAT25  BatteryPackType = "EK-BAT-25"  // 25 kWh, van
+	BatteryPackTypeEKBAT50  BatteryPackType = "EK-BAT-50"  // 50 kWh, city bus
+	BatteryPackTypeEKBAT100 BatteryPackType = "EK-BAT-100" // 100 kWh, truck
+)
+
+// BatteryPackState represents battery pack state
+type BatteryPackState string
+
+const (
+	BatteryPackStateIdle        BatteryPackState = "idle"
+	BatteryPackStateCharging    BatteryPackState = "charging"
+	BatteryPackStateDischarging BatteryPackState = "discharging"
+	BatteryPackStateSwapping    BatteryPackState = "swapping"
+	BatteryPackStateBalancing   BatteryPackState = "balancing"
+	BatteryPackStateFaulted     BatteryPackState = "faulted"
+)
+
+// BatteryPack represents an EK-BAT swappable battery pack
+type BatteryPack struct {
+	ID              string           `json:"id"`
+	Type            string           `json:"type"`            // Pack type string from spec
+	State           BatteryPackState `json:"state"`
+	Location        string           `json:"location"`        // "vehicle:bus-001" or "station:station-001"
+	SlotIndex       int              `json:"slotIndex"`       // Position in rack or vehicle
+
+	// Capacity and energy
+	CapacityKWh     float64 `json:"capacityKwh"`     // kWh nominal
+	SOC             float64 `json:"soc"`             // 0-100%
+	SOH             float64 `json:"soh"`             // 0-100%
+
+	// Electrical
+	Voltage         float64 `json:"voltage"`         // V (pack voltage)
+	Current         float64 `json:"current"`         // A (+ = discharge)
+	Power           float64 `json:"power"`           // W
+	MaxChargePower  float64 `json:"maxChargePower"`  // W (current limit)
+	MaxDischargePower float64 `json:"maxDischargePower"` // W
+
+	// Thermal
+	Temperature     float64 `json:"temperature"`     // °C average cell temp
+	CellTempMin     float64 `json:"cellTempMin"`     // °C coldest cell
+	CellTempMax     float64 `json:"cellTempMax"`     // °C hottest cell
+	CoolantTemp     float64 `json:"coolantTemp"`     // °C
+	CoolingActive   bool    `json:"coolingActive"`
+	HeaterActive    bool    `json:"heaterActive"`
+
+	// Cell balance
+	CellVoltageMin  float64 `json:"cellVoltageMin"`  // V
+	CellVoltageMax  float64 `json:"cellVoltageMax"`  // V
+	CellImbalance   float64 `json:"cellImbalance"`   // mV max spread
+	BalancingActive bool    `json:"balancingActive"`
+
+	// Statistics
+	CycleCount      int     `json:"cycleCount"`      // Full equivalent cycles
+	EnergyIn        float64 `json:"energyIn"`        // kWh lifetime charged
+	EnergyOut       float64 `json:"energyOut"`       // kWh lifetime discharged
+	OperatingHours  float64 `json:"operatingHours"`
+	LastSwapTime    string  `json:"lastSwapTime"`    // ISO timestamp
+
+	// Health & status
+	IsHealthy       bool    `json:"isHealthy"`
+	BMSOnline       bool    `json:"bmsOnline"`
+	ContactorClosed bool    `json:"contactorClosed"`
+	FaultCode       uint32  `json:"faultCode"`
+}
+
 // Grid represents the electrical grid state
 type Grid struct {
 	Frequency    float64 `json:"frequency"`    // Hz (50 nominal)
@@ -206,11 +276,74 @@ type CANMessage struct {
 
 // Event types for pub/sub
 const (
-	EventSimState    = "sim:state"
-	EventModuleState = "sim:module"
-	EventBusState    = "sim:bus"
-	EventStationState = "sim:station"
-	EventRobotState  = "sim:robot"
-	EventGridState   = "sim:grid"
-	EventAlert       = "sim:alert"
+	EventSimState         = "sim:state"
+	EventModuleState      = "sim:module"
+	EventBusState         = "sim:bus"
+	EventStationState     = "sim:station"
+	EventRobotState       = "sim:robot"
+	EventGridState        = "sim:grid"
+	EventBatteryPackState = "sim:battery_pack"
+	EventAlert            = "sim:alert"
+	EventControl          = "sim:control" // Control commands from API
+	EventMetrics          = "sim:metrics" // Aggregated metrics for dashboard
 )
+
+// ControlCommand represents a control command from the API
+type ControlCommand struct {
+	Action    string  `json:"action"`             // start, stop, pause, resume, setTimeScale, injectFault, triggerV2G
+	Value     float64 `json:"value,omitempty"`    // For setTimeScale
+	ModuleID  string  `json:"moduleId,omitempty"` // For injectFault, setModulePower
+	FaultType int     `json:"faultType,omitempty"` // For injectFault
+	Severity  float64 `json:"severity,omitempty"` // For injectFault
+	Power     float64 `json:"power,omitempty"`    // For setModulePower
+	RackID    string  `json:"rackId,omitempty"`   // For distributeRackPower
+	BusID     string  `json:"busId,omitempty"`    // For queueBusForSwap
+	StationID string  `json:"stationId,omitempty"` // For queueBusForSwap
+	Frequency float64 `json:"frequency,omitempty"` // For triggerV2G (grid frequency)
+}
+
+// SimulationMetrics represents aggregated metrics for demo/pitch
+type SimulationMetrics struct {
+	// Time
+	SimulatedHours   float64 `json:"simulatedHours"`
+	RealTimeSeconds  float64 `json:"realTimeSeconds"`
+
+	// Uptime & Reliability
+	SystemUptime     float64 `json:"systemUptime"`      // 0-100%
+	ModuleUptime     float64 `json:"moduleUptime"`      // Average module uptime %
+	FaultsDetected   int     `json:"faultsDetected"`
+	FaultsRecovered  int     `json:"faultsRecovered"`
+	MTBFHours        float64 `json:"mtbfHours"`         // Mean time between failures
+	MTTRMinutes      float64 `json:"mttrMinutes"`       // Mean time to repair
+
+	// Efficiency
+	AvgEfficiency    float64 `json:"avgEfficiency"`     // 0-100%
+	PeakEfficiency   float64 `json:"peakEfficiency"`
+	TotalEnergyKWh   float64 `json:"totalEnergyKwh"`
+	EnergyLossKWh    float64 `json:"energyLossKwh"`
+
+	// Cost Savings (vs traditional)
+	ModulesReplaced  int     `json:"modulesReplaced"`
+	DowntimeMinutes  float64 `json:"downtimeMinutes"`
+	DowntimeAvoided  float64 `json:"downtimeAvoided"`   // Minutes saved by hot-swap
+	CostSavingsUSD   float64 `json:"costSavingsUsd"`    // Estimated savings
+
+	// Fleet Performance
+	BusesCharged     int     `json:"busesCharged"`
+	SwapsCompleted   int     `json:"swapsCompleted"`
+	AvgChargeTimeMin float64 `json:"avgChargeTimeMin"`
+	AvgSwapTimeSec   float64 `json:"avgSwapTimeSec"`
+	FleetSOC         float64 `json:"fleetSoc"`          // Average fleet SoC
+
+	// V2G Performance
+	V2GEventsCount   int     `json:"v2gEventsCount"`
+	V2GEnergyKWh     float64 `json:"v2gEnergyKwh"`      // Energy exported to grid
+	V2GRevenueUSD    float64 `json:"v2gRevenueUsd"`
+	GridFreqMin      float64 `json:"gridFreqMin"`       // Minimum frequency seen
+	GridFreqMax      float64 `json:"gridFreqMax"`       // Maximum frequency seen
+
+	// Swarm Intelligence
+	LoadBalanceScore float64 `json:"loadBalanceScore"`  // 0-100 (100 = perfect distribution)
+	ThermalBalance   float64 `json:"thermalBalance"`    // Temperature spread across modules
+	RedundancyLevel  float64 `json:"redundancyLevel"`   // Available spare capacity %
+}

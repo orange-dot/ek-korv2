@@ -1,0 +1,50 @@
+{
+    "configurations": [
+        {
+            "name": "JEZGRO Simulation",
+            "includePath": [
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/test"
+            ],
+            "defines": [
+                "JEZGRO_SIM",
+                "JEZGRO_DEBUG=1"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "JEZGRO Windows",
+            "includePath": [
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/test"
+            ],
+            "defines": [
+                "JEZGRO_SIM",
+                "JEZGRO_DEBUG=1",
+                "_WIN32"
+            ],
+            "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x64"
+        },
+        {
+            "name": "JEZGRO STM32",
+            "includePath": [
+                "${workspaceFolder}/src/**"
+            ],
+            "defines": [
+                "STM32G474xx",
+                "USE_HAL_DRIVER"
+            ],
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}

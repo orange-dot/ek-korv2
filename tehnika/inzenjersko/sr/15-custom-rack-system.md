@@ -5,8 +5,8 @@
 | Polje | Vrednost |
 |-------|----------|
 | ID Dokumenta | EK-TECH-016 |
-| Verzija | 1.0 |
-| Datum | 2026-01-03 |
+| Verzija | 1.1 |
+| Datum | 2026-01-04 |
 | Status | Aktivan |
 | Autor | Elektrokombinacija Inženjering |
 
@@ -431,14 +431,23 @@ Rack kontroler je **OPCIONI**. Moduli rade autonomno bez njega:
 
 ### 4.2 Hardver Kontrolera
 
-| Komponenta | Specifikacija |
-|------------|---------------|
-| MCU | STM32F407VGT6 |
-| CAN interfejs | 2× CAN-FD (za bus A i B) |
-| I2C interfejs | Za slot senzore, temp senzore |
-| GPIO | Za fan PWM, prekidač vrata, LED-ove |
-| Ethernet | Opciono, za direktnu mrežnu konekciju |
-| Napajanje | 12V od rack PSU |
+Rack kontroler koristi **isti MCU i kernel** kao EK3 moduli, omogućavajući unifikovani firmware razvoj i konzistentnu obradu grešaka kroz ceo sistem.
+
+| Komponenta | Specifikacija | Napomene |
+|------------|---------------|----------|
+| MCU | **STM32G474VET6** | Isti kao EK3 moduli |
+| Firmware | **JEZGRO mikrokernel** | Unifikovani kernel, različita konfiguracija servisa |
+| CAN interfejs | 2× CAN-FD (bus A i B) | 5 Mbps, dual redundantno |
+| I2C interfejs | Za slot senzore, GPIO ekspandere | 84 slota preko ekspandera |
+| GPIO | Za fan PWM, prekidač vrata, LED-ove | 15× PWM izlaza |
+| Ethernet | Opcioni W5500 SPI modul | Direktna mrežna konekcija |
+| Napajanje | 12V od rack PSU | 5W tipično |
+
+**Ključni uvid:** Pokretanje JEZGRO na oba, EK3 modulima i rack kontroleru, pruža:
+- Zajedničku bazu koda (smanjen razvojni napor)
+- Konzistentnu izolaciju grešaka (zaštita zasnovana na MPU)
+- Automatski restart servisa (nema jedne tačke kvara)
+- Poznat razvojni tok za sve firmware inženjere
 
 ### 4.3 Funkcije Kontrolera
 
@@ -951,6 +960,306 @@ Moduli autonomno redistribuiraju opterećenje bazirano na temperaturi:
 | `tehnika/05-swarm-intelligence.md` | Swarm koordinacija |
 | `tehnika/09-ek3-rack-sistem.md` | Originalni koncept rack-a |
 | `tehnika/13-hardware-security.md` | CAN EMC dizajn |
+| `tehnika/16-jezgro.md` | JEZGRO mikrokernel specifikacija |
+
+---
+
+## 10. JEZGRO Rack Kontroler
+
+Ovaj odeljak opisuje firmware arhitekturu rack kontrolera koristeći JEZGRO - isti mikrokernel koji radi na EK3 modulima.
+
+### 10.1 Filozofija Unifikovanog Kernela
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              JEZGRO: Unifikovani Kernel Kroz EK3 Sistem          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   EK3 Modul (84×)               Rack Kontroler (1×)             │
+│   ┌─────────────────┐           ┌─────────────────┐             │
+│   │   STM32G474     │           │   STM32G474     │             │
+│   │   JEZGRO Kernel │           │   JEZGRO Kernel │  ← ISTI!    │
+│   │   ─────────────────         │   ─────────────────           │
+│   │   LLC_CONTROL   │           │   FAN_CONTROL   │             │
+│   │   SAFETY_MONITOR│           │   THERMAL_MON   │             │
+│   │   CAN_HANDLER   │           │   SLOT_INVENTORY│             │
+│   │   THERMAL_MGR   │           │   CAN_BRIDGE    │             │
+│   │   ROJ_COORD   │           │   TELEMETRY     │             │
+│   │   AUDIT_LOGGER  │           │   AUDIT_LOGGER  │             │
+│   └────────┬────────┘           └────────┬────────┘             │
+│            │                             │                       │
+│            └─────────── CAN-FD ──────────┘                      │
+│                     (5 Mbps, dual bus)                          │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Prednosti unifikovanog kernela:**
+- Jedna baza koda firmware-a (lakše održavanje)
+- Konzistentna izolacija grešaka (zaštita bazirana na MPU)
+- Automatski restart servisa (reinkarnacioni server inspirisan MINIX-om)
+- Poznat razvojni tok za sve inženjere
+
+### 10.2 Konfiguracija Servisa Rack Kontrolera
+
+| ID | Ime Servisa | Prioritet | Stack | Memorija | Watchdog | Namena |
+|----|-------------|-----------|-------|----------|----------|--------|
+| 0 | KERNEL | - | 2 KB | 8 KB | - | Jezgro (privilegovano) |
+| 1 | FAN_CONTROL | HIGH | 2 KB | 8 KB | 100 ms | Fan PWM, tahometar |
+| 2 | THERMAL_MONITOR | MEDIUM | 2 KB | 8 KB | 500 ms | Temperatura zone |
+| 3 | SLOT_INVENTORY | MEDIUM | 2 KB | 8 KB | 1000 ms | Detekcija prisustva |
+| 4 | CAN_BRIDGE | HIGH | 2 KB | 8 KB | 100 ms | CAN-A/B premošćivanje |
+| 5 | TELEMETRY | LOW | 4 KB | 16 KB | 2000 ms | Agregacija ka stanici |
+| 6 | AUDIT_LOGGER | LOW | 4 KB | 16 KB | 2000 ms | Logovanje događaja |
+
+### 10.3 Razlike u Hardveru (vs EK3 Modul)
+
+| Karakteristika | EK3 Modul | Rack Kontroler |
+|----------------|-----------|----------------|
+| MCU | STM32G474 | STM32G474 (isti!) |
+| Flash | 512 KB | 512 KB |
+| RAM | 128 KB | 128 KB |
+| Stepen snage | LLC konvertor | Nema |
+| HRTIM (PWM) | Stepen snage | Kontrola ventilatora |
+| ADC kanali | Senzori struje/napona | Senzori temperature |
+| I2C slave-ovi | Nema | 84 slot senzora preko ekspandera |
+| Kontrola ventilatora | N/A | 15× PWM izlaza |
+| Ethernet | Nema | Opcioni (W5500 SPI) |
+
+### 10.4 Alternative Razvojnog Puta (Hibridni Pristup)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   OPCIJE RAZVOJNOG PUTA                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   Opcija A: FreeRTOS → JEZGRO Migracija (PREPORUČENO)           │
+│   ─────────────────────────────────────────────────             │
+│   ┌────────────────┐         ┌────────────────┐                 │
+│   │ Faza 1         │────────►│ Faza 2         │                 │
+│   │ FreeRTOS       │         │ JEZGRO         │                 │
+│   │ ────────────── │         │ ────────────── │                 │
+│   │ • Brzi proto   │         │ • Produkcija   │                 │
+│   │ • Bez MPU      │         │ • MPU izolovan │                 │
+│   │ • Deljeni task │         │ • Auto-restart │                 │
+│   └────────────────┘         └────────────────┘                 │
+│                                                                  │
+│   Opcija B: Zephyr Hibrid                                       │
+│   • Koristi Zephyr RTOS sa omogućenim userspace-om              │
+│   • Širi ekosistem (drajveri, mrežni stek)                      │
+│   • Možda ne ispunjava <1µs latenciju prekida                   │
+│                                                                  │
+│   Opcija C: Čist JEZGRO od Početka                              │
+│   • Maksimalna kontrola i optimizacija                          │
+│   • Najduži inicijalni razvoj                                   │
+│   • Unifikovano sa EK3 firmware-om od prvog dana                │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 10.5 Sloj Kompatibilnosti za Migraciju
+
+| FreeRTOS API | JEZGRO Ekvivalent | Napomene za Migraciju |
+|--------------|-------------------|----------------------|
+| `xTaskCreate()` | `JEZGRO_SERVICE_DEFINE()` | Dodaj MPU region config |
+| `vTaskDelay()` | `jezgro_sleep()` | 1:1 mapiranje |
+| `xQueueSend()` | `jezgro_send()` | Promeni na IPC poruku |
+| `xQueueReceive()` | `jezgro_receive()` | Promeni na IPC poruku |
+| `xSemaphore*()` | `jezgro_sem_*()` | Sličan API |
+| `configASSERT()` | `jezgro_assert()` | Okida reinkarnaciju |
+
+Videti `tehnika/inzenjersko/sr/16-jezgro.md` Odeljak 8.4 za detaljan vodič za migraciju.
+
+---
+
+## 11. Dizajn Backplane PCB-a
+
+Ovaj odeljak pruža detaljne specifikacije PCB dizajna za pasivni backplane.
+
+### 11.1 Slaganje Slojeva
+
+Backplane koristi 6-slojni dizajn optimizovan za distribuciju snage i integritet signala:
+
+| Sloj | Funkcija | Bakar | Namena |
+|------|----------|-------|--------|
+| 1 | Signal GORE | 2 oz | CAN-A, I2C, kontrola |
+| 2 | Ravnina uzemljenja | 3 oz | GND referenca |
+| 3 | Ravnina snage DC+ | 4 oz | 650V DC pozitivan |
+| 4 | Ravnina snage DC- | 4 oz | 650V DC negativan |
+| 5 | Ravnina uzemljenja | 3 oz | GND referenca |
+| 6 | Signal DOLE | 2 oz | CAN-B, senzori |
+
+**Ukupna debljina:** ~3.0 mm
+
+### 11.2 Specifikacije Materijala
+
+| Parametar | Vrednost | Napomene |
+|-----------|----------|----------|
+| Osnovni materijal | FR4 High-Tg | Tg > 170°C |
+| Težina bakra (interna snaga) | 4 oz (140 µm) | Za 350A kapacitet |
+| Dielektrična konstanta (εr) | 4.5 | @ 1 MHz |
+| Dimenzije ploče | 800 × 600 mm | Maksimalna veličina panela |
+| Min širina/razmak traga | 0.15 mm | Za signal slojeve |
+
+### 11.3 CAN-FD Trasiranje
+
+| Parametar | CAN-A (Sloj 1) | CAN-B (Sloj 6) |
+|-----------|----------------|----------------|
+| Širina traga | 0.2 mm | 0.2 mm |
+| Razmak tragova | 0.15 mm | 0.15 mm |
+| Impedansa | 100Ω diff | 100Ω diff |
+| Referentni sloj | Sloj 2 (GND) | Sloj 5 (GND) |
+| Max dužina | 2000 mm | 2000 mm |
+| Usklađivanje dužine | ±5 mm | ±5 mm |
+
+### 11.4 Specifikacije Proizvodnje
+
+| Parametar | Vrednost | Napomene |
+|-----------|----------|----------|
+| PCB klasa | IPC Klasa 2 | Industrijska |
+| Maska za lemljenje | Zelena, LPI | >25 µm |
+| Završna obrada površine | **ENIG** | Au: 50-100 nm |
+| Kontrolisana impedansa | ±10% | CAN tragovi |
+
+---
+
+## 12. Centralni PFC Modul
+
+Ovaj odeljak opisuje modul za korekciju faktora snage (PFC) koji konvertuje 3-fazni AC u 650V DC za rack.
+
+### 12.1 PFC Arhitektura
+
+**Topologija: Bečki Ispravljač (Vienna Rectifier)**
+
+| Parametar | Vrednost | Napomene |
+|-----------|----------|----------|
+| Ulazni napon | **380-480V AC 3-fazno** | ±10% tolerancija |
+| Izlazni napon | **650V DC** | ±5% regulacija |
+| Izlazna snaga | **100 kW kontinualno** | Po PFC jedinici |
+| Efikasnost | **>97%** | @ punom opterećenju |
+| Faktor snage | **>0.99** | @ >25% opterećenja |
+| THD (struja) | **<5%** | EN 61000-3-12 |
+
+### 12.2 Kontrolni Sistem
+
+| Parametar | Vrednost |
+|-----------|----------|
+| Kontroler | TMS320F28379D (dual-core DSP) |
+| Frekvencija uzorkovanja | 50 kHz |
+| PWM frekvencija | 50 kHz (po fazi, interleaved) |
+| Regulacija napona | ±1% (DC bus) |
+
+### 12.3 Zaštitne Funkcije
+
+| Zaštita | Prag | Odgovor |
+|---------|------|---------|
+| Ulazna prekostruja | >200A | Isključenje gate-a |
+| Izlazni prenapon | >720V | Crowbar |
+| Kvar uzemljenja | >30mA | Gašenje |
+| Preterana temperatura | >85°C | Derating pa gašenje |
+
+### 12.4 Fizički Dizajn
+
+| Parametar | Vrednost |
+|-----------|----------|
+| Form faktor | 3U × 19" rack-mount |
+| Težina | ~25 kg |
+| Hlađenje | Integrisani ventilatori |
+
+---
+
+## 13. Procedure Proizvodnje i Testiranja
+
+### 13.1 SMT Proces
+
+| Korak | Proces | Parametri |
+|-------|--------|-----------|
+| 1 | Štampa paste za lem | Tip 4 pasta, 0.15 mm šablon |
+| 2 | Postavljanje komponenti | Pick-and-place, ±0.05 mm |
+| 3 | Reflow | Vrh 250°C, 60s iznad likvidusa |
+| 4 | AOI inspekcija | 100% pokrivenost |
+
+### 13.2 Testovi Pred-Puštanja u Rad
+
+| Test | Oprema | Kriterijum |
+|------|--------|------------|
+| Otpornost izolacije | Megger | >100 MΩ @ 1000V DC |
+| Hi-pot (DC+ ka šasiji) | Hi-pot tester | 2500V DC, 60s, <1 mA |
+| CAN-A kontinuitet | CAN analizator | Svih 84 slotova odgovara |
+| Rad ventilatora | Vizuelno + tahometar | Svih 15 ventilatora na 100% |
+| Boot kontrolera | Serijska konzola | JEZGRO banner se pojavljuje |
+
+---
+
+## 14. Vodič za Instalaciju
+
+### 14.1 Zahtevi za Lokaciju
+
+| Parametar | Zahtev |
+|-----------|--------|
+| Opterećenje poda | ≥500 kg/m² |
+| Ambijentalna temperatura | 0°C do 40°C |
+| Vlažnost | <95% bez kondenzacije |
+| Nadmorska visina | <2000 m (derating 1% na 100m iznad 1000m) |
+
+### 14.2 Električni Zahtevi
+
+| Parametar | Specifikacija |
+|-----------|---------------|
+| AC napajanje | 400V 3-fazno + N + PE |
+| Automatski prekidač | 400A, Tip B, 4-polni |
+| Presek kabla | 185 mm² Cu, minimum |
+| Uzemljenje | <1Ω do uzemljenja |
+
+### 14.3 Prva Lista za Uključivanje
+
+| Korak | Akcija | Očekivani Rezultat |
+|-------|--------|-------------------|
+| 1 | Zatvorite AC prekidač | Nema luka, nema isključenja |
+| 2 | Sačekajte 30 sekundi | PFC soft-start završen |
+| 3 | Proverite DC bus | 650V ±5% |
+| 4 | Proverite ventilatore | Svih 15 na 30% |
+| 5 | Ubacite prvi modul | LED modul zelena |
+
+---
+
+## 15. Raspored Održavanja
+
+### 15.1 Preventivno Održavanje
+
+| Interval | Zadatak |
+|----------|---------|
+| Mesečno | Vizuelna inspekcija, provera prašine |
+| Kvartalno | Čišćenje filtera ventilatora |
+| Godišnje | Termalno snimanje pod punim opterećenjem |
+| Godišnje | Test CAN busa |
+| Godišnje | Provera zatezanja sabirnica |
+| 5 godina | Provera zdravlja kondenzatora |
+
+### 15.2 Procedure Zamene
+
+**Zamena fan modula (hot-swappable):**
+1. Identifikujte pokvareni ventilator
+2. Otvorite prednja vrata
+3. Pritisnite polugu za otpuštanje
+4. Izvucite fan modul
+5. Ubacite novi fan modul
+6. Proverite tahometar signal
+
+**Zamena modula (hot-swappable):**
+1. Izvucite modul pravo napolje
+2. Sačekajte 3 sekunde (swarm re-election)
+3. Ubacite zamenu
+4. Proverite zelenu LED u roku od 10 sekundi
+
+### 15.3 Inventar Rezervnih Delova
+
+| Stavka | Preporučena Količina |
+|--------|---------------------|
+| Fan moduli | 2 po rack-u |
+| PTC osigurači | 10 po rack-u |
+| CAN terminacija kit | 2 po rack-u |
+| Kontroler PCB | 1 na 10 rack-ova |
 
 ---
 
@@ -966,7 +1275,7 @@ Moduli autonomno redistribuiraju opterećenje bazirano na temperaturi:
 | PTC osigurači | 84 | 5A hold, 1000V |
 | Fan moduli | 5 | 3× 120mm ventilatora svaki |
 | Senzori temperature | 20 | NTC, I2C |
-| Rack kontroler | 1 | Baziran na STM32F407 |
+| Rack kontroler | 1 | STM32G474 + JEZGRO |
 | Ulaz snage | 1 | 3-fazno 400V, 400A |
 
 ---
@@ -984,3 +1293,12 @@ Moduli autonomno redistribuiraju opterećenje bazirano na temperaturi:
 | Vreme hot-swap-a | <60 sekundi |
 | Kompatibilnost sa robotom | Da |
 | MTBF backplane-a | >1,000,000 sati |
+
+---
+
+## Istorija Izmena
+
+| Datum | Verzija | Opis |
+|-------|---------|------|
+| 2026-01-04 | 1.1 | Veliko proširenje: JEZGRO integracija (Odeljak 10), Dizajn backplane PCB-a (Odeljak 11), Centralni PFC modul (Odeljak 12), Proizvodnja i testiranje (Odeljak 13), Vodič za instalaciju (Odeljak 14), Raspored održavanja (Odeljak 15). Ažuriran Odeljak 4.2 na STM32G474 + JEZGRO. |
+| 2026-01-03 | 1.0 | Inicijalno izdanje: Mikrokernel filozofija, mehanički dizajn, backplane arhitektura, distribucija snage, termalno upravljanje, obrada grešaka, interfejs za robota |

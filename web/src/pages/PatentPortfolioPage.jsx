@@ -311,6 +311,100 @@ Predictive V2G optimization deployed from edge to cloud for intelligent fleet pa
 - Battery health <80% → EXCLUDE
         `,
       },
+      {
+        id: 'multi-vehicle-swap',
+        title: 'Multi-Vehicle Swap',
+        disclosureId: 'EK-2026-009',
+        date: '2026-01-04',
+        status: 'disclosed',
+        summary: 'Standardized Battery Module for Multi-Vehicle Platform with Universal Swap Compatibility',
+        content: `
+## Core Innovation
+
+Universal battery module standard enabling cross-platform battery swapping between buses, trucks, and marine vessels.
+
+### Battery Module Standard
+| Parameter | Value |
+|-----------|-------|
+| Capacity | 50 kWh nominal |
+| Voltage | 400-800V DC |
+| Dimensions | 800 × 600 × 200 mm |
+| Weight | ~400 kg |
+| Connector | Universal EK-BAT interface |
+
+### Vehicle Platforms
+- **City buses**: 4-8 modules (200-400 kWh)
+- **Intercity coaches**: 8-12 modules (400-600 kWh)
+- **Delivery trucks**: 2-6 modules (100-300 kWh)
+- **Marine vessels**: 10-50 modules (500-2500 kWh)
+
+### Key Benefits
+1. **Cross-Platform Compatibility**: Same battery fits multiple vehicle types
+2. **Fleet Flexibility**: Batteries allocated based on daily demand
+3. **Investment Protection**: Batteries outlive vehicle lifecycle
+4. **Rapid Deployment**: Swap in <3 minutes per module
+
+### ROJ Coordination
+All batteries run JEZGRO-BAT firmware with ROJ_COORD service, enabling:
+- State-of-charge reporting across fleet
+- Predictive maintenance coordination
+- Load balancing during charging
+- V2G participation when stationary
+        `,
+      },
+      {
+        id: 'jezgro-ecosystem',
+        title: 'JEZGRO Ecosystem',
+        disclosureId: 'EK-2026-010',
+        date: '2026-01-05',
+        status: 'disclosed',
+        summary: 'Unified Microkernel Operating System for Heterogeneous Power Electronics Ecosystem',
+        content: `
+## Core Innovation
+
+**JEZGRO Product Family** - A single microkernel (~8KB) that runs on ALL intelligent components in the EV charging ecosystem: charging modules, battery BMS, robots, and protocol gateways.
+
+### The Problem
+Traditional approaches use separate firmware for each device type:
+- Charger: Custom RTOS + power control
+- BMS: Different RTOS + cell monitoring
+- Robot: Yet another RTOS + motion control
+- Gateway: Linux or bare-metal + protocols
+
+Result: 4+ codebases, 4+ teams, no code reuse, inconsistent fault handling.
+
+### JEZGRO Solution
+
+| Variant | Target Device | MCU | Key Services |
+|---------|---------------|-----|--------------|
+| JEZGRO-EK3 | 3.3kW charger | STM32G474 | LLC_CONTROL, THERMAL, ROJ_COORD |
+| JEZGRO-RACK | Rack controller | STM32G474 | FAN_CONTROL, SLOT_INVENTORY |
+| JEZGRO-BAT | Battery BMS | STM32G474 | CELL_MONITOR, BALANCING, SOC |
+| JEZGRO-ROB | Robot arm | STM32H743 | MOTION_CTRL, TRAJECTORY, SAFETY |
+| JEZGRO-GW | V2G gateway | STM32H743 | PLL_SYNC, ISO15118, DROOP_CTRL |
+
+### Key Innovation Elements
+1. **Unified Kernel**: Same ~8KB kernel on all devices
+2. **Variant Selection**: Compile-time service configuration
+3. **Common Services**: ROJ_COORD, CAN_HANDLER, THERMAL_MGR shared
+4. **Cross-Device Protocol**: All devices speak same CAN-FD protocol
+5. **Consistent Fault Recovery**: <50ms service restart everywhere
+
+### Adapter Devices (JEZGRO-GW)
+- **EK-ADAPT-V2G**: Non-EK vehicles → V2G network
+- **EK-ADAPT-BUS**: Retrofit existing buses
+- **EK-ADAPT-CCS**: CCS Combo protocol bridge
+- **EK-ADAPT-MCS**: Megawatt Charging adapter
+- **EK-ADAPT-OCPP**: Third-party charger gateway
+
+### Benefits
+- 60% reduction in firmware development cost
+- 2 MCU families instead of 4+ (STM32G474, STM32H743)
+- Single vendor relationship (STMicroelectronics)
+- Operators learn ONE recovery behavior
+- No external coordinator needed for cross-device coordination
+        `,
+      },
     ],
   },
   {

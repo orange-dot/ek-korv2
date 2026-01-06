@@ -78,6 +78,8 @@ import { useDeliveryEngine } from '../hooks/useDeliveryEngine';
 import DeliveryDecisionHUD from '../components/la-delivery/DeliveryDecisionHUD';
 import { SCENARIO_CONFIG, SCENARIO_TYPES } from '../data/laDecisionScenarios';
 import { applyDecisionEffect } from '../utils/laDecisionEffects';
+import { DeliveryKorAllThingPanel as KorAllThingPanelNew } from '../components/la-delivery/kor-all-thing';
+import { useDeliveryConnection } from '../hooks/useDeliveryConnection';
 
 // US Map configuration
 const US_MAP_CONFIG = {
@@ -437,6 +439,7 @@ function DeliveryProvider({ children }) {
             packages: Math.random() > 0.5 ? Math.floor(Math.random() * 3) + 1 : 0,
             targetPosition: null,
             zone: zone.zone,
+            zoneId: `swarm-zone-${zone.zone}`, // For route-based movement
             baseHub: zone.baseHub,
             priority: Object.values(DELIVERY_PRIORITY)[Math.floor(Math.random() * 4)] || DELIVERY_PRIORITY.STANDARD,
             missionQueue: generateMissionQueue('swarmbot', zone.zone),
@@ -2352,7 +2355,7 @@ function VehicleDetailPanel() {
 }
 
 // ============================================================================
-// KorAllThing Panel (Delivery Version)
+// KorAllThing Panel (Delivery Version) - Now using extracted component
 // ============================================================================
 
 function DeliveryKorAllThingPanel() {
@@ -2360,310 +2363,80 @@ function DeliveryKorAllThingPanel() {
     korAllThingExpanded,
     toggleKorAllThing,
     scenarioQueue,
-    drones,
-    pods,
-    swarmBots,
-    stats
+    drones: localDrones,
+    pods: localPods,
+    swarmBots: localSwarmBots,
+    stats,
+    updateScenario,
+    showDecisionToast,
+    clearDecisionToast,
+    clearFocusedVehicle,
+    setSelectedCity
   } = useDelivery();
 
-  const activeScenarios = scenarioQueue.filter(s => s.status === 'active' || s.status === 'pending');
-  const completedScenarios = scenarioQueue.filter(s => s.status === 'completed').slice(-5);
+  // Connect to backend simulation
+  const {
+    isConnected,
+    drones: backendDrones,
+    pods: backendPods,
+    swarmBots: backendSwarmBots,
+    metrics: backendMetrics,
+    connect
+  } = useDeliveryConnection({ autoConnect: true });
 
-  // System health based on battery levels
-  const systemStatus = useMemo(() => {
-    const allVehicles = [...drones, ...pods, ...swarmBots];
-    const criticalCount = allVehicles.filter(v => v.batteryLevel < 15).length;
-    if (criticalCount > 3) return 'critical';
-    if (criticalCount > 0) return 'warning';
-    return 'healthy';
-  }, [drones, pods, swarmBots]);
+  // Use backend data when connected, fallback to local simulation
+  const drones = isConnected && backendDrones.length > 0 ? backendDrones : localDrones;
+  const pods = isConnected && backendPods.length > 0 ? backendPods : localPods;
+  const swarmBots = isConnected && backendSwarmBots.length > 0 ? backendSwarmBots : localSwarmBots;
 
-  // Collapsed sidebar
-  if (!korAllThingExpanded) {
-    return (
-      <motion.div
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        className="absolute left-0 top-0 bottom-0 w-16 bg-[#0a0a0f]/95 backdrop-blur-xl border-r border-white/10 flex flex-col items-center py-4 gap-4 z-[1000]"
-      >
-        {/* Logo */}
-        <div className="relative">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/30 to-cyan-500/30 flex items-center justify-center border border-purple-500/30">
-            <Brain className="w-5 h-5 text-purple-400" />
-          </div>
-          {activeScenarios.length > 0 && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center">
-              <span className="text-[10px] font-bold text-black">{activeScenarios.length}</span>
-            </div>
-          )}
-        </div>
+  // Handle scenario option selection from KorAllThing panel
+  const handleScenarioSelect = useCallback((scenario, option) => {
+    // Mark scenario as completed with selected option
+    updateScenario({
+      id: scenario.id,
+      status: 'completed',
+      selectedOption: option,
+      completedAt: Date.now()
+    });
 
-        {/* System Status */}
-        <div className="flex flex-col items-center gap-1">
-          <div className={`w-3 h-3 rounded-full animate-pulse ${
-            systemStatus === 'healthy' ? 'bg-emerald-500' :
-            systemStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
-          }`} />
-          <span className="text-[8px] text-slate-500 uppercase">SYS</span>
-        </div>
+    // Show decision result toast with proper fields
+    showDecisionToast({
+      title: scenario.config?.title || 'Decision Made',
+      action: option.label,
+      effect: option.ifChosen || 'Action applied',
+      vehicleId: scenario.vehicleId,
+      vehicleType: scenario.vehicleType,
+      color: scenario.config?.color || '#00f0ff'
+    });
 
-        {/* Quick Stats */}
-        <div className="flex flex-col items-center gap-3 flex-1">
-          <div className="flex flex-col items-center">
-            <Plane className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs font-bold text-white">{stats.dronesFlying}</span>
-            <span className="text-[8px] text-slate-500">FLY</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <Truck className="w-4 h-4 text-green-400" />
-            <span className="text-xs font-bold text-white">{stats.podsMoving}</span>
-            <span className="text-[8px] text-slate-500">POD</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <Bot className="w-4 h-4 text-pink-400" />
-            <span className="text-xs font-bold text-white">{stats.swarmsDelivering}</span>
-            <span className="text-[8px] text-slate-500">SWM</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <Package className="w-4 h-4 text-amber-400" />
-            <span className="text-xs font-bold text-white">{stats.packagesInTransit}</span>
-            <span className="text-[8px] text-slate-500">PKG</span>
-          </div>
-        </div>
+    // Clear toast and return to global view after 5 seconds
+    setTimeout(() => {
+      clearDecisionToast();
+      clearFocusedVehicle();
+      setSelectedCity(null);
+    }, 5000);
+  }, [updateScenario, showDecisionToast, clearDecisionToast, clearFocusedVehicle, setSelectedCity]);
 
-        {/* Expand Button */}
-        <button
-          onClick={toggleKorAllThing}
-          className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors group"
-        >
-          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white" />
-        </button>
-      </motion.div>
-    );
-  }
+  // Handle scenario completion (after action flow animation)
+  const handleScenarioComplete = useCallback((scenario) => {
+    // Scenario already marked complete in handleScenarioSelect
+    // This is called after the action flow animation finishes
+  }, []);
 
-  // Expanded full panel
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[9999] bg-[#050508]/98 backdrop-blur-xl overflow-hidden"
-    >
-      <div className="h-full flex flex-col p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/30 to-cyan-500/30 flex items-center justify-center border border-purple-500/30">
-              <Brain className="w-6 h-6 text-purple-400" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">KorAllThing</h1>
-              <p className="text-xs text-slate-400">LA Delivery Orchestrator • TechnoCore AI</p>
-            </div>
-          </div>
-          <button
-            onClick={toggleKorAllThing}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4 text-slate-400" />
-            <span className="text-sm text-slate-300">Close</span>
-          </button>
-        </div>
-
-        {/* Main Grid */}
-        <div className="flex-1 grid grid-cols-3 gap-6 overflow-hidden">
-          {/* Left - Fleet Overview */}
-          <div className="flex flex-col">
-            <h2 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-cyan-400" />
-              Fleet Status
-            </h2>
-            <div className="space-y-3">
-              {/* Drones */}
-              <div className="p-4 rounded-lg bg-white/5 border border-cyan-500/20">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-cyan-400 font-medium flex items-center gap-2">
-                    <Plane className="w-4 h-4" /> Drones
-                  </span>
-                  <span className="text-white font-bold">{drones.length}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center">
-                    <div className="text-emerald-400 font-bold">{drones.filter(d => d.state === DELIVERY_STATES.FLYING).length}</div>
-                    <div className="text-slate-500">Flying</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-amber-400 font-bold">{drones.filter(d => d.state === DELIVERY_STATES.CHARGING).length}</div>
-                    <div className="text-slate-500">Charging</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-purple-400 font-bold">{drones.filter(d => d.state?.includes('handoff')).length}</div>
-                    <div className="text-slate-500">Handoff</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pods */}
-              <div className="p-4 rounded-lg bg-white/5 border border-green-500/20">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-green-400 font-medium flex items-center gap-2">
-                    <Truck className="w-4 h-4" /> Pods
-                  </span>
-                  <span className="text-white font-bold">{pods.length}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center">
-                    <div className="text-emerald-400 font-bold">{pods.filter(p => p.state === DELIVERY_STATES.EN_ROUTE).length}</div>
-                    <div className="text-slate-500">Moving</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-amber-400 font-bold">{pods.filter(p => p.state === DELIVERY_STATES.CHARGING).length}</div>
-                    <div className="text-slate-500">Charging</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-purple-400 font-bold">{pods.filter(p => p.state === DELIVERY_STATES.DISPATCHING).length}</div>
-                    <div className="text-slate-500">Dispatch</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Swarm Bots */}
-              <div className="p-4 rounded-lg bg-white/5 border border-pink-500/20">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-pink-400 font-medium flex items-center gap-2">
-                    <Bot className="w-4 h-4" /> Swarm Bots
-                  </span>
-                  <span className="text-white font-bold">{swarmBots.length}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center">
-                    <div className="text-emerald-400 font-bold">{swarmBots.filter(s => s.state === DELIVERY_STATES.DELIVERING).length}</div>
-                    <div className="text-slate-500">Deliver</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-cyan-400 font-bold">{swarmBots.filter(s => s.state === DELIVERY_STATES.SWARMING).length}</div>
-                    <div className="text-slate-500">Swarm</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-slate-400 font-bold">{swarmBots.filter(s => s.state === DELIVERY_STATES.IDLE).length}</div>
-                    <div className="text-slate-500">Idle</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Center - AI Flow + Metrics */}
-          <div className="flex flex-col gap-4">
-            {/* AI Flow */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-2 mb-4">
-                <Workflow className="w-4 h-4 text-purple-400" />
-                <span className="text-xs font-medium text-white uppercase tracking-wider">AI Flow</span>
-              </div>
-              <div className="flex items-center justify-between relative">
-                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/10 -translate-y-1/2" />
-                {[
-                  { id: 'sense', label: 'SENSE', icon: Eye, color: 'cyan' },
-                  { id: 'analyze', label: 'ANALYZE', icon: Cpu, color: 'purple' },
-                  { id: 'decide', label: 'DECIDE', icon: Brain, color: 'amber' },
-                  { id: 'act', label: 'ACT', icon: Zap, color: 'emerald' },
-                ].map((stage, i) => {
-                  const Icon = stage.icon;
-                  return (
-                    <div key={stage.id} className="relative flex flex-col items-center z-10">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-${stage.color}-500/20 border border-${stage.color}-500/50`}>
-                        <Icon className={`w-4 h-4 text-${stage.color}-400`} />
-                      </div>
-                      <span className="text-[9px] mt-1 text-white">{stage.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Key Metrics */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-                <div className="text-xs text-slate-400 mb-1">Packages</div>
-                <div className="text-2xl font-bold text-amber-400">{stats.packagesInTransit}</div>
-              </div>
-              <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-                <div className="text-xs text-slate-400 mb-1">Handoffs</div>
-                <div className="text-2xl font-bold text-purple-400">{stats.activeHandoffs}</div>
-              </div>
-              <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-                <div className="text-xs text-slate-400 mb-1">EK3 Load</div>
-                <div className="text-2xl font-bold text-emerald-400">{stats.ek3Utilization}%</div>
-              </div>
-              <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-                <div className="text-xs text-slate-400 mb-1">Efficiency</div>
-                <div className="text-2xl font-bold text-cyan-400">94%</div>
-              </div>
-            </div>
-
-            {/* AI Confidence */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-slate-400">AI Confidence</span>
-                <span className="text-sm font-bold text-emerald-400">94%</span>
-              </div>
-              <div className="w-full h-2 bg-white/10 rounded-full">
-                <div className="h-full w-[94%] bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full" />
-              </div>
-            </div>
-          </div>
-
-          {/* Right - Scenarios */}
-          <div className="flex flex-col">
-            <h2 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-400" />
-              Scenario Queue ({activeScenarios.length})
-            </h2>
-            <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-              {activeScenarios.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <CheckCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">All systems nominal</p>
-                  <p className="text-xs mt-1">No active scenarios</p>
-                </div>
-              ) : (
-                activeScenarios.map(scenario => (
-                  <div key={scenario.id} className="p-3 rounded-lg bg-white/5 border border-white/10">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-amber-400 text-xs font-medium">{scenario.type}</span>
-                      <span className="text-slate-500 text-[10px]">now</span>
-                    </div>
-                    <div className="text-white text-sm">{scenario.message}</div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full animate-pulse ${
-                systemStatus === 'healthy' ? 'bg-emerald-500' :
-                systemStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
-              }`} />
-              <span className="text-xs text-slate-400">System {systemStatus}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Network className="w-3 h-3 text-purple-400" />
-              <span className="text-xs text-slate-400">All Hubs Online</span>
-            </div>
-          </div>
-          <div className="text-xs text-slate-500">
-            KorAllThing v2.0 • LA Delivery Network
-          </div>
-        </div>
-      </div>
-    </motion.div>
+    <KorAllThingPanelNew
+      drones={drones}
+      pods={pods}
+      swarmBots={swarmBots}
+      scenarioQueue={scenarioQueue}
+      stats={stats}
+      isExpanded={korAllThingExpanded}
+      onToggle={toggleKorAllThing}
+      isConnected={isConnected}
+      backendData={isConnected ? { drones: backendDrones, pods: backendPods, swarmBots: backendSwarmBots, metrics: backendMetrics } : null}
+      onScenarioSelect={handleScenarioSelect}
+      onScenarioComplete={handleScenarioComplete}
+    />
   );
 }
 
