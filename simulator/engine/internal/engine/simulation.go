@@ -3,10 +3,12 @@ package engine
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/elektrokombinacija/simulator/internal/delivery"
 	"github.com/elektrokombinacija/simulator/internal/models"
 	"github.com/elektrokombinacija/simulator/pkg/types"
 	"github.com/redis/go-redis/v9"
@@ -44,6 +46,9 @@ type Simulation struct {
 	robots   map[string]*Robot
 	grid     *Grid
 
+	// LA Delivery simulation
+	deliverySimulation *delivery.DeliverySimulation
+
 	// Communication
 	redis      *redis.Client
 	redisSub   *redis.Client // Separate client for subscriptions
@@ -58,9 +63,47 @@ type Simulation struct {
 	gridFreqMin     float64
 	gridFreqMax     float64
 
+	// City configuration
+	cityConfig CityConfig
+
 	// Context for shutdown
 	ctx    context.Context
 	cancel context.CancelFunc
+}
+
+// CityConfig holds city-specific coordinates
+type CityConfig struct {
+	Name     string
+	Center   types.Position
+	Stations []types.Position
+}
+
+// Predefined cities
+var Cities = map[string]CityConfig{
+	"belgrade": {
+		Name:   "Belgrade",
+		Center: types.Position{Lat: 44.8176, Lng: 20.4633},
+		Stations: []types.Position{
+			{Lat: 44.8176, Lng: 20.4633}, // Depot
+			{Lat: 44.8066, Lng: 20.4489}, // Center
+		},
+	},
+	"noviSad": {
+		Name:   "Novi Sad",
+		Center: types.Position{Lat: 45.2671, Lng: 19.8335},
+		Stations: []types.Position{
+			{Lat: 45.2671, Lng: 19.8335}, // Main station
+			{Lat: 45.2551, Lng: 19.8419}, // City center
+		},
+	},
+	"nis": {
+		Name:   "Niš",
+		Center: types.Position{Lat: 43.3209, Lng: 21.8958},
+		Stations: []types.Position{
+			{Lat: 43.3209, Lng: 21.8958}, // Main
+			{Lat: 43.3150, Lng: 21.9000}, // Center
+		},
+	},
 }
 
 // Config holds simulation configuration
@@ -68,6 +111,7 @@ type Config struct {
 	TickRate   time.Duration
 	TimeScale  float64
 	RedisURL   string
+	City       string // City name (belgrade, noviSad, nis)
 
 	// Initial entity counts
 	ModuleCount  int
@@ -82,11 +126,20 @@ func DefaultConfig() Config {
 		TickRate:     100 * time.Millisecond,
 		TimeScale:    1.0,
 		RedisURL:     "redis://localhost:6379",
-		ModuleCount:  84, // 1 rack worth
+		City:         "noviSad", // Default to Novi Sad
+		ModuleCount:  84,        // 1 rack worth
 		RackCount:    1,
 		BusCount:     10,
 		StationCount: 2,
 	}
+}
+
+// GetCityConfig returns city config, defaulting to Novi Sad
+func GetCityConfig(cityName string) CityConfig {
+	if city, ok := Cities[cityName]; ok {
+		return city
+	}
+	return Cities["noviSad"]
 }
 
 // NewSimulation creates a new simulation instance
@@ -131,12 +184,21 @@ func NewSimulation(cfg Config) (*Simulation, error) {
 		gridFreqMin:  50.0, // Nominal
 		gridFreqMax:  50.0,
 
+		// City config
+		cityConfig: GetCityConfig(cfg.City),
+
 		ctx:    ctx,
 		cancel: cancel,
 	}
 
 	// Initialize entities
 	sim.initializeEntities(cfg)
+
+	// Initialize LA Delivery simulation
+	deliveryConfig := delivery.DefaultDeliveryConfig()
+	sim.deliverySimulation = delivery.NewDeliverySimulation(deliveryConfig)
+	log.Println("LA Delivery simulation initialized with", deliveryConfig.NumDrones, "drones,",
+		deliveryConfig.NumPods, "pods,", deliveryConfig.NumSwarmBots, "swarm bots")
 
 	// Start control command listener
 	go sim.subscribeControl()
@@ -146,10 +208,10 @@ func NewSimulation(cfg Config) (*Simulation, error) {
 
 // subscribeControl listens for control commands from the API
 func (s *Simulation) subscribeControl() {
-	pubsub := s.redisSub.Subscribe(s.ctx, types.EventControl)
+	pubsub := s.redisSub.Subscribe(s.ctx, types.EventControl, "delivery:control")
 	defer pubsub.Close()
 
-	log.Println("Subscribed to control channel:", types.EventControl)
+	log.Println("Subscribed to control channels:", types.EventControl, "delivery:control")
 
 	ch := pubsub.Channel()
 	for {
@@ -160,7 +222,11 @@ func (s *Simulation) subscribeControl() {
 			if msg == nil {
 				continue
 			}
-			s.handleControlCommand(msg.Payload)
+			if msg.Channel == "delivery:control" {
+				s.handleDeliveryControlCommand(msg.Payload)
+			} else {
+				s.handleControlCommand(msg.Payload)
+			}
 		}
 	}
 }
@@ -209,17 +275,70 @@ func (s *Simulation) handleControlCommand(payload string) {
 	}
 }
 
+// DeliveryControlCommand represents a delivery-specific control command
+type DeliveryControlCommand struct {
+	Action      string          `json:"action"`
+	Priority    string          `json:"priority,omitempty"`
+	Origin      *types.Position `json:"origin,omitempty"`
+	Destination *types.Position `json:"destination,omitempty"`
+	Weight      float64         `json:"weight,omitempty"`
+	Size        string          `json:"size,omitempty"`
+	VehicleID   string          `json:"vehicleId,omitempty"`
+	PackageID   string          `json:"packageId,omitempty"`
+}
+
+// handleDeliveryControlCommand processes delivery-specific control commands
+func (s *Simulation) handleDeliveryControlCommand(payload string) {
+	if s.deliverySimulation == nil {
+		log.Println("Delivery control command received but simulation not initialized")
+		return
+	}
+
+	var cmd DeliveryControlCommand
+	if err := json.Unmarshal([]byte(payload), &cmd); err != nil {
+		log.Printf("Failed to parse delivery control command: %v", err)
+		return
+	}
+
+	log.Printf("Received delivery control command: %s", cmd.Action)
+
+	switch cmd.Action {
+	case "addPackage":
+		if cmd.Origin != nil && cmd.Destination != nil {
+			pkg := &types.Package{
+				ID:          fmt.Sprintf("pkg-%d", time.Now().UnixNano()),
+				Priority:    types.DeliveryPriority(cmd.Priority),
+				Origin:      *cmd.Origin,
+				Destination: *cmd.Destination,
+				Weight:      cmd.Weight,
+				Size:        cmd.Size,
+				Status:      "pending",
+				CreatedAt:   time.Now().UnixMilli(),
+			}
+			s.deliverySimulation.AddPackage(pkg)
+			log.Printf("Added package %s with priority %s", pkg.ID, pkg.Priority)
+		}
+	case "start":
+		s.deliverySimulation.Start()
+	case "stop":
+		s.deliverySimulation.Stop()
+	case "pause":
+		s.deliverySimulation.Pause()
+	case "resume":
+		s.deliverySimulation.Resume()
+	default:
+		log.Printf("Unknown delivery control command: %s", cmd.Action)
+	}
+}
+
 // initializeEntities creates initial simulation entities
 func (s *Simulation) initializeEntities(cfg Config) {
 	// Create grid
 	s.grid = NewGrid()
 	s.entities["grid"] = s.grid
 
-	// Create stations
-	stationPositions := []types.Position{
-		{Lat: 44.8176, Lng: 20.4633}, // Belgrade depot
-		{Lat: 44.8066, Lng: 20.4489}, // Belgrade center
-	}
+	// Create stations using city config
+	stationPositions := s.cityConfig.Stations
 	for i := 0; i < cfg.StationCount && i < len(stationPositions); i++ {
 		station := NewStation(i, stationPositions[i])
 		s.stations[station.ID()] = station
@@ -272,15 +391,15 @@ func (s *Simulation) initializeEntities(cfg Config) {
 		}
 	}
 
-	// Create buses
+	// Create buses around city center
 	for i := 0; i < cfg.BusCount; i++ {
-		bus := NewBus(i)
+		bus := NewBus(i, s.cityConfig.Center)
 		s.buses[bus.ID()] = bus
 		s.entities[bus.ID()] = bus
 	}
 
-	log.Printf("Initialized simulation with %d modules, %d racks, %d buses, %d stations, %d V2G modules",
-		len(s.modules), len(s.racks), len(s.buses), len(s.stations), 10*len(s.racks))
+	log.Printf("Initialized simulation for %s with %d modules, %d racks, %d buses, %d stations, %d V2G modules",
+		s.cityConfig.Name, len(s.modules), len(s.racks), len(s.buses), len(s.stations), 10*len(s.racks))
 }
 
 // Start begins the simulation
@@ -333,6 +452,11 @@ func (s *Simulation) run() {
 			s.mu.Unlock()
 
 			wg.Wait()
+
+			// Tick LA Delivery simulation
+			if s.deliverySimulation != nil {
+				s.deliverySimulation.Tick(dt)
+			}
 
 			// Update metrics after entity tick
 			s.mu.Lock()
@@ -512,6 +636,20 @@ func (s *Simulation) publishState() {
 		metricsJSON, _ := json.Marshal(metrics)
 		s.redis.Publish(ctx, types.EventMetrics, metricsJSON)
 	}
+
+	// Publish LA Delivery state
+	if s.deliverySimulation != nil {
+		deliveryState := s.deliverySimulation.GetState()
+		deliveryJSON, _ := json.Marshal(deliveryState)
+		s.redis.Publish(ctx, "delivery:state", deliveryJSON)
+
+		// Publish delivery metrics (throttled)
+		if s.tickCount%10 == 0 {
+			deliveryMetrics := s.deliverySimulation.GetMetrics()
+			deliveryMetricsJSON, _ := json.Marshal(deliveryMetrics)
+			s.redis.Publish(ctx, "delivery:metrics", deliveryMetricsJSON)
+		}
+	}
 }
 
 // Close cleans up resources
@@ -551,6 +689,24 @@ func (s *Simulation) GetRobots() []types.Robot {
 		robots = append(robots, r.data)
 	}
 	return robots
+}
+
+// GetDeliveryState returns the current LA Delivery simulation state
+func (s *Simulation) GetDeliveryState() *types.DeliverySimulationState {
+	if s.deliverySimulation == nil {
+		return nil
+	}
+	state := s.deliverySimulation.GetState()
+	return &state
+}
+
+// GetDeliveryMetrics returns the current LA Delivery metrics
+func (s *Simulation) GetDeliveryMetrics() *types.DeliveryMetrics {
+	if s.deliverySimulation == nil {
+		return nil
+	}
+	metrics := s.deliverySimulation.GetMetrics()
+	return &metrics
 }
 
 // SendCANMessage sends a CAN message on the specified bus
