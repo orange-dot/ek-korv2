@@ -23,7 +23,7 @@ import {
   ArrowRight,
   Star,
 } from 'lucide-react';
-import PasswordGate from '../components/PasswordGate';
+import PasswordGate, { ACCESS_TIERS } from '../components/PasswordGate';
 
 // Development Options
 const DEV_OPTIONS = [
@@ -491,7 +491,7 @@ function JezgroDevContent() {
             <Link to="/" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
               <Home className="w-5 h-5 text-slate-600" />
             </Link>
-            <div>
+            <div className="flex-1">
               <h1 className="text-xl font-bold text-slate-900">
                 {lang === 'sr' ? 'JEZGRO razvojne opcije' : 'JEZGRO Development Options'}
               </h1>
@@ -499,6 +499,13 @@ function JezgroDevContent() {
                 {lang === 'sr' ? 'Microkernel RTOS za power electronics' : 'Microkernel RTOS for power electronics'}
               </p>
             </div>
+            <Link
+              to="/jezgro-blog"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+            >
+              <Terminal className="w-4 h-4" />
+              {lang === 'sr' ? 'Dev Blog' : 'Dev Blog'}
+            </Link>
           </div>
         </div>
       </div>
@@ -824,11 +831,7 @@ export default function JezgroDevPage() {
   const lang = i18n.language === 'sr' ? 'sr' : 'en';
 
   return (
-    <PasswordGate
-      title={lang === 'sr' ? 'JEZGRO Razvojne Opcije' : 'JEZGRO Development Options'}
-      storageKey="ek_jezgro_unlocked"
-      password="gazdamilorad"
-    >
+    <PasswordGate tier={ACCESS_TIERS.PARTNER}>
       <JezgroDevContent />
     </PasswordGate>
   );

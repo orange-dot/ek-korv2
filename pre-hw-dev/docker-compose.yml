@@ -1,0 +1,48 @@
+# JEZGRO RTOS - Docker Compose for Testing
+#
+# Usage:
+#   docker-compose build           # Build test image
+#   docker-compose up              # Run all tests
+#   docker-compose run test bash   # Interactive shell
+#   docker-compose run test renode # Interactive Renode
+
+version: '3.8'
+
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jezgro-test:latest
+    container_name: jezgro-test
+    volumes:
+      # Mount results directory for test output
+      - ./test-results:/jezgro/test-results
+    environment:
+      - TERM=xterm-256color
+    # Default command runs all tests
+    command: run-tests
+
+  # Interactive Renode session
+  renode:
+    image: jezgro-test:latest
+    container_name: jezgro-renode
+    volumes:
+      - ./test-results:/jezgro/test-results
+    stdin_open: true
+    tty: true
+    command: >
+      renode --console --disable-xwt -e "
+        mach create;
+        machine LoadPlatformDescription @/jezgro/renode/stm32g474-minimal.repl;
+        sysbus LoadELF @/jezgro/build-arm/jezgro_firmware;
+        start
+      "
+
+  # Build only (for CI)
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jezgro-test:latest
+    command: echo "Build complete"

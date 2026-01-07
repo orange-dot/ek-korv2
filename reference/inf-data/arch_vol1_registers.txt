@@ -1,0 +1,1900 @@
+
+============================================================
+PAGE 40
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+General Purpose and System Registers
+System Control Register (SYSCON)
+The System Configuration Register provides the following functionality.
+•
+Enable bit for Temperal protection system
+•
+Enable bit for memory protection system
+•
+Bit for definition of the initial state of the PSW.S bit in interrupt handlers
+•
+Bit for definition of the initial state of the PSW.S bit in trap handlers.
+•
+Enable for User-1 IO mode peripheral access.
+•
+Disable for User-1 IO mode ability to enable and disable interrupts
+•
+Boot halt status and release bit.
+•
+Status indicator of the Free Context List Depletion condition.
+Note:
+This register is SAFETY_ENDINIT protected with the exception of the FCDSF bit.
+SYSCON
+System Configuration Register
+(FE14H)
+Reset Value: 0000 0000H
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+-
+rwh
+-
+rw
+rw
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+-
+rw
+-
+rw
+rw
+rw
+rw
+rwh
+Field
+Description
+RES
+Reserved
+BHALT
+Boot halt status and release
+Following reset a CPU may be immediately placed in halt. In this case the
+BHALT bit will be set to “1”. The CPU will remain in halt until this bit is written
+to “0”. On a write from “1” to “0” the CPU will start execution from the
+program address defined program counter (PC) register. A write of this bit to
+“1” will be ignored.
+RES
+Reserved
+U1_IOS
+User-1 Peripheral access as supervisor.
+Allow User-1 mode tasks to access peripherals as if in Supervisor mode.
+Enables User-1 access to all peripheral registers.
+U1_IED
+User-1 Instruction execution disable.
+Disable the execution of User-1 mode instructions in User-1 IO mode.
+Disables User-1 ability to enable and disable interrupts
+RES
+Reserved
+ESDIS
+Emulator Space Disable
+RES
+Reserved
+User Manual (Volume 1)
+3-13
+V1.2.2
+2020-01-15
+RES
+BHALT
+RES
+U1_IO
+S
+U1_IE
+D
+RES
+ESDIS
+RES
+TS
+IS
+TPROT
+EN
+PROTE
+N
+FCDSF
+Bits
+Type
+[31:25]
+-
+24
+rwh
+[23:18]
+-
+17
+rw
+16
+rw
+[15:9]
+-
+8
+rw
+[7:5]
+rw
+
+
+============================================================
+PAGE 41
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+General Purpose and System Registers
+Field
+Description
+TS
+Initial state of PSW.S bit in trap handler
+IS
+Initial state of PSW.S bit in interrupt handler
+TPROTEN
+Temporal Protection Enable
+Enable the Temporal Protection system.
+0 : Temporal Protection is disabled.
+1 : Temporal Protection is enabled.
+PROTEN
+Memory Protection Enable
+Enables the memory protection system. Memory protection is controlled
+through the memory protection register sets. Note: Initialize the protection
+register sets prior to setting PROTEN to one.
+0 : Memory Protection is disabled.
+1 : Memory Protection is enabled.
+FCDSF
+Free Context List Depleted Sticky Flag
+This sticky bit indicates that a FCD (Free Context List Depleted) trap
+occurred since the bit was last cleared by software.
+0 : No FCD trap occurred since the last clear.
+1 : An FCD trap occurred since the last clear.
+User Manual (Volume 1)
+3-14
+V1.2.2
+2020-01-15
+Bits
+Type
+4
+rw
+3
+rw
+2
+rw
+1
+rw
+0
+rwh
+
+
+============================================================
+PAGE 42
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+General Purpose and System Registers
+CPU Identification Register (CPU_ID)
+Identification Registers identify the processor type and revision used. Only the CPU core ID register is described
+here. All other ID registers are described in the product documentation. The CPU Identification Register identifies
+the CPU type and revision.
+CPU_ID
+CPU Module Identification
+(FE18H)
+Reset Value: Implementation Specific
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+MOD
+r
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+r
+r
+Field
+Description
+MOD
+Module Identification Number
+Used for module identification.
+MOD_32B
+32-Bit Module Enable
+A value of C0H in this field indicates a 32-bit module with a 32-bit module ID
+register.
+MOD_REV
+Module Revision Number
+Used for revision numbering. The value of the revision starts at 01H (first
+revision) up to FFH.
+User Manual (Volume 1)
+3-15
+V1.2.2
+2020-01-15
+MOD_32B
+MOD_REV
+Bits
+Type
+[31:16]
+r
+[15:8]
+r
+[7:0]
+r
+
+
+============================================================
+PAGE 43
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+General Purpose and System Registers
+Core Identification Register (CORE_ID)
+In a multiprocessor system each logical processor core is given a unique identification number. The Core
+Identification Register holds this number.
+Core_ID
+Core Identification
+(FE1CH)
+Reset Value: Implementation Specific
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+RES
+-
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+-
+r
+Field
+Description
+RES
+Reserved
+CORE_ID
+Core Identification Number
+User Manual (Volume 1)
+3-16
+V1.2.2
+2020-01-15
+RES
+CORE_ID
+Bits
+Type
+[31:3]
+-
+[2:0]
+r
+
+
+============================================================
+PAGE 44
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+General Purpose and System Registers
+3.4
+Compatibility Mode Register (COMPAT)
+The COMPAT register is provided to allow implementations to selectively force compatibility of features with
+previous versions.
+Compatibility Mode Register (COMPAT)
+The contents of the register are implementation specific.
+Note:
+This register is SAFETY_ENDINIT protected.
+COMPAT
+Compatibility Mode Register
+(9400H)
+Reset Value: Implementation Specific
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+Implementation Specific
+-
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+Implementation Specific
+-
+Field
+Description
+Implementation
+Implementation Specific
+Specific
+User Manual (Volume 1)
+3-17
+V1.2.2
+2020-01-15
+Bits
+Type
+[31:0]
+-
+
+
+============================================================
+PAGE 45
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+General Purpose and System Registers
+3.5
+Access Control Registers
+SIST Mode Access Control Register (SMACON)
+Implementations may control the operation of Software in System Test (SIST) systems using the SMACON
+register. The contents of this register is implementation specific.
+Note:
+This register is SAFETY_ENDINIT protected
+SMACON
+SIST Mode Access Control
+(900CH)
+Reset Value: Implementation Specific
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+Implementation Specific
+-
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+Implementation Specific
+-
+Field
+Description
+Implementation
+Implementation Specific
+Specific
+3.6
+Interrupt Registers
+A typical Service Request Control register in the TriCore architecture holds the individual control bits to enable
+or disable the request, to assign a priority number, and to direct the request to one of the service providers. The
+Core Special Function Registers (CSFR) which control the Interrupts are described in “Interrupt System” on
+Page 1.
+3.7
+Memory Protection Registers
+The number of Memory Protection Register Sets is specific to each implementation of the architecture. There can
+be a maximum number of eight sets (one set includes both a data set and a code set). Each register set is made
+up of several range registers (also called Range Table Entries).
+Each Range Table Entry consists of a Segment Protection register pair and a bit field within a common Mode
+register. The register pair specifies the lower and upper boundary addresses of the memory range.
+The Core Special Function Registers (CSFR) which control the Memory Protection Registers are described in
+“Memory Protection System” on Page 1.
+3.8
+Trap Registers
+The Core Special Function Registers (CSFR) which control the Trap Registers are described in “Trap System” on
+Page 1.
+User Manual (Volume 1)
+3-18
+V1.2.2
+2020-01-15
+Bits
+Type
+[31:0]
+-
+
+
+============================================================
+PAGE 46
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+General Purpose and System Registers
+3.9
+Memory Configuration Registers
+The Memory Configuration Registers are defined in the architecture but the contents of the registers are
+implementation specific. The Core Special Function Registers (CSFR) which control the memoryconfiguration are
+described in “Physical Memory Attributes (PMA)” on Page 1.
+3.10
+Core Debug Controller Registers
+TriCore registers that support debugging are described in “Core Debug Controller” on Page 1
+3.11
+Floating Point Registers
+The registers for the optional TriCore Floating Point Unit are described on “FPU_TRAP_CON” on Page 11.
+3.12
+Accessing Core Special Function Registers (CSFRs)
+Core Special Function registers are read with a MFCR (Move From Core Register) instruction and written with a
+MTCR (Move To Core register) instruction. The need for software updates to CSFRs is usually infrequent.
+Implementations are therefore not required to implement hardware structures to avoid hazard conditions that
+may result from the update of CSFRs. Such hazard conditions are avoided by the insertion of an ISYNC instruction
+immediately after the MTCR update of the CSFR. The ISYNC instruction ensures that the effects of the CSFR
+update are correctly seen by all following instructions.
+A MTCR instruction that accesses an undefined register location will have no effect. A MFCR instruction that
+accesses an undefined register location will return undefined data.
+User Manual (Volume 1)
+3-19
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 47
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+4
+Tasks and Functions
+Most embedded and real-time control systems are designed according to a model in which interrupt handlers
+and software-managed tasks are each considered to be executing on their own ‘virtual’ microcontroller. That
+model is generally supported by the services of a Real-time Executive or Real-time Operating System (RTOS),
+layered on top of the features and capabilities of the underlying machine architecture.
+In the TriCore™ architecture, the RTOS layer can be very ‘thin’ and the hardware can efficiently handle much of
+the switching between one task and another. At the same time the architecture allows for considerable flexibility
+in the tasking model used. System designers can choose the real-time executive and software design approach
+that best suits the needs of their application, with relatively few constraints imposed by the architecture.
+The mechanisms for low-overhead task switching and for function calling within the TriCore architecture are
+closely related.
+4.1
+Context Types
+A task is an independent thread of control. The state of a task is defined by its context. When a task is interrupted,
+the processor uses that task’s context to re-enable the continued execution of the task.
+The context types are:
+•
+Upper context: Consists of the upper address registers A[10] to A[15] and the upper data registers D[8] to
+D[15]. The upper context also includes PCXI and PSW. These registers are designated as non-volatile for
+purposes of function-calling (their contents are preserved across calls).
+•
+Lower context: Consists of the lower address registers A[2] to A[7], the lower data registers D[0] to D[7], A[11]
+(Return Address) and PCXI.
+Contexts, when saved to memory, occupy 16 word blocks of storage, known as Context Save Areas (CSAs).
+User Manual (Volume 1)
+4-1
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 48
+============================================================
+Upper Context
+Example Memory
+D[15]
+Addresses
+D[14]
+803FFFFCH
+D[13]
+803FFFF8H
+D[12]
+803FFFF4H
+803FFFF0H
+A[15]
+803FFFECH
+803FFFE8H
+A[14]
+803FFFE4H
+A[13]
+803FFFE0H
+803FFFDCH
+A[12]
+803FFFD8H
+803FFFD4H
+D[11]
+803FFFD0H
+D[10]
+803FFFCCH
+803FFFC8H
+Lower Context
+D[9]
+803FFFC4H
+D[7]
+803FFFC0H
+D[8]
+D[6]
+A[11] (RA)
+-
+D[5]
+A[10] (SP)
+-
+D[4]
+PSW
+803FFB7CH
+A[7]
+PCXI (Link Word)
+803FFB78H
+A[6]
+803FFB74H
+803FFB70H
+A[5]
+803FFB6CH
+803FFB68H
+A[4]
+803FFB64H
+D[3]
+803FFB60H
+803FFB5CH
+D[2]
+803FFB58H
+803FFB54H
+D[1]
+803FFB50H
+D[0]
+803FFB4CH
+803FFB48H
+A[3]
+803FFB44H
+803FFB40H
+A[2]
+A[11] (RA)
+PCXI (Link Word)
+TC1015F
+-
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+Figure 12 
+Upper and Lower Contexts
+4.1.1
+Context Save Area
+The architecture uses linked lists of fixed-size Context Save Areas. A CSA is 16 words of memory storage, aligned
+on a 16 word boundary. Each CSA can hold exactly one upper or one lower context. CSAs are linked together
+through a Link Word.
+The Link Word includes two fields that link the given CSA to the next one in a chain. The fields are a 4-bit segment
+and a 16-bit offset. The segment number and offset are used to generate the Effective Address (EA) of the linked
+CSA. See Figure 13.
+Incrementing the pointer offset value by one always increments the EA to the address that is 16 word locations
+above the previous one. The total usable range in each address segment for CSAs is 4 MBytes, resulting in storage
+space for 216 CSAs.
+User Manual (Volume 1)
+4-2
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 49
+============================================================
+6 5
+_Link Word_
+31
+Segment
+Zero fill
+Left shift by six
+31
+22 21
+0
+Segment
+TC1016
+20 19
+Offset
+Zero fill
+28 27
+0  0  0  0  0  0
+16 15
+Offset
+0
+0  0  0  0  0  0
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+Figure 13 
+Generation of the Effective Address of a Context Save Area (CSA)
+If the CSA is in use (for example, it holds an upper or lower context image for a suspended task), then the Link
+Word also contains other information about the linked context. The entire Link Word is a copy of the PCXI register
+for the associated task.
+For further information on how linked CSAs support context switching, refer to “Context Save Areas (CSAs) and
+Context Lists” on Page 4
+4.2
+Task Switching Operation
+The architecture switches tasks when one of the events or instructions listed in Table 7, occurs. When one of
+these events or instructions is encountered, the upper or lower context of the task is saved or restored. The upper
+context is saved automatically as a result of an external interrupt, trap or function call. The lower context is saved
+explicitly through instructions. In Table 7 ‘Save’ is a store through the Free CSA List Head Pointer register (FCX)
+after the next value for the FCX is read from the Link Word. ‘Store’ is a store through the Effective Address of the
+instruction with no change to the CSA list or the FCX register. ‘Restore’ is the converse of ‘Save’. ‘Load’ is the
+converse of ‘Store’.
+There is an essential difference in the treatment of registers in the upper and lower contexts, in terms of how their
+contents are maintained. The lower context registers are similar to global registers in the sense that a interrupt
+handler, trap handler or called function, sees the same values that were present in the registers just before the
+interrupt, trap or call. Any changes made to those registers that are made in the interrupt, trap handler or called
+function, remains present after the return from the event, since they are not automatically restored as part of the
+Return From Call (RET) or Return From Exception (RFE) semantics. That means that the lower context registers
+can be used to pass arguments to called functions and pass return values from those functions. It also means that
+interrupt and trap handlers must save the original values they find in these registers before using the registers,
+and to restore the original values before exiting.
+The upper context registers are not guaranteed to be static hardware registers. Conceptually, a function call or
+interrupt handler always begins execution with its own private set of upper context registers. The upper context
+registers of the interrupted or calling function are not inherited.
+Only the A[10](SP), A[11](RA), PSW, PCXI and (in the case of a trap) D[15] registers start with architecturally
+defined values in the called function, trap handler or interrupt handler. A function, trap handler or interrupt
+handler that reads any of the other upper context registers before writing a value into it, is performing an
+undefined operation.
+User Manual (Volume 1)
+4-3
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 50
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+Table 7 
+Context Related Events and Instructions
+Event / Instruction
+Context Operation
+Interrupt
+Restore Upper
+Trap
+Restore Upper
+CALL - Function Call
+Restore Upper
+BISR - Begin Interrupt Service
+Restore Lower
+Routine
+SVLCX - Save Lower Context
+Restore Lower
+STLCX - Store Lower Context
+Load Lower
+STUCX - Store Upper Context
+Load Upper
+4.3
+Context Save Areas (CSAs) and Context Lists
+The upper and lower contexts are saved in Context Save Areas (CSAs). Unused CSAs are linked together in the Free
+Context List (FCX). CSAs that contain saved upper or lower contexts are linked together in the Previous Context
+List (PCX). The following figure (Figure 14) shows a simple configuration of CSAs within both context lists.
+CSAs in Memory
+Free Context List
+Processor
+SFRs
+CSA 3
+CSA 4
+CSA 5
+CSA 6
+FCX
+Link to 4
+Link to 5
+Link to 6
+Link
+Previous Context List
+CSA 2
+CSA 1
+PCX
+Link to 1
+Link
+TC1017
+Figure 14 
+CSAs in Context Lists
+The contents of the FCX register always points to an available CSA in the Free Context List. That CSAs Link Word
+points to the next available CSA in the free context list.
+Before an upper or lower context is saved in the first available CSA, its Link Word is read, supplying a new value
+for the FCX. To the memory subsystem, context saving is therefore a read/modify/write operation. The new value
+of FCX, which points to the next available CSA, is available immediately for subsequent upper or lower context
+saves.
+The LCX register points to one of the last CSAs in the free list and is used to recognise impending free CSA list
+depletion. If the value of FCX matches that of LCX when an operation that performs a context save is attempted,
+the operation completes and a free CSA list depletion trap (FCD) is taken on the next instruction; i.e., the return
+address of the FCD trap is the first instruction of the trap/interrupt/called routine or the instruction following an
+SVLCX or BISR instruction. See “Context Management (Trap Class 3)” on Page 8.
+The action taken by the trap handler depends on the software implementation. It might issue a system reset for
+example, if it is determined that the CSA list depletion resulted from an unrecoverable software error. Normally
+however it extends the free list, either by allocating additional memory or by terminating one or more tasks and
+reclaiming their CSA call chains. In those cases the trap handler exits with a RFE instruction.
+User Manual (Volume 1)
+4-4
+V1.2.2
+2020-01-15
+Context 
+Operation
+Complement Instruction
+Save Upper
+RFE - Return from Exception
+Save Upper
+RFE - Return from Exception
+Save Upper
+RET - Return from Call
+Save Lower
+RSLCX - Restore Lower Context
+Save Lower
+RSLCX - Restore Lower Context
+Store Lower
+LDLCX - Load Lower Context
+Store Upper
+LDUCX - Load Upper Context
+
+
+============================================================
+PAGE 51
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+The link word in the last CSA in a free context list must be set to null before it is first used. This is necessary to
+support the FCU trap. Before first use of the CSA, the PCX pointer value should be null. This is to support CSU (Call
+Stack Underflow) traps.
+The PCXI.PCX field points to the CSA where the previous context was saved. The PCXI.UL bit identifies whether
+the saved context is upper (PCXI.UL == 1) or lower (PCXI.UL == 0). If the type does not match the type expected
+when a context restore operation is performed, a CYTP exception occurs and a context management trap is
+taken.
+After the context save operation has been performed the Return Address A[11](RA) is updated:
+•
+For a call, the A[11](RA) is updated with the function return address.
+•
+For a synchronous trap, the A[11](RA) is updated with the PC of the instruction which raised the trap.
+•
+For a SYSCALL and an asynchronous trap or an interrupt, the A[11](RA) is updated with the PC of the next
+instruction to be executed.
+When a lower context save operation is performed the value of A[11](RA) is included in the saved context and is
+placed in the second word of the CSA. This A[11](RA) is correspondingly restored by a lower context restore.
+The Call Depth Control field (PSW.CDC) consists of two subfields; A call depth counter, and a mask that
+determines the width of the counter and when it overflows.
+The Call Depth Counter is incremented on calls and is restored to its previous value on returns. An exception
+occurs when the counter overflows. Its purpose is to prevent software errors from causing ‘runaway recursion’
+and depleting the CSA free list.
+4.4
+Context Switching with Interrupts and Traps
+When an interrupt or trap (for example NMI or SYSTRAP) occurs, the processor saves the upper context of the
+current task in memory, suspends execution of the current task and then starts execution of the interrupt or trap
+handler.
+If, when an interrupt or trap is taken, the processor is not using the interrupt stack (PSW.IS bit == 0), the Stack
+Pointer is then loaded with the current contents of the ISP (Interrupt Stack Pointer). The PSW.IS bit is then set to
+one (1) to indicate execution from the interrupt stack.
+The Interrupt Control Register (ICR) holds the Current CPU Priority Number (ICR.CCPN), the Interrupt Enable bit
+(ICR.IE) and Pending Interrupt Priority Number (ICR.PIPN). These fields, together with the Previous CPU Priority
+Number (PCXI.PCPN) and Previous Interrupt Enable (PCXI.PIE) are all part of the interrupt management system.
+ICR.CCPN is typically only non-zero within Interrupt Service Routines (ISRs) where it is used to order interrupt
+servicing. It is held in a register that is separate from the PSW and is not part of the context that the RTOS handles
+for switching among Software Managed Tasks (SMTs).
+PCXI.PIE is only typically zero within Trap handlers started within ISRs, e.g. an NMI or SYSTRAP occurring during
+a peripheral service request.
+For both interrupts and traps, the existing PCPN and PIE values in the current PCXI are saved in the CSA for the
+upper context, and the existing IE and CCPN values in the ICR are copied to the PCXI.PIE and PCXI.PCPN fields.
+Once the interrupt or trap is handled, the saved lower context is reloaded if necessary and execution of the
+interrupted task is resumed (RFE).
+On an interrupt or trap the upper context of the current task context is saved by hardware as an explicit part of
+the interrupt or trap sequence. For small interrupt and trap handlers that can execute entirely within this set of
+registers saved on the interrupt, no further context saving is needed. The handler can execute immediately and
+return. Typically handlers that make calls or require more registers execute the BISR (Begin Interrupt Service
+Routine) or SVLCX (Save Lower Context) instruction to save the lower context registers that were not saved as part
+of the interrupt or trap sequence. That instruction must be issued before any of the associated registers are
+modified, but it need not be the first instruction in the handler.
+User Manual (Volume 1)
+4-5
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 52
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+Interrupt handlers with critical response time requirements can perform their initial, time-critical processing
+immediately, using upper context registers. After that they can execute a BISR and continue with less time-critical
+processing. The BISR re-enables interrupts, hence its use dividing time critical from less time critical processing.
+Trap handlers typically do not have critical response time requirements, however those that can occur in an ISR
+or those which might hold off interrupts for too long can also take a similar approach to distinguish between non-
+interruptible and interruptible execution segments.
+User Manual (Volume 1)
+4-6
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 53
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+4.5
+Context Switching for Function Calls
+When a function call is made (the CALL instruction is executed), the context of the calling routine must be saved
+and then restored in order to resume the caller’s execution after return from the function.
+On a function call the entire set of upper context registers are saved by hardware. Furthermore, the saving of the
+upper context by the CALL instruction happens in parallel with the call jump. In addition, restoring the upper
+context is performed by the RET (Return) instruction and takes place in parallel with the return jump. The called
+function does not need to save and restore the caller’s context and is freed of any need to restrict its usage of the
+upper context registers. The calling and called functions must co-operate on the use of the lower context
+registers.
+4.6
+Fast Function Calls with FCALL/FRET
+In situations where the saving and restoring of the upper context registers is not required an FCALL instruction
+may be used in preference to a CALL. The FCALL instruction performs a call jump and in parallel saves the current
+return address (A11) to the stack. No other state is saved. The called function therefore starts execution with the
+same context as the caller (with the exception of A10 and A11).
+To return from a function called by an FCALL, an FRET instruction is executed. This performs a jump to the current
+return address (A11) and loads the previous A11 back from the stack. No other state is loaded. The caller function
+therefore resumes execution with a context modified by the called function. The calling and called functions
+must co-operate on the use of all registers.
+User Manual (Volume 1)
+4-7
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 54
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+4.7
+Context Save and Restore Examples
+This section provides an example of a context save operation and an example of a context restore operation.
+4.7.1
+Context Save
+Figure 15 shows the free and previous context lists for this example. The free context list (FCX) contains three free
+CSAs (3, 4, and 5), and the previous context list (PCX) contains two CSAs (2 and 1).
+The FCX points to CSA3, the first available CSA. The Link Word of CSA3 points to CSA4; the Link Word of CSA4
+points to CSA5. The PCX points to the most recently saved CSA in the previous context list. The Link Word of CSA2
+points to CSA1. CSA1 contains the saved context prior to CSA2.
+When the context save operation is performed, the first CSA in the free context list (CSA3) is pulled off and is
+placed on the front of the previous context list.
+Free Context List
+Processor
+SFRs
+CSA 3
+CSA 4
+CSA 5
+FCX
+Link to 4
+Link to 5
+Link
+Previous Context List
+CSA 2
+CSA 1
+PCX
+Link to 1
+Link
+TC1018
+Figure 15 
+CSAs and Processor State Prior to Context Save
+Figure 16 shows the steps taken during the context save operation. The numbers in the figure correspond to the
+steps listed after the figure.
+FCX
+3
+4
+PCX
+NEW_FCX
+2
+1
+CSA 3
+TC1019
+Link
+Figure 16 
+CSA and Processor SFR Updates on a Context Save Process
+1. The contents of the Link Word in CSA3 are loaded into the NEW_FCX. The NEW_FCX now points to CSA4. The
+NEW_FCX is an internal buffer and is not accessible by the user.
+2. The contents of the PCX are written into the Link Word of CSA3. The Link Word of CSA3 now points to CSA2.
+3. The contents of FCX are written into the PCX. The PCX now points to CSA3, which is at the front of the Previous
+Context List.
+User Manual (Volume 1)
+4-8
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 55
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+4. The NEW_FCX is loaded into the FCX.
+The processor SFRs and CSAs look as shown in Figure 17. The processor context to be saved is now written into
+the rest of CSA3.
+Free Context List
+Processor
+SFRs
+CSA 4
+CSA 5
+FCX
+Link to 5
+Link
+Previous Context List
+CSA 3
+CSA 2
+CSA 1
+PCX
+Link to 2
+Link to 1
+Link
+TC1020
+Figure 17 
+CSAs and Processor State After Context Save
+4.7.2
+Context Restore
+The example in Figure 18, shows the previous context list (PCX) with three CSAs (3, 2, and 1) and the free context
+list (FCX) containing two CSAs (4 and 5).
+The FCX points to CSA4, the first available CSA in the free context list. PCX points to CSA3, the most recently saved
+CSA in the previous context list.
+The Link Word of CSA3 points to CSA2; the Link Word of CSA2 points to CSA1; the Link Word of CSA4 points to
+CSA5.
+Free Context List
+Processor
+SFRs
+CSA 4
+CSA 5
+FCX
+Link to 5
+Link
+Previous Context List
+CSA 3
+CSA 2
+CSA 1
+PCX
+Link to 2
+Link to 1
+Link
+TC1021
+Figure 18 
+CSAs and Processor State Prior to Context Restore
+When the context restore operation is performed, the first CSA in the previous context list (CSA3) is pulled off and
+is placed on the front of the free context list.
+Figure 19 shows the steps taken during the context restore operation. The numbers in the figure correspond to
+the following steps:
+1. The contents of the Link Word in CSA3 are loaded into the NEW_PCX. The NEW_PCX now points to CSA2. The
+NEW_PCX is an internal buffer and is not accessible by the user.
+2. The contents of the FCX are written into the Link Word of CSA3. The Link Word of CSA3 now points to CSA4.
+User Manual (Volume 1)
+4-9
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 56
+============================================================
+PCX
+3
+FCX
+2
+CSA 3
+TC1022
+Link
+4
+NEW_PCX
+1
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+3. The contents of the PCX are written into the FCX. The FCX now points to CSA3, which is at the front of the free
+context list.
+4. The NEW_PCX is loaded into the PCX.
+Figure 19 
+CSA and Processor SFR Updates on a Context Restore Process
+The processor SFRs and CSAs now look as shown in Figure 20. The restored context is then written into the upper
+or lower context registers.
+Free Context List
+Processor
+SFRs
+CSA 3
+CSA 4
+CSA 5
+FCX
+Link to 4
+Link to 5
+Link
+Previous Context List
+CSA 2
+CSA 1
+PCX
+Link to 1
+Link
+TC1023
+Figure 20 
+CSAs and Processor State After Context Restore
+User Manual (Volume 1)
+4-10
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 57
+============================================================
+6 5
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+4.8
+Context Management Registers
+The three context management registers are pointers that are used during context save and restore operations.
+•
+FCX: Free CSA List Head PointerPage 12.
+•
+PCX: Previous Context PointerPage 13.
+•
+LCX: Free CSA List Limit PointerPage 14.
+Each pointer consists of two fields:
+•
+A16-bit offset.
+•
+A 4-bit segment specifier.
+Table 21 shows how the effective address of a Context Save Area (CSA) is generated using these two fields. A
+Context Save Area is an address range containing 16 word locations (64 bytes), which is the space required to save
+one upper or one lower context. Incrementing the pointer offset value by one always increments the Effective
+Address (EA) to the address that is 16 word locations above the previous one. The total usable range in each
+address segment for CSAs is 4 MBytes, resulting in storage space for 64 KByte CSAs.
+_Link Word_
+31
+20 19
+16 15
+0
+Segment
+Offset
+Zero fill
+Left shift by six
+Zero fill
+31
+28 27
+22 21
+0
+Segment
+0  0  0  0  0  0
+Offset
+0  0  0  0  0  0
+TC1016
+Figure 21 
+Generation of the Effective Address of a Context Save Area (CSA)
+Note:
+See “Context Save Area” on Page 2 for additional constraints on the Effective Address (EA).
+User Manual (Volume 1)
+4-11
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 58
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+4.8.1
+Registers
+Free CSA List Head Pointer Register (FCX)
+The Free CSA List Head Pointer (FCX) register holds the free CSA list head pointer. This always points to an
+available CSA.
+FCX
+Free CSA List Head Pointer
+(FE38H)
+Reset Value: Implementation Specific
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+-
+rw
+15
+14
+13
+12
+11
+10
+19
+8
+7
+6
+5
+4
+3
+2
+1
+0
+FCXO
+rw
+Field
+Description
+RES
+Reserved
+FCXS
+FCX Segment Address
+Used in conjunction with the FCXO field.
+FCXO
+FCX Offset Address
+The FCXO and FCXS fields together form the FCX pointer, which points to the
+next available CSA.
+User Manual (Volume 1)
+4-12
+V1.2.2
+2020-01-15
+RES
+FCXS
+Bits
+Type
+[31:20]
+-
+[19:16]
+rw
+[15:0]
+rw
+
+
+============================================================
+PAGE 59
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+Previous Context Pointer Register (PCX)
+The Previous Context Pointer (PCX) holds the address of the CSA of the previous task. The PCX is part of the PCXI
+register.
+PCX
+Previous Context Pointer Register
+(FE00H)
+Reset Value: Implementation Specific
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+-
+rw
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+PCXO
+rw
+Field
+Description
+RES
+Reserved
+PCXS
+Previous Context Pointer Segment Address
+This field is used in conjunction with the PCXO field.
+PCXO
+Previous Context Pointer Offset
+The PCXO and PCXS fields form the pointer PCX, which points to the CSA of
+the previous context.
+User Manual (Volume 1)
+4-13
+V1.2.2
+2020-01-15
+RES
+PCXS
+Bits
+Type
+[31:20]
+-
+[19:16]
+rw
+[15:0]
+rw
+
+
+============================================================
+PAGE 60
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+4.8.2
+Free CSA List Limit Pointer Register (LCX)
+The free CSA List Limit Pointer (LCX) register is used to recognize impending free CSA list depletion. If a context
+save operation occurs and the value of FCX matches LCX then the ‘free context depletion’ condition is recognized,
+which triggers an FCD trap immediately after completion of the operation causing the context save; i.e. the return
+address of the FCD trap is the first instruction of the trap/interrupt/called routine, or the instruction following an
+SVLCX or BISR instruction.
+Note:
+Please refer to the FCD trap description for details on the use and setting of LCX. See “FCD - Free
+Context list Depletion (TIN 1)” on Page 8.
+Free CSA List Limit Pointer Register (LCX)
+LCX
+Free CSA List Limit Pointer
+(FE3CH)
+Reset Value: Implementation Specific
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+-
+rw
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+LCXO
+rw
+Field
+Description
+RES
+Reserved
+LCXS
+LCX Segment Address
+This field is used in conjunction with the LCXO field.
+LCXO
+LCX Offset
+The LCXO and LCXS fields form the pointer LCX, which points to the last
+available CSA.
+User Manual (Volume 1)
+4-14
+V1.2.2
+2020-01-15
+RES
+LCXS
+Bits
+Type
+[31:20]
+-
+[19:16]
+rw
+[15:0]
+rw
+
+
+============================================================
+PAGE 61
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Tasks and Functions
+4.9
+Accessing CSA Memory Locations
+Implementations may internally buffer context information to increase performance. To ensure memory
+coherency, a DSYNC instruction must be executed prior to any access to an active CSA memory location. The
+DSYNC instruction forces all internally buffered CSA register state to be written to memory.
+4.10
+Context Save Area Placement
+Context Save Areas (CSAs) may not be placed in memory segments which have the peripheral space attribute
+(Section 1.2.1), or in memory areas that undergo address translation (if an MMU is present and enabled).
+Note:
+Individual TriCore implementations may place additional restrictions on CSA placement. Such
+restrictions will be detailed in the documentation accompanying a specific TriCore product.
+User Manual (Volume 1)
+4-15
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 62
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+5
+Interrupt System
+In a TriCore™ system, multiple sources such as peripherals or external interrupts can generate interrupt requests
+to interrupt service providers such as CPUs or a DMA channels. This chapter describes the interrupt processing
+capabilities of the CPU including the interrupt prioritisation scheme and access to the vector table.
+5.1
+General Operation
+Each interrupt source is assigned a unique interrupt priority number known as the Service Request Priority
+Number (SRPN). On receipt of an interrupt request from an interrupt source the SRPN is used by the Interrupt
+Control Unit (ICU) to prioritise between multiple concurrent interrupt requests. The SRPN of the winning request
+is supplied to the CPU as a Pending Interrupt Priority Number (PIPN) along with an request trigger. The CPU
+decides whether to accept a requested interrupt by comparing the PIPN with its Current CPU Priority Number
+(CCPN). If the CPU decides to accept the requested interrupt it responds with an Interrupt Acknowledge and the
+returns the priority number of the taken interrupt. The ICU will then clear down the requesting interrupt source.
+5.1.1
+ICU Interrupt Control Register (ICR)
+The ICU Interrupt Control Register (ICR) holds the Current CPU Priority Number (CCPN), the global Interrupt
+enable/disable bit (IE) and the current Pending Interrupt Priority Number (PIPN).
+5.1.2
+CPU operation on an interrupt request
+The CPU checks the state of the global interrupt enable bit ICR.IE, and compares the current CPU priority number
+ICR.CCPN against the PIPN. The CPU can be interrupted only if ICR.IE == 1 and PIPN is greater than CCPN. If this is
+true the CPU can enter the service routine. The PIPN is used to determine the interrupt vector table entry point
+and acknowledges the ICU, which in turn sends acknowledgement back to the pending interrupt request.
+Several conditions could block the CPU from immediately responding to the interrupt request generated by the
+ICU. These are:
+•
+The interrupt system is globally disabled (ICR.IE == 0).
+•
+The current CPU priority (CCPN), is equal to or higher than the Pending Interrupt Priority Number (PIPN).
+•
+The CPU is in the process of entering an interrupt or trap service routine.
+•
+The CPU is operating on non-interruptible trap services.
+•
+The CPU is executing a multi-cycle instruction.
+•
+The CPU is executing an instruction which modifies the ICR.
+The CPU responds to the interrupt request only when these conditions are no longer true.
+5.1.3
+Entering an Interrupt Service Routine (ISR)
+When all conditions are clear for the CPU to service an interrupt request, the following actions are performed to
+enter an Interrupt Service Routine (ISR):
+•
+The upper context of the current task is saved.
+•
+The Return Address (A[11]) is updated with the current PC.
+•
+If the processor was not previously using the interrupt stack (PSW.IS = 0), then the A[10] Stack Pointer is set to
+the interrupt stack pointer (ISP). The stack pointer bit is then set for using the interrupt stack: PSW.IS = 1.
+•
+The I/O mode is set to Supervisor mode, which means all permissions are enabled: PSW.IO = 10B.
+•
+The current Protection Register Set is set to 0: PSW.PRS = 000B.
+•
+The Call Depth Counter (PSW.CDC) is cleared, and the call depth limit selector is set for 64:
+PSW.CDC = 0000000B.
+User Manual (Volume 1)
+5-1
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 63
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+•
+Call Depth Counter is enabled, PSW.CDE = 1.
+•
+PSW Safety bit is set to value defined in the SYSCON register. PSW.S = SYSCON.IS.
+•
+Write permission to global registers A[0], A[1], A[8], A[9] is disabled: PSW.GW = 0.
+•
+The interrupt system is globally disabled: ICR.IE = 0. The old ICR.IE is saved into PCXI.PIE.
+•
+The Current CPU Priority Number (ICR.CCPN) is saved into the Previous CPU Priority Number (PCXI.PCPN)
+field.
+•
+The Pending Interrupt Priority Number (ICR.PIPN) is saved into the Current CPU Priority Number (ICR.CCPN)
+field.
+•
+The interrupt vector table is accessed to fetch the first instruction of the ISR.
+Note:
+Global register write permission is disabled (PSW.GW == 0) whenever an Interrupt Service Routine or
+trap handler is entered. This ensures that all traps and interrupts must assume they do not have write
+access to the registers controlled by PSW.GW by default.
+An Interrupt Service Routine is entered with the interrupt system globally disabled and the current CPU priority
+(CCPN) set to the priority (PIPN) of the interrupt being serviced. It is up to the user to enable the interrupt system
+again and optionally modify the priority number CCPN to implement interrupt priority levels or handle special
+cases. See “Using the TriCore Interrupt System” on Page 5.
+The interrupt system can be enabled with the ENABLE instruction. ENABLE sets ICR.IE = 1 (interrupt system
+enabled). The BISR (Begin Interrupt Service Routine) instruction also enables the interrupt system, sets the
+ICR.CCPN to a new value, and saves the lower context of the interrupted task. The interrupt enable bit (ICR.IE) and
+current CPU priority number (ICR.CCPN) can also be modified with the MTCR (Move To Core Register) instruction.
+The ENABLE, BISR, and DISABLE (disable interrupts) instructions are all executed such that the CPU is blocked
+from taking interrupt requests until the instruction is completely finished. This avoids pipeline side effects and
+eliminates the need for an ISYNC (synchronize instruction stream) following these instructions. MTCR is an
+exception and must be followed by an ISYNC instruction.
+5.2
+Exiting an Interrupt Service Routine (ISR)
+When an ISR exits with an RFE (Return From Exception) instruction, the hardware automatically restores the
+upper context. The upper context includes the PCXI register which holds the Previous CPU Priority Number
+(PCPN) and the Previous Global Interrupt Enable Bit (PIE). The values in these respective bits are used as follows:
+•
+PCXI.PCPN is written to ICR.CCPN to set the CPU priority number to the value before interruption.
+•
+PCXI.PIE is written to ICR.IE to restore the state of this bit.
+The interrupted routine then continues.
+5.3
+Interrupt Vector Table
+Interrupt Service Routines are associated with interrupts at a particular priority by way of the Interrupt Vector
+Table. The Interrupt Vector Table is an array of Interrupt Service Routine (ISR) entry points. The Interrupt Vector
+Table is stored in memory.
+When the CPU takes an interrupt, it calculates an address in the Interrupt Vector Table that corresponds with the
+priority of the interrupt (the ICR.PIPN bit field). This address is loaded in the program counter. The CPU begins
+executing instructions at this address in the Interrupt Vector Table. The code at this address is the start of the
+selected Interrupt Service Routine (ISR). Depending on the code size of the ISR, the Interrupt Vector Table may
+only store the initial portion of the ISR, such as a jump instruction that vectors the CPU to the rest of the ISR
+elsewhere in memory.
+User Manual (Volume 1)
+5-2
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 64
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+The Base of Interrupt Vector Table register (BIV) stores the base address of the Interrupt Vector Table. Interrupt
+vectors are ordered in the table by increasing priority. The BIV register can be modified using the MTCR
+instruction during the initialization phase of the system (the BIV is ENDINIT protected), before interrupts are
+enabled. With this arrangement, it is possible to have multiple Interrupt Vector Tables and switch between them
+by changing the contents of the BIV register.
+When interrupted, the CPU calculates the entry point of the appropriate Interrupt Service Routine from the PIPN
+and the contents of the BIV register. Two vector table configurations are available with either 32 byte to 8 byte
+spacing between vectors. The spacing is selected by the Vector Size Select (VSS) bit of the BIV register.
+To generate a pointer into the Interrupt vector table the PIPN is left-shifted by either five bits (VSS=0), or three bits
+(VSS=1) and ORed with the address in the BIV register to generate a pointer into the Interrupt Vector Table.
+Execution of the ISR begins at this address. Due to this operation, it is recommended that bits [14:5] (VSS=0) or
+bits[12:3] (VSS=1) of register BIV are set to 0.
+if (BIV.VSS == 1’b0)
+ISR_Entry_PC = {BIV[31:1],1’b0} | {PIPN<<5};
+else
+ISR_Entry_PC = {BIV[31:1],1’b0} | {PIPN<<3};
+If an interrupt handler is very short it may fit entirely within the words available in the vector code segment.
+Otherwise the code stored at the entry location can either span several vector entries, or should contain some
+initial instructions followed by a jump to the rest of the handler. See “Spanning Interrupt Service Routines
+across Vector Entries” on Page 5
+Interrupt Vector
+Table
+Priority Number
+8 Words
+PN = 255
+8 Words
+PN = 5
+Service
+PN = 4
+Routine
+(may not be used
+may span
+if spanned by ISR
+several
+with PN = 2)
+PN = 3
+entries
+PN = 2
+8 Words
+PN = 1
+8 Words
+BIV
+PN = 0 (never used)
+TC1025D
+Figure 22 
+Interrupt Vector Table (VSS=0)
+User Manual (Volume 1)
+5-3
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 65
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+The BIV register allows the interrupt vector table to be located anywhere in the available code memory. The
+default on power-up is implementation specific. The BIV register can be written to using the MTCR instruction
+during the initialization phase of the system, before interrupts are enabled. It is also possible to have multiple
+interrupt vector tables and switch between them simply by modifying the contents of the BIV register.
+User Manual (Volume 1)
+5-4
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 66
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+5.4
+Using the TriCore Interrupt System
+The following sections contain examples showing how the TriCore architectures flexible interrupt system can be
+used to solve both typical and special application requirements.
+5.4.1
+Spanning Interrupt Service Routines across Vector Entries
+Because vector entries are not tied to the interrupt source, it is easy to span Interrupt Service Routines (ISRs)
+across vector entry locations, as shown previously in Figure 22 Page 3. Spanning eliminates the need of a jump
+to the rest of the interrupt handler if it would not fit into the available eight words between entry locations.
+Note that priority numbers relating to entries occupied by a spanned service routine must not be used for any of
+the active Service Request Nodes (SRNs) which request service from the same service provider.
+In Figure 22Page 3, vector locations three and four are covered through the service routine for entry two.
+Therefore these numbers must not be assigned to SRNs requesting CPU service, although they can be used to
+request another service provider. The next available vector entry is now entry five.
+Use of this technique increases the range of priority numbers required in a given system, but the size of the vector
+table must be adjusted accordingly.
+5.4.2
+Interrupt Priority Groups
+Interrupt priority groups describe a set of interrupts which cannot interrupt each others service routine. These
+groups are easily created with the TriCore interrupt system architecture.
+When the CPU starts the service of an interrupt, the interrupt system is globally disabled and the CPU priority
+CCPN is set to the priority of the interrupt being serviced. This blocks all further interrupts from being serviced
+until the interrupt system is either enabled again through software, or the service routine is terminated with the
+RFE (Return From Exception) instruction.
+Note:
+The RFE instruction automatically re-installs the previous state of the ICR.IE bit. This will be one
+(ICE.IE = 1), otherwise that interrupt would not have been serviced.
+When Interrupt Service Routine (ISR) software enables the interrupt system again by setting ICR.IE without
+changing the CCPN, the effect is that all interrupt requests with the same or lower priority than the CCPN are still
+blocked from being serviced. This includes a re-occurrence of the current interrupt; i.e. it can not interrupt this
+service.
+However this ISR will be interrupted by each request which has a higher priority number than the CCPN. A
+potential problem (that is easily overcome in the TriCore architecture) is that application requirements often
+require interrupt requests of similar significance to be grouped together in such a way that no request in that
+group can interrupt the ISR of another member of the same group.
+Creating these Interrupt Priority Groups is easily accomplished in the interrupt system. For a defined group of
+interrupt requests, the software of their respective service routines sets the CCPN to the number of the highest
+SRPN used in that group, before enabling the interrupt system again. Figure 23 shows an example.
+User Manual (Volume 1)
+5-5
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 67
+============================================================
+Interrupt Vector Table
+PN = 255
+PN = 18
+PN = 17
+PN = 16
+Priority
+PN = 15
+Group 2
+PN = 14
+PN = 13
+PN = 12
+Priority
+PN = 11
+Group 1
+PN = 10
+TC1026C
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+Figure 23 
+Interrupt Priority Groups
+The interrupt requests with the priority numbers 11 and 12 form one group while the requests with priority
+numbers 14 to 17 inclusive form another group. Every time one of the interrupts from group one is serviced, the
+service routine sets the CCPN to 12, the highest number in that group, before re-enabling the interrupt system.
+Every time one of the interrupts from group two is serviced, the service routine sets the CCPN to 17 before re-
+enabling the interrupt system. If interrupt 14 is serviced for example, it can only be interrupted by requests with
+a priority number higher than 17, but not through a request from its own priority group or requests with lower
+priority.
+One can see the flexibility of this system and its superiority over systems with fixed priority levels. In the example
+above, the interrupt request with priority number 13 forms its own single member ‘group’. Setting the CCPN to
+the maximum number 255 in each service routine has the same effect as not enabling the interrupt system again;
+i.e. all interrupt requests can be considered to be in one group.
+The flexibility for interrupt priority levels ranges from all interrupts being in one group, to each interrupt request
+building its own group, and all possible combinations in between.
+5.4.3
+Dividing ISRs into Different Priorities
+Interrupt Service Routines can be easily divided into parts with different priorities. For example, an interrupt is
+placed on a very high priority because response time and reaction to an event is critical, but further operations in
+that service routine can run on a lower priority. In this instance the service routine would be divided into two
+parts, one containing the critical actions, the other part the less critical ones.
+The priority of the interrupt node is first set to the high priority, so that when the interrupt occurs the necessary
+actions are carried out immediately. The priority level of this interrupt is then lowered and the interrupt request
+bit is set again via software (indicating a pending interrupt) while still in the service routine. Returning to the
+interrupted program terminates the high priority service routine. The pending interrupt is serviced when the CPU
+User Manual (Volume 1)
+5-6
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 68
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+priority is lower than its own priority. After entering the service routine, which is now at a different address in the
+program memory, the outstanding but low-priority actions of the interrupt are performed.
+In other instances the priority of a service request might be low because the response time to an event is not
+critical, but once it has been granted service it should not be interrupted. To prevent any interruption the TriCore
+architecture allows the priority level of the service request to be raised within the ISR, and also allows interrupts
+to be completely disabled.
+5.4.4
+Using Different Priorities for the Same Interrupt Source
+For some applications the priority of an interrupt request in relation to other requests is not fixed, but depends
+on the current situation in the system. This can be achieved simply by assigning different Service Request Priority
+Numbers (SRPNs) at different times to an interrupt source depending on the application needs. Usually the ISR
+for that interrupt executes different code depending on its priority.
+In traditional interrupt systems, the ISR would have to check the current priority of that interrupt request and
+perform a branch to the appropriate code section, causing a delay in the response to the request. In the TriCore
+system however, the interrupt will automatically have different vector entries for the different priorities. An extra
+check and branch in the ISR is not necessary, therefore the interrupt latency is reduced.
+In case the ISR is independent of the interrupt’s priority, branches need to be placed to the common ISR code on
+each of the vector entries for that interrupt.
+Note:
+The use of different priority numbers for one interrupt has to be taken into consideration when creating
+the vector table.
+User Manual (Volume 1)
+5-7
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 69
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+5.4.5
+Interrupt Control Registers
+Two CSFRs support interrupt handling:
+•
+ICR: Interrupt Control RegisterPage 8
+•
+BIV: Base Interrupt Vector Table PointerPage 10
+The ICR holds the Current CPU Priority Number (CCPN), the enable/disable bit for the Interrupt System (IE), the
+Pending Interrupt Priority Number (PIPN), and an implementation specific control for the interrupt arbitration
+scheme. The BIV register holds the base addresses for the interrupt vector tables. Special instructions control the
+enabling and disabling of the interrupt system. For more information see “Interrupt System” on Page 1.
+ICU Interrupt Control Register (ICR)
+The ICU Interrupt Control register is defined as follows:
+ICR
+ICU Interrupt Control 
+(FE2CH)
+Reset Value: 0000 0000H
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+-
+rh
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+rwh
+-
+rwh
+Field
+Function
+RES
+Reserved
+PIPN
+Pending Interrupt Priority Number
+A read-only bit field that is updated by the ICU at the end of each interrupt
+arbitration process. It indicates the priority number of the pending service
+request. ICR.PIPN is set to 0 when no request is pending, and at the
+beginning of each new arbitration process.
+00H : No valid pending request.
+01H : Request pending, lowest priority.
+…
+FFH : Request pending, highest priority.
+IE
+Global Interrupt Enable Bit
+The interrupt enable bit globally enables the CPU service request system.
+Whether a service request is delivered to the CPU depends on the individual
+Service Request Enable Bits (SRE) in the SRNs, and the current state of the
+CPU.
+ICR.IE is automatically updated by hardware on entry and exit of an
+Interrupt Service Routine (ISR). ICR.IE is cleared to 0 when an interrupt is
+taken, and is restored to the previous value when the ISR executes an RFE
+instruction to terminate itself. ICR.IE can also be updated through the
+execution of the ENABLE, DISABLE, MTCR, and BISR instructions.
+0 : Interrupt system is globally disabled.
+1 : Interrupt system is globally enabled.
+User Manual (Volume 1)
+5-8
+V1.2.2
+2020-01-15
+RES
+PIPN
+IE
+RES
+CCPN
+Bits
+Type
+[31:24]
+-
+[23:16]
+rh
+15
+rwh
+
+
+============================================================
+PAGE 70
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Interrupt System
+Field
+Function
+RES
+Reserved Field
+CCPN
+Current CPU Priority Number
+The Current CPU Priority Number (CCPN) bit field indicates the current
+priority level of the CPU. It is automatically updated by hardware on entry or
+exit of Interrupt Service Routines (ISRs) and through the execution of a BISR
+instruction. CCPN can also be updated through an MTCR instruction.
+User Manual (Volume 1)
+5-9
+V1.2.2
+2020-01-15
+Bits
+Type
+[14:8]
+-
+[7:0]
+rwh
+

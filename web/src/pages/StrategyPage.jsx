@@ -17,7 +17,7 @@ import {
   Lightbulb,
   Globe,
 } from 'lucide-react';
-import PasswordGate from '../components/PasswordGate';
+import PasswordGate, { ACCESS_TIERS } from '../components/PasswordGate';
 
 // Strategy document sections
 const STRATEGY_DOCS = [
@@ -538,11 +538,7 @@ function StrategyContent() {
 
 export default function StrategyPage() {
   return (
-    <PasswordGate
-      password="silenus"
-      storageKey="ek_strategy_unlocked"
-      title="Strategy HQ"
-    >
+    <PasswordGate tier={ACCESS_TIERS.INVESTOR}>
       <StrategyContent />
     </PasswordGate>
   );

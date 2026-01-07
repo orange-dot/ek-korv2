@@ -18,7 +18,7 @@ import {
   Brain,
   ArrowLeftRight,
 } from 'lucide-react';
-import PasswordGate from '../components/PasswordGate';
+import PasswordGate, { ACCESS_TIERS } from '../components/PasswordGate';
 
 // Initialize mermaid with dark theme
 mermaid.initialize({
@@ -751,12 +751,7 @@ export default function V2GControlPage() {
   const { t } = useTranslation();
 
   return (
-    <PasswordGate
-      password="ek3"
-      storageKey="ek_v2g_unlocked"
-      title="V2G Control System"
-      subtitle={t('passwordGate.subtitle', 'Enter password to access')}
-    >
+    <PasswordGate tier={ACCESS_TIERS.PARTNER}>
       <V2GContent />
     </PasswordGate>
   );

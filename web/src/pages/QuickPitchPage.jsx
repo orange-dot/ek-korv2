@@ -18,6 +18,7 @@ import {
   Ship,
   Bike,
   Car,
+  Bus,
   FileText,
   Calendar,
   Euro,
@@ -47,6 +48,17 @@ const SCALE_ITEMS = [
 // Tech pillars for 2min+ view
 const TECH_PILLARS = [
   {
+    id: 'fleet',
+    icon: Bus,
+    color: 'green',
+    title: 'FLEET',
+    titleSr: 'FLOTA',
+    desc: 'Self-Healing Network',
+    descSr: 'Samoizlečiva Mreža',
+    detail: 'Buses carry spares, zero truck rolls',
+    detailSr: 'Autobusi nose rezerve, nula izlazaka',
+  },
+  {
     id: 'jezgro',
     icon: Cpu,
     color: 'purple',
@@ -71,13 +83,13 @@ const TECH_PILLARS = [
   {
     id: 'robots',
     icon: Bot,
-    color: 'green',
+    color: 'orange',
     title: 'ROBOTS',
     titleSr: 'ROBOTI',
     desc: 'A + B Coordination',
     descSr: 'A + B Koordinacija',
-    detail: '60s swap, zero downtime',
-    detailSr: '60s zamena, nula zastoja',
+    detail: '60s swap, no technicians',
+    detailSr: '60s zamena, bez tehničara',
   },
 ];
 

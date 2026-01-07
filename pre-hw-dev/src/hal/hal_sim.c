@@ -1,44 +1,41 @@
 /**
  * @file hal_sim.c
- * @brief JEZGRO HAL - Simulation Implementation (PC)
+ * @brief ek-kor HAL - Simulation Implementation (PC)
  *
  * This HAL implementation runs on a host PC for testing
  * without actual hardware.
  */
 
-#ifdef JEZGRO_SIM
-
-#include "hal.h"
+#include <ek-kor/hal.h>
+#include <ek-kor/config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
+#include <intrin.h>
 #else
 #include <unistd.h>
 #include <sys/time.h>
 #endif
 
-/*===========================================================================*/
-/* Private Data                                                              */
-/*===========================================================================*/
+/* ==========================================================================
+ * Private Data
+ * ========================================================================== */
 
-static uint64_t start_time_us = 0;
+static uint64_t g_start_time_us = 0;
+static volatile uint32_t g_tick_count = 0;
+static volatile uint32_t g_critical_nesting = 0;
+static volatile uint32_t g_interrupt_state = 1;
+static ekk_hal_systick_cb_t g_tick_callback = NULL;
 
-/* Simulated CAN message queue */
-#define SIM_CAN_QUEUE_SIZE 32
-static struct {
-    hal_can_msg_t msgs[SIM_CAN_QUEUE_SIZE];
-    int head;
-    int tail;
-    int count;
-} sim_can_rx[4];
-
-/*===========================================================================*/
-/* Helper Functions                                                          */
-/*===========================================================================*/
+/* ==========================================================================
+ * Helper Functions
+ * ========================================================================== */
 
 static uint64_t get_realtime_us(void)
 {
@@ -54,52 +51,120 @@ static uint64_t get_realtime_us(void)
 #endif
 }
 
-/*===========================================================================*/
-/* System Initialization                                                     */
-/*===========================================================================*/
+/* ==========================================================================
+ * Initialization
+ * ========================================================================== */
 
-int hal_init(void)
+int ekk_hal_init(void)
 {
-    printf("[HAL-SIM] Initializing simulation HAL\n");
-
-    start_time_us = get_realtime_us();
-
-    /* Initialize CAN queues */
-    memset(sim_can_rx, 0, sizeof(sim_can_rx));
-
-    printf("[HAL-SIM] HAL initialized (platform: %s)\n", HAL_PLATFORM_NAME);
+    printf("[EK-KOR HAL-SIM] Initializing simulation HAL\n");
+    g_start_time_us = get_realtime_us();
+    g_tick_count = 0;
+    g_critical_nesting = 0;
+    g_interrupt_state = 1;
+    printf("[EK-KOR HAL-SIM] HAL initialized\n");
     return 0;
 }
 
-const char *hal_get_platform(void)
+int ekk_hal_init_core(uint32_t core_id)
 {
-    return HAL_PLATFORM_NAME;
+    (void)core_id;
+    return 0;
 }
 
-void hal_reset(void)
+/* ==========================================================================
+ * Core Identification
+ * ========================================================================== */
+
+uint32_t ekk_hal_get_core_id(void)
 {
-    printf("[HAL-SIM] System reset requested\n");
-    exit(0);
+    return 0;
 }
 
-/*===========================================================================*/
-/* Timing                                                                    */
-/*===========================================================================*/
-
-uint64_t hal_get_time_us(void)
+uint32_t ekk_hal_get_core_count(void)
 {
-    return get_realtime_us() - start_time_us;
+    return 1;
 }
 
-uint32_t hal_get_time_ms(void)
+bool ekk_hal_is_boot_core(void)
 {
-    return (uint32_t)(hal_get_time_us() / 1000);
+    return true;
 }
 
-void hal_delay_us(uint32_t us)
+/* ==========================================================================
+ * Interrupt Control
+ * ========================================================================== */
+
+uint32_t ekk_hal_disable_interrupts(void)
+{
+    uint32_t prev = g_interrupt_state;
+    g_interrupt_state = 0;
+    return prev;
+}
+
+void ekk_hal_enable_interrupts(void)
+{
+    g_interrupt_state = 1;
+}
+
+void ekk_hal_restore_interrupts(uint32_t state)
+{
+    g_interrupt_state = state;
+}
+
+bool ekk_hal_interrupts_enabled(void)
+{
+    return g_interrupt_state != 0;
+}
+
+/* ==========================================================================
+ * Critical Sections
+ * ========================================================================== */
+
+uint32_t ekk_hal_enter_critical(void)
+{
+    ekk_hal_disable_interrupts();
+    return ++g_critical_nesting;
+}
+
+uint32_t ekk_hal_exit_critical(void)
+{
+    if (g_critical_nesting > 0) {
+        g_critical_nesting--;
+    }
+    if (g_critical_nesting == 0) {
+        ekk_hal_enable_interrupts();
+    }
+    return g_critical_nesting;
+}
+
+bool ekk_hal_in_critical(void)
+{
+    return g_critical_nesting > 0;
+}
+
+/* ==========================================================================
+ * Time Functions
+ * ========================================================================== */
+
+uint32_t ekk_hal_get_time_us(void)
+{
+    return (uint32_t)(get_realtime_us() - g_start_time_us);
+}
+
+uint32_t ekk_hal_get_time_ms(void)
+{
+    return ekk_hal_get_time_us() / 1000;
+}
+
+uint64_t ekk_hal_get_time_us64(void)
+{
+    return get_realtime_us() - g_start_time_us;
+}
+
+void ekk_hal_delay_us(uint32_t us)
 {
 #ifdef _WIN32
-    /* Windows doesn't have usleep, use Sleep for ms granularity */
     if (us >= 1000) {
         Sleep(us / 1000);
     }
@@ -108,7 +173,7 @@ void hal_delay_us(uint32_t us)
 #endif
 }
 
-void hal_delay_ms(uint32_t ms)
+void ekk_hal_delay_ms(uint32_t ms)
 {
 #ifdef _WIN32
     Sleep(ms);
@@ -117,220 +182,180 @@ void hal_delay_ms(uint32_t ms)
 #endif
 }
 
-int hal_systick_init(uint32_t tick_hz)
+/* ==========================================================================
+ * System Tick
+ * ========================================================================== */
+
+int ekk_hal_systick_init(ekk_hal_systick_cb_t callback)
 {
-    printf("[HAL-SIM] SysTick configured for %u Hz\n", tick_hz);
+    g_tick_callback = callback;
+    printf("[EK-KOR HAL-SIM] SysTick initialized at %d Hz\n", EKK_TICK_FREQ_HZ);
     return 0;
 }
 
-/*===========================================================================*/
-/* Interrupts (simulated)                                                    */
-/*===========================================================================*/
-
-static uint32_t interrupt_state = 1; /* 1 = enabled */
-
-uint32_t hal_disable_interrupts(void)
+uint32_t ekk_hal_get_tick_count(void)
 {
-    uint32_t prev = interrupt_state;
-    interrupt_state = 0;
-    return prev;
+    return g_tick_count;
 }
 
-void hal_enable_interrupts(void)
+uint32_t ekk_hal_get_tick_period_us(void)
 {
-    interrupt_state = 1;
+    return EKK_TICK_PERIOD_US;
 }
 
-void hal_restore_interrupts(uint32_t state)
+/* Call this periodically from main loop in simulation */
+void ekk_hal_sim_tick(void)
 {
-    interrupt_state = state;
-}
-
-/*===========================================================================*/
-/* MPU (simulated)                                                           */
-/*===========================================================================*/
-
-static hal_mpu_region_t mpu_regions[16];
-static bool mpu_enabled = false;
-
-int hal_mpu_init(void)
-{
-    printf("[HAL-SIM] MPU initialized (simulated)\n");
-    memset(mpu_regions, 0, sizeof(mpu_regions));
-    return 0;
-}
-
-int hal_mpu_configure_region(const hal_mpu_region_t *region)
-{
-    if (region == NULL || region->region_num >= 16) {
-        return -1;
+    g_tick_count++;
+    if (g_tick_callback) {
+        g_tick_callback();
     }
-
-    mpu_regions[region->region_num] = *region;
-    printf("[HAL-SIM] MPU region %d: base=0x%08X, size=%u\n",
-           region->region_num, region->base_addr, region->size);
-
-    return 0;
 }
 
-void hal_mpu_enable(void)
+/* ==========================================================================
+ * Context Switching
+ * ========================================================================== */
+
+void ekk_hal_trigger_context_switch(void)
 {
-    mpu_enabled = true;
-    printf("[HAL-SIM] MPU enabled\n");
+    /* In simulation, context switch is handled by scheduler */
 }
 
-void hal_mpu_disable(void)
+void ekk_hal_start_first_task(void *stack_ptr, void (*entry)(void))
 {
-    mpu_enabled = false;
-    printf("[HAL-SIM] MPU disabled\n");
-}
-
-/*===========================================================================*/
-/* CAN-FD (simulated with loopback)                                          */
-/*===========================================================================*/
-
-int hal_can_init(uint8_t instance, uint32_t bitrate, uint32_t data_bitrate)
-{
-    if (instance >= 4) return -1;
-
-    printf("[HAL-SIM] CAN%d initialized: %u/%u bps\n",
-           instance, bitrate, data_bitrate);
-
-    memset(&sim_can_rx[instance], 0, sizeof(sim_can_rx[instance]));
-    return 0;
-}
-
-int hal_can_send(uint8_t instance, const hal_can_msg_t *msg)
-{
-    if (instance >= 4 || msg == NULL) return -1;
-
-    printf("[HAL-SIM] CAN%d TX: ID=0x%03X, len=%d, data=[",
-           instance, msg->id, msg->len);
-    for (int i = 0; i < msg->len && i < 8; i++) {
-        printf("%02X ", msg->data[i]);
+    (void)stack_ptr;
+    printf("[EK-KOR HAL-SIM] Starting first task\n");
+    if (entry) {
+        entry();
     }
-    printf("]\n");
-
-    /* Loopback: put in RX queue for testing */
-    if (sim_can_rx[instance].count < SIM_CAN_QUEUE_SIZE) {
-        sim_can_rx[instance].msgs[sim_can_rx[instance].tail] = *msg;
-        sim_can_rx[instance].tail =
-            (sim_can_rx[instance].tail + 1) % SIM_CAN_QUEUE_SIZE;
-        sim_can_rx[instance].count++;
-    }
-
-    return 0;
 }
 
-int hal_can_receive(uint8_t instance, hal_can_msg_t *msg)
-{
-    if (instance >= 4 || msg == NULL) return -1;
-
-    if (sim_can_rx[instance].count == 0) {
-        return -1; /* No message */
-    }
-
-    *msg = sim_can_rx[instance].msgs[sim_can_rx[instance].head];
-    sim_can_rx[instance].head =
-        (sim_can_rx[instance].head + 1) % SIM_CAN_QUEUE_SIZE;
-    sim_can_rx[instance].count--;
-
-    return 0;
-}
-
-int hal_can_set_filter(uint8_t instance, uint32_t filter_id, uint32_t mask)
-{
-    printf("[HAL-SIM] CAN%d filter: ID=0x%03X, mask=0x%03X\n",
-           instance, filter_id, mask);
-    return 0;
-}
-
-/*===========================================================================*/
-/* UART (to stdout)                                                          */
-/*===========================================================================*/
-
-int hal_uart_init(uint8_t instance, uint32_t baudrate)
-{
-    printf("[HAL-SIM] UART%d initialized: %u baud\n", instance, baudrate);
-    return 0;
-}
-
-void hal_uart_putc(uint8_t instance, char byte)
-{
-    (void)instance;
-    putchar(byte);
-}
-
-void hal_uart_puts(uint8_t instance, const char *str)
-{
-    (void)instance;
-    printf("%s", str);
-}
-
-int hal_uart_getc(uint8_t instance)
-{
-    (void)instance;
-    /* Non-blocking stdin read would go here */
-    return -1;
-}
-
-/*===========================================================================*/
-/* GPIO (simulated)                                                          */
-/*===========================================================================*/
-
-static uint8_t gpio_state[16][16]; /* [port][pin] */
-
-int hal_gpio_config(uint8_t port, uint8_t pin, hal_gpio_mode_t mode)
-{
-    if (port >= 16 || pin >= 16) return -1;
-
-    printf("[HAL-SIM] GPIO P%d.%d configured as %d\n", port, pin, mode);
-    return 0;
-}
-
-void hal_gpio_write(uint8_t port, uint8_t pin, uint8_t value)
-{
-    if (port >= 16 || pin >= 16) return;
-    gpio_state[port][pin] = value ? 1 : 0;
-}
-
-uint8_t hal_gpio_read(uint8_t port, uint8_t pin)
-{
-    if (port >= 16 || pin >= 16) return 0;
-    return gpio_state[port][pin];
-}
-
-void hal_gpio_toggle(uint8_t port, uint8_t pin)
-{
-    if (port >= 16 || pin >= 16) return;
-    gpio_state[port][pin] ^= 1;
-}
-
-/*===========================================================================*/
-/* Context Switching (simulated - not real context switch)                   */
-/*===========================================================================*/
-
-uint32_t hal_context_init(void *stack_top, void (*entry)(void *), void *arg)
-{
-    (void)stack_top;
-    (void)entry;
-    (void)arg;
-
-    /* In simulation, we don't do real context switches */
-    printf("[HAL-SIM] Context initialized (simulated)\n");
-    return 0;
-}
-
-void hal_context_switch(uint32_t *current_sp, uint32_t next_sp)
+void ekk_hal_context_switch(void **current_sp, void *next_sp)
 {
     (void)current_sp;
     (void)next_sp;
     /* In simulation, context switch is a no-op */
 }
 
-void hal_trigger_context_switch(void)
+/* ==========================================================================
+ * Memory Barriers
+ * ========================================================================== */
+
+void ekk_hal_memory_barrier(void)
 {
-    /* In simulation, just call scheduler directly */
+#if defined(__GNUC__)
+    __asm__ __volatile__ ("" ::: "memory");
+#elif defined(_MSC_VER)
+    _ReadWriteBarrier();
+#endif
 }
 
-#endif /* JEZGRO_SIM */
+void ekk_hal_instruction_barrier(void)
+{
+    ekk_hal_memory_barrier();
+}
+
+void ekk_hal_data_sync_barrier(void)
+{
+    ekk_hal_memory_barrier();
+}
+
+/* ==========================================================================
+ * Idle / Sleep
+ * ========================================================================== */
+
+void ekk_hal_idle(void)
+{
+    ekk_hal_delay_ms(1);
+}
+
+void ekk_hal_sleep(uint32_t mode)
+{
+    (void)mode;
+    ekk_hal_delay_ms(10);
+}
+
+/* ==========================================================================
+ * Debug Support
+ * ========================================================================== */
+
+void ekk_hal_debug_break(void)
+{
+#if defined(_MSC_VER)
+    __debugbreak();
+#elif defined(__GNUC__)
+    __builtin_trap();
+#endif
+}
+
+void ekk_hal_debug_putc(char c)
+{
+    putchar(c);
+    fflush(stdout);
+}
+
+void ekk_hal_debug_puts(const char *s)
+{
+    if (s) {
+        printf("%s", s);
+        fflush(stdout);
+    }
+}
+
+void ekk_hal_debug_hex(uint32_t value)
+{
+    printf("0x%08X", value);
+    fflush(stdout);
+}
+
+/* ==========================================================================
+ * Watchdog
+ * ========================================================================== */
+
+int ekk_hal_watchdog_init(uint32_t timeout_ms)
+{
+    printf("[EK-KOR HAL-SIM] Watchdog initialized: %u ms\n", timeout_ms);
+    return 0;
+}
+
+void ekk_hal_watchdog_reset(void)
+{
+    /* No-op in simulation */
+}
+
+void ekk_hal_watchdog_disable(void)
+{
+    printf("[EK-KOR HAL-SIM] Watchdog disabled\n");
+}
+
+/* ==========================================================================
+ * System Reset
+ * ========================================================================== */
+
+void ekk_hal_system_reset(void)
+{
+    printf("[EK-KOR HAL-SIM] System reset requested\n");
+    exit(0);
+}
+
+uint32_t ekk_hal_get_reset_reason(void)
+{
+    return 0;
+}
+
+/* ==========================================================================
+ * Stack Checking
+ * ========================================================================== */
+
+void* ekk_hal_get_stack_ptr(void)
+{
+    volatile int dummy;
+    return (void*)&dummy;
+}
+
+bool ekk_hal_check_stack(void *stack_bottom, uint32_t stack_size)
+{
+    (void)stack_bottom;
+    (void)stack_size;
+    return true;
+}

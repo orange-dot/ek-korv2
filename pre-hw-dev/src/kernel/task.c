@@ -4,11 +4,12 @@
  */
 
 #include "jezgro.h"
+#include "hal.h"
 #include <string.h>
+#include <stdlib.h>
 
 #ifdef JEZGRO_SIM
 #include <stdio.h>
-#include <stdlib.h>
 #define TASK_DEBUG(fmt, ...) \
     do { if (JEZGRO_DEBUG) printf("[TASK] " fmt "\n", ##__VA_ARGS__); } while(0)
 #else
@@ -74,11 +75,14 @@ task_t *task_create(const char *name, task_func_t func, void *arg,
     task->period = period_ms;
     task->wcet = 0;
     task->deadline_missed = false;
+    task->block_reason = BLOCK_REASON_NONE;
+    task->block_object = NULL;
 
     #ifdef JEZGRO_SIM
     /* In simulation, no real stack needed */
     task->stack = NULL;
     task->stack_size = 0;
+    task->sp = 0;
     #else
     /* Allocate stack */
     task->stack_size = JEZGRO_TASK_STACK_SIZE;
@@ -87,6 +91,14 @@ task_t *task_create(const char *name, task_func_t func, void *arg,
         task_alloc_bitmap &= ~(1U << slot);
         return NULL;
     }
+
+    /* Initialize stack frame for context switch */
+    task->sp = hal_context_init(
+        (uint8_t *)task->stack + task->stack_size,  /* Stack top (grows down) */
+        task->func,                                  /* Entry point */
+        task->arg                                    /* Task argument */
+    );
+    TASK_DEBUG("Task '%s' stack initialized (sp=0x%08X)", name, task->sp);
     #endif
 
     TASK_DEBUG("Created task '%s' (id=%d, deadline=%u, period=%u)",

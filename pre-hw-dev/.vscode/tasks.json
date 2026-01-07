@@ -76,6 +76,51 @@
             ],
             "group": "build",
             "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "ARM Build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build", "build-arm"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Start Renode GDB Server",
+            "type": "shell",
+            "command": "C:\\Program Files\\Renode\\bin\\Renode.exe",
+            "args": [
+                "--console",
+                "--disable-xwt",
+                "-e", "include @renode/debug.resc"
+            ],
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^GDB Server running",
+                    "file": 1,
+                    "line": 2
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^Starting",
+                    "endsPattern": "^GDB Server running"
+                }
+            }
+        },
+        {
+            "label": "Run in Renode",
+            "type": "shell",
+            "command": "C:\\Program Files\\Renode\\bin\\Renode.exe",
+            "args": [
+                "--console",
+                "--disable-xwt",
+                "-e", "include @renode/debug.resc; start"
+            ],
+            "problemMatcher": [],
+            "dependsOn": "ARM Build"
         }
     ]
 }

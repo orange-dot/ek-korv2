@@ -1,13 +1,12 @@
 /**
  * @file test_main.c
- * @brief JEZGRO Test Runner
+ * @brief ek-kor RTOS Test Runner
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../src/kernel/jezgro.h"
-#include "../src/hal/hal.h"
+#include <ek-kor/ek-kor.h>
 
 /*===========================================================================*/
 /* Test Framework                                                            */
@@ -31,6 +30,7 @@ static int tests_failed = 0;
 #define RUN_TEST(test_func) \
     do { \
         printf("Running %s...\n", #test_func); \
+        fflush(stdout); \
         tests_run++; \
         if (test_func()) { \
             tests_passed++; \
@@ -38,242 +38,8 @@ static int tests_failed = 0;
         } else { \
             tests_failed++; \
         } \
+        fflush(stdout); \
     } while(0)
-
-/*===========================================================================*/
-/* Scheduler Tests                                                           */
-/*===========================================================================*/
-
-static int test_scheduler_init(void)
-{
-    scheduler_init();
-
-    int ready, blocked;
-    scheduler_get_stats(&ready, &blocked);
-
-    TEST_ASSERT_EQ(ready, 0, "Ready queue should be empty after init");
-    TEST_ASSERT_EQ(blocked, 0, "Blocked queue should be empty after init");
-
-    return 1;
-}
-
-static int test_scheduler_edf_priority(void)
-{
-    scheduler_init();
-    task_init();
-
-    /* Create tasks with different deadlines */
-    task_t *task1 = task_create("task1", NULL, NULL, 100, 0);
-    task_t *task2 = task_create("task2", NULL, NULL, 50, 0);  /* Earlier deadline */
-    task_t *task3 = task_create("task3", NULL, NULL, 200, 0);
-
-    TEST_ASSERT(task1 != NULL, "Task1 creation failed");
-    TEST_ASSERT(task2 != NULL, "Task2 creation failed");
-    TEST_ASSERT(task3 != NULL, "Task3 creation failed");
-
-    /* EDF should select task2 (earliest deadline) */
-    task_t *next = scheduler_get_next();
-    TEST_ASSERT(next != NULL, "scheduler_get_next returned NULL");
-    TEST_ASSERT_EQ(next->id, task2->id, "EDF should select task with earliest deadline");
-
-    /* Clean up */
-    task_destroy(task1);
-    task_destroy(task2);
-    task_destroy(task3);
-
-    return 1;
-}
-
-static int test_scheduler_deadline_miss(void)
-{
-    scheduler_init();
-    task_init();
-
-    /* Create task with very short deadline */
-    task_t *task = task_create("deadline_test", NULL, NULL, 10, 0);
-    TEST_ASSERT(task != NULL, "Task creation failed");
-
-    /* Advance time past deadline */
-    scheduler_tick(50);
-
-    TEST_ASSERT(task->deadline_missed == true, "Deadline miss not detected");
-
-    int missed = scheduler_check_deadlines();
-    TEST_ASSERT(missed >= 1, "Check deadlines should report at least 1 miss");
-
-    task_destroy(task);
-    return 1;
-}
-
-static int test_scheduler_yield(void)
-{
-    scheduler_init();
-    task_init();
-
-    task_t *task1 = task_create("yield1", NULL, NULL, 100, 0);
-    task_t *task2 = task_create("yield2", NULL, NULL, 200, 0);
-
-    TEST_ASSERT(task1 != NULL, "Task1 creation failed");
-    TEST_ASSERT(task2 != NULL, "Task2 creation failed");
-
-    /* Get first task */
-    task_t *current = scheduler_get_next();
-    TEST_ASSERT_EQ(current->id, task1->id, "Should start with earliest deadline");
-
-    /* Yield should allow reschedule */
-    scheduler_yield();
-    current = scheduler_get_current();
-    /* After yield with same deadlines, task1 should still be selected (no change) */
-    TEST_ASSERT(current != NULL, "Current task should not be NULL after yield");
-
-    task_destroy(task1);
-    task_destroy(task2);
-    return 1;
-}
-
-/*===========================================================================*/
-/* IPC Tests                                                                 */
-/*===========================================================================*/
-
-static int test_ipc_init(void)
-{
-    ipc_init();
-
-    uint32_t sent, recv, dropped;
-    ipc_get_stats(&sent, &recv, &dropped);
-
-    TEST_ASSERT_EQ(sent, 0, "Sent count should be 0 after init");
-    TEST_ASSERT_EQ(recv, 0, "Received count should be 0 after init");
-    TEST_ASSERT_EQ(dropped, 0, "Dropped count should be 0 after init");
-
-    return 1;
-}
-
-static int test_ipc_send_receive(void)
-{
-    scheduler_init();
-    task_init();
-    ipc_init();
-
-    /* Create a task to be the sender */
-    task_t *task = task_create("ipc_test", NULL, NULL, 1000, 0);
-    TEST_ASSERT(task != NULL, "Task creation failed");
-
-    /* Make it current */
-    scheduler_get_next();
-
-    /* Send message to self (for testing) */
-    uint8_t send_data[] = {0xDE, 0xAD, 0xBE, 0xEF};
-    int ret = ipc_send(task->id, IPC_MSG_TYPE_DATA, send_data, sizeof(send_data));
-    TEST_ASSERT_EQ(ret, 0, "ipc_send should return 0");
-
-    /* Check pending */
-    int pending = ipc_pending();
-    TEST_ASSERT_EQ(pending, 1, "Should have 1 pending message");
-
-    /* Receive message */
-    uint8_t src, type;
-    uint8_t recv_buf[64];
-    int len = ipc_receive(&src, &type, recv_buf, sizeof(recv_buf));
-
-    TEST_ASSERT_EQ(len, 4, "Received length should be 4");
-    TEST_ASSERT_EQ(type, IPC_MSG_TYPE_DATA, "Message type should match");
-    TEST_ASSERT(memcmp(recv_buf, send_data, 4) == 0, "Data should match");
-
-    task_destroy(task);
-    return 1;
-}
-
-static int test_ipc_async(void)
-{
-    scheduler_init();
-    task_init();
-    ipc_init();
-
-    task_t *task = task_create("async_test", NULL, NULL, 1000, 0);
-    scheduler_get_next();
-
-    /* Send multiple async messages */
-    for (int i = 0; i < 5; i++) {
-        uint8_t data = i;
-        int ret = ipc_send_async(task->id, IPC_MSG_TYPE_NOTIFY, &data, 1);
-        TEST_ASSERT_EQ(ret, 0, "Async send should succeed");
-    }
-
-    TEST_ASSERT_EQ(ipc_pending(), 5, "Should have 5 pending messages");
-
-    /* Receive all */
-    for (int i = 0; i < 5; i++) {
-        uint8_t src, type, data;
-        int len = ipc_receive_noblock(&src, &type, &data, 1);
-        TEST_ASSERT_EQ(len, 1, "Should receive 1 byte");
-        TEST_ASSERT_EQ(data, i, "Data should match sequence");
-    }
-
-    task_destroy(task);
-    return 1;
-}
-
-/*===========================================================================*/
-/* Task Tests                                                                */
-/*===========================================================================*/
-
-static int test_task_create_destroy(void)
-{
-    scheduler_init();
-    task_init();
-
-    int initial_count = task_count();
-
-    task_t *task = task_create("test_task", NULL, NULL, 100, 0);
-    TEST_ASSERT(task != NULL, "Task should be created");
-    TEST_ASSERT_EQ(task_count(), initial_count + 1, "Task count should increase");
-
-    task_destroy(task);
-    TEST_ASSERT_EQ(task_count(), initial_count, "Task count should decrease after destroy");
-
-    return 1;
-}
-
-static int test_task_suspend_resume(void)
-{
-    scheduler_init();
-    task_init();
-
-    task_t *task = task_create("suspend_test", NULL, NULL, 100, 0);
-    TEST_ASSERT(task != NULL, "Task should be created");
-    TEST_ASSERT_EQ(task->state, TASK_STATE_READY, "Initial state should be READY");
-
-    task_suspend(task);
-    TEST_ASSERT_EQ(task->state, TASK_STATE_SUSPENDED, "State should be SUSPENDED");
-
-    task_resume(task);
-    TEST_ASSERT_EQ(task->state, TASK_STATE_READY, "State should be READY after resume");
-
-    task_destroy(task);
-    return 1;
-}
-
-static int test_task_lookup(void)
-{
-    scheduler_init();
-    task_init();
-
-    task_t *task = task_create("lookup_test", NULL, NULL, 100, 0);
-    TEST_ASSERT(task != NULL, "Task should be created");
-
-    task_t *found_by_id = task_get_by_id(task->id);
-    TEST_ASSERT_EQ(found_by_id, task, "Should find task by ID");
-
-    task_t *found_by_name = task_get_by_name("lookup_test");
-    TEST_ASSERT_EQ(found_by_name, task, "Should find task by name");
-
-    task_t *not_found = task_get_by_name("nonexistent");
-    TEST_ASSERT(not_found == NULL, "Should not find nonexistent task");
-
-    task_destroy(task);
-    return 1;
-}
 
 /*===========================================================================*/
 /* HAL Tests                                                                 */
@@ -281,21 +47,25 @@ static int test_task_lookup(void)
 
 static int test_hal_init(void)
 {
-    int ret = hal_init();
+    int ret = ekk_hal_init();
     TEST_ASSERT_EQ(ret, 0, "HAL init should succeed");
 
-    const char *platform = hal_get_platform();
-    TEST_ASSERT(platform != NULL, "Platform name should not be NULL");
-    TEST_ASSERT(strlen(platform) > 0, "Platform name should not be empty");
+    uint32_t core_id = ekk_hal_get_core_id();
+    TEST_ASSERT_EQ(core_id, 0, "Core ID should be 0 for simulation");
+
+    uint32_t core_count = ekk_hal_get_core_count();
+    TEST_ASSERT_EQ(core_count, 1, "Core count should be 1 for simulation");
+
+    TEST_ASSERT(ekk_hal_is_boot_core() == true, "Should be boot core");
 
     return 1;
 }
 
 static int test_hal_timing(void)
 {
-    uint32_t t1 = hal_get_time_ms();
-    hal_delay_ms(10);
-    uint32_t t2 = hal_get_time_ms();
+    uint32_t t1 = ekk_hal_get_time_ms();
+    ekk_hal_delay_ms(10);
+    uint32_t t2 = ekk_hal_get_time_ms();
 
     TEST_ASSERT(t2 >= t1, "Time should not go backwards");
     /* Allow some tolerance */
@@ -304,29 +74,488 @@ static int test_hal_timing(void)
     return 1;
 }
 
-static int test_hal_can(void)
+static int test_hal_critical_section(void)
 {
-    int ret = hal_can_init(0, 500000, 5000000);
-    TEST_ASSERT_EQ(ret, 0, "CAN init should succeed");
+    TEST_ASSERT(ekk_hal_in_critical() == false, "Should not be in critical initially");
 
-    hal_can_msg_t tx_msg = {
-        .id = 0x123,
-        .len = 4,
-        .data = {0x11, 0x22, 0x33, 0x44},
-        .fd = true,
-        .brs = true
-    };
+    uint32_t nesting = ekk_hal_enter_critical();
+    TEST_ASSERT_EQ(nesting, 1, "Nesting should be 1 after first enter");
+    TEST_ASSERT(ekk_hal_in_critical() == true, "Should be in critical");
 
-    ret = hal_can_send(0, &tx_msg);
-    TEST_ASSERT_EQ(ret, 0, "CAN send should succeed");
+    nesting = ekk_hal_enter_critical();
+    TEST_ASSERT_EQ(nesting, 2, "Nesting should be 2 after second enter");
 
-    /* In simulation, message is looped back */
-    hal_can_msg_t rx_msg;
-    ret = hal_can_receive(0, &rx_msg);
-    TEST_ASSERT_EQ(ret, 0, "CAN receive should succeed (loopback)");
-    TEST_ASSERT_EQ(rx_msg.id, 0x123, "Message ID should match");
-    TEST_ASSERT(memcmp(rx_msg.data, tx_msg.data, 4) == 0, "Data should match");
+    nesting = ekk_hal_exit_critical();
+    TEST_ASSERT_EQ(nesting, 1, "Nesting should be 1 after first exit");
+    TEST_ASSERT(ekk_hal_in_critical() == true, "Should still be in critical");
 
+    nesting = ekk_hal_exit_critical();
+    TEST_ASSERT_EQ(nesting, 0, "Nesting should be 0 after second exit");
+    TEST_ASSERT(ekk_hal_in_critical() == false, "Should not be in critical");
+
+    return 1;
+}
+
+static int test_hal_interrupts(void)
+{
+    /* Enable interrupts first */
+    ekk_hal_enable_interrupts();
+    TEST_ASSERT(ekk_hal_interrupts_enabled() == true, "Interrupts should be enabled");
+
+    uint32_t state = ekk_hal_disable_interrupts();
+    TEST_ASSERT(ekk_hal_interrupts_enabled() == false, "Interrupts should be disabled");
+
+    ekk_hal_restore_interrupts(state);
+    TEST_ASSERT(ekk_hal_interrupts_enabled() == true, "Interrupts should be restored");
+
+    return 1;
+}
+
+/*===========================================================================*/
+/* Kernel Tests                                                              */
+/*===========================================================================*/
+
+static int test_kernel_version(void)
+{
+    const char *version = ekk_version();
+    TEST_ASSERT(version != NULL, "Version should not be NULL");
+    TEST_ASSERT(strlen(version) > 0, "Version should not be empty");
+    printf("    ek-kor version: %s\n", version);
+
+    return 1;
+}
+
+static int test_kernel_state(void)
+{
+    ekk_state_t state = ekk_get_state();
+    /* After init, should be in INIT state */
+    TEST_ASSERT(state == EKK_STATE_INIT || state == EKK_STATE_RUNNING,
+                "State should be INIT or RUNNING");
+
+    return 1;
+}
+
+static int test_kernel_time_conversion(void)
+{
+    /* Test tick to ms conversion */
+    ekk_time_ms_t ms = ekk_ticks_to_ms(1000);
+    TEST_ASSERT_EQ(ms, 1000, "1000 ticks @ 1kHz = 1000ms");
+
+    /* Test ms to ticks conversion */
+    ekk_tick_t ticks = ekk_ms_to_ticks(500);
+    TEST_ASSERT_EQ(ticks, 500, "500ms @ 1kHz = 500 ticks");
+
+    /* Test us to ticks conversion */
+    ticks = ekk_us_to_ticks(2000);
+    TEST_ASSERT_EQ(ticks, 2, "2000us @ 1kHz = 2 ticks");
+
+    return 1;
+}
+
+/*===========================================================================*/
+/* Scheduler Tests                                                           */
+/*===========================================================================*/
+
+static int test_scheduler_init(void)
+{
+    ekk_err_t err = ekk_sched_init();
+    TEST_ASSERT_EQ(err, EKK_OK, "Scheduler init should succeed");
+
+    TEST_ASSERT(ekk_sched_is_locked() == false, "Scheduler should not be locked");
+
+    return 1;
+}
+
+static int test_scheduler_lock_unlock(void)
+{
+    ekk_sched_lock();
+    TEST_ASSERT(ekk_sched_is_locked() == true, "Scheduler should be locked");
+
+    ekk_sched_lock();  /* Nested lock */
+    TEST_ASSERT(ekk_sched_is_locked() == true, "Scheduler should still be locked");
+
+    ekk_sched_unlock();
+    TEST_ASSERT(ekk_sched_is_locked() == true, "Scheduler should still be locked (nested)");
+
+    ekk_sched_unlock();
+    TEST_ASSERT(ekk_sched_is_locked() == false, "Scheduler should be unlocked");
+
+    return 1;
+}
+
+/*===========================================================================*/
+/* Task Tests                                                                */
+/*===========================================================================*/
+
+static void dummy_task(void *arg)
+{
+    (void)arg;
+    /* Do nothing */
+}
+
+static int test_task_init(void)
+{
+    ekk_err_t err = ekk_task_init();
+    TEST_ASSERT_EQ(err, EKK_OK, "Task init should succeed");
+
+    return 1;
+}
+
+static int test_task_create_delete(void)
+{
+    ekk_task_params_t params = EKK_TASK_PARAMS_DEFAULT;
+    params.name = "test_task";
+    params.func = dummy_task;
+    params.priority = 128;
+    params.stack_size = 1024;
+
+    ekk_task_t task = NULL;
+    ekk_err_t err = ekk_task_create(&params, &task);
+    TEST_ASSERT_EQ(err, EKK_OK, "Task creation should succeed");
+    TEST_ASSERT(task != NULL, "Task handle should not be NULL");
+
+    /* Check task properties */
+    const char *name = ekk_task_get_name(task);
+    TEST_ASSERT(name != NULL, "Task name should not be NULL");
+    TEST_ASSERT(strcmp(name, "test_task") == 0, "Task name should match");
+
+    uint8_t priority = ekk_task_get_priority(task);
+    TEST_ASSERT_EQ(priority, 128, "Priority should be 128");
+
+    ekk_task_state_t state = ekk_task_get_state(task);
+    TEST_ASSERT_EQ(state, EKK_TASK_READY, "Initial state should be READY");
+
+    /* Delete task */
+    err = ekk_task_delete(task);
+    TEST_ASSERT_EQ(err, EKK_OK, "Task deletion should succeed");
+
+    return 1;
+}
+
+static int test_task_suspend_resume(void)
+{
+    ekk_task_params_t params = EKK_TASK_PARAMS_DEFAULT;
+    params.name = "suspend_test";
+    params.func = dummy_task;
+
+    ekk_task_t task = NULL;
+    ekk_err_t err = ekk_task_create(&params, &task);
+    TEST_ASSERT_EQ(err, EKK_OK, "Task creation should succeed");
+
+    /* Suspend */
+    err = ekk_task_suspend(task);
+    TEST_ASSERT_EQ(err, EKK_OK, "Suspend should succeed");
+    TEST_ASSERT_EQ(ekk_task_get_state(task), EKK_TASK_SUSPENDED, "State should be SUSPENDED");
+
+    /* Resume */
+    err = ekk_task_resume(task);
+    TEST_ASSERT_EQ(err, EKK_OK, "Resume should succeed");
+    TEST_ASSERT_EQ(ekk_task_get_state(task), EKK_TASK_READY, "State should be READY");
+
+    ekk_task_delete(task);
+    return 1;
+}
+
+static int test_task_priority(void)
+{
+    ekk_task_params_t params = EKK_TASK_PARAMS_DEFAULT;
+    params.name = "priority_test";
+    params.func = dummy_task;
+    params.priority = 100;
+
+    ekk_task_t task = NULL;
+    ekk_task_create(&params, &task);
+
+    TEST_ASSERT_EQ(ekk_task_get_priority(task), 100, "Initial priority should be 100");
+
+    ekk_err_t err = ekk_task_set_priority(task, 200);
+    TEST_ASSERT_EQ(err, EKK_OK, "Set priority should succeed");
+    TEST_ASSERT_EQ(ekk_task_get_priority(task), 200, "Priority should be 200");
+
+    ekk_task_delete(task);
+    return 1;
+}
+
+static int test_task_lookup(void)
+{
+    ekk_task_params_t params = EKK_TASK_PARAMS_DEFAULT;
+    params.name = "lookup_test";
+    params.func = dummy_task;
+
+    ekk_task_t task = NULL;
+    ekk_task_create(&params, &task);
+
+    /* Get TCB to access ID */
+    ekk_tcb_t *tcb = ekk_task_get_tcb(task);
+    TEST_ASSERT(tcb != NULL, "TCB should not be NULL");
+
+    /* Find by name */
+    ekk_task_t found = ekk_task_get_by_name("lookup_test");
+    TEST_ASSERT_EQ(found, task, "Should find task by name");
+
+    /* Find by ID */
+    found = ekk_task_get_by_id(tcb->id);
+    TEST_ASSERT_EQ(found, task, "Should find task by ID");
+
+    /* Not found */
+    found = ekk_task_get_by_name("nonexistent");
+    TEST_ASSERT(found == NULL, "Should not find nonexistent task");
+
+    ekk_task_delete(task);
+    return 1;
+}
+
+/*===========================================================================*/
+/* Sync Tests - Spinlock                                                     */
+/*===========================================================================*/
+
+static int test_spinlock(void)
+{
+    ekk_spinlock_t spin;
+    ekk_spinlock_init(&spin, "test_spin");
+
+    TEST_ASSERT(ekk_spinlock_is_locked(&spin) == false, "Should be unlocked initially");
+
+    ekk_spinlock_acquire(&spin);
+    TEST_ASSERT(ekk_spinlock_is_locked(&spin) == true, "Should be locked");
+
+    ekk_spinlock_release(&spin);
+    TEST_ASSERT(ekk_spinlock_is_locked(&spin) == false, "Should be unlocked");
+
+    /* Try lock */
+    bool acquired = ekk_spinlock_try(&spin);
+    TEST_ASSERT(acquired == true, "Try should succeed");
+    TEST_ASSERT(ekk_spinlock_is_locked(&spin) == true, "Should be locked");
+
+    ekk_spinlock_release(&spin);
+    return 1;
+}
+
+/*===========================================================================*/
+/* Sync Tests - Mutex                                                        */
+/*===========================================================================*/
+
+static int test_mutex_init(void)
+{
+    ekk_mutex_struct_t mtx;
+    ekk_mutex_init(&mtx, "test_mutex");
+
+    TEST_ASSERT(ekk_mutex_is_locked(&mtx) == false, "Should be unlocked initially");
+    TEST_ASSERT(ekk_mutex_get_owner(&mtx) == NULL, "Owner should be NULL");
+
+    return 1;
+}
+
+static int test_mutex_lock_unlock(void)
+{
+    ekk_mutex_struct_t mtx;
+    ekk_mutex_init(&mtx, "test_mutex");
+
+    ekk_err_t err = ekk_mutex_lock(&mtx, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Lock should succeed");
+    TEST_ASSERT(ekk_mutex_is_locked(&mtx) == true, "Should be locked");
+
+    err = ekk_mutex_unlock(&mtx);
+    TEST_ASSERT_EQ(err, EKK_OK, "Unlock should succeed");
+    TEST_ASSERT(ekk_mutex_is_locked(&mtx) == false, "Should be unlocked");
+
+    return 1;
+}
+
+static int test_mutex_trylock(void)
+{
+    ekk_mutex_struct_t mtx;
+    ekk_mutex_init(&mtx, "test_mutex");
+
+    ekk_err_t err = ekk_mutex_trylock(&mtx);
+    TEST_ASSERT_EQ(err, EKK_OK, "Trylock should succeed");
+    TEST_ASSERT(ekk_mutex_is_locked(&mtx) == true, "Should be locked");
+
+    ekk_mutex_unlock(&mtx);
+    return 1;
+}
+
+/*===========================================================================*/
+/* Sync Tests - Semaphore                                                    */
+/*===========================================================================*/
+
+static int test_semaphore_init(void)
+{
+    ekk_sem_struct_t sem;
+    ekk_sem_init(&sem, "test_sem", 5, 10);
+
+    TEST_ASSERT_EQ(ekk_sem_get_count(&sem), 5, "Initial count should be 5");
+
+    return 1;
+}
+
+static int test_semaphore_wait_signal(void)
+{
+    ekk_sem_struct_t sem;
+    ekk_sem_init(&sem, "test_sem", 3, 10);
+
+    /* Wait decrements count */
+    ekk_err_t err = ekk_sem_wait(&sem, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Wait should succeed");
+    TEST_ASSERT_EQ(ekk_sem_get_count(&sem), 2, "Count should be 2");
+
+    err = ekk_sem_wait(&sem, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Wait should succeed");
+    TEST_ASSERT_EQ(ekk_sem_get_count(&sem), 1, "Count should be 1");
+
+    /* Signal increments count */
+    err = ekk_sem_signal(&sem);
+    TEST_ASSERT_EQ(err, EKK_OK, "Signal should succeed");
+    TEST_ASSERT_EQ(ekk_sem_get_count(&sem), 2, "Count should be 2");
+
+    return 1;
+}
+
+static int test_semaphore_trywait(void)
+{
+    ekk_sem_struct_t sem;
+    ekk_sem_init(&sem, "test_sem", 1, 1);
+
+    ekk_err_t err = ekk_sem_trywait(&sem);
+    TEST_ASSERT_EQ(err, EKK_OK, "Trywait should succeed");
+    TEST_ASSERT_EQ(ekk_sem_get_count(&sem), 0, "Count should be 0");
+
+    err = ekk_sem_trywait(&sem);
+    TEST_ASSERT_EQ(err, EKK_ERR_BUSY, "Trywait should return BUSY when count=0");
+
+    return 1;
+}
+
+/*===========================================================================*/
+/* Sync Tests - Event Flags                                                  */
+/*===========================================================================*/
+
+static int test_event_flags(void)
+{
+    ekk_event_struct_t event;
+    ekk_event_init(&event, "test_event");
+
+    TEST_ASSERT_EQ(ekk_event_get(&event), 0, "Initial flags should be 0");
+
+    /* Set flags */
+    ekk_err_t err = ekk_event_set(&event, 0x0F);
+    TEST_ASSERT_EQ(err, EKK_OK, "Set should succeed");
+    TEST_ASSERT_EQ(ekk_event_get(&event), 0x0F, "Flags should be 0x0F");
+
+    /* Set more flags */
+    ekk_event_set(&event, 0xF0);
+    TEST_ASSERT_EQ(ekk_event_get(&event), 0xFF, "Flags should be 0xFF");
+
+    /* Clear flags */
+    uint32_t old = ekk_event_clear(&event, 0x0F);
+    TEST_ASSERT_EQ(old, 0xFF, "Old flags should be 0xFF");
+    TEST_ASSERT_EQ(ekk_event_get(&event), 0xF0, "Flags should be 0xF0");
+
+    return 1;
+}
+
+/*===========================================================================*/
+/* IPC Tests - Queue                                                         */
+/*===========================================================================*/
+
+static int test_queue_create(void)
+{
+    ekk_queue_struct_t queue;
+    static uint8_t buffer[64 * 8];  /* 8 messages of 64 bytes */
+
+    ekk_err_t err = ekk_queue_create(&queue, "test_queue", 64, 8, buffer);
+    TEST_ASSERT_EQ(err, EKK_OK, "Queue creation should succeed");
+    TEST_ASSERT(ekk_queue_is_empty(&queue) == true, "Queue should be empty");
+    TEST_ASSERT(ekk_queue_is_full(&queue) == false, "Queue should not be full");
+    TEST_ASSERT_EQ(ekk_queue_count(&queue), 0, "Count should be 0");
+    TEST_ASSERT_EQ(ekk_queue_space(&queue), 8, "Space should be 8");
+
+    ekk_queue_delete(&queue);
+    return 1;
+}
+
+static int test_queue_send_receive(void)
+{
+    ekk_queue_struct_t queue;
+    static uint8_t buffer[sizeof(uint32_t) * 4];
+
+    ekk_queue_create(&queue, "test_queue", sizeof(uint32_t), 4, buffer);
+
+    /* Send messages */
+    uint32_t msg1 = 0x12345678;
+    uint32_t msg2 = 0xDEADBEEF;
+
+    ekk_err_t err = ekk_queue_send(&queue, &msg1, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Send should succeed");
+    TEST_ASSERT_EQ(ekk_queue_count(&queue), 1, "Count should be 1");
+
+    err = ekk_queue_send(&queue, &msg2, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Send should succeed");
+    TEST_ASSERT_EQ(ekk_queue_count(&queue), 2, "Count should be 2");
+
+    /* Receive messages */
+    uint32_t recv;
+    err = ekk_queue_receive(&queue, &recv, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Receive should succeed");
+    TEST_ASSERT_EQ(recv, 0x12345678, "First message should match");
+
+    err = ekk_queue_receive(&queue, &recv, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Receive should succeed");
+    TEST_ASSERT_EQ(recv, 0xDEADBEEF, "Second message should match");
+
+    TEST_ASSERT(ekk_queue_is_empty(&queue) == true, "Queue should be empty");
+
+    ekk_queue_delete(&queue);
+    return 1;
+}
+
+static int test_queue_peek(void)
+{
+    ekk_queue_struct_t queue;
+    static uint8_t buffer[sizeof(uint32_t) * 4];
+
+    ekk_queue_create(&queue, "test_queue", sizeof(uint32_t), 4, buffer);
+
+    uint32_t msg = 0xCAFEBABE;
+    ekk_queue_send(&queue, &msg, EKK_NO_WAIT);
+
+    /* Peek should not remove message */
+    uint32_t peek;
+    ekk_err_t err = ekk_queue_peek(&queue, &peek);
+    TEST_ASSERT_EQ(err, EKK_OK, "Peek should succeed");
+    TEST_ASSERT_EQ(peek, 0xCAFEBABE, "Peek value should match");
+    TEST_ASSERT_EQ(ekk_queue_count(&queue), 1, "Count should still be 1");
+
+    /* Receive should get same message */
+    uint32_t recv;
+    ekk_queue_receive(&queue, &recv, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(recv, 0xCAFEBABE, "Received value should match");
+
+    ekk_queue_delete(&queue);
+    return 1;
+}
+
+static int test_queue_flush(void)
+{
+    ekk_queue_struct_t queue;
+    static uint8_t buffer[sizeof(uint32_t) * 4];
+
+    ekk_queue_create(&queue, "test_queue", sizeof(uint32_t), 4, buffer);
+
+    uint32_t msg = 1;
+    ekk_queue_send(&queue, &msg, EKK_NO_WAIT);
+    msg = 2;
+    ekk_queue_send(&queue, &msg, EKK_NO_WAIT);
+    msg = 3;
+    ekk_queue_send(&queue, &msg, EKK_NO_WAIT);
+
+    TEST_ASSERT_EQ(ekk_queue_count(&queue), 3, "Count should be 3");
+
+    ekk_queue_flush(&queue);
+    TEST_ASSERT_EQ(ekk_queue_count(&queue), 0, "Count should be 0 after flush");
+    TEST_ASSERT(ekk_queue_is_empty(&queue) == true, "Queue should be empty");
+
+    ekk_queue_delete(&queue);
     return 1;
 }
 
@@ -341,39 +570,100 @@ int main(int argc, char *argv[])
 
     printf("\n");
     printf("================================================\n");
-    printf("  JEZGRO Pre-Hardware Test Suite\n");
-    printf("  Platform: %s\n", HAL_PLATFORM_NAME);
-    printf("  Version: %s\n", JEZGRO_VERSION_STRING);
+    printf("  ek-kor RTOS Test Suite\n");
+    printf("  Platform: Simulation\n");
     printf("================================================\n\n");
+    fflush(stdout);
+
+    printf("Step 1: Calling ekk_init()...\n");
+    fflush(stdout);
+
+    /* Initialize kernel */
+    ekk_err_t err = ekk_init();
+    if (err != EKK_OK) {
+        printf("ERROR: Failed to initialize kernel\n");
+        return 1;
+    }
+
+    printf("Step 2: Kernel initialized successfully\n");
+    fflush(stdout);
 
     /* HAL Tests */
     printf("--- HAL Tests ---\n");
+    fflush(stdout);
     RUN_TEST(test_hal_init);
     RUN_TEST(test_hal_timing);
-    RUN_TEST(test_hal_can);
+    RUN_TEST(test_hal_critical_section);
+    RUN_TEST(test_hal_interrupts);
     printf("\n");
+    fflush(stdout);
+
+    /* Kernel Tests */
+    printf("--- Kernel Tests ---\n");
+    fflush(stdout);
+    RUN_TEST(test_kernel_version);
+    RUN_TEST(test_kernel_state);
+    RUN_TEST(test_kernel_time_conversion);
+    printf("\n");
+    fflush(stdout);
 
     /* Scheduler Tests */
     printf("--- Scheduler Tests ---\n");
+    fflush(stdout);
     RUN_TEST(test_scheduler_init);
-    RUN_TEST(test_scheduler_edf_priority);
-    RUN_TEST(test_scheduler_deadline_miss);
-    RUN_TEST(test_scheduler_yield);
+    RUN_TEST(test_scheduler_lock_unlock);
     printf("\n");
-
-    /* IPC Tests */
-    printf("--- IPC Tests ---\n");
-    RUN_TEST(test_ipc_init);
-    RUN_TEST(test_ipc_send_receive);
-    RUN_TEST(test_ipc_async);
-    printf("\n");
+    fflush(stdout);
 
     /* Task Tests */
     printf("--- Task Tests ---\n");
-    RUN_TEST(test_task_create_destroy);
+    fflush(stdout);
+    RUN_TEST(test_task_init);
+    RUN_TEST(test_task_create_delete);
     RUN_TEST(test_task_suspend_resume);
+    RUN_TEST(test_task_priority);
     RUN_TEST(test_task_lookup);
     printf("\n");
+    fflush(stdout);
+
+    /* Sync Tests */
+    printf("--- Spinlock Tests ---\n");
+    fflush(stdout);
+    RUN_TEST(test_spinlock);
+    printf("\n");
+    fflush(stdout);
+
+    printf("--- Mutex Tests ---\n");
+    fflush(stdout);
+    RUN_TEST(test_mutex_init);
+    RUN_TEST(test_mutex_lock_unlock);
+    RUN_TEST(test_mutex_trylock);
+    printf("\n");
+    fflush(stdout);
+
+    printf("--- Semaphore Tests ---\n");
+    fflush(stdout);
+    RUN_TEST(test_semaphore_init);
+    RUN_TEST(test_semaphore_wait_signal);
+    RUN_TEST(test_semaphore_trywait);
+    printf("\n");
+    fflush(stdout);
+
+    printf("--- Event Tests ---\n");
+    fflush(stdout);
+    RUN_TEST(test_event_flags);
+    printf("\n");
+    fflush(stdout);
+
+    /* IPC Tests */
+    printf("--- Queue Tests ---\n");
+    fflush(stdout);
+    RUN_TEST(test_queue_create);
+    RUN_TEST(test_queue_send_receive);
+    RUN_TEST(test_queue_peek);
+    RUN_TEST(test_queue_flush);
+    printf("\n");
+    fflush(stdout);
 
     /* Summary */
     printf("================================================\n");
@@ -382,6 +672,7 @@ int main(int argc, char *argv[])
         printf("  FAILED: %d tests\n", tests_failed);
     }
     printf("================================================\n\n");
+    fflush(stdout);
 
     return (tests_failed > 0) ? 1 : 0;
 }

@@ -44,6 +44,12 @@
 /** Maximum message payload size */
 #define JEZGRO_MSG_MAX_SIZE     64
 
+/** Maximum number of mutexes */
+#define JEZGRO_MAX_MUTEXES      16
+
+/** Maximum number of semaphores */
+#define JEZGRO_MAX_SEMAPHORES   16
+
 /** Stack size for user tasks (bytes) */
 #define JEZGRO_TASK_STACK_SIZE  1024
 
@@ -77,6 +83,14 @@ typedef enum {
     TASK_STATE_TERMINATED
 } task_state_t;
 
+/** Task block reasons */
+typedef enum {
+    BLOCK_REASON_NONE = 0,
+    BLOCK_REASON_MUTEX,
+    BLOCK_REASON_SEMAPHORE,
+    BLOCK_REASON_SLEEP
+} block_reason_t;
+
 /** Task priority (lower = higher priority in EDF) */
 typedef uint8_t priority_t;
 
@@ -99,6 +113,9 @@ typedef struct task {
     size_t          stack_size;     /**< Stack size */
     uint32_t        sp;             /**< Saved stack pointer */
     struct task     *next;          /**< Next task in list */
+    /* Synchronization */
+    block_reason_t  block_reason;   /**< Why task is blocked */
+    void            *block_object;  /**< Mutex/semaphore blocking on */
 } task_t;
 
 /** IPC Message */
@@ -174,5 +191,6 @@ void jezgro_panic(const char *msg);
 #include "scheduler.h"
 #include "ipc.h"
 #include "task.h"
+#include "sync.h"
 
 #endif /* JEZGRO_H */

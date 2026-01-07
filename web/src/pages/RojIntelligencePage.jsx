@@ -20,7 +20,7 @@ import {
   Hexagon,
   Network,
 } from 'lucide-react';
-import PasswordGate from '../components/PasswordGate';
+import PasswordGate, { ACCESS_TIERS } from '../components/PasswordGate';
 
 // Initialize mermaid with dark theme
 mermaid.initialize({
@@ -912,11 +912,7 @@ function RojContent() {
 // Main export with password gate
 export default function RojIntelligencePage() {
   return (
-    <PasswordGate
-      password="kosnica"
-      storageKey="ek_roj_unlocked"
-      title="ROJ Intelligence"
-    >
+    <PasswordGate tier={ACCESS_TIERS.PARTNER}>
       <RojContent />
     </PasswordGate>
   );

@@ -8,6 +8,17 @@ node_modules/
 
 # Build outputs
 web/dist/
+**/build/
+**/build-arm/
+**/build_manual/
+*.o
+*.a
+*.obj
+*.exe
+*.bin
+*.elf
+*.map
+nul
 
 # IDE
 .idea/
@@ -18,3 +29,4 @@ web/dist/
 .DS_Store
 Thumbs.db
 deploy-ftp.ps1
+ACCESS-CREDENTIALS.md

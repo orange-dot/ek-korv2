@@ -2,7 +2,19 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X, Zap, Globe, Play, ChevronDown, FileText, Lock, Cpu, Hexagon, ArrowLeftRight } from 'lucide-react';
+import {
+  Menu,
+  X,
+  Zap,
+  Globe,
+  Play,
+  ChevronDown,
+  FileText,
+  Lock,
+  Users,
+  Briefcase,
+  BookOpen,
+} from 'lucide-react';
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
@@ -45,9 +57,6 @@ export default function Navbar() {
     { href: '#philosophy', label: t('nav.philosophy') },
     { href: '#robots', label: t('nav.robots') },
     { href: '#configurations', label: t('nav.configurations') },
-    { href: '#timeline', label: t('nav.timeline') },
-    { href: '#team', label: t('nav.team') },
-    { href: '#contact', label: t('nav.contact') },
   ];
 
   return (
@@ -64,7 +73,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-4">
             {navItems.map((item) => (
               <a
                 key={item.href}
@@ -81,7 +90,7 @@ export default function Navbar() {
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 onBlur={() => setTimeout(() => setDropdownOpen(false), 300)}
-                className="flex items-center space-x-1 px-4 py-1.5 rounded-full bg-accent-cyan/10 border border-accent-cyan hover:bg-accent-cyan/20 transition-colors"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-full bg-accent-cyan/10 border border-accent-cyan hover:bg-accent-cyan/20 transition-colors"
               >
                 <Play className="w-4 h-4 text-accent-cyan" />
                 <span className="text-sm font-medium text-accent-cyan">
@@ -111,6 +120,35 @@ export default function Navbar() {
               )}
             </div>
 
+            {/* Documentation (Public) */}
+            <Link
+              to="/docs"
+              className="flex items-center space-x-1 px-3 py-1.5 text-slate-300 hover:text-accent-cyan transition-colors"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('nav.docs')}</span>
+            </Link>
+
+            {/* Partner Portal */}
+            <Link
+              to="/partner"
+              className="flex items-center space-x-1 px-3 py-1.5 text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              <Lock className="w-3 h-3" />
+              <Users className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('nav.partner')}</span>
+            </Link>
+
+            {/* Investor Portal */}
+            <Link
+              to="/investor"
+              className="flex items-center space-x-1 px-3 py-1.5 text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              <Lock className="w-3 h-3" />
+              <Briefcase className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('nav.investor')}</span>
+            </Link>
+
             {/* Quick Pitch Link */}
             <Link
               to="/quick"
@@ -118,45 +156,6 @@ export default function Navbar() {
             >
               <Zap className="w-4 h-4" />
               <span className="text-sm font-medium">{t('nav.quickPitch')}</span>
-            </Link>
-
-            {/* Patent Link */}
-            <Link
-              to="/patent"
-              className="flex items-center space-x-1 px-3 py-1.5 text-slate-300 hover:text-accent-cyan transition-colors"
-            >
-              <FileText className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('nav.patent')}</span>
-            </Link>
-
-            {/* JEZGRO Dev Link (Protected) */}
-            <Link
-              to="/jezgro-dev"
-              className="flex items-center space-x-1 px-3 py-1.5 text-slate-300 hover:text-accent-cyan transition-colors"
-            >
-              <Lock className="w-3 h-3" />
-              <Cpu className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('nav.jezgroDev')}</span>
-            </Link>
-
-            {/* ROJ Link (Protected) */}
-            <Link
-              to="/roj"
-              className="flex items-center space-x-1 px-3 py-1.5 text-slate-300 hover:text-accent-cyan transition-colors"
-            >
-              <Lock className="w-3 h-3" />
-              <Hexagon className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('nav.roj')}</span>
-            </Link>
-
-            {/* V2G Link (Protected) */}
-            <Link
-              to="/v2g"
-              className="flex items-center space-x-1 px-3 py-1.5 text-slate-300 hover:text-green-400 transition-colors"
-            >
-              <Lock className="w-3 h-3" />
-              <ArrowLeftRight className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('nav.v2g')}</span>
             </Link>
 
             {/* Language Toggle */}
@@ -212,6 +211,7 @@ export default function Navbar() {
                 {item.label}
               </a>
             ))}
+
             <div className="border-t border-border pt-3 mt-3">
               <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">{t('nav.simulations')}</p>
               <Link
@@ -231,6 +231,37 @@ export default function Navbar() {
                 <span>{t('nav.laDelivery')}</span>
               </Link>
             </div>
+
+            <div className="border-t border-border pt-3 mt-3">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">{t('nav.portals')}</p>
+              <Link
+                to="/docs"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center space-x-2 text-slate-300 hover:text-accent-cyan py-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>{t('nav.docs')}</span>
+              </Link>
+              <Link
+                to="/partner"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center space-x-2 text-emerald-400 py-2"
+              >
+                <Lock className="w-3 h-3" />
+                <Users className="w-4 h-4" />
+                <span>{t('nav.partner')}</span>
+              </Link>
+              <Link
+                to="/investor"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center space-x-2 text-amber-400 py-2"
+              >
+                <Lock className="w-3 h-3" />
+                <Briefcase className="w-4 h-4" />
+                <span>{t('nav.investor')}</span>
+              </Link>
+            </div>
+
             <Link
               to="/quick"
               onClick={() => setIsOpen(false)}
@@ -238,41 +269,6 @@ export default function Navbar() {
             >
               <Zap className="w-4 h-4" />
               <span>{t('nav.quickPitch')}</span>
-            </Link>
-            <Link
-              to="/patent"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-2 text-slate-300 hover:text-accent-cyan py-2"
-            >
-              <FileText className="w-4 h-4" />
-              <span>{t('nav.patent')}</span>
-            </Link>
-            <Link
-              to="/jezgro-dev"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-2 text-slate-300 hover:text-accent-cyan py-2"
-            >
-              <Lock className="w-3 h-3" />
-              <Cpu className="w-4 h-4" />
-              <span>{t('nav.jezgroDev')}</span>
-            </Link>
-            <Link
-              to="/roj"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-2 text-slate-300 hover:text-accent-cyan py-2"
-            >
-              <Lock className="w-3 h-3" />
-              <Hexagon className="w-4 h-4" />
-              <span>{t('nav.roj')}</span>
-            </Link>
-            <Link
-              to="/v2g"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-2 text-slate-300 hover:text-green-400 py-2"
-            >
-              <Lock className="w-3 h-3" />
-              <ArrowLeftRight className="w-4 h-4" />
-              <span>{t('nav.v2g')}</span>
             </Link>
           </div>
         </motion.div>

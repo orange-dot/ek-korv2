@@ -1,0 +1,525 @@
+/**
+ * @file main.c
+ * @brief JEZGRO TC397XP Application Entry Point
+ *
+ * Multi-core demo application:
+ *   - CPU0: Boot core, coordinator, safety monitor
+ *   - CPU1: Safety core #1 (lockstep)
+ *   - CPU2: Safety core #2 (lockstep)
+ *   - CPU3: Safety core #3 (lockstep)
+ *   - CPU4: Performance core #1
+ *   - CPU5: Performance core #2
+ */
+
+#include <stddef.h>
+#include <ek-kor/kernel.h>
+#include <ek-kor/scheduler.h>
+#include <ek-kor/task.h>
+#include <ek-kor/sync.h>
+#include <ek-kor/ipc.h>
+#include <ek-kor/hal.h>
+#include "arch/tricore_cpu.h"
+#include "arch/tricore_multicore.h"
+
+/* API compatibility macros */
+#define hal_init()                  ekk_hal_init()
+#define hal_init_core(c)            ekk_hal_init_core(c)
+#define hal_get_core_id()           ekk_hal_get_core_id()
+#define hal_systick_init(cb)        ekk_hal_systick_init(cb)
+#define hal_watchdog_reset()        ekk_hal_watchdog_reset()
+#define hal_debug_puts(s)           ekk_hal_debug_puts(s)
+#define hal_debug_hex(v)            ekk_hal_debug_hex(v)
+#define task_init()                 ekk_task_init()
+#define task_create(p, h)           ekk_task_create(p, h)
+#define task_create_idle()          ekk_task_create_idle()
+#define task_delay(t)               ekk_task_delay(t)
+#define task_yield()                ekk_task_yield()
+#define task_wait_for_period()      ekk_task_wait_for_period()
+#define scheduler_init()            ekk_sched_init()
+#define scheduler_tick              ekk_sched_tick
+
+/* ==========================================================================
+ * Application Configuration
+ * ========================================================================== */
+
+/* Task priorities */
+#define PRIORITY_COORDINATOR    200
+#define PRIORITY_SAFETY         180
+#define PRIORITY_CONTROL        160
+#define PRIORITY_MONITOR        140
+#define PRIORITY_BACKGROUND     100
+#define PRIORITY_LOGGING        60
+
+/* Task periods (microseconds) */
+#define PERIOD_FAST_CONTROL     100     /* 10 kHz */
+#define PERIOD_SLOW_CONTROL     1000    /* 1 kHz */
+#define PERIOD_MONITOR          10000   /* 100 Hz */
+#define PERIOD_LOGGING          100000  /* 10 Hz */
+
+/* ==========================================================================
+ * Shared Data (in LMU)
+ * ========================================================================== */
+
+/* System state */
+typedef struct {
+    volatile uint32_t heartbeat[JEZGRO_MAX_CORES];
+    volatile bool core_ready[JEZGRO_MAX_CORES];
+    volatile bool system_running;
+    volatile uint32_t error_count;
+} system_state_t;
+
+static system_state_t g_system __attribute__((section(".shared")));
+
+/* Cross-core spinlock for shared state */
+static sync_spinlock_t g_state_lock __attribute__((section(".spinlock")));
+
+/* ==========================================================================
+ * Demo Tasks
+ * ========================================================================== */
+
+/**
+ * @brief Coordinator task (CPU0)
+ *
+ * Monitors all cores, handles system coordination.
+ */
+static void coordinator_task(void *arg)
+{
+    (void)arg;
+    uint32_t iteration = 0;
+
+    while (1) {
+        /* Update heartbeat */
+        g_system.heartbeat[CPU0]++;
+
+        /* Check all core heartbeats */
+        for (uint32_t i = 1; i < JEZGRO_MAX_CORES; i++) {
+            if (g_system.core_ready[i]) {
+                /* Check if core is still alive */
+                static uint32_t prev_heartbeat[JEZGRO_MAX_CORES];
+                if (g_system.heartbeat[i] == prev_heartbeat[i]) {
+                    /* Core may be stuck */
+                    g_system.error_count++;
+                }
+                prev_heartbeat[i] = g_system.heartbeat[i];
+            }
+        }
+
+        /* Debug output every 100 iterations */
+        if (++iteration % 100 == 0) {
+            hal_debug_puts("JEZGRO alive: ");
+            hal_debug_hex(iteration);
+            hal_debug_puts("\r\n");
+        }
+
+        task_delay(jezgro_ms_to_ticks(10));  /* 100 Hz */
+    }
+}
+
+/**
+ * @brief Safety monitor task (CPU0)
+ *
+ * Checks for safety violations, watchdog feeding.
+ */
+static void safety_monitor_task(void *arg)
+{
+    (void)arg;
+
+    while (1) {
+        /* Feed watchdog */
+        hal_watchdog_reset();
+
+        /* Check error count */
+        if (g_system.error_count > 10) {
+            /* Too many errors - initiate safe shutdown */
+            g_system.system_running = false;
+            hal_debug_puts("SAFETY: Too many errors!\r\n");
+        }
+
+        /* Check stack usage on all tasks */
+        /* TODO: Implement stack monitoring */
+
+        task_delay(jezgro_ms_to_ticks(100));  /* 10 Hz */
+    }
+}
+
+/**
+ * @brief Control task (CPU1-3, safety cores)
+ *
+ * Periodic control loop. Runs at high frequency.
+ */
+static void control_task(void *arg)
+{
+    uint32_t core_id = (uint32_t)(uintptr_t)arg;
+
+    /* Signal ready */
+    g_system.core_ready[core_id] = true;
+
+    while (g_system.system_running) {
+        /* Update heartbeat */
+        g_system.heartbeat[core_id]++;
+
+        /* Simulate control computation */
+        volatile uint32_t dummy = 0;
+        for (uint32_t i = 0; i < 100; i++) {
+            dummy += i;
+        }
+
+        /* Wait for next period */
+        task_wait_for_period();
+    }
+}
+
+/**
+ * @brief Background task (CPU4-5, performance cores)
+ *
+ * Non-critical processing, logging, etc.
+ */
+static void background_task(void *arg)
+{
+    uint32_t core_id = (uint32_t)(uintptr_t)arg;
+
+    /* Signal ready */
+    g_system.core_ready[core_id] = true;
+
+    while (g_system.system_running) {
+        /* Update heartbeat */
+        g_system.heartbeat[core_id]++;
+
+        /* Process any IPC messages */
+        /* TODO: ipc_process_pending() not implemented in ek-kor */
+
+        /* Yield to other tasks */
+        task_yield();
+
+        task_delay(jezgro_ms_to_ticks(1));
+    }
+}
+
+/* ==========================================================================
+ * Per-Core Main Functions
+ * ========================================================================== */
+
+/**
+ * @brief CPU0 main - Boot core
+ */
+void cpu0_main(void)
+{
+    hal_debug_puts("\r\n");
+    hal_debug_puts("=================================\r\n");
+    hal_debug_puts("JEZGRO RTOS for TC397XP\r\n");
+    hal_debug_puts("Version: ");
+    hal_debug_puts(jezgro_version());
+    hal_debug_puts("\r\n");
+    hal_debug_puts("=================================\r\n");
+    hal_debug_puts("\r\n");
+
+    /* Initialize HAL */
+    hal_init();
+    hal_init_core(CPU0);
+
+    hal_debug_puts("CPU0: HAL initialized\r\n");
+
+    /* Initialize kernel */
+    jezgro_init();
+    task_init();
+    scheduler_init();
+
+    hal_debug_puts("CPU0: Kernel initialized\r\n");
+
+    /* Initialize IPC */
+    ipc_mailbox_init();
+    ipc_buffer_pool_init();
+
+    hal_debug_puts("CPU0: IPC initialized\r\n");
+
+    /* Initialize shared state */
+    sync_spinlock_init(&g_state_lock, "state");
+    for (uint32_t i = 0; i < JEZGRO_MAX_CORES; i++) {
+        g_system.heartbeat[i] = 0;
+        g_system.core_ready[i] = false;
+    }
+    g_system.system_running = true;
+    g_system.error_count = 0;
+    g_system.core_ready[CPU0] = true;
+
+    /* Initialize systick */
+    hal_systick_init(scheduler_tick);
+
+    /* Create idle task */
+    task_create_idle();
+
+    /* Create coordinator task */
+    task_params_t params = JEZGRO_TASK_PARAMS_DEFAULT;
+    params.name = "coord";
+    params.func = coordinator_task;
+    params.priority = PRIORITY_COORDINATOR;
+    params.stack_size = 2048;
+    params.core_affinity = CPU0;
+    task_create(&params, NULL);
+
+    /* Create safety monitor task */
+    params.name = "safety";
+    params.func = safety_monitor_task;
+    params.priority = PRIORITY_SAFETY;
+    task_create(&params, NULL);
+
+    hal_debug_puts("CPU0: Tasks created\r\n");
+
+    /* Start secondary cores */
+    hal_debug_puts("CPU0: Starting secondary cores...\r\n");
+    multicore_start_all();
+
+    /* Wait for all cores to be ready */
+    hal_debug_puts("CPU0: Waiting for cores...\r\n");
+    multicore_wait_all_ready(5000);
+
+    hal_debug_puts("CPU0: All cores ready, starting scheduler\r\n");
+
+    /* Start scheduler - never returns */
+    jezgro_start();
+}
+
+/**
+ * @brief CPU1 main - Safety core #1
+ */
+void cpu1_main(void)
+{
+    /* Initialize per-core HAL */
+    hal_init_core(CPU1);
+
+    /* Initialize scheduler for this core */
+    scheduler_init();
+
+    /* Initialize systick */
+    hal_systick_init(scheduler_tick);
+
+    /* Create idle task */
+    task_create_idle();
+
+    /* Create control task */
+    task_params_t params = JEZGRO_TASK_PARAMS_DEFAULT;
+    params.name = "ctrl1";
+    params.func = control_task;
+    params.arg = (void*)(uintptr_t)CPU1;
+    params.priority = PRIORITY_CONTROL;
+    params.stack_size = 2048;
+    params.core_affinity = CPU1;
+    params.period_us = PERIOD_SLOW_CONTROL;
+    params.flags = TASK_FLAG_PERIODIC | TASK_FLAG_REALTIME | TASK_FLAG_SAFETY;
+    task_create(&params, NULL);
+
+    /* Signal ready to CPU0 */
+    multicore_signal_ready();
+
+    /* Start scheduler */
+    jezgro_start();
+}
+
+/**
+ * @brief CPU2 main - Safety core #2
+ */
+void cpu2_main(void)
+{
+    hal_init_core(CPU2);
+    scheduler_init();
+    hal_systick_init(scheduler_tick);
+    task_create_idle();
+
+    task_params_t params = JEZGRO_TASK_PARAMS_DEFAULT;
+    params.name = "ctrl2";
+    params.func = control_task;
+    params.arg = (void*)(uintptr_t)CPU2;
+    params.priority = PRIORITY_CONTROL;
+    params.stack_size = 2048;
+    params.core_affinity = CPU2;
+    params.period_us = PERIOD_SLOW_CONTROL;
+    params.flags = TASK_FLAG_PERIODIC | TASK_FLAG_REALTIME | TASK_FLAG_SAFETY;
+    task_create(&params, NULL);
+
+    multicore_signal_ready();
+    jezgro_start();
+}
+
+/**
+ * @brief CPU3 main - Safety core #3
+ */
+void cpu3_main(void)
+{
+    hal_init_core(CPU3);
+    scheduler_init();
+    hal_systick_init(scheduler_tick);
+    task_create_idle();
+
+    task_params_t params = JEZGRO_TASK_PARAMS_DEFAULT;
+    params.name = "ctrl3";
+    params.func = control_task;
+    params.arg = (void*)(uintptr_t)CPU3;
+    params.priority = PRIORITY_CONTROL;
+    params.stack_size = 2048;
+    params.core_affinity = CPU3;
+    params.period_us = PERIOD_SLOW_CONTROL;
+    params.flags = TASK_FLAG_PERIODIC | TASK_FLAG_REALTIME | TASK_FLAG_SAFETY;
+    task_create(&params, NULL);
+
+    multicore_signal_ready();
+    jezgro_start();
+}
+
+/**
+ * @brief CPU4 main - Performance core #1
+ */
+void cpu4_main(void)
+{
+    hal_init_core(CPU4);
+    scheduler_init();
+    hal_systick_init(scheduler_tick);
+    task_create_idle();
+
+    task_params_t params = JEZGRO_TASK_PARAMS_DEFAULT;
+    params.name = "bg4";
+    params.func = background_task;
+    params.arg = (void*)(uintptr_t)CPU4;
+    params.priority = PRIORITY_BACKGROUND;
+    params.stack_size = 2048;
+    params.core_affinity = CPU4;
+    task_create(&params, NULL);
+
+    multicore_signal_ready();
+    jezgro_start();
+}
+
+/**
+ * @brief CPU5 main - Performance core #2
+ */
+void cpu5_main(void)
+{
+    hal_init_core(CPU5);
+    scheduler_init();
+    hal_systick_init(scheduler_tick);
+    task_create_idle();
+
+    task_params_t params = JEZGRO_TASK_PARAMS_DEFAULT;
+    params.name = "bg5";
+    params.func = background_task;
+    params.arg = (void*)(uintptr_t)CPU5;
+    params.priority = PRIORITY_BACKGROUND;
+    params.stack_size = 2048;
+    params.core_affinity = CPU5;
+    task_create(&params, NULL);
+
+    multicore_signal_ready();
+    jezgro_start();
+}
+
+/* ==========================================================================
+ * Kernel Callbacks
+ * ========================================================================== */
+
+/**
+ * @brief Kernel panic handler
+ */
+void jezgro_panic(const char *msg)
+{
+    __disable();
+
+    hal_debug_puts("\r\n!!! KERNEL PANIC !!!\r\n");
+    hal_debug_puts("Core: ");
+    hal_debug_hex(hal_get_core_id());
+    hal_debug_puts("\r\n");
+    hal_debug_puts("Message: ");
+    hal_debug_puts(msg);
+    hal_debug_puts("\r\n");
+
+    /* Halt */
+    while (1) {
+        __nop();
+    }
+}
+
+/**
+ * @brief Deadline miss handler
+ */
+void jezgro_deadline_miss_hook(task_handle_t task, uint32_t overrun)
+{
+    hal_debug_puts("DEADLINE MISS: ");
+    hal_debug_puts(task_get_name(task));
+    hal_debug_puts(" overrun=");
+    hal_debug_hex(overrun);
+    hal_debug_puts("us\r\n");
+
+    g_system.error_count++;
+}
+
+/**
+ * @brief Stack overflow handler
+ */
+void jezgro_stack_overflow_hook(task_handle_t task)
+{
+    hal_debug_puts("STACK OVERFLOW: ");
+    hal_debug_puts(task_get_name(task));
+    hal_debug_puts("\r\n");
+
+    jezgro_panic("Stack overflow");
+}
+
+/* ==========================================================================
+ * Kernel Support Functions
+ * ========================================================================== */
+
+const char* jezgro_version(void)
+{
+    return JEZGRO_VERSION_STRING;
+}
+
+jezgro_error_t jezgro_init(void)
+{
+    /* Initialize per-core kernel state */
+    return JEZGRO_OK;
+}
+
+void jezgro_start(void)
+{
+    scheduler_start();
+}
+
+kernel_state_t jezgro_get_state(void)
+{
+    return KERNEL_STATE_RUNNING;
+}
+
+jezgro_ticks_t jezgro_get_ticks(void)
+{
+    return scheduler_get_ticks();
+}
+
+jezgro_time_us_t jezgro_get_time_us(void)
+{
+    return hal_get_time_us();
+}
+
+jezgro_time_ms_t jezgro_ticks_to_ms(jezgro_ticks_t ticks)
+{
+    return ticks;  /* Assuming 1ms tick */
+}
+
+jezgro_ticks_t jezgro_ms_to_ticks(jezgro_time_ms_t ms)
+{
+    return ms;  /* Assuming 1ms tick */
+}
+
+bool jezgro_in_isr(void)
+{
+    /* Check ICR.CCPN (Current CPU Priority Number) */
+    uint32_t icr = __mfcr(CSFR_ICR);
+    return (icr & ICR_CCPN_MASK) != 0;
+}
+
+void jezgro_enter_critical(void)
+{
+    hal_enter_critical();
+}
+
+void jezgro_exit_critical(void)
+{
+    hal_exit_critical();
+}

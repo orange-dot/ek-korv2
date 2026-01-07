@@ -1,0 +1,93 @@
+# JEZGRO ROJ (Swarm) Multi-Node Simulation
+# Simulates 3 EK3 modules communicating via CAN-FD bus
+#
+# Usage:
+#   renode swarm-simulation.resc
+#   (monitor) start
+
+# Create shared CAN bus hub
+emulation CreateCANHub "canHub"
+
+# ============================================================
+# Node 1: EK3 Module 1 (Master/Coordinator)
+# ============================================================
+mach create "ek3-node1"
+machine LoadPlatformDescription @stm32g474-minimal.repl
+
+# Connect FDCAN1 to shared CAN bus
+connector Connect sysbus.fdcan1 canHub
+
+# Load firmware
+sysbus LoadELF @../build-arm/jezgro_firmware
+
+# Create UART analyzer for debug output
+showAnalyzer sysbus.usart1 Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+
+# Set machine variables (node ID will be read from memory)
+sysbus Tag <0x20000000 4> "NODE_ID" 1
+
+# ============================================================
+# Node 2: EK3 Module 2 (Worker)
+# ============================================================
+mach create "ek3-node2"
+machine LoadPlatformDescription @stm32g474-minimal.repl
+
+# Connect FDCAN1 to shared CAN bus
+connector Connect sysbus.fdcan1 canHub
+
+# Load firmware
+sysbus LoadELF @../build-arm/jezgro_firmware
+
+# Create UART analyzer
+showAnalyzer sysbus.usart1 Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+
+# Set node ID
+sysbus Tag <0x20000000 4> "NODE_ID" 2
+
+# ============================================================
+# Node 3: EK3 Module 3 (Worker)
+# ============================================================
+mach create "ek3-node3"
+machine LoadPlatformDescription @stm32g474-minimal.repl
+
+# Connect FDCAN1 to shared CAN bus
+connector Connect sysbus.fdcan1 canHub
+
+# Load firmware
+sysbus LoadELF @../build-arm/jezgro_firmware
+
+# Create UART analyzer
+showAnalyzer sysbus.usart1 Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+
+# Set node ID
+sysbus Tag <0x20000000 4> "NODE_ID" 3
+
+# ============================================================
+# Simulation Control
+# ============================================================
+
+# Switch to machine 1 for default interaction
+mach set "ek3-node1"
+
+# Set up logging
+logLevel 3 canHub
+logLevel 1 sysbus.fdcan1
+
+echo ""
+echo "========================================"
+echo "  JEZGRO ROJ (Swarm) Simulation Ready"
+echo "========================================"
+echo ""
+echo "Machines:"
+echo "  - ek3-node1 (Master)"
+echo "  - ek3-node2 (Worker)"
+echo "  - ek3-node3 (Worker)"
+echo ""
+echo "CAN Bus: canHub"
+echo ""
+echo "Commands:"
+echo "  start              - Start all machines"
+echo "  pause              - Pause all machines"
+echo "  mach set <name>    - Switch to machine"
+echo "  sysbus.usart1 DumpHistoryBuffer"
+echo ""

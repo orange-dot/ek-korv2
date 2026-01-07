@@ -16,7 +16,7 @@ import {
   Calendar,
   User,
 } from 'lucide-react';
-import PasswordGate from '../components/PasswordGate';
+import PasswordGate, { ACCESS_TIERS } from '../components/PasswordGate';
 
 // Document structure
 const DOCUMENT_CATEGORIES = [
@@ -991,11 +991,7 @@ function PatentPortfolioContent() {
 
 export default function PatentPortfolioPage() {
   return (
-    <PasswordGate
-      password="ritamneredadjaniritamneredadjanidjanjipoizborudjanji"
-      storageKey="ek_patent_unlocked"
-      title="Patent Portfolio"
-    >
+    <PasswordGate tier={ACCESS_TIERS.INVESTOR}>
       <PatentPortfolioContent />
     </PasswordGate>
   );

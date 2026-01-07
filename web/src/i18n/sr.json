@@ -17,7 +17,11 @@
     "jezgroDev": "JEZGRO Dev",
     "roj": "ROJ",
     "quickPitch": "Brzi Pitch",
-    "v2g": "V2G"
+    "v2g": "V2G",
+    "docs": "Dokumentacija",
+    "partner": "Partner",
+    "investor": "Investitor",
+    "portals": "Portali"
   },
   "simulation": {
     "title": "Simulacija Sistema",
@@ -185,6 +189,63 @@
         "point2": "Kvalifikovani tehničari sa pravom opremom",
         "point3": "Refurbishment do fabričkih specifikacija",
         "note": "Cirkularna ekonomija - moduli se vraćaju u upotrebu"
+      }
+    }
+  },
+  "selfHealingFleet": {
+    "title": "Samoizlečiva Flota",
+    "subtitle": "Bez tehničara na terenu. Nikad.",
+    "description": "Autobusi nose rezervne EK3 module. Roboti menjaju pokvarene module za 60 sekundi. Pokvareni moduli putuju nazad u servis redovnim autobuskim linijama. Nula izlazaka servisnih vozila.",
+    "steps": {
+      "predict": {
+        "title": "AI Predviđa",
+        "description": "2 nedelje pre kvara, AI detektuje degradaciju",
+        "icon": "brain"
+      },
+      "carry": {
+        "title": "Autobus Nosi Rezerve",
+        "description": "Svaki autobus nosi 2-4 rezervna EK3 modula",
+        "icon": "bus"
+      },
+      "swap": {
+        "title": "Robot Menja",
+        "description": "60-sekundna robotska zamena, bez čoveka",
+        "icon": "robot"
+      },
+      "transport": {
+        "title": "Transport Flotom",
+        "description": "Pokvareni modul putuje u depo sledećim autobusom",
+        "icon": "route"
+      }
+    },
+    "comparison": {
+      "traditional": {
+        "title": "Tradicionalno",
+        "time": "3-4 sata",
+        "steps": ["Alarm", "Pozovi tehničara", "Vožnja do lokacije", "Dijagnostika", "Naruči delove", "Popravka"]
+      },
+      "ek": {
+        "title": "ELEKTROKOMBINACIJA",
+        "time": "2 minuta",
+        "steps": ["AI detektuje", "Robot A dijagnostikuje", "Robot B menja", "Autobus nastavlja"]
+      }
+    },
+    "benefits": {
+      "noTruckRolls": {
+        "title": "Nula izlazaka",
+        "description": "Pokvareni moduli putuju redovnim linijama"
+      },
+      "noFieldTech": {
+        "title": "Bez tehničara na terenu",
+        "description": "Roboti obavljaju sve terenske operacije"
+      },
+      "fleetSpares": {
+        "title": "Flota = skladište rezervi",
+        "description": "Autobusi nose distribuirani rezervni kapacitet"
+      },
+      "circular": {
+        "title": "Cirkularna ekonomija",
+        "description": "Moduli se popravljaju u depou, vraćaju u upotrebu"
       }
     }
   },

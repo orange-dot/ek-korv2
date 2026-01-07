@@ -17,7 +17,11 @@
     "jezgroDev": "JEZGRO Dev",
     "roj": "ROJ",
     "quickPitch": "Quick Pitch",
-    "v2g": "V2G"
+    "v2g": "V2G",
+    "docs": "Docs",
+    "partner": "Partner",
+    "investor": "Investor",
+    "portals": "Portals"
   },
   "simulation": {
     "title": "System Simulation",
@@ -255,6 +259,63 @@
         "point2": "Qualified technicians with proper equipment",
         "point3": "Refurbishment to factory specifications",
         "note": "Circular economy - modules return to service"
+      }
+    }
+  },
+  "selfHealingFleet": {
+    "title": "Self-Healing Fleet",
+    "subtitle": "No technicians in the field. Ever.",
+    "description": "Buses carry spare EK3 modules. Robots swap failed modules in 60 seconds. Failed modules travel back to service center on regular bus routes. Zero truck rolls.",
+    "steps": {
+      "predict": {
+        "title": "AI Predicts",
+        "description": "2 weeks before failure, AI detects degradation",
+        "icon": "brain"
+      },
+      "carry": {
+        "title": "Bus Carries Spares",
+        "description": "Each bus carries 2-4 spare EK3 modules",
+        "icon": "bus"
+      },
+      "swap": {
+        "title": "Robot Swaps",
+        "description": "60-second robotic replacement, no human needed",
+        "icon": "robot"
+      },
+      "transport": {
+        "title": "Fleet Transport",
+        "description": "Failed module travels to depot on next bus",
+        "icon": "route"
+      }
+    },
+    "comparison": {
+      "traditional": {
+        "title": "Traditional",
+        "time": "3-4 hours",
+        "steps": ["Alarm", "Dispatch technician", "Drive to site", "Diagnose", "Order parts", "Repair"]
+      },
+      "ek": {
+        "title": "ELEKTROKOMBINACIJA",
+        "time": "2 minutes",
+        "steps": ["AI detects", "Robot A diagnoses", "Robot B swaps", "Bus continues"]
+      }
+    },
+    "benefits": {
+      "noTruckRolls": {
+        "title": "Zero truck rolls",
+        "description": "Failed modules travel on regular bus routes"
+      },
+      "noFieldTech": {
+        "title": "No field technicians",
+        "description": "Robots handle all field operations"
+      },
+      "fleetSpares": {
+        "title": "Fleet = spare inventory",
+        "description": "Buses carry distributed spare capacity"
+      },
+      "circular": {
+        "title": "Circular economy",
+        "description": "Modules repaired at depot, returned to service"
       }
     }
   },

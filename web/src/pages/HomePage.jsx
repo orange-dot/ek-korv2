@@ -3,6 +3,7 @@ import Problem from '../components/Problem';
 import Product from '../components/Product';
 import Philosophy from '../components/Philosophy';
 import RobotSystem from '../components/RobotSystem';
+import SelfHealingFleet from '../components/SelfHealingFleet';
 import Configurations from '../components/Configurations';
 import Timeline from '../components/Timeline';
 import Team from '../components/Team';
@@ -16,6 +17,7 @@ export default function HomePage() {
       <Product />
       <Philosophy />
       <RobotSystem />
+      <SelfHealingFleet />
       <Configurations />
       <Timeline />
       <Team />

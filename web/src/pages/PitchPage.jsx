@@ -20,7 +20,7 @@ import {
   Shield,
   Globe,
 } from 'lucide-react';
-import PasswordGate from '../components/PasswordGate';
+import PasswordGate, { ACCESS_TIERS } from '../components/PasswordGate';
 
 // Pitch deck sections
 const PITCH_SECTIONS = [
@@ -590,11 +590,7 @@ function PitchContent() {
 
 export default function PitchPage() {
   return (
-    <PasswordGate
-      password="kassad"
-      storageKey="ek_pitch_unlocked"
-      title="Investor Presentation"
-    >
+    <PasswordGate tier={ACCESS_TIERS.INVESTOR}>
       <PitchContent />
     </PasswordGate>
   );
