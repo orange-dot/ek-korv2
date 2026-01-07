@@ -80,6 +80,12 @@ bool ekk_sched_is_locked(void);
  */
 bool ekk_sched_is_running(void);
 
+/**
+ * @brief Set the idle task for the current core
+ * @param task Idle task handle
+ */
+void ekk_sched_set_idle_task(ekk_task_t task);
+
 /* ==========================================================================
  * Task Queue Management
  * ========================================================================== */
@@ -134,6 +140,16 @@ ekk_task_t ekk_sched_get_current(void);
  * @return Task to run (idle task if none ready)
  */
 ekk_task_t ekk_sched_select_next(void);
+
+/**
+ * @brief Perform context switch (called from HAL)
+ *
+ * Called from platform's context switch handler (e.g., PendSV on ARM).
+ *
+ * @param current_sp Current task's saved stack pointer
+ * @return Next task's stack pointer (context_data)
+ */
+uint32_t ekk_sched_do_switch(uint32_t current_sp);
 
 /* ==========================================================================
  * Timer Tick Handling

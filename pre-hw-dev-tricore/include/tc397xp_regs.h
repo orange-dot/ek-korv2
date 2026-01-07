@@ -367,6 +367,7 @@ extern "C" {
 #define SRC_SRPN_MASK       0x000000FF  /**< Service Request Priority Number */
 #define SRC_SRE             (1U << 10)  /**< Service Request Enable */
 #define SRC_TOS_MASK        0x00001800  /**< Type of Service */
+#define SRC_TOS_SHIFT       11          /**< TOS field bit position */
 #define SRC_TOS_CPU0        0x00000000  /**< Route to CPU0 */
 #define SRC_TOS_CPU1        0x00000800  /**< Route to CPU1 */
 #define SRC_TOS_CPU2        0x00001000  /**< Route to CPU2 */

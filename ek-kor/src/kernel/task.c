@@ -73,6 +73,12 @@ ekk_err_t ekk_task_create(const ekk_task_params_t *params, ekk_task_t *handle)
     tcb->effective_priority = params->priority;
     tcb->period_us = params->period_us;
     tcb->relative_deadline_us = params->deadline_us ? params->deadline_us : params->period_us;
+    /* Set initial absolute deadline for EDF scheduling */
+    if (tcb->relative_deadline_us > 0) {
+        tcb->deadline = ekk_hal_get_time_us() + tcb->relative_deadline_us;
+    } else {
+        tcb->deadline = 0;  /* No deadline = lowest priority in EDF */
+    }
     tcb->entry_func = params->func;
     tcb->entry_arg = params->arg;
 
@@ -86,7 +92,8 @@ ekk_err_t ekk_task_create(const ekk_task_params_t *params, ekk_task_t *handle)
         tcb->stack_base = params->stack_base;
     } else {
         /* Static allocation from pool - simplified */
-        static uint8_t stack_pool[EKK_MAX_TASKS][EKK_DEFAULT_STACK_SIZE];
+        /* Align to 8 bytes as required by ARM AAPCS */
+        static uint8_t stack_pool[EKK_MAX_TASKS][EKK_DEFAULT_STACK_SIZE] __attribute__((aligned(8)));
         static uint32_t stack_idx = 0;
         if (stack_idx < EKK_MAX_TASKS) {
             tcb->stack_base = stack_pool[stack_idx++];
@@ -383,7 +390,12 @@ ekk_err_t ekk_task_create_idle(void)
     params.stack_size = EKK_MIN_STACK_SIZE;
 
     ekk_task_t handle;
-    return ekk_task_create(&params, &handle);
+    ekk_err_t err = ekk_task_create(&params, &handle);
+    if (err == EKK_OK) {
+        /* Register as the idle task for this core */
+        ekk_sched_set_idle_task(handle);
+    }
+    return err;
 }
 
 EKK_WEAK void ekk_task_idle_hook(void)

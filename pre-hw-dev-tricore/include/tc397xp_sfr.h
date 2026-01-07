@@ -59,6 +59,63 @@ extern "C" {
 #define CSFR_BIV        0xFE20      /**< Base Interrupt Vector Table Pointer */
 
 /* --------------------------------------------------------------------------
+ * Memory Protection System (MPS) - Data Protection Registers
+ * TC1.6.2 has 18 data protection register pairs (DPR0-DPR17)
+ * Each pair has Lower (L) and Upper (U) bounds
+ * -------------------------------------------------------------------------- */
+
+/* Data Protection Registers - Set 0 (Protection Register Set 0) */
+#define CSFR_DPR0_L     0xC000      /**< Data Protection Range 0 Lower */
+#define CSFR_DPR0_U     0xC004      /**< Data Protection Range 0 Upper */
+#define CSFR_DPR1_L     0xC008      /**< Data Protection Range 1 Lower */
+#define CSFR_DPR1_U     0xC00C      /**< Data Protection Range 1 Upper */
+#define CSFR_DPR2_L     0xC010      /**< Data Protection Range 2 Lower */
+#define CSFR_DPR2_U     0xC014      /**< Data Protection Range 2 Upper */
+#define CSFR_DPR3_L     0xC018      /**< Data Protection Range 3 Lower */
+#define CSFR_DPR3_U     0xC01C      /**< Data Protection Range 3 Upper */
+#define CSFR_DPR4_L     0xC020      /**< Data Protection Range 4 Lower */
+#define CSFR_DPR4_U     0xC024      /**< Data Protection Range 4 Upper */
+#define CSFR_DPR5_L     0xC028      /**< Data Protection Range 5 Lower */
+#define CSFR_DPR5_U     0xC02C      /**< Data Protection Range 5 Upper */
+#define CSFR_DPR6_L     0xC030      /**< Data Protection Range 6 Lower */
+#define CSFR_DPR6_U     0xC034      /**< Data Protection Range 6 Upper */
+#define CSFR_DPR7_L     0xC038      /**< Data Protection Range 7 Lower */
+#define CSFR_DPR7_U     0xC03C      /**< Data Protection Range 7 Upper */
+
+/* Data Protection Read/Write Enable - Per PRS (4 sets: PRS 0-3) */
+#define CSFR_DPRE_0     0xE010      /**< Data Protection Read Enable Set 0 */
+#define CSFR_DPWE_0     0xE020      /**< Data Protection Write Enable Set 0 */
+#define CSFR_DPRE_1     0xE014      /**< Data Protection Read Enable Set 1 */
+#define CSFR_DPWE_1     0xE024      /**< Data Protection Write Enable Set 1 */
+#define CSFR_DPRE_2     0xE018      /**< Data Protection Read Enable Set 2 */
+#define CSFR_DPWE_2     0xE028      /**< Data Protection Write Enable Set 2 */
+#define CSFR_DPRE_3     0xE01C      /**< Data Protection Read Enable Set 3 */
+#define CSFR_DPWE_3     0xE02C      /**< Data Protection Write Enable Set 3 */
+
+/* Code Protection Registers */
+#define CSFR_CPR0_L     0xD000      /**< Code Protection Range 0 Lower */
+#define CSFR_CPR0_U     0xD004      /**< Code Protection Range 0 Upper */
+#define CSFR_CPR1_L     0xD008      /**< Code Protection Range 1 Lower */
+#define CSFR_CPR1_U     0xD00C      /**< Code Protection Range 1 Upper */
+#define CSFR_CPR2_L     0xD010      /**< Code Protection Range 2 Lower */
+#define CSFR_CPR2_U     0xD014      /**< Code Protection Range 2 Upper */
+#define CSFR_CPR3_L     0xD018      /**< Code Protection Range 3 Lower */
+#define CSFR_CPR3_U     0xD01C      /**< Code Protection Range 3 Upper */
+
+/* Code Protection Execute Enable */
+#define CSFR_CPXE_0     0xE000      /**< Code Protection Execute Enable Set 0 */
+#define CSFR_CPXE_1     0xE004      /**< Code Protection Execute Enable Set 1 */
+#define CSFR_CPXE_2     0xE008      /**< Code Protection Execute Enable Set 2 */
+#define CSFR_CPXE_3     0xE00C      /**< Code Protection Execute Enable Set 3 */
+
+/* Memory Trap/Error Registers */
+#define CSFR_DEADD      0x9020      /**< Data Error Address Register */
+#define CSFR_DIEAR      0x9024      /**< Data Integrity Error Address Register */
+#define CSFR_DIETR      0x9028      /**< Data Integrity Error Trap Register */
+#define CSFR_PIETR      0x9214      /**< Program Integrity Error Trap Register */
+#define CSFR_PIEAR      0x9210      /**< Program Integrity Error Address Register */
+
+/* --------------------------------------------------------------------------
  * Debug Registers
  * -------------------------------------------------------------------------- */
 #define CSFR_DBGSR      0xFD00      /**< Debug Status Register */

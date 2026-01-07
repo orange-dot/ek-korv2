@@ -25,11 +25,15 @@ extern "C" {
 #define IRQ_MAX_PRIORITY        255     /**< Maximum interrupt priority */
 #define IRQ_MIN_PRIORITY        1       /**< Minimum interrupt priority (0 = disabled) */
 #define IRQ_PRIORITY_KERNEL     200     /**< Kernel-level interrupts */
+#define IRQ_PRIORITY_IPI        150     /**< Inter-processor interrupt priority */
 #define IRQ_PRIORITY_SYSTICK    100     /**< System tick priority */
 #define IRQ_PRIORITY_LOW        50      /**< Low priority */
 
 /* Number of service request nodes */
 #define SRC_COUNT               1024    /**< Total SRC nodes in TC397XP */
+
+/* GPSR interrupt numbers (base + core * 4 + channel) */
+#define IRQ_GPSR_BASE           200     /**< Base IRQ number for GPSR */
 
 /* ==========================================================================
  * Types

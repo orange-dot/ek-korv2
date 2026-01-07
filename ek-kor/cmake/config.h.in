@@ -81,6 +81,16 @@
 /** Debug mode */
 #cmakedefine01 EKK_DEBUG
 
+/** Memory Protection Unit support */
+#cmakedefine01 EKK_USE_MPU
+
+/* ==========================================================================
+ * MPU Configuration
+ * ========================================================================== */
+
+/** Maximum MPU regions per task */
+#define EKK_MPU_REGIONS_PER_TASK    @EKK_MPU_REGIONS_PER_TASK@
+
 /* ==========================================================================
  * Derived Configuration
  * ========================================================================== */

@@ -316,6 +316,160 @@ void* ekk_hal_get_stack_ptr(void);
  */
 bool ekk_hal_check_stack(void *stack_bottom, uint32_t stack_size);
 
+/* ==========================================================================
+ * Memory Protection Unit (MPU)
+ * ========================================================================== */
+
+/* Forward declaration */
+struct ekk_tcb;
+
+/**
+ * @brief Initialize MPU hardware
+ * @return 0 on success, negative on error
+ */
+int ekk_hal_mpu_init(void);
+
+/**
+ * @brief Get number of MPU regions supported by hardware
+ * @return Number of regions (0 if MPU not supported)
+ */
+uint8_t ekk_hal_mpu_get_region_count(void);
+
+/**
+ * @brief Configure an MPU region
+ * @param region Region number
+ * @param base Base address (must be aligned)
+ * @param size Size in bytes (must be power of 2)
+ * @param access Access permissions
+ * @param attr Memory attributes
+ * @return 0 on success
+ */
+int ekk_hal_mpu_configure_region(uint8_t region, void *base, uint32_t size,
+                                  uint8_t access, uint8_t attr);
+
+/**
+ * @brief Enable MPU region
+ * @param region Region number
+ */
+void ekk_hal_mpu_enable_region(uint8_t region);
+
+/**
+ * @brief Disable MPU region
+ * @param region Region number
+ */
+void ekk_hal_mpu_disable_region(uint8_t region);
+
+/**
+ * @brief Enable MPU globally
+ */
+void ekk_hal_mpu_enable(void);
+
+/**
+ * @brief Disable MPU globally
+ */
+void ekk_hal_mpu_disable(void);
+
+/**
+ * @brief Load MPU configuration for a task
+ * @param tcb Task control block with MPU regions
+ */
+void ekk_hal_mpu_load_task_regions(const struct ekk_tcb *tcb);
+
+/* ==========================================================================
+ * Privilege Control
+ * ========================================================================== */
+
+/**
+ * @brief Enter user (unprivileged) mode
+ */
+void ekk_hal_enter_user_mode(void);
+
+/**
+ * @brief Enter privileged (supervisor) mode
+ */
+void ekk_hal_enter_privileged_mode(void);
+
+/**
+ * @brief Check if currently in privileged mode
+ * @return true if privileged
+ */
+bool ekk_hal_is_privileged(void);
+
+/* ==========================================================================
+ * Fault Handling
+ * ========================================================================== */
+
+/**
+ * @brief Fault handler callback type
+ * @param fault_type Type of fault
+ * @param fault_addr Faulting address (if applicable)
+ */
+typedef void (*ekk_hal_fault_handler_t)(uint32_t fault_type, void *fault_addr);
+
+/**
+ * @brief Register fault handler
+ * @param handler Fault handler function
+ */
+void ekk_hal_register_fault_handler(ekk_hal_fault_handler_t handler);
+
+/**
+ * @brief Get last fault address
+ * @return Faulting address
+ */
+void* ekk_hal_get_fault_address(void);
+
+/**
+ * @brief Get last fault status
+ * @return Platform-specific fault status
+ */
+uint32_t ekk_hal_get_fault_status(void);
+
+/**
+ * @brief Clear fault status
+ */
+void ekk_hal_clear_fault_status(void);
+
+/* ==========================================================================
+ * Inter-Processor Interrupt (IPI)
+ * ========================================================================== */
+
+/**
+ * @brief IPI callback type
+ */
+typedef void (*ekk_hal_ipi_handler_t)(uint32_t sender_core, uint32_t msg);
+
+/**
+ * @brief Initialize IPI subsystem
+ * @return 0 on success
+ */
+int ekk_hal_ipi_init(void);
+
+/**
+ * @brief Register IPI handler
+ * @param handler IPI handler function
+ */
+void ekk_hal_ipi_register_handler(ekk_hal_ipi_handler_t handler);
+
+/**
+ * @brief Send IPI to specific core
+ * @param target_core Target core ID
+ * @param msg Message value (platform-specific)
+ * @return 0 on success
+ */
+int ekk_hal_ipi_send(uint32_t target_core, uint32_t msg);
+
+/**
+ * @brief Send IPI to all other cores
+ * @param msg Message value
+ * @return Number of cores notified
+ */
+uint32_t ekk_hal_ipi_broadcast(uint32_t msg);
+
+/**
+ * @brief Acknowledge IPI (call from IPI handler)
+ */
+void ekk_hal_ipi_ack(void);
+
 #ifdef __cplusplus
 }
 #endif

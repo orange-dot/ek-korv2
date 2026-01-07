@@ -10,6 +10,7 @@
 #define EKK_TASK_H
 
 #include <ek-kor/types.h>
+#include <ek-kor/mpu.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,6 +76,13 @@ typedef struct ekk_tcb {
 
     /* User data */
     void            *user_data;             /**< Application-specific data */
+
+#if EKK_USE_MPU
+    /* Memory Protection */
+    ekk_mpu_region_t mpu_regions[EKK_MPU_REGIONS_PER_TASK]; /**< MPU regions */
+    uint8_t          mpu_region_count;      /**< Number of active regions */
+    ekk_privilege_t  privilege;             /**< Privilege level */
+#endif
 
 } ekk_tcb_t;
 

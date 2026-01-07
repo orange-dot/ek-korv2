@@ -28,7 +28,11 @@ set(EKK_MAX_SEMAPHORES 32 CACHE STRING "Semaphores per core")
 option(EKK_USE_EDF "Enable EDF (Earliest Deadline First) scheduling" ON)
 option(EKK_TRACK_TIME "Track per-task execution time" ON)
 option(EKK_CHECK_DEADLINE "Enable deadline miss detection" ON)
+option(EKK_USE_MPU "Enable Memory Protection Unit support" OFF)
 option(EKK_DEBUG "Enable debug assertions and logging" OFF)
+
+# MPU configuration
+set(EKK_MPU_REGIONS_PER_TASK 4 CACHE STRING "Maximum MPU regions per task")
 
 # =============================================================================
 # Generate Configuration Header
@@ -50,6 +54,7 @@ set(EKK_SOURCES
     src/kernel/task.c
     src/kernel/sync.c
     src/kernel/ipc.c
+    src/kernel/fault.c
 )
 
 # =============================================================================
@@ -64,8 +69,13 @@ target_include_directories(ek-kor PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-# C99 standard
-target_compile_features(ek-kor PUBLIC c_std_99)
+# C99 standard - use compile_features where supported, fallback to flags
+if(CMAKE_C_COMPILER_ID AND NOT CMAKE_C_COMPILER_ID STREQUAL "")
+    target_compile_features(ek-kor PUBLIC c_std_99)
+else()
+    # Fallback for compilers without feature detection (e.g., TriCore GCC)
+    target_compile_options(ek-kor PUBLIC -std=c99)
+endif()
 
 # Warning flags
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")

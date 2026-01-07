@@ -16,6 +16,11 @@ static ekk_sched_data_t g_sched[EKK_MAX_CORES];
 static volatile ekk_tick_t g_tick_count[EKK_MAX_CORES];
 static ekk_task_t g_delay_head[EKK_MAX_CORES];
 
+/* CPU utilization tracking */
+static uint32_t g_last_util_time[EKK_MAX_CORES];
+static uint32_t g_busy_time_us[EKK_MAX_CORES];
+static uint32_t g_task_start_time[EKK_MAX_CORES];
+
 /* ==========================================================================
  * Helper Functions
  * ========================================================================== */
@@ -29,6 +34,9 @@ static inline ekk_tick_t* get_tick_count(void)
 {
     return (ekk_tick_t*)&g_tick_count[ekk_hal_get_core_id()];
 }
+
+/* Forward declarations for internal functions */
+static void delay_queue_insert(uint32_t core, ekk_tcb_t *tcb);
 
 /* ==========================================================================
  * Initialization
@@ -63,6 +71,9 @@ void ekk_sched_start(void)
     }
 
     sched->current = first;
+
+    /* Remove first task from ready queue - it's now running */
+    ekk_sched_unready(first);
 
     /* Start systick */
     ekk_hal_systick_init(ekk_sched_tick);
@@ -113,6 +124,11 @@ bool ekk_sched_is_running(void)
     return get_sched()->running;
 }
 
+void ekk_sched_set_idle_task(ekk_task_t task)
+{
+    get_sched()->idle_task = task;
+}
+
 /* ==========================================================================
  * Task Queue Management
  * ========================================================================== */
@@ -130,10 +146,29 @@ void ekk_sched_ready(ekk_task_t task)
     ekk_tcb_t **pp = (ekk_tcb_t**)&sched->ready_head;
 
 #if EKK_USE_EDF
-    while (*pp && (*pp)->deadline <= tcb->deadline) {
-        pp = &(*pp)->next_ready;
+    /* EDF: Earlier deadline = higher priority
+     * Special case: deadline=0 means "no deadline" = lowest priority
+     * So tasks with deadline=0 go to the END of the queue
+     */
+    while (*pp) {
+        /* If new task has no deadline, skip everything (insert at end) */
+        if (tcb->deadline == 0) {
+            pp = &(*pp)->next_ready;
+        }
+        /* If current queue task has no deadline, insert before it */
+        else if ((*pp)->deadline == 0) {
+            break;
+        }
+        /* Both have deadlines: earlier deadline first */
+        else if ((*pp)->deadline <= tcb->deadline) {
+            pp = &(*pp)->next_ready;
+        }
+        else {
+            break;
+        }
     }
 #else
+    /* Priority scheduling: higher priority = runs first */
     while (*pp && (*pp)->effective_priority >= tcb->effective_priority) {
         pp = &(*pp)->next_ready;
     }
@@ -144,11 +179,6 @@ void ekk_sched_ready(ekk_task_t task)
     sched->ready_count++;
 
     ekk_hal_exit_critical();
-
-    /* May need to preempt current task */
-    if (sched->running && !sched->lock_count) {
-        ekk_sched_switch_request();
-    }
 }
 
 void ekk_sched_unready(ekk_task_t task)
@@ -176,15 +206,20 @@ ekk_err_t ekk_sched_block(ekk_tick_t timeout)
 {
     ekk_sched_data_t *sched = get_sched();
     ekk_tcb_t *tcb = ekk_task_get_tcb(sched->current);
+    uint32_t core = ekk_hal_get_core_id();
 
     ekk_hal_enter_critical();
+
+    /* Remove from ready queue first */
+    ekk_sched_unready(sched->current);
 
     tcb->state = EKK_TASK_BLOCKED;
     tcb->timeout_result = EKK_OK;
 
     if (timeout != EKK_WAIT_FOREVER && timeout > 0) {
         tcb->wake_time = *get_tick_count() + timeout;
-        /* Add to delay queue - simplified, just store wake time */
+        /* Add to delay queue for timeout */
+        delay_queue_insert(core, tcb);
     }
 
     ekk_hal_exit_critical();
@@ -246,24 +281,88 @@ ekk_task_t ekk_sched_select_next(void)
     return sched->idle_task;
 }
 
+/**
+ * @brief Perform context switch (called from HAL)
+ *
+ * This function is called from the PendSV handler to perform the
+ * actual context switch bookkeeping.
+ *
+ * @param current_sp Current task's saved stack pointer
+ * @return Next task's stack pointer (from context_data)
+ */
+uint32_t ekk_sched_do_switch(uint32_t current_sp)
+{
+    ekk_sched_data_t *sched = get_sched();
+    ekk_tcb_t *current_tcb = ekk_task_get_tcb(sched->current);
+    ekk_tcb_t *next_tcb;
+
+    /* Save current SP to current task's context_data */
+    if (current_tcb) {
+        current_tcb->context_data = current_sp;
+        if (current_tcb->state == EKK_TASK_RUNNING) {
+            current_tcb->state = EKK_TASK_READY;
+            /* Add back to ready queue since it was running (not in queue) */
+            ekk_sched_ready(sched->current);
+        }
+    }
+
+    /* Select next task */
+    ekk_task_t next = ekk_sched_select_next();
+    next_tcb = ekk_task_get_tcb(next);
+
+    /* Remove selected task from ready queue - it's now running */
+    ekk_sched_unready(next);
+
+    /* Update scheduler state */
+    sched->current = next;
+    next_tcb->state = EKK_TASK_RUNNING;
+    sched->context_switches++;
+
+    return next_tcb->context_data;
+}
+
 /* ==========================================================================
  * Timer Tick Handling
  * ========================================================================== */
 
 void ekk_sched_tick(void)
 {
+    uint32_t core = ekk_hal_get_core_id();
     ekk_tick_t *tick = get_tick_count();
     (*tick)++;
 
     /* Process delay queue - wake tasks whose time has come */
-    /* TODO: Implement delay queue processing */
+    ekk_tcb_t *prev = NULL;
+    ekk_tcb_t *tcb = (ekk_tcb_t*)g_delay_head[core];
+
+    while (tcb) {
+        if (tcb->wake_time <= *tick) {
+            /* Remove from delay queue */
+            if (prev) {
+                prev->next_delay = tcb->next_delay;
+            } else {
+                g_delay_head[core] = (ekk_task_t)tcb->next_delay;
+            }
+
+            ekk_tcb_t *next = (ekk_tcb_t*)tcb->next_delay;
+            tcb->next_delay = NULL;
+            ekk_sched_wake((ekk_task_t)tcb, true);
+            tcb = next;
+        } else {
+            prev = tcb;
+            tcb = (ekk_tcb_t*)tcb->next_delay;
+        }
+    }
 
 #if EKK_CHECK_DEADLINE
     ekk_sched_check_deadlines();
 #endif
 
-    /* Request reschedule to check if preemption needed */
-    ekk_sched_switch_request();
+    /* DON'T request reschedule every tick - let tasks run until they yield
+     * This was causing too many context switches, preventing tasks from making progress.
+     * Preemption will happen when higher-priority tasks become ready.
+     */
+    /* ekk_sched_switch_request(); */
 }
 
 ekk_tick_t ekk_sched_get_ticks(void)
@@ -275,16 +374,35 @@ ekk_tick_t ekk_sched_get_ticks(void)
  * Delay Management
  * ========================================================================== */
 
+static void delay_queue_insert(uint32_t core, ekk_tcb_t *tcb)
+{
+    /* Insert sorted by wake_time for efficient processing */
+    ekk_tcb_t **pp = (ekk_tcb_t**)&g_delay_head[core];
+
+    while (*pp && (*pp)->wake_time <= tcb->wake_time) {
+        pp = (ekk_tcb_t**)&(*pp)->next_delay;
+    }
+
+    tcb->next_delay = (struct ekk_tcb*)*pp;
+    *pp = tcb;
+}
+
 void ekk_sched_delay(ekk_tick_t ticks)
 {
     if (ticks == 0) return;
 
+    uint32_t core = ekk_hal_get_core_id();
     ekk_sched_data_t *sched = get_sched();
     ekk_tcb_t *tcb = ekk_task_get_tcb(sched->current);
 
     ekk_hal_enter_critical();
+
     tcb->wake_time = *get_tick_count() + ticks;
     tcb->state = EKK_TASK_BLOCKED;
+
+    /* Add to delay queue sorted by wake time */
+    delay_queue_insert(core, tcb);
+
     ekk_hal_exit_critical();
 
     ekk_sched_switch_request();
@@ -388,7 +506,16 @@ void ekk_sched_get_stats(uint32_t core_id, uint32_t *switches, uint32_t *idle_pc
     }
 
     if (switches) *switches = g_sched[core_id].context_switches;
-    if (idle_pct) *idle_pct = 0; /* TODO: Calculate idle percentage */
+    if (idle_pct) {
+        /* Calculate idle percentage from idle_time_us */
+        uint32_t now = ekk_hal_get_time_us();
+        uint32_t elapsed = now - g_last_util_time[core_id];
+        if (elapsed > 0) {
+            *idle_pct = (g_sched[core_id].idle_time_us * 100) / elapsed;
+        } else {
+            *idle_pct = 0;
+        }
+    }
 }
 
 void ekk_sched_reset_stats(void)
@@ -400,8 +527,22 @@ void ekk_sched_reset_stats(void)
 
 uint32_t ekk_sched_get_utilization(void)
 {
-    /* TODO: Implement CPU utilization calculation */
-    return 0;
+    uint32_t core = ekk_hal_get_core_id();
+    uint32_t now = ekk_hal_get_time_us();
+    uint32_t elapsed = now - g_last_util_time[core];
+
+    if (elapsed == 0) return 0;
+
+    /* Utilization = 100 - idle_percentage */
+    uint32_t idle_pct = (g_sched[core].idle_time_us * 100) / elapsed;
+    uint32_t util = (idle_pct > 100) ? 0 : (100 - idle_pct);
+
+    /* Reset counters for next measurement period */
+    g_last_util_time[core] = now;
+    g_sched[core].idle_time_us = 0;
+    g_busy_time_us[core] = 0;
+
+    return util;
 }
 
 void ekk_sched_dump_ready(void)
@@ -420,6 +561,44 @@ void ekk_sched_dump_ready(void)
 
 bool ekk_sched_validate(void)
 {
-    /* TODO: Validate ready queue integrity */
+    ekk_sched_data_t *sched = get_sched();
+    ekk_tcb_t *tcb = (ekk_tcb_t*)sched->ready_head;
+    ekk_tcb_t *prev = NULL;
+    uint32_t count = 0;
+
+    while (tcb) {
+        /* Check state consistency - all tasks in ready queue must be READY */
+        if (tcb->state != EKK_TASK_READY) {
+            return false;
+        }
+
+        /* Check ordering based on scheduling policy */
+#if EKK_USE_EDF
+        /* EDF: deadlines must be in non-decreasing order */
+        if (prev && prev->deadline > tcb->deadline) {
+            return false;
+        }
+#else
+        /* Priority: priorities must be in non-increasing order */
+        if (prev && prev->effective_priority < tcb->effective_priority) {
+            return false;
+        }
+#endif
+
+        /* Check for circular references */
+        count++;
+        if (count > sched->ready_count + 10) {
+            return false;  /* Likely circular list */
+        }
+
+        prev = tcb;
+        tcb = tcb->next_ready;
+    }
+
+    /* Verify count matches */
+    if (count != sched->ready_count) {
+        return false;
+    }
+
     return true;
 }

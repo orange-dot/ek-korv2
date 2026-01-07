@@ -26,6 +26,7 @@ SOURCES=(
     "kernel/task.c"
     "kernel/sync.c"
     "kernel/ipc.c"
+    "kernel/fault.c"
 )
 
 echo "Building ek-kor library for TriCore..."

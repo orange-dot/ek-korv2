@@ -48,6 +48,8 @@ endif()
 set(EKK_MAX_CORES 1 CACHE STRING "" FORCE)
 set(EKK_MAX_TASKS_PER_CORE 16 CACHE STRING "" FORCE)
 set(EKK_DEBUG ${ENABLE_DEBUG} CACHE BOOL "" FORCE)
+# Use EDF scheduling (deadline=0 means no deadline = lowest priority)
+set(EKK_USE_EDF ON CACHE BOOL "" FORCE)
 
 # Add ek-kor as subdirectory
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ek-kor ${CMAKE_BINARY_DIR}/ek-kor)

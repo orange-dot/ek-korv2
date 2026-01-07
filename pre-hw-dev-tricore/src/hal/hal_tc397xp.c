@@ -625,3 +625,506 @@ int ekk_hal_tc_stm_compare(uint32_t stm_id, uint32_t cmp_id,
 
     return 0;
 }
+
+/* ==========================================================================
+ * Memory Protection Unit (MPU)
+ *
+ * TC397XP uses Memory Protection System (MPS) with Protection Register Sets.
+ * Each CPU has its own set of data and code protection registers.
+ *
+ * Data Protection: DPR0-DPR15 (16 regions)
+ * Code Protection: CPR0-CPR5 (6 regions)
+ * ========================================================================== */
+
+/* MPU register offsets per CPU */
+#define CPU_DPR(n)          (0x00 + (n) * 8)     /* Data Protection Range */
+#define CPU_CPR(n)          (0x80 + (n) * 8)     /* Code Protection Range */
+#define CPU_DPRE(n)         (0xE0 + (n) * 4)     /* Data Protection Enable */
+#define CPU_CPRE(n)         (0xE8 + (n) * 4)     /* Code Protection Enable */
+
+/* Protection register set indices (PSW.PRS) */
+#define PRS_KERNEL          0       /* Supervisor mode */
+#define PRS_USER            1       /* User mode */
+
+/* Number of MPU regions supported */
+#define TC397_DATA_REGIONS  16
+#define TC397_CODE_REGIONS  6
+
+/* Fault handler callback */
+static ekk_hal_fault_handler_t g_fault_handler = NULL;
+
+/* Last fault information */
+static volatile void *g_last_fault_addr = NULL;
+static volatile uint32_t g_last_fault_status = 0;
+
+int ekk_hal_mpu_init(void)
+{
+    /* MPU is always active on TriCore, initialized by boot */
+    /* Clear all protection ranges for user mode (PRS1) */
+
+    uint32_t core_id = ekk_hal_get_core_id();
+    (void)core_id;
+
+    /* Protection is managed via DPR/CPR registers */
+    /* Default: kernel has full access, user has no access */
+
+    return 0;
+}
+
+uint8_t ekk_hal_mpu_get_region_count(void)
+{
+    /* TC397XP supports 16 data + 6 code regions */
+    return TC397_DATA_REGIONS;
+}
+
+int ekk_hal_mpu_configure_region(uint8_t region, void *base, uint32_t size,
+                                  uint8_t access, uint8_t attr)
+{
+    (void)attr;  /* TriCore doesn't have memory attributes like ARM */
+
+    if (region >= TC397_DATA_REGIONS) {
+        return -1;
+    }
+
+    /* Calculate upper bound (base + size - 1, aligned to 8 bytes) */
+    uint32_t lower = (uint32_t)base & ~0x7;
+    uint32_t upper = ((uint32_t)base + size) & ~0x7;
+
+    /* DPRx_L and DPRx_U encode lower and upper bounds */
+    /* Format: [31:3] = address[31:3], [2:0] = reserved */
+
+    /* Write to Data Protection Range register for PRS1 (user mode) */
+    uint32_t dpr_l = lower;
+    uint32_t dpr_u = upper;
+
+    /* Use MTCR to write to core registers */
+    switch (region) {
+        case 0:
+            __mtcr(CSFR_DPR0_L, dpr_l);
+            __mtcr(CSFR_DPR0_U, dpr_u);
+            break;
+        case 1:
+            __mtcr(CSFR_DPR1_L, dpr_l);
+            __mtcr(CSFR_DPR1_U, dpr_u);
+            break;
+        case 2:
+            __mtcr(CSFR_DPR2_L, dpr_l);
+            __mtcr(CSFR_DPR2_U, dpr_u);
+            break;
+        case 3:
+            __mtcr(CSFR_DPR3_L, dpr_l);
+            __mtcr(CSFR_DPR3_U, dpr_u);
+            break;
+        /* Add more cases as needed */
+        default:
+            return -1;
+    }
+
+    /* Configure access permissions in DPRE/DPWE registers */
+    /* DPRE = Data Protection Read Enable */
+    /* DPWE = Data Protection Write Enable */
+    uint32_t dpre = __mfcr(CSFR_DPRE_1);  /* PRS1 read enable */
+    uint32_t dpwe = __mfcr(CSFR_DPWE_1);  /* PRS1 write enable */
+
+    uint32_t mask = (1 << region);
+
+    if (access & 0x01) {  /* EKK_MPU_READ */
+        dpre |= mask;
+    } else {
+        dpre &= ~mask;
+    }
+
+    if (access & 0x02) {  /* EKK_MPU_WRITE */
+        dpwe |= mask;
+    } else {
+        dpwe &= ~mask;
+    }
+
+    __mtcr(CSFR_DPRE_1, dpre);
+    __mtcr(CSFR_DPWE_1, dpwe);
+
+    __isync();
+
+    return 0;
+}
+
+void ekk_hal_mpu_enable_region(uint8_t region)
+{
+    if (region >= TC397_DATA_REGIONS) return;
+
+    /* Enable region in DPRE/DPWE for PRS1 */
+    uint32_t dpre = __mfcr(CSFR_DPRE_1);
+    dpre |= (1 << region);
+    __mtcr(CSFR_DPRE_1, dpre);
+    __isync();
+}
+
+void ekk_hal_mpu_disable_region(uint8_t region)
+{
+    if (region >= TC397_DATA_REGIONS) return;
+
+    /* Disable region in DPRE/DPWE for PRS1 */
+    uint32_t dpre = __mfcr(CSFR_DPRE_1);
+    uint32_t dpwe = __mfcr(CSFR_DPWE_1);
+    dpre &= ~(1 << region);
+    dpwe &= ~(1 << region);
+    __mtcr(CSFR_DPRE_1, dpre);
+    __mtcr(CSFR_DPWE_1, dpwe);
+    __isync();
+}
+
+void ekk_hal_mpu_enable(void)
+{
+    /* MPU is always enabled on TriCore */
+    /* Protection is controlled by PSW.PRS (Protection Register Set) */
+}
+
+void ekk_hal_mpu_disable(void)
+{
+    /* Cannot truly disable MPU on TriCore */
+    /* Set PRS to supervisor mode for full access */
+    uint32_t psw = __mfcr(CSFR_PSW);
+    psw &= ~PSW_PRS_MASK;
+    psw |= (PRS_KERNEL << PSW_PRS_SHIFT);
+    __mtcr(CSFR_PSW, psw);
+    __isync();
+}
+
+void ekk_hal_mpu_load_task_regions(const struct ekk_tcb *tcb)
+{
+    if (!tcb) return;
+
+#if EKK_USE_MPU
+    /* Load task's MPU regions */
+    for (uint8_t i = 0; i < tcb->mpu_region_count; i++) {
+        const ekk_mpu_region_t *region = &tcb->mpu_regions[i];
+        if (region->enabled) {
+            ekk_hal_mpu_configure_region(
+                region->region_num,
+                region->base,
+                region->size,
+                region->access,
+                region->attr
+            );
+        }
+    }
+
+    /* Set privilege level based on task */
+    if (tcb->privilege == EKK_PRIV_USER) {
+        ekk_hal_enter_user_mode();
+    } else {
+        ekk_hal_enter_privileged_mode();
+    }
+#else
+    (void)tcb;
+#endif
+}
+
+/* ==========================================================================
+ * Privilege Control
+ *
+ * TC397XP uses PSW.IO and PSW.PRS for privilege levels:
+ *   PSW.IO = I/O privilege level (0-2)
+ *   PSW.PRS = Protection Register Set (0-3)
+ * ========================================================================== */
+
+/* PSW bit definitions */
+#define PSW_IO_SHIFT        10
+#define PSW_IO_MASK         (0x3 << PSW_IO_SHIFT)
+#define PSW_PRS_SHIFT       12
+#define PSW_PRS_MASK        (0x3 << PSW_PRS_SHIFT)
+
+#define PSW_IO_USER         0       /* User-0: No peripheral access */
+#define PSW_IO_SUPERVISOR   2       /* Supervisor: Full peripheral access */
+
+void ekk_hal_enter_user_mode(void)
+{
+    uint32_t psw = __mfcr(CSFR_PSW);
+
+    /* Set User mode: IO=0, PRS=1 */
+    psw &= ~(PSW_IO_MASK | PSW_PRS_MASK);
+    psw |= (PSW_IO_USER << PSW_IO_SHIFT);
+    psw |= (PRS_USER << PSW_PRS_SHIFT);
+
+    __mtcr(CSFR_PSW, psw);
+    __isync();
+}
+
+void ekk_hal_enter_privileged_mode(void)
+{
+    uint32_t psw = __mfcr(CSFR_PSW);
+
+    /* Set Supervisor mode: IO=2, PRS=0 */
+    psw &= ~(PSW_IO_MASK | PSW_PRS_MASK);
+    psw |= (PSW_IO_SUPERVISOR << PSW_IO_SHIFT);
+    psw |= (PRS_KERNEL << PSW_PRS_SHIFT);
+
+    __mtcr(CSFR_PSW, psw);
+    __isync();
+}
+
+bool ekk_hal_is_privileged(void)
+{
+    uint32_t psw = __mfcr(CSFR_PSW);
+    uint32_t io = (psw & PSW_IO_MASK) >> PSW_IO_SHIFT;
+
+    /* Supervisor mode if IO >= 1 */
+    return io >= 1;
+}
+
+/* ==========================================================================
+ * Fault Handling
+ *
+ * TC397XP uses trap vectors for exceptions:
+ *   Class 0: MMU traps (not used on TC397XP)
+ *   Class 1: Internal Protection traps
+ *   Class 2: Instruction errors
+ *   Class 3: Context management
+ *   Class 4: Bus errors
+ *   Class 5: Assertion traps
+ *   Class 6: System call
+ *   Class 7: NMI
+ * ========================================================================== */
+
+/* Trap class definitions */
+#define TRAP_CLASS_PROT     1       /* Protection faults */
+#define TRAP_CLASS_INST     2       /* Instruction errors */
+#define TRAP_CLASS_CTX      3       /* Context errors */
+#define TRAP_CLASS_BUS      4       /* Bus errors */
+
+void ekk_hal_register_fault_handler(ekk_hal_fault_handler_t handler)
+{
+    g_fault_handler = handler;
+}
+
+void* ekk_hal_get_fault_address(void)
+{
+    return (void*)g_last_fault_addr;
+}
+
+uint32_t ekk_hal_get_fault_status(void)
+{
+    return g_last_fault_status;
+}
+
+void ekk_hal_clear_fault_status(void)
+{
+    g_last_fault_addr = NULL;
+    g_last_fault_status = 0;
+}
+
+/**
+ * @brief TriCore trap handler (called from trap vector)
+ *
+ * This function should be called from the assembly trap handler.
+ */
+void ekk_hal_trap_handler(uint32_t trap_class, uint32_t trap_id)
+{
+    uint32_t fault_type;
+
+    /* Map TriCore trap to fault type */
+    switch (trap_class) {
+        case TRAP_CLASS_PROT:
+            /* Protection trap - TIN indicates specific cause */
+            switch (trap_id) {
+                case 1:  fault_type = 1; break;  /* PRIV - privilege violation */
+                case 2:  fault_type = 1; break;  /* MPR - memory protection read */
+                case 3:  fault_type = 1; break;  /* MPW - memory protection write */
+                case 4:  fault_type = 2; break;  /* MPX - memory protection execute */
+                case 5:  fault_type = 8; break;  /* MPP - peripheral protection */
+                default: fault_type = 255; break;
+            }
+            break;
+
+        case TRAP_CLASS_INST:
+            /* Instruction error */
+            switch (trap_id) {
+                case 1:  fault_type = 6; break;  /* IOPC - illegal opcode */
+                case 2:  fault_type = 7; break;  /* UOPC - unimplemented opcode */
+                case 3:  fault_type = 6; break;  /* OPD - invalid operand */
+                case 4:  fault_type = 7; break;  /* ALN - alignment error */
+                case 5:  fault_type = 5; break;  /* MEM - memory error */
+                default: fault_type = 255; break;
+            }
+            break;
+
+        case TRAP_CLASS_CTX:
+            /* Context error */
+            switch (trap_id) {
+                case 1:  fault_type = 4; break;  /* FCD - free context list depleted */
+                case 2:  fault_type = 4; break;  /* CDO - context list overflow */
+                case 3:  fault_type = 4; break;  /* CDU - context list underflow */
+                case 4:  fault_type = 4; break;  /* FCU - free context list underflow */
+                case 5:  fault_type = 4; break;  /* CSU - call stack underflow */
+                case 6:  fault_type = 4; break;  /* CTYP - context type error */
+                case 7:  fault_type = 4; break;  /* NEST - nesting error */
+                default: fault_type = 255; break;
+            }
+            break;
+
+        case TRAP_CLASS_BUS:
+            /* Bus error */
+            fault_type = 3;  /* Bus error */
+            break;
+
+        default:
+            fault_type = 255;  /* Unknown */
+            break;
+    }
+
+    /* Store fault info */
+    g_last_fault_status = (trap_class << 8) | trap_id;
+
+    /* Get fault address from DEADD register (if applicable) */
+    if (trap_class == TRAP_CLASS_PROT || trap_class == TRAP_CLASS_BUS) {
+        g_last_fault_addr = (void*)__mfcr(CSFR_DEADD);
+    }
+
+    /* Call registered handler */
+    if (g_fault_handler) {
+        g_fault_handler(fault_type, (void*)g_last_fault_addr);
+    } else {
+        /* Default: halt */
+        ekk_hal_debug_puts("[TRAP] Class=");
+        ekk_hal_debug_hex(trap_class);
+        ekk_hal_debug_puts(" ID=");
+        ekk_hal_debug_hex(trap_id);
+        ekk_hal_debug_puts("\n");
+
+        while (1) {
+            __nop();
+        }
+    }
+}
+
+/* ==========================================================================
+ * Inter-Processor Interrupt (IPI)
+ *
+ * TC397XP uses GPSR (General Purpose Service Request) for IPIs.
+ * Each CPU has multiple GPSR channels (GPSR0-3).
+ * SRC_GPSRxy = Service Request Control for CPU x, channel y
+ * ========================================================================== */
+
+/* IPI channel assignment */
+#define IPI_CHANNEL_MAILBOX     0       /* For mailbox notifications */
+#define IPI_CHANNEL_RESCHEDULE  1       /* For reschedule requests */
+
+/* IPI handler callback */
+static ekk_hal_ipi_handler_t g_ipi_handler = NULL;
+
+/* Pending IPI messages per core */
+static volatile uint32_t g_ipi_pending_msg[EKK_MAX_CORES];
+static volatile uint32_t g_ipi_sender[EKK_MAX_CORES];
+
+/**
+ * @brief GPSR ISR for IPI handling
+ */
+static void gpsr_ipi_isr(void)
+{
+    uint32_t core_id = ekk_hal_get_core_id();
+
+    /* Acknowledge the interrupt */
+    ekk_hal_ipi_ack();
+
+    /* Call registered handler */
+    if (g_ipi_handler) {
+        g_ipi_handler(g_ipi_sender[core_id], g_ipi_pending_msg[core_id]);
+    }
+
+    /* Clear pending */
+    g_ipi_pending_msg[core_id] = 0;
+    g_ipi_sender[core_id] = 0xFF;
+}
+
+int ekk_hal_ipi_init(void)
+{
+    uint32_t core_id = ekk_hal_get_core_id();
+
+    /* Initialize pending message storage */
+    for (uint32_t i = 0; i < EKK_MAX_CORES; i++) {
+        g_ipi_pending_msg[i] = 0;
+        g_ipi_sender[i] = 0xFF;
+    }
+
+    /* Configure GPSR0 for this core as IPI receiver */
+    /* SRC_GPSRxy register format:
+     *   [7:0]   SRPN  - Service Request Priority Number
+     *   [10]    SRE   - Service Request Enable
+     *   [11]    TOS   - Type of Service (CPU number)
+     *   [24]    CLRR  - Clear Request
+     *   [25]    SETR  - Set Request
+     *   [26]    IOV   - Interrupt Overflow
+     *   [27]    SWS   - Software Sticky
+     *   [28]    SRR   - Service Request Flag
+     */
+
+    uint32_t gpsr_addr = SRC_GPSR(core_id, IPI_CHANNEL_MAILBOX);
+
+    /* Configure: enable, set priority, route to this core */
+    uint32_t src_val = 0;
+    src_val |= (IRQ_PRIORITY_IPI & 0xFF);           /* Priority */
+    src_val |= SRC_SRE;                              /* Enable */
+    src_val |= ((core_id & 0x7) << SRC_TOS_SHIFT);  /* Route to this core */
+
+    REG_WRITE32(gpsr_addr, src_val);
+
+    /* Register ISR */
+    uint32_t irq_num = IRQ_GPSR_BASE + core_id * 4 + IPI_CHANNEL_MAILBOX;
+    irq_register(irq_num, IRQ_PRIORITY_IPI, (irq_tos_t)core_id, gpsr_ipi_isr);
+
+    return 0;
+}
+
+void ekk_hal_ipi_register_handler(ekk_hal_ipi_handler_t handler)
+{
+    g_ipi_handler = handler;
+}
+
+int ekk_hal_ipi_send(uint32_t target_core, uint32_t msg)
+{
+    if (target_core >= EKK_MAX_CORES) {
+        return -1;
+    }
+
+    /* Store message for target to read */
+    g_ipi_pending_msg[target_core] = msg;
+    g_ipi_sender[target_core] = ekk_hal_get_core_id();
+
+    /* Memory barrier to ensure message is visible */
+    __dsync();
+
+    /* Trigger GPSR interrupt on target core */
+    uint32_t gpsr_addr = SRC_GPSR(target_core, IPI_CHANNEL_MAILBOX);
+    uint32_t src = REG_READ32(gpsr_addr);
+    src |= SRC_SETR;  /* Set request bit */
+    REG_WRITE32(gpsr_addr, src);
+
+    return 0;
+}
+
+uint32_t ekk_hal_ipi_broadcast(uint32_t msg)
+{
+    uint32_t my_core = ekk_hal_get_core_id();
+    uint32_t count = 0;
+
+    for (uint32_t i = 0; i < EKK_MAX_CORES; i++) {
+        if (i != my_core) {
+            if (ekk_hal_ipi_send(i, msg) == 0) {
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+void ekk_hal_ipi_ack(void)
+{
+    uint32_t core_id = ekk_hal_get_core_id();
+    uint32_t gpsr_addr = SRC_GPSR(core_id, IPI_CHANNEL_MAILBOX);
+
+    /* Clear request by writing CLRR bit */
+    uint32_t src = REG_READ32(gpsr_addr);
+    src |= SRC_CLRR;
+    REG_WRITE32(gpsr_addr, src);
+}

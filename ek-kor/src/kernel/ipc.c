@@ -7,6 +7,56 @@
 #include <string.h>
 
 /* ==========================================================================
+ * IPI Message Types
+ * ========================================================================== */
+
+#define EKK_IPI_MSG_MAILBOX     0x01    /**< Mailbox message available */
+#define EKK_IPI_MSG_BUFFER      0x02    /**< Zero-copy buffer available */
+#define EKK_IPI_MSG_RPC_REQUEST 0x03    /**< RPC request */
+#define EKK_IPI_MSG_RPC_RESPONSE 0x04   /**< RPC response */
+#define EKK_IPI_MSG_RESCHEDULE  0x05    /**< Request reschedule */
+
+#if EKK_MAX_CORES > 1
+
+/* Forward declaration for RPC processing */
+void ekk_rpc_process(void);
+
+/**
+ * @brief IPI handler for mailbox, buffer, and RPC notifications
+ */
+static void ipc_ipi_handler(uint32_t sender_core, uint32_t msg)
+{
+    (void)sender_core;
+
+    switch (msg) {
+        case EKK_IPI_MSG_MAILBOX:
+        case EKK_IPI_MSG_BUFFER:
+            /* Wake any tasks waiting on mailbox/buffer receive */
+            ekk_sched_switch_request();
+            break;
+
+        case EKK_IPI_MSG_RPC_REQUEST:
+            /* Process RPC request immediately */
+            ekk_rpc_process();
+            break;
+
+        case EKK_IPI_MSG_RPC_RESPONSE:
+            /* Caller will check completion flag */
+            break;
+
+        case EKK_IPI_MSG_RESCHEDULE:
+            ekk_sched_switch_request();
+            break;
+
+        default:
+            break;
+    }
+
+    ekk_hal_ipi_ack();
+}
+#endif
+
+/* ==========================================================================
  * Message Queue
  * ========================================================================== */
 
@@ -198,6 +248,10 @@ ekk_err_t ekk_mailbox_init(void)
         memset(&g_mailboxes[i], 0, sizeof(ekk_mailbox_struct_t));
         g_mailboxes[i].owner_core = i;
     }
+
+    /* Initialize IPI and register handler */
+    ekk_hal_ipi_init();
+    ekk_hal_ipi_register_handler(ipc_ipi_handler);
 #endif
     return EKK_OK;
 }
@@ -243,7 +297,9 @@ ekk_err_t ekk_mailbox_send(uint32_t target_core, uint32_t msg_type,
 
     ekk_hal_exit_critical();
 
-    /* TODO: Send IPI to target core */
+    /* Send IPI to wake target core */
+    ekk_hal_ipi_send(target_core, EKK_IPI_MSG_MAILBOX);
+
     return EKK_OK;
 #else
     (void)target_core;
@@ -331,68 +387,359 @@ uint32_t ekk_mailbox_broadcast(uint32_t msg_type, const void *data, uint32_t siz
 }
 
 /* ==========================================================================
- * Zero-Copy Buffer Pool (stub)
+ * Zero-Copy Buffer Pool
+ *
+ * Static pool of fixed-size buffers for efficient cross-core data sharing.
+ * Uses reference counting for safe multi-reader access.
  * ========================================================================== */
+
+#ifndef EKK_BUFFER_POOL_SIZE
+#define EKK_BUFFER_POOL_SIZE    16
+#endif
+
+#ifndef EKK_BUFFER_DATA_SIZE
+#define EKK_BUFFER_DATA_SIZE    256
+#endif
+
+/* Internal buffer structure */
+typedef struct {
+    ekk_buffer_t    header;                     /**< Public header */
+    uint8_t         data[EKK_BUFFER_DATA_SIZE]; /**< Data storage */
+    volatile bool   in_use;                     /**< Allocation flag */
+} ekk_buffer_internal_t;
+
+/* Buffer pool */
+static ekk_buffer_internal_t g_buffer_pool[EKK_BUFFER_POOL_SIZE];
+static ekk_spinlock_t g_buffer_pool_lock;
+
+/* Per-core buffer receive queues */
+#if EKK_MAX_CORES > 1
+typedef struct {
+    ekk_buffer_t    *buffers[8];                /**< Pending buffers */
+    uint32_t        msg_types[8];               /**< Message types */
+    uint32_t        head;
+    uint32_t        tail;
+    uint32_t        count;
+} ekk_buffer_queue_t;
+
+static ekk_buffer_queue_t g_buffer_queues[EKK_MAX_CORES];
+#endif
 
 ekk_err_t ekk_buffer_pool_init(void)
 {
+    /* Initialize pool */
+    memset(g_buffer_pool, 0, sizeof(g_buffer_pool));
+
+    for (uint32_t i = 0; i < EKK_BUFFER_POOL_SIZE; i++) {
+        g_buffer_pool[i].header.data = g_buffer_pool[i].data;
+        g_buffer_pool[i].header.size = 0;
+        g_buffer_pool[i].header.ref_count = 0;
+        g_buffer_pool[i].in_use = false;
+    }
+
+    ekk_spinlock_init(&g_buffer_pool_lock, "buf_pool");
+
+#if EKK_MAX_CORES > 1
+    memset(g_buffer_queues, 0, sizeof(g_buffer_queues));
+#endif
+
     return EKK_OK;
 }
 
 ekk_buffer_t* ekk_buffer_alloc(uint32_t size)
 {
-    (void)size;
-    return NULL; /* TODO */
+    if (size > EKK_BUFFER_DATA_SIZE) {
+        return NULL;  /* Too large */
+    }
+
+    ekk_spinlock_acquire(&g_buffer_pool_lock);
+
+    /* Find free buffer */
+    for (uint32_t i = 0; i < EKK_BUFFER_POOL_SIZE; i++) {
+        if (!g_buffer_pool[i].in_use) {
+            g_buffer_pool[i].in_use = true;
+            g_buffer_pool[i].header.ref_count = 1;
+            g_buffer_pool[i].header.size = size;
+            g_buffer_pool[i].header.owner_core = ekk_hal_get_core_id();
+
+            ekk_spinlock_release(&g_buffer_pool_lock);
+            return &g_buffer_pool[i].header;
+        }
+    }
+
+    ekk_spinlock_release(&g_buffer_pool_lock);
+    return NULL;  /* Pool exhausted */
 }
 
 void ekk_buffer_ref(ekk_buffer_t *buf)
 {
-    if (buf) buf->ref_count++;
+    if (buf) {
+        ekk_hal_enter_critical();
+        buf->ref_count++;
+        ekk_hal_exit_critical();
+    }
 }
 
 void ekk_buffer_release(ekk_buffer_t *buf)
 {
-    if (buf && buf->ref_count > 0) {
+    if (!buf) return;
+
+    ekk_hal_enter_critical();
+
+    if (buf->ref_count > 0) {
         buf->ref_count--;
+
+        /* Free buffer when ref count reaches zero */
+        if (buf->ref_count == 0) {
+            /* Find internal structure */
+            ekk_buffer_internal_t *internal =
+                (ekk_buffer_internal_t*)((uint8_t*)buf - offsetof(ekk_buffer_internal_t, header));
+
+            /* Verify it's in our pool */
+            if (internal >= &g_buffer_pool[0] &&
+                internal < &g_buffer_pool[EKK_BUFFER_POOL_SIZE]) {
+                internal->in_use = false;
+                buf->size = 0;
+            }
+        }
     }
+
+    ekk_hal_exit_critical();
 }
 
 ekk_err_t ekk_buffer_send(uint32_t target_core, ekk_buffer_t *buf, uint32_t msg_type)
 {
+#if EKK_MAX_CORES > 1
+    if (target_core >= EKK_MAX_CORES || !buf) {
+        return EKK_ERR_PARAM;
+    }
+
+    ekk_buffer_queue_t *queue = &g_buffer_queues[target_core];
+
+    ekk_hal_enter_critical();
+
+    if (queue->count >= 8) {
+        ekk_hal_exit_critical();
+        return EKK_ERR_FULL;
+    }
+
+    /* Add reference for receiver */
+    buf->ref_count++;
+
+    /* Enqueue buffer */
+    queue->buffers[queue->head] = buf;
+    queue->msg_types[queue->head] = msg_type;
+    queue->head = (queue->head + 1) % 8;
+    queue->count++;
+
+    ekk_hal_exit_critical();
+
+    /* Send IPI to notify receiver */
+    ekk_hal_ipi_send(target_core, EKK_IPI_MSG_BUFFER);
+
+    return EKK_OK;
+#else
     (void)target_core;
     (void)buf;
     (void)msg_type;
-    return EKK_ERR_PARAM; /* TODO */
+    return EKK_ERR_PARAM;
+#endif
 }
 
 ekk_err_t ekk_buffer_receive(ekk_buffer_t **buf, uint32_t *msg_type, ekk_tick_t timeout)
 {
+#if EKK_MAX_CORES > 1
+    if (!buf) {
+        return EKK_ERR_PARAM;
+    }
+
+    uint32_t core = ekk_hal_get_core_id();
+    ekk_buffer_queue_t *queue = &g_buffer_queues[core];
+
+    ekk_hal_enter_critical();
+
+    while (queue->count == 0) {
+        ekk_hal_exit_critical();
+
+        if (timeout == EKK_NO_WAIT) {
+            return EKK_ERR_EMPTY;
+        }
+
+        ekk_err_t err = ekk_sched_block(timeout);
+        if (err != EKK_OK) {
+            return err;
+        }
+
+        ekk_hal_enter_critical();
+    }
+
+    /* Dequeue buffer */
+    *buf = queue->buffers[queue->tail];
+    if (msg_type) {
+        *msg_type = queue->msg_types[queue->tail];
+    }
+    queue->tail = (queue->tail + 1) % 8;
+    queue->count--;
+
+    ekk_hal_exit_critical();
+
+    return EKK_OK;
+#else
     (void)buf;
     (void)msg_type;
     (void)timeout;
-    return EKK_ERR_PARAM; /* TODO */
+    return EKK_ERR_PARAM;
+#endif
 }
 
 /* ==========================================================================
- * RPC (stub)
+ * Remote Procedure Call (RPC)
+ *
+ * Synchronous function calls across cores.
+ * Uses mailbox for request/response with completion notification.
  * ========================================================================== */
+
+#if EKK_MAX_CORES > 1
+
+/* RPC request structure */
+typedef struct {
+    void        (*func)(void*);     /**< Function to call */
+    void        *arg;               /**< Argument */
+    volatile int32_t result;        /**< Return value */
+    volatile bool    completed;     /**< Completion flag */
+    uint32_t    caller_core;        /**< Who sent the request */
+} ekk_rpc_request_t;
+
+/* Pending RPC requests per core */
+static volatile ekk_rpc_request_t *g_rpc_pending[EKK_MAX_CORES];
+
+/**
+ * @brief RPC handler (called on target core)
+ */
+static void rpc_handle_request(ekk_rpc_request_t *req)
+{
+    if (req && req->func) {
+        /* Execute the function */
+        req->func(req->arg);
+        req->result = 0;
+    } else {
+        req->result = -1;
+    }
+
+    /* Memory barrier before setting completed */
+    ekk_hal_memory_barrier();
+
+    /* Mark as completed */
+    req->completed = true;
+
+    /* Send IPI to wake caller */
+    ekk_hal_ipi_send(req->caller_core, EKK_IPI_MSG_RPC_RESPONSE);
+}
+
+/**
+ * @brief Process pending RPC requests (called from scheduler tick or IPI)
+ */
+void ekk_rpc_process(void)
+{
+    uint32_t core = ekk_hal_get_core_id();
+
+    ekk_rpc_request_t *req = (ekk_rpc_request_t*)g_rpc_pending[core];
+    if (req && !req->completed) {
+        g_rpc_pending[core] = NULL;
+        rpc_handle_request(req);
+    }
+}
+
+#endif /* EKK_MAX_CORES > 1 */
 
 int32_t ekk_call_on_core(uint32_t target_core, void (*func)(void*),
                          void *arg, ekk_tick_t timeout)
 {
+#if EKK_MAX_CORES > 1
+    uint32_t my_core = ekk_hal_get_core_id();
+
+    /* If calling own core, just execute directly */
+    if (target_core == my_core || target_core >= EKK_MAX_CORES) {
+        if (func) func(arg);
+        return 0;
+    }
+
+    /* Create RPC request on stack (valid until function returns) */
+    ekk_rpc_request_t request;
+    request.func = func;
+    request.arg = arg;
+    request.result = -1;
+    request.completed = false;
+    request.caller_core = my_core;
+
+    /* Post request to target core */
+    ekk_hal_enter_critical();
+    g_rpc_pending[target_core] = &request;
+    ekk_hal_exit_critical();
+
+    /* Send IPI to trigger execution */
+    ekk_hal_ipi_send(target_core, EKK_IPI_MSG_RPC_REQUEST);
+
+    /* Wait for completion */
+    uint32_t start = ekk_hal_get_time_ms();
+    uint32_t timeout_ms = (timeout == EKK_WAIT_FOREVER) ? 0xFFFFFFFF : timeout;
+
+    while (!request.completed) {
+        if (timeout != EKK_WAIT_FOREVER) {
+            uint32_t elapsed = ekk_hal_get_time_ms() - start;
+            if (elapsed >= timeout_ms) {
+                /* Timeout - cancel request */
+                ekk_hal_enter_critical();
+                if (g_rpc_pending[target_core] == &request) {
+                    g_rpc_pending[target_core] = NULL;
+                }
+                ekk_hal_exit_critical();
+                return -1;
+            }
+        }
+
+        /* Yield to let scheduler run */
+        ekk_hal_idle();
+    }
+
+    return request.result;
+#else
     (void)target_core;
     (void)timeout;
 
-    /* On single-core, just call directly */
+    /* Single-core: just call directly */
     if (func) func(arg);
     return 0;
+#endif
 }
 
 uint32_t ekk_call_on_all(void (*func)(void*), void *arg, ekk_tick_t timeout)
 {
+#if EKK_MAX_CORES > 1
+    uint32_t my_core = ekk_hal_get_core_id();
+    uint32_t success_count = 0;
+
+    /* Execute on own core first */
+    if (func) {
+        func(arg);
+        success_count++;
+    }
+
+    /* Execute on all other cores */
+    for (uint32_t i = 0; i < EKK_MAX_CORES; i++) {
+        if (i != my_core) {
+            if (ekk_call_on_core(i, func, arg, timeout) == 0) {
+                success_count++;
+            }
+        }
+    }
+
+    return success_count;
+#else
     (void)timeout;
     if (func) func(arg);
     return 1;
+#endif
 }
 
 /* ==========================================================================

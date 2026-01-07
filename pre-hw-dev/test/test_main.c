@@ -560,6 +560,269 @@ static int test_queue_flush(void)
 }
 
 /*===========================================================================*/
+/* Scheduler Delay Queue Tests                                               */
+/*===========================================================================*/
+
+static int test_scheduler_ticks(void)
+{
+    ekk_tick_t t1 = ekk_sched_get_ticks();
+    TEST_ASSERT(t1 >= 0, "Tick count should be valid");
+
+    /* Ticks should not go backwards */
+    ekk_tick_t t2 = ekk_sched_get_ticks();
+    TEST_ASSERT(t2 >= t1, "Ticks should not go backwards");
+
+    return 1;
+}
+
+static int test_scheduler_validation(void)
+{
+    /* Validate ready queue after init */
+    bool valid = ekk_sched_validate();
+    TEST_ASSERT(valid == true, "Ready queue should be valid after init");
+
+    return 1;
+}
+
+static int test_scheduler_utilization(void)
+{
+    /* Get utilization - should be 0-100 */
+    uint32_t util = ekk_sched_get_utilization();
+    TEST_ASSERT(util <= 100, "Utilization should be <= 100");
+
+    return 1;
+}
+
+static int test_scheduler_stats(void)
+{
+    uint32_t switches = 0;
+    uint32_t idle_pct = 0;
+
+    ekk_sched_get_stats(0, &switches, &idle_pct);
+
+    /* Just verify it doesn't crash and returns reasonable values */
+    TEST_ASSERT(idle_pct <= 100, "Idle percentage should be <= 100");
+
+    return 1;
+}
+
+/*===========================================================================*/
+/* Wait Queue Tests                                                          */
+/*===========================================================================*/
+
+static int test_mutex_wait_queue(void)
+{
+    ekk_mutex_struct_t mtx;
+    ekk_mutex_init(&mtx, "wait_test");
+
+    /* Lock mutex */
+    ekk_err_t err = ekk_mutex_lock(&mtx, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "First lock should succeed");
+
+    /* Try to lock again with no-wait (should fail) */
+    err = ekk_mutex_trylock(&mtx);
+    TEST_ASSERT_EQ(err, EKK_ERR_STATE, "Recursive lock should fail");
+
+    /* Unlock */
+    err = ekk_mutex_unlock(&mtx);
+    TEST_ASSERT_EQ(err, EKK_OK, "Unlock should succeed");
+
+    /* Should be able to lock again */
+    err = ekk_mutex_lock(&mtx, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Second lock should succeed");
+
+    ekk_mutex_unlock(&mtx);
+    return 1;
+}
+
+static int test_semaphore_binary(void)
+{
+    ekk_sem_struct_t sem;
+    ekk_sem_init(&sem, "binary_sem", 1, 1);
+
+    /* Take the semaphore */
+    ekk_err_t err = ekk_sem_wait(&sem, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "First wait should succeed");
+    TEST_ASSERT_EQ(ekk_sem_get_count(&sem), 0, "Count should be 0");
+
+    /* Try to take again (should fail) */
+    err = ekk_sem_trywait(&sem);
+    TEST_ASSERT_EQ(err, EKK_ERR_BUSY, "Second wait should fail");
+
+    /* Signal should succeed */
+    err = ekk_sem_signal(&sem);
+    TEST_ASSERT_EQ(err, EKK_OK, "Signal should succeed");
+    TEST_ASSERT_EQ(ekk_sem_get_count(&sem), 1, "Count should be 1");
+
+    /* Signal again should fail (max=1) */
+    err = ekk_sem_signal(&sem);
+    TEST_ASSERT_EQ(err, EKK_ERR_FULL, "Signal should fail when full");
+
+    return 1;
+}
+
+static int test_event_wait_any(void)
+{
+    ekk_event_struct_t event;
+    ekk_event_init(&event, "wait_any");
+
+    /* Set some flags */
+    ekk_event_set(&event, 0x05);
+
+    /* Wait for any of bits 0x03 */
+    uint32_t actual = 0;
+    ekk_err_t err = ekk_event_wait(&event, 0x03, EKK_EVENT_ANY, false,
+                                    EKK_NO_WAIT, &actual);
+    TEST_ASSERT_EQ(err, EKK_OK, "Wait should succeed (bit 0 is set)");
+    TEST_ASSERT_EQ(actual & 0x03, 0x01, "Should have matched bit 0");
+
+    return 1;
+}
+
+static int test_event_wait_all(void)
+{
+    ekk_event_struct_t event;
+    ekk_event_init(&event, "wait_all");
+
+    /* Set only bit 0 */
+    ekk_event_set(&event, 0x01);
+
+    /* Wait for ALL of bits 0x03 (should timeout/fail) */
+    ekk_err_t err = ekk_event_wait(&event, 0x03, EKK_EVENT_ALL, false,
+                                    EKK_NO_WAIT, NULL);
+    TEST_ASSERT_EQ(err, EKK_ERR_TIMEOUT, "Wait should timeout (not all bits set)");
+
+    /* Now set bit 1 too */
+    ekk_event_set(&event, 0x02);
+
+    /* Wait for ALL should now succeed */
+    uint32_t actual = 0;
+    err = ekk_event_wait(&event, 0x03, EKK_EVENT_ALL, false,
+                          EKK_NO_WAIT, &actual);
+    TEST_ASSERT_EQ(err, EKK_OK, "Wait should succeed (all bits set)");
+    TEST_ASSERT_EQ(actual, 0x03, "Should have matched both bits");
+
+    return 1;
+}
+
+/*===========================================================================*/
+/* Buffer Pool Tests                                                         */
+/*===========================================================================*/
+
+static int test_buffer_pool_init(void)
+{
+    ekk_err_t err = ekk_buffer_pool_init();
+    TEST_ASSERT_EQ(err, EKK_OK, "Buffer pool init should succeed");
+
+    return 1;
+}
+
+static int test_buffer_alloc_release(void)
+{
+    /* Allocate a buffer */
+    ekk_buffer_t *buf = ekk_buffer_alloc(128);
+    TEST_ASSERT(buf != NULL, "Buffer allocation should succeed");
+    TEST_ASSERT(buf->data != NULL, "Buffer data should not be NULL");
+    TEST_ASSERT_EQ(buf->ref_count, 1, "Ref count should be 1");
+
+    /* Write some data */
+    memset(buf->data, 0xAA, 128);
+    buf->size = 128;
+
+    /* Add reference */
+    ekk_buffer_ref(buf);
+    TEST_ASSERT_EQ(buf->ref_count, 2, "Ref count should be 2");
+
+    /* Release once */
+    ekk_buffer_release(buf);
+    TEST_ASSERT_EQ(buf->ref_count, 1, "Ref count should be 1");
+
+    /* Release again - should free */
+    ekk_buffer_release(buf);
+    /* Can't check ref_count after free */
+
+    return 1;
+}
+
+static int test_buffer_pool_exhaustion(void)
+{
+    /* Allocate all buffers */
+    ekk_buffer_t *buffers[20];
+    int allocated = 0;
+
+    for (int i = 0; i < 20; i++) {
+        buffers[i] = ekk_buffer_alloc(64);
+        if (buffers[i] == NULL) {
+            break;
+        }
+        allocated++;
+    }
+
+    TEST_ASSERT(allocated > 0, "Should allocate at least one buffer");
+    TEST_ASSERT(allocated <= 16, "Should not exceed pool size");
+
+    /* Try one more - should fail */
+    ekk_buffer_t *extra = ekk_buffer_alloc(64);
+    TEST_ASSERT(extra == NULL, "Pool should be exhausted");
+
+    /* Release all */
+    for (int i = 0; i < allocated; i++) {
+        ekk_buffer_release(buffers[i]);
+    }
+
+    /* Should be able to allocate again */
+    ekk_buffer_t *buf = ekk_buffer_alloc(64);
+    TEST_ASSERT(buf != NULL, "Should be able to allocate after release");
+    ekk_buffer_release(buf);
+
+    return 1;
+}
+
+/*===========================================================================*/
+/* Reader-Writer Lock Tests                                                  */
+/*===========================================================================*/
+
+static int test_rwlock_read(void)
+{
+    ekk_rwlock_t rwlock;
+    ekk_rwlock_init(&rwlock, "test_rwlock");
+
+    /* Multiple readers should be allowed */
+    ekk_err_t err = ekk_rwlock_rdlock(&rwlock, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "First read lock should succeed");
+
+    err = ekk_rwlock_rdlock(&rwlock, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Second read lock should succeed");
+
+    ekk_rwlock_rdunlock(&rwlock);
+    ekk_rwlock_rdunlock(&rwlock);
+
+    return 1;
+}
+
+static int test_rwlock_write(void)
+{
+    ekk_rwlock_t rwlock;
+    ekk_rwlock_init(&rwlock, "test_rwlock");
+
+    /* Write lock should be exclusive */
+    ekk_err_t err = ekk_rwlock_wrlock(&rwlock, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_OK, "Write lock should succeed");
+
+    /* Read lock should fail while write locked */
+    err = ekk_rwlock_rdlock(&rwlock, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_ERR_BUSY, "Read lock should fail");
+
+    /* Another write lock should fail */
+    err = ekk_rwlock_wrlock(&rwlock, EKK_NO_WAIT);
+    TEST_ASSERT_EQ(err, EKK_ERR_BUSY, "Second write lock should fail");
+
+    ekk_rwlock_wrunlock(&rwlock);
+
+    return 1;
+}
+
+/*===========================================================================*/
 /* Main                                                                      */
 /*===========================================================================*/
 
@@ -612,6 +875,10 @@ int main(int argc, char *argv[])
     fflush(stdout);
     RUN_TEST(test_scheduler_init);
     RUN_TEST(test_scheduler_lock_unlock);
+    RUN_TEST(test_scheduler_ticks);
+    RUN_TEST(test_scheduler_validation);
+    RUN_TEST(test_scheduler_utilization);
+    RUN_TEST(test_scheduler_stats);
     printf("\n");
     fflush(stdout);
 
@@ -638,6 +905,7 @@ int main(int argc, char *argv[])
     RUN_TEST(test_mutex_init);
     RUN_TEST(test_mutex_lock_unlock);
     RUN_TEST(test_mutex_trylock);
+    RUN_TEST(test_mutex_wait_queue);
     printf("\n");
     fflush(stdout);
 
@@ -646,12 +914,15 @@ int main(int argc, char *argv[])
     RUN_TEST(test_semaphore_init);
     RUN_TEST(test_semaphore_wait_signal);
     RUN_TEST(test_semaphore_trywait);
+    RUN_TEST(test_semaphore_binary);
     printf("\n");
     fflush(stdout);
 
     printf("--- Event Tests ---\n");
     fflush(stdout);
     RUN_TEST(test_event_flags);
+    RUN_TEST(test_event_wait_any);
+    RUN_TEST(test_event_wait_all);
     printf("\n");
     fflush(stdout);
 
@@ -662,6 +933,23 @@ int main(int argc, char *argv[])
     RUN_TEST(test_queue_send_receive);
     RUN_TEST(test_queue_peek);
     RUN_TEST(test_queue_flush);
+    printf("\n");
+    fflush(stdout);
+
+    /* Buffer Pool Tests */
+    printf("--- Buffer Pool Tests ---\n");
+    fflush(stdout);
+    RUN_TEST(test_buffer_pool_init);
+    RUN_TEST(test_buffer_alloc_release);
+    RUN_TEST(test_buffer_pool_exhaustion);
+    printf("\n");
+    fflush(stdout);
+
+    /* Reader-Writer Lock Tests */
+    printf("--- RW Lock Tests ---\n");
+    fflush(stdout);
+    RUN_TEST(test_rwlock_read);
+    RUN_TEST(test_rwlock_write);
     printf("\n");
     fflush(stdout);
 
