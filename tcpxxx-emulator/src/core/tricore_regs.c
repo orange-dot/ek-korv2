@@ -34,6 +34,7 @@ void cpu_init(cpu_state_t *cpu, uint32_t core_id)
     cpu->core_id = core_id;
     cpu->state = CPU_STATE_HALTED;
     cpu->irq_pending = false;
+    cpu->a14_shadow_depth = 0;  /* Initialize A14 shadow stack */
 }
 
 uint32_t cpu_read_csfr(cpu_state_t *cpu, uint16_t addr)

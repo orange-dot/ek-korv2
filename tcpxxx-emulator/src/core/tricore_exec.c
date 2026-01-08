@@ -204,6 +204,12 @@ int csa_save_lower(cpu_state_t *cpu, mem_system_t *mem)
     store32(cpu, mem, csa_addr + 56, D(6), &cycles);
     store32(cpu, mem, csa_addr + 60, D(7), &cycles);
 
+    /* Save A14 to shadow stack (GCC expects A14 preserved across calls) */
+    if (cpu->a14_shadow_depth < 64) {
+        fprintf(stderr, "[A14-SAVE] depth=%d A14=0x%08X\n", cpu->a14_shadow_depth, A(14));
+        cpu->a14_shadow[cpu->a14_shadow_depth++] = A(14);
+    }
+
     /* Update PCXI with new link (lower context, UL=0) */
     PCXI = addr_to_link(csa_addr);  /* UL bit clear = lower context */
 
@@ -244,6 +250,12 @@ int csa_restore_lower(cpu_state_t *cpu, mem_system_t *mem)
     D(5) = load32(cpu, mem, csa_addr + 52, &cycles);
     D(6) = load32(cpu, mem, csa_addr + 56, &cycles);
     D(7) = load32(cpu, mem, csa_addr + 60, &cycles);
+
+    /* Restore A14 from shadow stack (GCC expects A14 preserved across calls) */
+    if (cpu->a14_shadow_depth > 0) {
+        A(14) = cpu->a14_shadow[--cpu->a14_shadow_depth];
+        fprintf(stderr, "[A14-REST] depth=%d A14=0x%08X\n", cpu->a14_shadow_depth, A(14));
+    }
 
     /* Return CSA to free list */
     store32(cpu, mem, csa_addr, FCX, &cycles);
@@ -457,7 +469,23 @@ static int exec_16bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
         }
         break;
 
+    case 0x26:  /* AND D[a], D[b] */
+        D(insn->dst) = D(insn->dst) & D(insn->src2);
+        break;
+
+    case 0x66:  /* XOR D[a], D[b] */
+        D(insn->dst) = D(insn->dst) ^ D(insn->src2);
+        break;
+
+    case 0xA6:  /* OR D[a], D[b] */
+        D(insn->dst) = D(insn->dst) | D(insn->src2);
+        break;
+
     case 0x40:  /* MOV.AA A[a], A[b] */
+        if (insn->dst == 14) {
+            fprintf(stderr, "[MOV.AA] PC=0x%08X A14 <- A%d (0x%08X), old_A14=0x%08X\n",
+                    insn->pc, insn->src2, A(insn->src2), A(14));
+        }
         A(insn->dst) = A(insn->src2);
         break;
 
@@ -536,6 +564,10 @@ static int exec_16bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
         A(insn->dst) = (uint32_t)insn->imm;
         break;
     case 0x20:  /* SUB.A A[a], const4 - Subtract const from address register */
+        if (insn->pc >= 0x80006566 && insn->pc <= 0x80006596) {
+            fprintf(stderr, "[TRACE] SUB.A: PC=0x%08X A%d=0x%08X - %d => 0x%08X\n",
+                    insn->pc, insn->dst, A(insn->dst), insn->imm, A(insn->dst) - (uint32_t)insn->imm);
+        }
         A(insn->dst) = A(insn->dst) - (uint32_t)insn->imm;
         break;
     case 0xB0:  /* ADD.A A[a], const4 - Add const to address register */
@@ -559,13 +591,19 @@ static int exec_16bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
         D(15) = (uint32_t)(insn->imm & 0xFF);
         break;
 
-    /* ======== SLR format - Load short ======== */
-    case 0x54:  /* LD.W D[a], [A15] */
-        D(insn->dst) = load32(cpu, mem, A(15), &cycles);
+    /* ======== SLR format - Load short (uses A[b] from instruction) ======== */
+    case 0x54:  /* LD.W D[c], [A[b]] */
+        {
+            uint32_t addr = A(insn->src1);
+            uint32_t val = load32(cpu, mem, addr, &cycles);
+            fprintf(stderr, "[TRACE] LD.W-54: PC=0x%08X A%d=0x%08X => D%d=0x%08X\n",
+                    insn->pc, insn->src1, addr, insn->dst, val);
+            D(insn->dst) = val;
+        }
         break;
 
-    case 0xD4:  /* LD.A A[a], [A15] */
-        A(insn->dst) = load32(cpu, mem, A(15), &cycles);
+    case 0xD4:  /* LD.A A[c], [A[b]] */
+        A(insn->dst) = load32(cpu, mem, A(insn->src1), &cycles);
         break;
 
     /* ======== SLRO format - Load with offset ======== */
@@ -597,6 +635,26 @@ static int exec_16bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
     /* ======== SSR format - Store short ======== */
     case 0x74:  /* ST.W [A[b]], D[a] */
         store32(cpu, mem, A(insn->src2), D(insn->src1), &cycles);
+        break;
+
+    case 0x24:  /* ST.B [A[b]+], D[a] (post-increment byte) */
+        store8(cpu, mem, A(insn->src2), (uint8_t)D(insn->src1), &cycles);
+        A(insn->src2) = A(insn->src2) + 1;  /* Post-increment by 1 byte */
+        break;
+
+    case 0x34:  /* ST.W [A[b]+], D[a] (post-increment word) */
+        store32(cpu, mem, A(insn->src2), D(insn->src1), &cycles);
+        A(insn->src2) = A(insn->src2) + 4;  /* Post-increment by 4 bytes */
+        break;
+
+    case 0x84:  /* LD.B [A[b]+], D[a] (post-increment byte) */
+        D(insn->src1) = SEXT8(load8(cpu, mem, A(insn->src2), &cycles));
+        A(insn->src2) = A(insn->src2) + 1;  /* Post-increment by 1 byte */
+        break;
+
+    case 0xC4:  /* LD.W [A[b]+], D[a] (post-increment word) */
+        D(insn->src1) = load32(cpu, mem, A(insn->src2), &cycles);
+        A(insn->src2) = A(insn->src2) + 4;  /* Post-increment by 4 bytes */
         break;
 
     case 0xF4:  /* ST.A [A[b]], A[a] */
@@ -710,12 +768,16 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
         return CYCLES_BRANCH;
 
     case 0x6D:  /* CALL disp24 */
-        A(11) = insn->pc + 4;  /* Return address */
-        cycles = csa_save_lower(cpu, mem);
-        if (cycles < 0) {
-            return -1;  /* CSA depleted */
+        {
+            uint32_t target = insn->pc + insn->imm;
+            fprintf(stderr, "[TRACE] CALL: PC=0x%08X target=0x%08X\n", insn->pc, target);
+            A(11) = insn->pc + 4;  /* Return address */
+            cycles = csa_save_lower(cpu, mem);
+            if (cycles < 0) {
+                return -1;  /* CSA depleted */
+            }
+            PC = target;
         }
-        PC = insn->pc + insn->imm;
         return cycles;
 
     case 0x2D:  /* CALLI A[a] - Call Indirect */
@@ -770,40 +832,74 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
         break;
 
     case 0x59:  /* ST.W */
-        store32(cpu, mem, A(insn->src1) + insn->imm, D(insn->src2), &cycles);
+        {
+            uint32_t addr = A(insn->src1) + insn->imm;
+            uint32_t val = D(insn->src2);
+            if (insn->pc == 0x800065A0) {
+                fprintf(stderr, "[TRACE] ST.W-59: PC=0x%08X A%d=0x%08X off=%d addr=0x%08X <= D%d=0x%08X\n",
+                        insn->pc, insn->src1, A(insn->src1), insn->imm, addr, insn->src2, val);
+            }
+            store32(cpu, mem, addr, val, &cycles);
+        }
         break;
 
-    case 0x89:  /* ST.A */
-        store32(cpu, mem, A(insn->src1) + insn->imm, A(insn->src2), &cycles);
+    case 0x89:  /* ST.D (64-bit store) */
+        {uint32_t addr = A(insn->src1) + insn->imm; store32(cpu, mem, addr, D(insn->src2), &cycles); store32(cpu, mem, addr + 4, D(insn->src2 + 1), &cycles);}
         break;
 
     case 0xE9:  /* ST.B */
-        store8(cpu, mem, A(insn->src1) + insn->imm, (uint8_t)D(insn->src2), &cycles);
+        {
+            uint32_t addr = A(insn->src1) + insn->imm;
+            uint8_t val = (uint8_t)D(insn->src2);
+            if (addr >= 0x70039D70 && addr <= 0x70039D80) {
+                fprintf(stderr, "[TRACE] ST.B-E9: PC=0x%08X A%d=0x%08X off=%d addr=0x%08X <= 0x%02X\n",
+                        insn->pc, insn->src1, A(insn->src1), insn->imm, addr, val);
+            }
+            store8(cpu, mem, addr, val, &cycles);
+        }
         break;
 
     case 0xF9:  /* ST.H */
         store16(cpu, mem, A(insn->src1) + insn->imm, (uint16_t)D(insn->src2), &cycles);
         break;
 
-    case 0x79:  /* ST.D (64-bit store) */
+    case 0x79:  /* LD.B (signed byte load) */
         {
             uint32_t addr = A(insn->src1) + insn->imm;
-            store32(cpu, mem, addr, D(insn->src2), &cycles);
-            store32(cpu, mem, addr + 4, D(insn->src2 + 1), &cycles);
+            uint8_t val = load8(cpu, mem, addr, &cycles);
+            fprintf(stderr, "[TRACE] LD.B: PC=0x%08X A%d=0x%08X off=%d addr=0x%08X => byte=0x%02X\n",
+                    insn->pc, insn->src1, A(insn->src1), insn->imm, addr, val);
+            D(insn->dst) = SEXT8(val);
         }
         break;
 
     /* ======== BOL format - LEA, LD.A, ST.A ======== */
     case 0x99:  /* LD.A A[c], [A[b]]off16 */
-        A(insn->dst) = load32(cpu, mem, A(insn->src1) + insn->imm, &cycles);
+        {
+            uint32_t addr = A(insn->src1) + insn->imm;
+            uint32_t val = load32(cpu, mem, addr, &cycles);
+            fprintf(stderr, "[TRACE] LD.A: PC=0x%08X A%d=0x%08X off=%d addr=0x%08X => A%d=0x%08X\n",
+                    insn->pc, insn->src1, A(insn->src1), insn->imm, addr, insn->dst, val);
+            A(insn->dst) = val;
+        }
         break;
 
     case 0xB5:  /* ST.A [A[b]]off16, A[c] */
-        store32(cpu, mem, A(insn->src1) + insn->imm, A(insn->src2), &cycles);
+        {
+            uint32_t addr = A(insn->src1) + insn->imm;
+            fprintf(stderr, "[TRACE] ST.A: PC=0x%08X A%d=0x%08X off=%d addr=0x%08X <= A%d=0x%08X\n",
+                    insn->pc, insn->src1, A(insn->src1), insn->imm, addr, insn->src2, A(insn->src2));
+            store32(cpu, mem, addr, A(insn->src2), &cycles);
+        }
         break;
 
     case 0xD9:  /* LEA A[c], [A[b]]off16 */
-        A(insn->dst) = A(insn->src1) + insn->imm;
+        {
+            uint32_t result = A(insn->src1) + insn->imm;
+            fprintf(stderr, "[TRACE] LEA: PC=0x%08X A%d=0x%08X + %d => A%d=0x%08X\n",
+                    insn->pc, insn->src1, A(insn->src1), insn->imm, insn->dst, result);
+            A(insn->dst) = result;
+        }
         break;
 
     /* ======== BRR format - Conditional branches ======== */
@@ -928,6 +1024,11 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
             /* Extract disp15 from raw instruction, sign-extend and multiply by 2 */
             uint32_t raw_disp15 = (insn->raw >> 16) & 0x7FFF;
             int32_t disp = ((int32_t)(raw_disp15 << 17)) >> 16;
+            
+            if (insn->pc == 0x800065b6) {
+                fprintf(stderr, "[TRACE] JEQ: PC=0x%08X raw=0x%08X D%d=%d imm=%d disp=%d src2=%d\n",
+                        insn->pc, insn->raw, insn->src1, (int32_t)D(insn->src1), insn->imm, disp, insn->src2);
+            }
 
             switch (insn->opcode2) {
             case 0:  /* JEQ D[a], const4, disp15 - signed equality */
@@ -939,16 +1040,13 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
                     cycles = CYCLES_BRANCH_NT;
                 }
                 return cycles;
-            case 1:  /* JLT.U D[a], const4, disp15 - unsigned < */
-                {
-                    uint32_t uconst = (uint32_t)(insn->imm & 0xF);
-                    if (D(insn->src1) < uconst) {
-                        PC = insn->pc + disp;
-                        cycles = CYCLES_BRANCH;
-                    } else {
-                        PC = insn->pc + 4;
-                        cycles = CYCLES_BRANCH_NT;
-                    }
+            case 1:  /* JNE D[a], const4, disp15 - jump if NOT equal */
+                if ((int32_t)D(insn->src1) != insn->imm) {
+                    PC = insn->pc + disp;
+                    cycles = CYCLES_BRANCH;
+                } else {
+                    PC = insn->pc + 4;
+                    cycles = CYCLES_BRANCH_NT;
                 }
                 return cycles;
             default:
@@ -1110,6 +1208,47 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
             break;
         case 0x15:  /* GE.U D[c], D[a], const9 (unsigned) */
             D(insn->dst) = (D(insn->src1) >= (uint32_t)insn->imm) ? 1 : 0;
+            break;
+
+        /* Accumulating comparisons */
+        case 0x20:  /* AND.EQ D[c], D[a], const9 */
+            /* D[c] = D[c] AND (D[a] == const9 ? 1 : 0) */
+            D(insn->dst) = D(insn->dst) & (((int32_t)D(insn->src1) == insn->imm) ? 1 : 0);
+            break;
+        case 0x21:  /* AND.NE D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) & (((int32_t)D(insn->src1) != insn->imm) ? 1 : 0);
+            break;
+        case 0x24:  /* AND.GE D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) & (((int32_t)D(insn->src1) >= insn->imm) ? 1 : 0);
+            break;
+        case 0x25:  /* AND.GE.U D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) & ((D(insn->src1) >= (uint32_t)insn->imm) ? 1 : 0);
+            break;
+        case 0x22:  /* AND.LT D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) & (((int32_t)D(insn->src1) < insn->imm) ? 1 : 0);
+            break;
+        case 0x23:  /* AND.LT.U D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) & ((D(insn->src1) < (uint32_t)insn->imm) ? 1 : 0);
+            break;
+
+        /* OR accumulating comparisons */
+        case 0x28:  /* OR.EQ D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) | (((int32_t)D(insn->src1) == insn->imm) ? 1 : 0);
+            break;
+        case 0x29:  /* OR.NE D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) | (((int32_t)D(insn->src1) != insn->imm) ? 1 : 0);
+            break;
+        case 0x2C:  /* OR.GE D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) | (((int32_t)D(insn->src1) >= insn->imm) ? 1 : 0);
+            break;
+        case 0x2D:  /* OR.GE.U D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) | ((D(insn->src1) >= (uint32_t)insn->imm) ? 1 : 0);
+            break;
+        case 0x2A:  /* OR.LT D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) | (((int32_t)D(insn->src1) < insn->imm) ? 1 : 0);
+            break;
+        case 0x2B:  /* OR.LT.U D[c], D[a], const9 */
+            D(insn->dst) = D(insn->dst) | ((D(insn->src1) < (uint32_t)insn->imm) ? 1 : 0);
             break;
 
         default:
@@ -1859,6 +1998,19 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
         default:
             fprintf(stderr, "Unimplemented SYS opcode2: 0x%02X\n", insn->opcode2);
             return -1;
+        }
+        break;
+
+    case 0xC5:  /* LEA A[c], off18 (ABS format) */
+        {
+            uint32_t c = (insn->raw >> 8) & 0xF;
+            uint32_t off18_5_0   = (insn->raw >> 16) & 0x3F;
+            uint32_t off18_9_6   = (insn->raw >> 28) & 0xF;
+            uint32_t off18_13_10 = (insn->raw >> 22) & 0xF;
+            uint32_t off18_17_14 = (insn->raw >> 12) & 0xF;
+            uint32_t off18 = off18_5_0 | (off18_9_6 << 6) | (off18_13_10 << 10) | (off18_17_14 << 14);
+            uint32_t ea = (off18_17_14 << 28) | (off18 & 0x3FFF);
+            A(c) = ea;
         }
         break;
 

@@ -341,6 +341,10 @@ typedef struct {
     bool temp_prot_enabled;         /**< Temporal protection enabled */
     uint8_t current_prs;            /**< Current Protection Register Set */
 
+    /* A14 shadow stack for CALL/RET (GCC expects A14 preserved across calls) */
+    uint32_t a14_shadow[64];        /**< Shadow stack for A14 */
+    int a14_shadow_depth;           /**< Current shadow stack depth */
+
 } cpu_state_t;
 
 /* ==========================================================================

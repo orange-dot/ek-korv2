@@ -928,7 +928,7 @@ static int run_emulator(emu_config_t *cfg)
     printf("DEBUG: First instruction word at PC=0x%08X: 0x%08X (opc=0x%02X)\n",
            cores[0].pc, first_word, first_word & 0xFF);
 
-    uint64_t max_insns = 2000000;  /* Limit for safety - increased to 2M */
+    uint64_t max_insns = 50000000;  /* Limit for safety - increased to 2M */
 
     /* Debug: trace first 20 instructions */
     printf("\nFirst 20 instructions:\n");

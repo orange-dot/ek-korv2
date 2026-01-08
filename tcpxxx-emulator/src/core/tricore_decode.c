@@ -163,11 +163,14 @@ static int decode_16bit(uint16_t insn, decoded_insn_t *out)
         decode_sr(insn, out);
         out->opcode2 = BITS(insn, 15, 12);
         break;
-    /* SRR format - ADD, SUB, MOV, etc. */
+    /* SRR format - ADD, SUB, MOV, logic ops, etc. */
     case 0x02:  /* MOV D[a], D[b] */
     case 0x42:  /* ADD D[a], D[b] */
     case 0xA2:  /* SUB D[a], D[b] */
     case 0xE2:  /* MUL D[a], D[b] */
+    case 0x26:  /* AND D[a], D[b] */
+    case 0x66:  /* XOR D[a], D[b] */
+    case 0xA6:  /* OR D[a], D[b] */
         decode_srr(insn, out);
         break;
     case 0x40:  /* MOV.AA A[a], A[b] */
@@ -191,8 +194,10 @@ static int decode_16bit(uint16_t insn, decoded_insn_t *out)
         decode_src(insn, out);
         out->is_addr_dst = true;
         break;
-    case 0x20:  /* SUB.A A[a], const4 */
-        decode_src(insn, out);
+    case 0x20:  /* SUB.A SP, const8 - SC format with implicit SP */
+        out->format = FMT_SC;
+        out->dst = 10;                          /* SP (A10) implicit */
+        out->imm = BITS(insn, 15, 8);           /* const8 */
         out->is_addr_dst = true;
         break;
     case 0xB0:  /* ADD.A A[a], const4 */
@@ -225,11 +230,17 @@ static int decode_16bit(uint16_t insn, decoded_insn_t *out)
         out->is_addr_dst = (opc == 0xCC);
         out->dst = BITS(insn, 11, 8);
         break;
-    /* SSR format - ST.W, ST.A */
+    /* SSR format - ST.W, ST.A, post-increment variants */
     case 0x74:  /* ST.W [A[b]], D[a] */
     case 0xF4:  /* ST.A [A[b]], A[a] */
         decode_ssr(insn, out);
         out->is_addr_src1 = (opc == 0xF4);
+        break;
+    case 0x24:  /* ST.B [A[b]+], D[a] (post-increment byte) */
+    case 0x34:  /* ST.W [A[b]+], D[a] (post-increment word) */
+    case 0x84:  /* LD.B [A[b]+], D[a] (post-increment byte) */
+    case 0xC4:  /* LD.W [A[b]+], D[a] (post-increment word) */
+        decode_ssr(insn, out);
         break;
     /* SSRO format - ST.W, ST.A with offset */
     case 0x68:  /* ST.W [A15]off4, D[a] */
@@ -511,10 +522,9 @@ static int decode_32bit(uint32_t insn, decoded_insn_t *out)
         out->src2 = out->dst;  /* source is the "dst" field for stores */
         out->dst = -1;
         break;
-    case 0x79:  /* ST.D */
-        decode_bo(insn, out);
-        out->src2 = out->dst;
-        out->dst = -1;
+    case 0x79:  /* LD.B BOL format (signed byte load) */
+        decode_bol(insn, out);
+        out->is_addr_dst = false;  /* D[c] is data destination */
         break;
     case 0x89:  /* ST.A */
         decode_bo(insn, out);
@@ -663,6 +673,10 @@ static int decode_32bit(uint32_t insn, decoded_insn_t *out)
     /* ABS format - absolute addressing */
     case 0x85:  /* LD.W abs, etc. */
         decode_abs(insn, out);
+        break;
+    case 0xC5:  /* LEA A[c], off18 */
+        decode_abs(insn, out);
+        out->is_addr_dst = true;
         break;
     default:
         out->format = FMT_UNKNOWN;
@@ -831,10 +845,9 @@ const char* tricore_mnemonic(const decoded_insn_t *insn)
             default:   return "DIVU?";
             }
         case 0x73: return "MUL";
-        case 0x79: return "ST.D";
+        case 0x79: return "LD.B";
         case 0x7B: return "MOVH";
         case 0x7F: return "JNE";
-        case 0x89: return "ST.A";
         case 0x8B: return "ADD";
         case 0x8F: return "OR/SH";
         case 0x9F:
