@@ -945,6 +945,12 @@ static int run_emulator(emu_config_t *cfg)
         /* Step core 0 */
         mem_set_core(mem, 0);
 
+        /* Trace execution in get_sched range */
+        if (cores[0].pc >= 0x80004306 && cores[0].pc <= 0x80004320) {
+            fprintf(stderr, "[GETSCHED] PC=0x%08X A2=0x%08X D2=0x%08X D3=0x%08X\n",
+                    cores[0].pc, cores[0].a[2], cores[0].d[2], cores[0].d[3]);
+        }
+
         /* Debug: detect when we reach cpu0_main */
         static bool reached_cpu0_main = false;
         static bool reached_startup = false;

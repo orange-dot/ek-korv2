@@ -2,6 +2,10 @@
 .ftp-credentials
 *.env
 .env.*
+ugovor-o-saradnji-draft.*
+
+# Claude Code local settings
+.claude/settings.local.json
 
 # Node modules
 node_modules/
@@ -10,7 +14,9 @@ node_modules/
 web/dist/
 **/build/
 **/build-arm/
+**/build_arm/
 **/build_manual/
+**/target/
 *.o
 *.a
 *.obj
@@ -18,7 +24,19 @@ web/dist/
 *.bin
 *.elf
 *.map
+*.img
 nul
+
+# Downloaded tools and packages
+renode-portable/
+renode*.zip
+*.pkg.tar
+*.pkg.tar.zst
+OVMF.fd
+
+# Procurement (sensitive)
+nabavka/*.xlsx
+nabavka/*.py
 
 # IDE
 .idea/

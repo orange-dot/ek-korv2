@@ -1,0 +1,40 @@
+Predmet: Zahtev za ponudu [BROJ ZAHTEVA] - Elektrokombinacija
+
+Postovani,
+
+Obracam Vam se sa zahtevom za ponudu za opremu potrebnu za razvoj modularnih punjaca za elektricna vozila. Projekat ukljucuje distribuiranu kontrolu preko CAN-FD mreze sa 10+ kontrolnih jedinica baziranih na STM32G474 mikrokontroleru.
+
+U prilogu se nalazi Excel tabela sa kompletnim spiskom opreme (23 stavke). Prioritetne stavke su oznacene zutom bojom.
+
+KLJUCNE STAVKE:
+- Razvojne ploce: NUCLEO-G474RE, STM32G474RET6 MCU
+- Programatori: ST-LINK/V3SET, ST-LINK/V3MINIE
+- CAN-FD: PCAN-USB FD adapter, CAN-FD transiveri
+- Merna oprema: Logicki analizator, USB-UART adapteri
+- Napajanje: Lab napajanje 30V/10A, DC-DC pretvaraci
+
+Molim Vas da u ponudi navedete:
+- Cenu po stavci i ukupnu cenu (sa i bez PDV-a)
+- Rok isporuke za svaku stavku
+- Validnost ponude (minimum 14 dana)
+
+Ako neka stavka nije dostupna, molim predlozite ekvivalentnu alternativu.
+
+PODACI ZA ISPORUKU:
+Bojan Janjatovic
+Gavrila Principa 28
+Kikinda
+Tel: 061 147 87 26
+
+Placanje: Po dogovoru (avans ili virman)
+
+Unapred zahvaljujem na odgovoru.
+
+S postovanjem,
+
+Bojan Janjatovic
+Elektrokombinacija
+Tel: 061 147 87 26
+
+---
+Prilog: [EXCEL FAJL]
