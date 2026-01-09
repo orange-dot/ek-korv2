@@ -58,6 +58,37 @@ Added post-increment variants:
 - MOV.AA tracing when dst=A14
 - SUB.A tracing in puts/putc range
 
+## Critical Fix: RET Instruction Return Value Preservation
+
+**Problem:** The `RET` instruction was restoring D2 and A2 registers from the CSA, which
+destroyed function return values. In TriCore calling convention:
+- D2 holds scalar return values
+- A2 holds pointer/address return values
+
+When a function returned, the `csa_restore_lower()` function restored these registers
+from the caller's saved context, overwriting the return value the callee had placed there.
+
+**Root Cause:** The scheduler's `get_sched()` function called `ekk_hal_get_core_id()`,
+which correctly returned 0 in D2. But RET restored D2 from the CSA (garbage value),
+causing `get_sched()` to calculate wrong scheduler address (0x80000000 instead of 0x70000730).
+
+**Solution:** Created `csa_restore_lower_ex()` with a `preserve_retval` parameter:
+- RET uses `csa_restore_lower_ex(cpu, mem, 1)` - preserves D2/A2
+- RSLCX uses `csa_restore_lower(cpu, mem)` - restores all registers
+
+**File:** `src/core/tricore_exec.c`
+```c
+int csa_restore_lower_ex(cpu_state_t *cpu, mem_system_t *mem, int preserve_retval)
+{
+    /* ... */
+    if (!preserve_retval) {
+        A(2) = load32(cpu, mem, csa_addr + 8, &cycles);
+        D(2) = load32(cpu, mem, csa_addr + 24, &cycles);
+    }
+    /* ... */
+}
+```
+
 ## Test Results
 
 **Boot Output (successful):**
@@ -67,27 +98,28 @@ JEZGRO
 JEZGRO RTOS for TC397XP
 ==================================
 Kernel initialized
-Starting scheduler....
+Starting scheduler...
 ```
 
 **Status:**
 - Kernel initialization: ✓
 - UART output: ✓
 - Function calls/returns: ✓
+- Return value preservation: ✓
 - Scheduler start: ✓
-- Context switch: In progress (FCX setup issue)
+- Scheduler enters idle loop: ✓ (waiting for timer interrupts)
 
 ## Files Modified
 
 - `src/core/tricore_decode.c` - Decoder fixes
-- `src/core/tricore_exec.c` - Executor fixes + debug traces
+- `src/core/tricore_exec.c` - Executor fixes + RET return value preservation
 - `src/core/tricore_regs.c` - Register handling
 - `src/main.c` - Emulator main loop
 - `include/emu_types.h` - Type definitions
 
 ## Next Steps
 
-1. Debug context switch FCX pointer issue
-2. Verify CSA initialization in firmware
-3. Complete task switching test
+1. ~~Debug context switch FCX pointer issue~~ (resolved by RET fix)
+2. Enable STM timer interrupts for task preemption
+3. Test task context switching with timer
 4. Multi-core boot (CPU1, CPU2)

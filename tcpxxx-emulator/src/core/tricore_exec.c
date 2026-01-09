@@ -220,9 +220,13 @@ int csa_save_lower(cpu_state_t *cpu, mem_system_t *mem)
 }
 
 /**
- * @brief Restore lower context (RET instruction)
+ * @brief Restore lower context from CSA
+ * @param cpu CPU state
+ * @param mem Memory system
+ * @param preserve_retval If true, preserve D2/A2 (return value registers)
+ *                        Use true for RET, false for RSLCX
  */
-int csa_restore_lower(cpu_state_t *cpu, mem_system_t *mem)
+int csa_restore_lower_ex(cpu_state_t *cpu, mem_system_t *mem, int preserve_retval)
 {
     int cycles = 0;
 
@@ -236,11 +240,20 @@ int csa_restore_lower(cpu_state_t *cpu, mem_system_t *mem)
     /* Restore lower context */
     uint32_t old_pcxi = load32(cpu, mem, csa_addr + 0, &cycles);
     A(11) = load32(cpu, mem, csa_addr + 4, &cycles);  /* Return address */
-    A(2) = load32(cpu, mem, csa_addr + 8, &cycles);
+
+    /* D2 and A2 are return value registers - only restore for RSLCX, not RET */
+    if (!preserve_retval) {
+        A(2) = load32(cpu, mem, csa_addr + 8, &cycles);
+        D(2) = load32(cpu, mem, csa_addr + 24, &cycles);
+    } else {
+        /* Still need to read for cycle count but don't use values */
+        (void)load32(cpu, mem, csa_addr + 8, &cycles);
+        (void)load32(cpu, mem, csa_addr + 24, &cycles);
+    }
+
     A(3) = load32(cpu, mem, csa_addr + 12, &cycles);
     D(0) = load32(cpu, mem, csa_addr + 16, &cycles);
     D(1) = load32(cpu, mem, csa_addr + 20, &cycles);
-    D(2) = load32(cpu, mem, csa_addr + 24, &cycles);
     D(3) = load32(cpu, mem, csa_addr + 28, &cycles);
     A(4) = load32(cpu, mem, csa_addr + 32, &cycles);
     A(5) = load32(cpu, mem, csa_addr + 36, &cycles);
@@ -265,6 +278,12 @@ int csa_restore_lower(cpu_state_t *cpu, mem_system_t *mem)
     PCXI = old_pcxi;
 
     return cycles;
+}
+
+/* Wrapper for backward compatibility - restores all registers */
+int csa_restore_lower(cpu_state_t *cpu, mem_system_t *mem)
+{
+    return csa_restore_lower_ex(cpu, mem, 0);  /* restore all */
 }
 
 /**
@@ -376,8 +395,8 @@ static int exec_16bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
                 }
                 /* 0x0090 = RET (d=9) */
                 if ((word16 & 0x0F00) == 0x0900) {
-                    /* RET */
-                    cycles = csa_restore_lower(cpu, mem);
+                    /* RET - preserve D2/A2 return values */
+                    cycles = csa_restore_lower_ex(cpu, mem, 1);
                     if (cycles < 0) {
                         return -1;  /* Error */
                     }
@@ -414,8 +433,8 @@ static int exec_16bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
             /* Skip it as a NOP */
             break;
 
-        case 0x09:  /* RET (standard encoding) */
-            cycles = csa_restore_lower(cpu, mem);
+        case 0x09:  /* RET (standard encoding) - preserve D2/A2 return values */
+            cycles = csa_restore_lower_ex(cpu, mem, 1);
             if (cycles < 0) {
                 return -1;  /* Error */
             }
@@ -596,8 +615,16 @@ static int exec_16bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
         {
             uint32_t addr = A(insn->src1);
             uint32_t val = load32(cpu, mem, addr, &cycles);
-            fprintf(stderr, "[TRACE] LD.W-54: PC=0x%08X A%d=0x%08X => D%d=0x%08X\n",
-                    insn->pc, insn->src1, addr, insn->dst, val);
+            /* Debug: trace ALL LD.W from RAM or at specific PCs */
+            if (addr >= 0x70000000 && addr < 0x70100000) {
+                fprintf(stderr, "[LD.W] PC=0x%08X: [0x%08X] => 0x%08X\n",
+                        insn->pc, addr, val);
+            }
+            /* Debug: trace specific PCs in ekk_sched_select_next and ekk_sched_start */
+            if (insn->pc >= 0x800047cc && insn->pc < 0x80004800) {
+                fprintf(stderr, "[SCHED_SEL] PC=0x%08X A2=0x%08X D2=0x%08X\n",
+                        insn->pc, A(2), D(2));
+            }
             D(insn->dst) = val;
         }
         break;
@@ -1144,6 +1171,8 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
     case 0x4D:  /* MFCR D[c], const16 */
         {
             uint16_t csfr_addr = (uint16_t)insn->imm;
+            fprintf(stderr, "[MFCR] PC=0x%08X csfr=0x%04X imm=0x%08X dst=%d\n",
+                    insn->pc, csfr_addr, insn->imm, insn->dst);
             switch (csfr_addr) {
             case CSFR_PC:       D(insn->dst) = PC; break;
             case CSFR_PSW:      D(insn->dst) = PSW; break;
@@ -1155,7 +1184,11 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
             case CSFR_BTV:      D(insn->dst) = cpu->btv; break;
             case CSFR_BIV:      D(insn->dst) = cpu->biv; break;
             case CSFR_SYSCON:   D(insn->dst) = cpu->syscon; break;
-            case CSFR_CORE_ID:  D(insn->dst) = cpu->core_id; break;
+            case CSFR_CORE_ID:
+                fprintf(stderr, "[CORE_ID] PC=0x%08X cpu->core_id=%u D%d<=%u\n",
+                        insn->pc, cpu->core_id, insn->dst, cpu->core_id);
+                D(insn->dst) = cpu->core_id;
+                break;
             case CSFR_CCNT:     D(insn->dst) = (uint32_t)cpu->cycle_count; break;
             default:            D(insn->dst) = 0; break;
             }
@@ -1936,8 +1969,8 @@ static int exec_32bit(cpu_state_t *cpu, const decoded_insn_t *insn, mem_system_t
         case 0x00:  /* NOP */
             break;
 
-        case 0x06:  /* RET */
-            cycles = csa_restore_lower(cpu, mem);
+        case 0x06:  /* RET - preserve D2/A2 return values */
+            cycles = csa_restore_lower_ex(cpu, mem, 1);
             if (cycles < 0) return -1;
             PC = A(11);
             return cycles;
