@@ -9,10 +9,6 @@ import {
   Globe,
   Play,
   ChevronDown,
-  FileText,
-  Lock,
-  Users,
-  Briefcase,
   BookOpen,
 } from 'lucide-react';
 
@@ -129,35 +125,6 @@ export default function Navbar() {
               <span className="text-sm font-medium">{t('nav.docs')}</span>
             </Link>
 
-            {/* Partner Portal */}
-            <Link
-              to="/partner"
-              className="flex items-center space-x-1 px-3 py-1.5 text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              <Lock className="w-3 h-3" />
-              <Users className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('nav.partner')}</span>
-            </Link>
-
-            {/* Investor Portal */}
-            <Link
-              to="/investor"
-              className="flex items-center space-x-1 px-3 py-1.5 text-amber-400 hover:text-amber-300 transition-colors"
-            >
-              <Lock className="w-3 h-3" />
-              <Briefcase className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('nav.investor')}</span>
-            </Link>
-
-            {/* Quick Pitch Link */}
-            <Link
-              to="/quick"
-              className="flex items-center space-x-1 px-3 py-1.5 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/50 rounded-full text-cyan-400 hover:text-white hover:border-cyan-400 transition-colors"
-            >
-              <Zap className="w-4 h-4" />
-              <span className="text-sm font-medium">{t('nav.quickPitch')}</span>
-            </Link>
-
             {/* Language Toggle */}
             <button
               onClick={toggleLanguage}
@@ -233,7 +200,6 @@ export default function Navbar() {
             </div>
 
             <div className="border-t border-border pt-3 mt-3">
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">{t('nav.portals')}</p>
               <Link
                 to="/docs"
                 onClick={() => setIsOpen(false)}
@@ -242,34 +208,7 @@ export default function Navbar() {
                 <BookOpen className="w-4 h-4" />
                 <span>{t('nav.docs')}</span>
               </Link>
-              <Link
-                to="/partner"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-2 text-emerald-400 py-2"
-              >
-                <Lock className="w-3 h-3" />
-                <Users className="w-4 h-4" />
-                <span>{t('nav.partner')}</span>
-              </Link>
-              <Link
-                to="/investor"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-2 text-amber-400 py-2"
-              >
-                <Lock className="w-3 h-3" />
-                <Briefcase className="w-4 h-4" />
-                <span>{t('nav.investor')}</span>
-              </Link>
             </div>
-
-            <Link
-              to="/quick"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-2 text-cyan-400 py-2 font-medium"
-            >
-              <Zap className="w-4 h-4" />
-              <span>{t('nav.quickPitch')}</span>
-            </Link>
           </div>
         </motion.div>
       )}

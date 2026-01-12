@@ -175,34 +175,6 @@ export default function DocsPage() {
         </div>
       </section>
 
-      {/* Partner/Investor CTA */}
-      <section className="py-12 px-6 border-t border-slate-800">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            {lang === 'sr' ? 'Tražite više detalja?' : 'Looking for more details?'}
-          </h2>
-          <p className="text-slate-400 mb-6">
-            {lang === 'sr'
-              ? 'Detaljne tehničke specifikacije i patentna dokumentacija dostupni su partnerima i investitorima.'
-              : 'Detailed technical specifications and patent documentation are available to partners and investors.'}
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              to="/partner"
-              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
-            >
-              {lang === 'sr' ? 'Partner Portal' : 'Partner Portal'}
-            </Link>
-            <Link
-              to="/investor"
-              className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors"
-            >
-              {lang === 'sr' ? 'Investor Portal' : 'Investor Portal'}
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="border-t border-slate-800 mt-8">
         <div className="max-w-6xl mx-auto px-6 py-8 text-center text-slate-500 text-sm">

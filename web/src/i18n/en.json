@@ -15,6 +15,7 @@
     "patent": "Patents",
     "internal": "Internal",
     "jezgroDev": "JEZGRO Dev",
+    "ekKor2Dev": "EK-KOR v2",
     "roj": "ROJ",
     "quickPitch": "Quick Pitch",
     "v2g": "V2G",
@@ -210,7 +211,7 @@
       "description": "We combine the best of both worlds: highly modular design enabling fast field replacement, with modern AI diagnostics that predict failures and robotic automation for swap.",
       "features": [
         "AI predicts failure 2 weeks ahead",
-        "Robot swaps module in 60 seconds",
+        "Robot swaps module under a minute",
         "No technician needed in the field",
         "Module is repaired at service center - by humans"
       ],
@@ -223,12 +224,12 @@
         {
           "title": "AI Detection",
           "description": "System detects module degradation and predicts failure",
-          "time": "14 days ahead"
+          "time": "Days ahead"
         },
         {
           "title": "Automatic Swap",
           "description": "Robot at swap station replaces module without human intervention",
-          "time": "60 seconds"
+          "time": "Under a minute"
         },
         {
           "title": "Transport",
@@ -247,7 +248,7 @@
       "field": {
         "title": "In the Field",
         "subtitle": "Automated, fast, no waiting",
-        "point1": "Robotic module swap - 60 seconds",
+        "point1": "Fast robotic module swap",
         "point2": "AI diagnostics - knows exactly what to replace",
         "point3": "No technician needed on location",
         "note": "Zero truck rolls for replacement"
@@ -265,11 +266,11 @@
   "selfHealingFleet": {
     "title": "Self-Healing Fleet",
     "subtitle": "No technicians in the field. Ever.",
-    "description": "Buses carry spare EK3 modules. Robots swap failed modules in 60 seconds. Failed modules travel back to service center on regular bus routes. Zero truck rolls.",
+    "description": "Buses carry spare EK3 modules. Robots quickly swap failed modules. Failed modules travel back to service center on regular bus routes. Zero truck rolls.",
     "steps": {
       "predict": {
         "title": "AI Predicts",
-        "description": "2 weeks before failure, AI detects degradation",
+        "description": "Before failure, AI detects degradation",
         "icon": "brain"
       },
       "carry": {
@@ -279,7 +280,7 @@
       },
       "swap": {
         "title": "Robot Swaps",
-        "description": "60-second robotic replacement, no human needed",
+        "description": "Fast robotic replacement, no human needed",
         "icon": "robot"
       },
       "transport": {
@@ -363,22 +364,22 @@
       "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
       "description": "Standard module for all applications",
-      "specs": ["200 × 320 × 44mm (1U half-width)", "~3.5 kg - robot-ready", "SiC MOSFET, >97% efficiency", "Blind-mate connectors"]
+      "specs": ["Compact blade form factor", "Lightweight, robot-ready", "SiC MOSFET, high efficiency", "Blind-mate connectors"]
     },
     "phase2": {
       "title": "RACK SYSTEM",
-      "power": "252 kW",
-      "description": "84 modules in standard 19\" rack",
-      "specs": ["Wide striping - load across ALL modules", "Distributed sparing - no hot-spare", "Robot swap in 40 seconds", "Graceful degradation"]
+      "power": "Hundreds of kW",
+      "description": "Multiple modules in standard 19\" rack",
+      "specs": ["Wide striping - load across ALL modules", "Distributed sparing - no hot-spare", "Fast robot swap", "Graceful degradation"]
     },
     "features": {
       "title": "Why one module for everything?",
       "modular": "Mass production",
       "modularDesc": "One design, millions of units = low cost",
       "hotswap": "Granular reliability",
-      "hotswapDesc": "1 of 334 fails = 0.3% loss, not 10%",
+      "hotswapDesc": "Single module fails = minimal loss, not 10%",
       "protection": "Robot swap",
-      "protectionDesc": "40 second replacement, no technician",
+      "protectionDesc": "Fast replacement, no technician",
       "local": "3PAR inspiration",
       "localDesc": "Proven concepts from storage industry"
     }
@@ -397,18 +398,18 @@
     "opportunity": {
       "title": "DC Fast Charging",
       "power": "50-350 kW",
-      "modules": "17-117 × EK3",
-      "price": "€2,500 - €18,000",
+      "modules": "Multiple EK3",
+      "price": "Contact us",
       "description": "Cars, highway stations. Rack system, robot-ready module swap.",
-      "features": ["1-2 racks", "40 sec swap", "99.9% uptime"]
+      "features": ["1-2 racks", "Fast swap", "99.9% uptime"]
     },
     "swap": {
       "title": "Heavy Duty + MCS",
       "power": "500 kW - 3 MW",
-      "modules": "167-1000 × EK3",
+      "modules": "Many EK3",
       "price": "Contact us",
       "description": "Buses, trucks, MCS. Multiple racks, robotic swap, graceful degradation.",
-      "features": ["4-12 racks", "2 robots parallel", "0.1% loss per failure"]
+      "features": ["Multiple racks", "Parallel robots", "Minimal loss per failure"]
     }
   },
   "timeline": {
@@ -418,19 +419,19 @@
       "title": "Phase 1: EK3 Module",
       "duration": "4 months",
       "description": "Blade format, robot-ready design",
-      "items": ["SiC MOSFET power stage", "Blind-mate connectors", "AI edge processor", "~3.5 kg, 1U half-width"]
+      "items": ["SiC MOSFET power stage", "Blind-mate connectors", "AI edge processor", "Compact blade form factor"]
     },
     "phase2": {
       "title": "Phase 2: Rack System",
       "duration": "3 months",
-      "description": "84 modules in 19\" rack",
-      "items": ["Backplane design", "Wide striping algorithm", "Distributed sparing", "252 kW per rack"]
+      "description": "Multiple modules in 19\" rack",
+      "items": ["Backplane design", "Wide striping algorithm", "Distributed sparing", "Scalable power"]
     },
     "phase3": {
       "title": "Phase 3: Robot System",
       "duration": "4 months",
       "description": "Custom robots for swap",
-      "items": ["Robot A (on bus)", "Robot B (at station)", "Coordination protocol", "40 sec swap"]
+      "items": ["Robot A (on bus)", "Robot B (at station)", "Coordination protocol", "Fast swap"]
     },
     "phase4": {
       "title": "Phase 4: Self-Healing",
@@ -448,11 +449,11 @@
   "team": {
     "title": "Our Vision",
     "subtitle": "Return to modularity",
-    "mission": "The industry went down the integration path - everything in one chip, impossible to repair, planned obsolescence. But infrastructure isn't a phone. An EV charger should last 15+ years. We combine 1970s modularity with 2020s AI technology: module swap in the field in 60 seconds, no technician needed, and AI predicts failures two weeks ahead.",
+    "mission": "The industry went down the integration path - everything in one chip, impossible to repair, planned obsolescence. But infrastructure isn't a phone. An EV charger should last 15+ years. We combine 1970s modularity with 2020s AI technology: fast module swap in the field, no technician needed, and AI predicts failures days ahead.",
     "stats": {
       "guarantee": "15+",
       "guaranteeLabel": "years lifespan",
-      "refund": "60s",
+      "refund": "<1m",
       "refundLabel": "module swap"
     }
   },
