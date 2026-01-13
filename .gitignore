@@ -48,3 +48,26 @@ nabavka/*.py
 Thumbs.db
 deploy-ftp.ps1
 ACCESS-CREDENTIALS.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+venv/
+
+# SQLite databases (local dev)
+*.db
+
+# Claude temp files
+tmpclaude-*
+
+# Large binary files (OS dev)
+*.vdi
+*.vhdx
+*.iso
+*.fd
+serial.log
