@@ -14,8 +14,8 @@ option(EKK_BUILD_TESTS "Build unit tests" ON)
 option(EKK_BUILD_EXAMPLES "Build examples" ON)
 option(EKK_BUILD_DOCS "Build documentation" OFF)
 
-set(EKK_PLATFORM "posix" CACHE STRING "Target platform: posix, stm32g474, tricore")
-set_property(CACHE EKK_PLATFORM PROPERTY STRINGS posix stm32g474 tricore)
+set(EKK_PLATFORM "posix" CACHE STRING "Target platform: posix, stm32g474, tricore, x86_64")
+set_property(CACHE EKK_PLATFORM PROPERTY STRINGS posix stm32g474 tricore x86_64)
 
 # ============================================================================
 # Configuration
@@ -95,6 +95,12 @@ elseif(EKK_PLATFORM STREQUAL "stm32g474")
 elseif(EKK_PLATFORM STREQUAL "tricore")
     target_sources(ekk PRIVATE src/hal/ekk_hal_tricore.c)
     target_compile_definitions(ekk PUBLIC EKK_PLATFORM_TRICORE)
+
+elseif(EKK_PLATFORM STREQUAL "x86_64")
+    target_sources(ekk PRIVATE src/hal/ekk_hal_x86.c)
+    target_compile_definitions(ekk PUBLIC EKK_PLATFORM_X86_64)
+    # Note: x86_64 HAL is for bare-metal use (EK-OS, custom bootloaders)
+    # Debug output via ekk_hal_printf is a weak symbol - override in application
 
 else()
     message(FATAL_ERROR "Unknown platform: ${EKK_PLATFORM}")

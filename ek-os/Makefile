@@ -62,8 +62,8 @@ BOOT_DIR = boot
 KERNEL_DIR = kernel
 DRIVERS_DIR = drivers
 LIB_DIR = lib
-HAL_DIR = hal
-EKK_DIR = ekk
+# EK-KOR library from ek-kor2 (sibling directory)
+EKK_DIR = ../ek-kor2/c
 BUILD_DIR = build
 ESP_DIR = esp
 
@@ -75,13 +75,21 @@ INCLUDES = -I. -I$(EKK_DIR)/include -I$(LIB_DIR)
 BOOT_SRC = $(BOOT_DIR)/uefi_entry.c
 KERNEL_SRC = $(KERNEL_DIR)/main.c \
              $(KERNEL_DIR)/gdt.c \
-             $(KERNEL_DIR)/idt.c
+             $(KERNEL_DIR)/idt.c \
+             $(KERNEL_DIR)/ekk_serial.c
 KERNEL_ASM = $(KERNEL_DIR)/interrupts.S
 DRIVERS_SRC = $(DRIVERS_DIR)/serial.c \
               $(DRIVERS_DIR)/vga.c \
-              $(DRIVERS_DIR)/keyboard.c
+              $(DRIVERS_DIR)/keyboard.c \
+              $(DRIVERS_DIR)/fb.c \
+              $(DRIVERS_DIR)/font.c \
+              $(DRIVERS_DIR)/gfx.c \
+              $(DRIVERS_DIR)/pci.c \
+              $(DRIVERS_DIR)/xhci.c \
+              $(DRIVERS_DIR)/usb.c \
+              $(DRIVERS_DIR)/usb_hid.c
 LIB_SRC = $(LIB_DIR)/string.c
-HAL_SRC = $(HAL_DIR)/ekk_hal_x86.c
+# EK-KOR library sources (including x86 HAL)
 EKK_SRC = $(EKK_DIR)/src/ekk_init.c \
           $(EKK_DIR)/src/ekk_types.c \
           $(EKK_DIR)/src/ekk_field.c \
@@ -90,9 +98,10 @@ EKK_SRC = $(EKK_DIR)/src/ekk_init.c \
           $(EKK_DIR)/src/ekk_heartbeat.c \
           $(EKK_DIR)/src/ekk_consensus.c \
           $(EKK_DIR)/src/ekk_spsc.c \
-          $(EKK_DIR)/src/ekk_auth.c
+          $(EKK_DIR)/src/ekk_auth.c \
+          $(EKK_DIR)/src/hal/ekk_hal_x86.c
 
-ALL_C_SRC = $(BOOT_SRC) $(KERNEL_SRC) $(DRIVERS_SRC) $(LIB_SRC) $(HAL_SRC) $(EKK_SRC)
+ALL_C_SRC = $(BOOT_SRC) $(KERNEL_SRC) $(DRIVERS_SRC) $(LIB_SRC) $(EKK_SRC)
 ALL_ASM_SRC = $(KERNEL_ASM)
 
 # Object files
@@ -100,12 +109,19 @@ BOOT_OBJ = $(BUILD_DIR)/uefi_entry.o
 KERNEL_OBJ = $(BUILD_DIR)/main.o \
              $(BUILD_DIR)/gdt.o \
              $(BUILD_DIR)/idt.o \
+             $(BUILD_DIR)/ekk_serial.o \
              $(BUILD_DIR)/interrupts.o
 DRIVERS_OBJ = $(BUILD_DIR)/serial.o \
               $(BUILD_DIR)/vga.o \
-              $(BUILD_DIR)/keyboard.o
+              $(BUILD_DIR)/keyboard.o \
+              $(BUILD_DIR)/fb.o \
+              $(BUILD_DIR)/font.o \
+              $(BUILD_DIR)/gfx.o \
+              $(BUILD_DIR)/pci.o \
+              $(BUILD_DIR)/xhci.o \
+              $(BUILD_DIR)/usb.o \
+              $(BUILD_DIR)/usb_hid.o
 LIB_OBJ = $(BUILD_DIR)/string.o
-HAL_OBJ = $(BUILD_DIR)/ekk_hal_x86.o
 EKK_OBJ = $(BUILD_DIR)/ekk_init.o \
           $(BUILD_DIR)/ekk_types.o \
           $(BUILD_DIR)/ekk_field.o \
@@ -114,9 +130,10 @@ EKK_OBJ = $(BUILD_DIR)/ekk_init.o \
           $(BUILD_DIR)/ekk_heartbeat.o \
           $(BUILD_DIR)/ekk_consensus.o \
           $(BUILD_DIR)/ekk_spsc.o \
-          $(BUILD_DIR)/ekk_auth.o
+          $(BUILD_DIR)/ekk_auth.o \
+          $(BUILD_DIR)/ekk_hal_x86.o
 
-ALL_OBJ = $(BOOT_OBJ) $(KERNEL_OBJ) $(DRIVERS_OBJ) $(LIB_OBJ) $(HAL_OBJ) $(EKK_OBJ)
+ALL_OBJ = $(BOOT_OBJ) $(KERNEL_OBJ) $(DRIVERS_OBJ) $(LIB_OBJ) $(EKK_OBJ)
 
 # Output files
 ELF_FILE = $(BUILD_DIR)/EK-OS.elf
@@ -143,6 +160,9 @@ $(BUILD_DIR)/gdt.o: $(KERNEL_DIR)/gdt.c | $(BUILD_DIR)
 $(BUILD_DIR)/idt.o: $(KERNEL_DIR)/idt.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
+$(BUILD_DIR)/ekk_serial.o: $(KERNEL_DIR)/ekk_serial.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
 $(BUILD_DIR)/interrupts.o: $(KERNEL_DIR)/interrupts.S | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -156,15 +176,32 @@ $(BUILD_DIR)/vga.o: $(DRIVERS_DIR)/vga.c | $(BUILD_DIR)
 $(BUILD_DIR)/keyboard.o: $(DRIVERS_DIR)/keyboard.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
+$(BUILD_DIR)/fb.o: $(DRIVERS_DIR)/fb.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
+$(BUILD_DIR)/font.o: $(DRIVERS_DIR)/font.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
+$(BUILD_DIR)/gfx.o: $(DRIVERS_DIR)/gfx.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
+$(BUILD_DIR)/pci.o: $(DRIVERS_DIR)/pci.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
+$(BUILD_DIR)/xhci.o: $(DRIVERS_DIR)/xhci.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
+$(BUILD_DIR)/usb.o: $(DRIVERS_DIR)/usb.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
+$(BUILD_DIR)/usb_hid.o: $(DRIVERS_DIR)/usb_hid.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
 # Compile library files
 $(BUILD_DIR)/string.o: $(LIB_DIR)/string.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
-# Compile HAL files
-$(BUILD_DIR)/ekk_hal_x86.o: $(HAL_DIR)/ekk_hal_x86.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
-
-# Compile EK-KOR library files
+# Compile EK-KOR library files (from ek-kor2)
 $(BUILD_DIR)/ekk_init.o: $(EKK_DIR)/src/ekk_init.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
@@ -192,17 +229,16 @@ $(BUILD_DIR)/ekk_spsc.o: $(EKK_DIR)/src/ekk_spsc.c | $(BUILD_DIR)
 $(BUILD_DIR)/ekk_auth.o: $(EKK_DIR)/src/ekk_auth.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
+$(BUILD_DIR)/ekk_hal_x86.o: $(EKK_DIR)/src/hal/ekk_hal_x86.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
 # Link ELF
 $(ELF_FILE): $(ALL_OBJ) linker.ld
 	$(LD) $(LDFLAGS) -o $@ $(ALL_OBJ)
 
 # For PE output, just copy the linked file (it's already PE format)
 $(EFI_FILE): $(ELF_FILE)
-ifeq ($(OS),Windows_NT)
-	copy /Y $(subst /,\,$<) $(subst /,\,$@)
-else
 	cp $< $@
-endif
 
 # Create bootable ESP directory
 # Uses Python script to patch PE subsystem from Windows Console (3) to EFI Application (10)
@@ -255,6 +291,7 @@ info:
 	@echo "CC      = $(CC)"
 	@echo "LD      = $(LD)"
 	@echo "CFLAGS  = $(CFLAGS)"
+	@echo "EKK_DIR = $(EKK_DIR)"
 	@echo "Sources = $(ALL_C_SRC)"
 	@echo "Objects = $(ALL_OBJ)"
 

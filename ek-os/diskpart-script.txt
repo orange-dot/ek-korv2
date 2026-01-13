@@ -1,0 +1,7 @@
+create vdisk file="D:\work\autobusi-punjaci\ek-os\ek-os.vhd" maximum=64 type=fixed
+select vdisk file="D:\work\autobusi-punjaci\ek-os\ek-os.vhd"
+attach vdisk
+create partition primary
+format fs=fat32 quick label="EK-OS"
+assign letter=Z
+detach vdisk

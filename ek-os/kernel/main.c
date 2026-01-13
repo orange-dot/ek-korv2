@@ -10,6 +10,13 @@
 #include "../drivers/serial.h"
 #include "../drivers/vga.h"
 #include "../drivers/keyboard.h"
+#include "../drivers/fb.h"
+#include "../drivers/font.h"
+#include "../drivers/gfx.h"
+#include "../drivers/pci.h"
+#include "../drivers/xhci.h"
+#include "../drivers/usb.h"
+#include "../drivers/usb_hid.h"
 #include "gdt.h"
 #include "idt.h"
 
@@ -24,6 +31,17 @@
 
 /* EK-KOR module for this core (BSP) */
 static ekk_module_t g_bsp_module;
+
+/* USB status for GUI display (volatile to prevent optimization) */
+static volatile struct {
+    int pci_ok;
+    int xhci_ok;
+    int usb_ok;
+    int hid_ok;
+    int usb_devices;
+    int hid_keyboards;
+    int hid_mice;
+} g_usb_status;
 
 /* Global boot info pointer */
 static ek_boot_info_t *g_boot_info;
@@ -46,6 +64,95 @@ static void keyboard_irq_handler(struct interrupt_frame *frame) {
             vga_putchar('\b');
         }
     }
+}
+
+/* Draw GUI with system status - reads actual driver state directly */
+static void draw_status_gui(void) {
+    if (!fb_available()) return;
+
+    /* Clear screen */
+    fb_clear(COLOR_BG_DARK);
+
+    /* Draw header panel with gradient */
+    gradient_t header_grad = {COLOR_ACCENT, COLOR_ACCENT_DARK};
+    gfx_gradient_rounded(20, 20, 500, 60, 8, header_grad);
+    font_string(40, 40, "EK-OS v" EK_OS_VERSION " (" EK_OS_CODENAME ")", COLOR_TEXT);
+
+    /* Draw system info panel */
+    gfx_rounded_rect_fill(20, 100, 500, 120, 8, COLOR_BG_PANEL);
+    gfx_rounded_rect(20, 100, 500, 120, 8, COLOR_BORDER);
+
+    font_string(40, 115, "System Status", COLOR_TEXT);
+    font_string(40, 145, "Based on EK-KOR Distributed RTOS", COLOR_TEXT_DIM);
+    font_string(40, 175, "Framebuffer: 1280x720", COLOR_SUCCESS);
+
+    /* Draw USB status panel */
+    gfx_rounded_rect_fill(20, 240, 500, 180, 8, COLOR_BG_PANEL);
+    gfx_rounded_rect(20, 240, 500, 180, 8, COLOR_BORDER);
+
+    font_string(40, 255, "USB Stack Status", COLOR_TEXT);
+
+    /* Check actual driver state directly */
+    int pci_ok = (pci_device_count > 0);
+    int xhci_ok = g_xhci.initialized;
+    int usb_ok = (usb_device_count >= 0 && xhci_ok);  /* usb_init was called */
+    int hid_keyboards = 0;
+    for (hid_device_t *h = hid_devices; h; h = h->next) {
+        if (h->type == HID_TYPE_KEYBOARD) hid_keyboards++;
+    }
+
+    /* PCI status */
+    if (pci_ok) {
+        font_string(40, 285, "[OK] PCI bus scanned", COLOR_SUCCESS);
+    } else {
+        font_string(40, 285, "[--] PCI not initialized", COLOR_TEXT_DIM);
+    }
+
+    /* xHCI status */
+    if (xhci_ok) {
+        font_string(40, 310, "[OK] xHCI controller ready", COLOR_SUCCESS);
+    } else {
+        font_string(40, 310, "[!!] No xHCI controller", COLOR_ERROR);
+    }
+
+    /* USB status */
+    if (usb_ok) {
+        font_string(40, 335, "[OK] USB core initialized", COLOR_SUCCESS);
+    } else if (xhci_ok) {
+        font_string(40, 335, "[!!] USB init failed", COLOR_ERROR);
+    } else {
+        font_string(40, 335, "[--] USB not available", COLOR_TEXT_DIM);
+    }
+
+    /* HID status */
+    if (hid_devices || xhci_ok) {
+        font_string(40, 360, "[OK] HID driver ready", COLOR_SUCCESS);
+    } else {
+        font_string(40, 360, "[--] HID not available", COLOR_TEXT_DIM);
+    }
+
+    /* Device count */
+    if (usb_device_count > 0) {
+        font_string(40, 390, "USB devices found", COLOR_SUCCESS);
+    } else if (usb_ok) {
+        font_string(40, 390, "No USB devices connected", COLOR_TEXT_DIM);
+    }
+
+    /* Draw input panel */
+    gfx_rounded_rect_fill(20, 440, 500, 80, 8, COLOR_BG_PANEL);
+    gfx_rounded_rect(20, 440, 500, 80, 8, COLOR_BORDER);
+
+    font_string(40, 455, "Input Devices", COLOR_TEXT);
+    font_string(40, 485, "PS/2 keyboard: ready", COLOR_SUCCESS);
+
+    if (hid_keyboards > 0) {
+        font_string(280, 485, "USB keyboard: ready", COLOR_SUCCESS);
+    } else if (xhci_ok) {
+        font_string(280, 485, "USB keyboard: none", COLOR_TEXT_DIM);
+    }
+
+    /* Footer */
+    font_string(40, 550, "Type on keyboard to test input (serial output)", COLOR_TEXT_DIM);
 }
 
 /* Print memory map */
@@ -108,6 +215,15 @@ void kernel_main(ek_boot_info_t *boot_info) {
     /* Initialize serial first for debug output */
     serial_init();
 
+    /* Initialize USB status struct (BSS may not be zeroed in freestanding) */
+    g_usb_status.pci_ok = 0;
+    g_usb_status.xhci_ok = 0;
+    g_usb_status.usb_ok = 0;
+    g_usb_status.hid_ok = 0;
+    g_usb_status.usb_devices = 0;
+    g_usb_status.hid_keyboards = 0;
+    g_usb_status.hid_mice = 0;
+
     /* Debug: print kernel stack location */
     uint64_t current_rsp;
     __asm__ volatile("movq %%rsp, %0" : "=r"(current_rsp));
@@ -136,65 +252,140 @@ void kernel_main(ek_boot_info_t *boot_info) {
     idt_init();
     serial_printf("[OK] IDT initialized\n");
 
-    /* Initialize VGA */
+    /* Initialize VGA (fallback text mode) */
     serial_printf("[....] Initializing VGA...\n");
     vga_init();
     serial_printf("[OK] VGA initialized\n");
 
-    /* Print banner on screen */
-    vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
-    vga_printf("========================================\n");
-    vga_printf("  EK-OS v%s (%s)\n", EK_OS_VERSION, EK_OS_CODENAME);
-    vga_printf("  Based on EK-KOR Distributed RTOS\n");
-    vga_printf("========================================\n\n");
-    vga_set_color(VGA_WHITE, VGA_BLACK);
+    /* Initialize framebuffer if available */
+    if (boot_info->framebuffer_addr != 0) {
+        serial_printf("[....] Initializing framebuffer...\n");
+        fb_init(boot_info->framebuffer_addr,
+                boot_info->framebuffer_width,
+                boot_info->framebuffer_height,
+                boot_info->framebuffer_pitch,
+                boot_info->framebuffer_bpp,
+                boot_info->framebuffer_pixfmt == EK_PIXFMT_BGR);
+        font_init();
+
+        serial_printf("[OK] Framebuffer: %ux%u @ 0x%lx\n",
+                     boot_info->framebuffer_width,
+                     boot_info->framebuffer_height,
+                     boot_info->framebuffer_addr);
+
+        /* Show boot splash while initializing */
+        fb_clear(COLOR_BG_DARK);
+        gradient_t header_grad = {COLOR_ACCENT, COLOR_ACCENT_DARK};
+        gfx_gradient_rounded(20, 20, 400, 60, 8, header_grad);
+        font_string(40, 40, "EK-OS v" EK_OS_VERSION " (" EK_OS_CODENAME ")", COLOR_TEXT);
+        font_string(40, 120, "Initializing...", COLOR_TEXT_DIM);
+
+        serial_printf("Resolution: %ux%u\n", boot_info->framebuffer_width, boot_info->framebuffer_height);
+        serial_printf("[OK] Framebuffer ready, initializing drivers...\n");
+    } else {
+        serial_printf("[INFO] No framebuffer - using VGA text mode\n");
+
+        /* Print banner on screen */
+        vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
+        vga_printf("========================================\n");
+        vga_printf("  EK-OS v%s (%s)\n", EK_OS_VERSION, EK_OS_CODENAME);
+        vga_printf("  Based on EK-KOR Distributed RTOS\n");
+        vga_printf("========================================\n\n");
+        vga_set_color(VGA_WHITE, VGA_BLACK);
+    }
 
     /* Print ACPI info */
     if (boot_info->acpi_rsdp) {
         serial_printf("[OK] ACPI RSDP at 0x%lx\n", boot_info->acpi_rsdp);
-        vga_printf("[OK] ACPI RSDP found\n");
+        if (!fb_available()) vga_printf("[OK] ACPI RSDP found\n");
     } else {
         serial_printf("[WARN] No ACPI RSDP\n");
-        vga_printf("[WARN] No ACPI RSDP\n");
+        if (!fb_available()) vga_printf("[WARN] No ACPI RSDP\n");
     }
 
     /* Print memory map */
     print_memory_map();
-    vga_printf("[OK] Memory map loaded\n");
+    if (!fb_available()) vga_printf("[OK] Memory map loaded\n");
 
-    /* Initialize keyboard */
-    serial_printf("[....] Initializing keyboard...\n");
+    /* Initialize keyboard (PS/2) */
+    serial_printf("[....] Initializing PS/2 keyboard...\n");
     keyboard_init();
     idt_register_handler(33, keyboard_irq_handler);
-    serial_printf("[OK] Keyboard initialized\n");
-    vga_printf("[OK] Keyboard initialized\n");
+    serial_printf("[OK] PS/2 keyboard initialized\n");
+    if (!fb_available()) vga_printf("[OK] PS/2 keyboard initialized\n");
+
+    /* Initialize PCI bus */
+    serial_printf("[....] Initializing PCI...\n");
+    pci_init();
+    g_usb_status.pci_ok = 1;
+    serial_printf("[OK] PCI bus scanned\n");
+    if (!fb_available()) vga_printf("[OK] PCI bus scanned\n");
+
+    /* Initialize xHCI (USB 3.0) controller */
+    serial_printf("[....] Initializing xHCI...\n");
+    if (xhci_init() == 0) {
+        g_usb_status.xhci_ok = 1;
+        serial_printf("[OK] xHCI controller initialized\n");
+        if (!fb_available()) vga_printf("[OK] xHCI ready\n");
+
+        /* Initialize USB core */
+        serial_printf("[....] Initializing USB...\n");
+        if (usb_init() == 0) {
+            g_usb_status.usb_ok = 1;
+            g_usb_status.usb_devices = usb_device_count;
+            serial_printf("[OK] USB core initialized\n");
+            if (!fb_available()) vga_printf("[OK] USB ready\n");
+
+            /* Initialize HID driver */
+            serial_printf("[....] Initializing USB HID...\n");
+            hid_init();
+            g_usb_status.hid_ok = 1;
+            /* Count HID devices */
+            for (hid_device_t *h = hid_devices; h; h = h->next) {
+                if (h->type == HID_TYPE_KEYBOARD) g_usb_status.hid_keyboards++;
+                if (h->type == HID_TYPE_MOUSE) g_usb_status.hid_mice++;
+            }
+            serial_printf("[OK] USB HID driver initialized\n");
+            if (!fb_available()) vga_printf("[OK] USB HID ready\n");
+        } else {
+            serial_printf("[WARN] USB initialization failed\n");
+            if (!fb_available()) vga_printf("[WARN] USB init failed\n");
+        }
+    } else {
+        serial_printf("[WARN] No xHCI controller found\n");
+        if (!fb_available()) vga_printf("[WARN] No xHCI\n");
+    }
 
     /* Enable interrupts - IST stacks now configured for fault handling */
     interrupts_enable();
     serial_printf("[OK] Interrupts enabled\n");
-    vga_printf("[OK] Interrupts enabled\n");
+    if (!fb_available()) vga_printf("[OK] Interrupts enabled\n");
 
     /* Initialize EK-KOR HAL */
     serial_printf("[....] Initializing EK-KOR HAL...\n");
     if (ekk_hal_init() != EKK_OK) {
         serial_printf("[FAIL] EK-KOR HAL initialization failed\n");
-        vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
-        vga_printf("[FAIL] EK-KOR HAL init failed\n");
+        if (!fb_available()) {
+            vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
+            vga_printf("[FAIL] EK-KOR HAL init failed\n");
+        }
         goto halt;
     }
     serial_printf("[OK] EK-KOR HAL initialized (%s)\n", ekk_hal_platform_name());
-    vga_printf("[OK] EK-KOR HAL: %s\n", ekk_hal_platform_name());
+    if (!fb_available()) vga_printf("[OK] EK-KOR HAL: %s\n", ekk_hal_platform_name());
 
     /* Initialize EK-KOR library */
     serial_printf("[....] Initializing EK-KOR library...\n");
     if (ekk_init() != EKK_OK) {
         serial_printf("[FAIL] EK-KOR initialization failed\n");
-        vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
-        vga_printf("[FAIL] EK-KOR init failed\n");
+        if (!fb_available()) {
+            vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
+            vga_printf("[FAIL] EK-KOR init failed\n");
+        }
         goto halt;
     }
     serial_printf("[OK] EK-KOR library initialized\n");
-    vga_printf("[OK] EK-KOR library ready\n");
+    if (!fb_available()) vga_printf("[OK] EK-KOR library ready\n");
 
     /* Initialize BSP module */
     serial_printf("[....] Creating BSP module...\n");
@@ -202,20 +393,31 @@ void kernel_main(ek_boot_info_t *boot_info) {
     ekk_position_t bsp_pos = {.x = 0, .y = 0, .z = 0};
     if (ekk_module_init(&g_bsp_module, my_id, "bsp-core", bsp_pos) != EKK_OK) {
         serial_printf("[FAIL] Module initialization failed\n");
-        vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
-        vga_printf("[FAIL] Module init failed\n");
+        if (!fb_available()) {
+            vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
+            vga_printf("[FAIL] Module init failed\n");
+        }
         goto halt;
     }
     serial_printf("[OK] BSP module ID=%u initialized\n", my_id);
-    vga_printf("[OK] Module ID=%u (BSP)\n", my_id);
+    if (!fb_available()) vga_printf("[OK] Module ID=%u (BSP)\n", my_id);
 
-    vga_printf("\n");
-    vga_set_color(VGA_LIGHT_GREEN, VGA_BLACK);
-    vga_printf("EK-OS boot complete!\n");
-    vga_set_color(VGA_WHITE, VGA_BLACK);
-    vga_printf("EK-KOR distributed RTOS running.\n");
-    vga_printf("Type on keyboard to test input.\n\n");
-    vga_printf("> ");
+    /* Draw final status GUI with all info */
+    serial_printf("[GUI] Status: pci=%d xhci=%d usb=%d hid=%d devs=%d kbd=%d\n",
+                  g_usb_status.pci_ok, g_usb_status.xhci_ok,
+                  g_usb_status.usb_ok, g_usb_status.hid_ok,
+                  g_usb_status.usb_devices, g_usb_status.hid_keyboards);
+    draw_status_gui();
+
+    if (!fb_available()) {
+        vga_printf("\n");
+        vga_set_color(VGA_LIGHT_GREEN, VGA_BLACK);
+        vga_printf("EK-OS boot complete!\n");
+        vga_set_color(VGA_WHITE, VGA_BLACK);
+        vga_printf("EK-KOR distributed RTOS running.\n");
+        vga_printf("Type on keyboard to test input.\n\n");
+        vga_printf("> ");
+    }
 
     serial_printf("\n[OK] Boot complete. Entering EK-KOR main loop.\n");
 
@@ -227,6 +429,53 @@ void kernel_main(ek_boot_info_t *boot_info) {
 
         /* Run EK-KOR module tick */
         ekk_module_tick(&g_bsp_module, now);
+
+        /* Poll USB HID devices */
+        hid_poll();
+
+        /* Check USB keyboard input */
+        char usb_key = hid_keyboard_read();
+        if (usb_key) {
+            serial_printf("USB Key: '%c' (0x%02x)\n", usb_key >= 32 ? usb_key : '.', (unsigned char)usb_key);
+
+            /* Display on framebuffer GUI */
+            if (fb_available()) {
+                static char input_buf[80];
+                static int input_pos = 0;
+                static int input_y = 500;
+
+                if (usb_key >= 32 && usb_key < 127 && input_pos < 79) {
+                    input_buf[input_pos++] = usb_key;
+                    input_buf[input_pos] = '\0';
+                    /* Clear input area and redraw */
+                    fb_rect_fill(40, input_y, 600, 24, COLOR_BG_DARK);
+                    font_string(40, input_y, "> ", COLOR_ACCENT);
+                    font_string(60, input_y, input_buf, COLOR_TEXT);
+                } else if (usb_key == '\n') {
+                    /* Move to next line */
+                    input_y += 24;
+                    if (input_y > 680) input_y = 500;
+                    input_pos = 0;
+                    input_buf[0] = '\0';
+                    fb_rect_fill(40, input_y, 600, 24, COLOR_BG_DARK);
+                    font_string(40, input_y, "> ", COLOR_ACCENT);
+                } else if (usb_key == '\b' && input_pos > 0) {
+                    input_buf[--input_pos] = '\0';
+                    fb_rect_fill(40, input_y, 600, 24, COLOR_BG_DARK);
+                    font_string(40, input_y, "> ", COLOR_ACCENT);
+                    font_string(60, input_y, input_buf, COLOR_TEXT);
+                }
+            }
+
+            /* Also display on VGA text mode */
+            if (usb_key >= 32 && usb_key < 127) {
+                vga_putchar(usb_key);
+            } else if (usb_key == '\n') {
+                vga_putchar('\n');
+            } else if (usb_key == '\b') {
+                vga_putchar('\b');
+            }
+        }
 
         /* Poll for serial input */
         char c = serial_getchar();
@@ -252,7 +501,8 @@ void kernel_main(ek_boot_info_t *boot_info) {
             last_status = now;
         }
 
-        __asm__ volatile("hlt");
+        /* Yield CPU briefly (don't use HLT since we're polling) */
+        __asm__ volatile("pause");
     }
 
 halt:

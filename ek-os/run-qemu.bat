@@ -38,9 +38,12 @@ echo.
 qemu-system-x86_64 ^
     -bios OVMF.fd ^
     -drive format=raw,file=fat:rw:esp ^
-    -serial stdio ^
+    -serial file:serial.log ^
     -smp 4 ^
-    -m 128M ^
-    -no-reboot
+    -m 256M ^
+    -no-reboot ^
+    -device qemu-xhci,id=xhci ^
+    -device usb-kbd,bus=xhci.0 ^
+    -device usb-mouse,bus=xhci.0
 
 pause

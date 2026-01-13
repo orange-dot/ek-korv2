@@ -83,6 +83,11 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
     boot_info.magic = EK_BOOT_MAGIC;
     boot_info.acpi_rsdp = 0;
     boot_info.framebuffer_addr = 0;
+    boot_info.framebuffer_width = 0;
+    boot_info.framebuffer_height = 0;
+    boot_info.framebuffer_pitch = 0;
+    boot_info.framebuffer_bpp = 0;
+    boot_info.framebuffer_pixfmt = 0;
 
     /* Find ACPI RSDP */
     void *rsdp = find_acpi_rsdp(SystemTable);
@@ -91,6 +96,70 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
         uefi_print(SystemTable, "[OK] Found ACPI RSDP\n");
     } else {
         uefi_print(SystemTable, "[WARN] ACPI RSDP not found\n");
+    }
+
+    /* Initialize Graphics Output Protocol (GOP) */
+    EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = NULL;
+
+    status = BS->LocateProtocol(&gop_guid, NULL, (void **)&gop);
+    if (status == EFI_SUCCESS && gop != NULL) {
+        /* Find best mode: prefer 1280x720, fallback to highest resolution */
+        uint32_t best_mode = gop->Mode->Mode;
+        uint32_t best_width = 0;
+        uint32_t best_height = 0;
+        int found_target = 0;
+
+        for (uint32_t i = 0; i < gop->Mode->MaxMode; i++) {
+            EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *info;
+            UINTN info_size;
+
+            status = gop->QueryMode(gop, i, &info_size, &info);
+            if (status != EFI_SUCCESS) continue;
+
+            /* Check for exact 1280x720 match */
+            if (info->HorizontalResolution == 1280 &&
+                info->VerticalResolution == 720) {
+                best_mode = i;
+                found_target = 1;
+                break;
+            }
+
+            /* Track highest resolution as fallback */
+            if (info->HorizontalResolution * info->VerticalResolution >
+                best_width * best_height) {
+                best_width = info->HorizontalResolution;
+                best_height = info->VerticalResolution;
+                best_mode = i;
+            }
+        }
+
+        /* Set the chosen mode */
+        if (best_mode != gop->Mode->Mode) {
+            gop->SetMode(gop, best_mode);
+        }
+
+        /* Store framebuffer info */
+        boot_info.framebuffer_addr = gop->Mode->FrameBufferBase;
+        boot_info.framebuffer_width = gop->Mode->Info->HorizontalResolution;
+        boot_info.framebuffer_height = gop->Mode->Info->VerticalResolution;
+        boot_info.framebuffer_pitch = gop->Mode->Info->PixelsPerScanLine * 4;
+        boot_info.framebuffer_bpp = 32;
+
+        /* Determine pixel format (RGB vs BGR) */
+        if (gop->Mode->Info->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
+            boot_info.framebuffer_pixfmt = EK_PIXFMT_BGR;
+        } else {
+            boot_info.framebuffer_pixfmt = EK_PIXFMT_RGB;
+        }
+
+        if (found_target) {
+            uefi_print(SystemTable, "[OK] GOP initialized: 1280x720x32\n");
+        } else {
+            uefi_print(SystemTable, "[OK] GOP initialized (fallback resolution)\n");
+        }
+    } else {
+        uefi_print(SystemTable, "[WARN] GOP not available - VGA fallback\n");
     }
 
     /* Get memory map */
