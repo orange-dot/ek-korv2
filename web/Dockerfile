@@ -1,16 +1,12 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+# Copy all source (including tehnika for markdown imports)
+COPY . /project
+WORKDIR /project/web
 
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy source
-COPY . .
+# Install dependencies fresh in container
+RUN rm -rf node_modules package-lock.json && npm install
 
 # Build
 RUN npm run build
@@ -19,10 +15,10 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY web/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built files
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /project/web/dist /usr/share/nginx/html
 
 # Expose port
 EXPOSE 80
