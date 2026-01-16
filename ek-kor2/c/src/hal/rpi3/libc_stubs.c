@@ -67,3 +67,13 @@ size_t strlen(const char *s)
     while (*p) p++;
     return p - s;
 }
+
+/* Stack protector stubs for bare-metal */
+uintptr_t __stack_chk_guard = 0xDEADBEEF;
+
+void __stack_chk_fail(void)
+{
+    while (1) {
+        __asm__ volatile("wfe");
+    }
+}

@@ -114,6 +114,7 @@ elseif(EKK_PLATFORM STREQUAL "rpi3")
         src/hal/rpi3/libc_stubs.c
         src/hal/rpi3/mailbox.c
         src/hal/rpi3/framebuffer.c
+        src/hal/rpi3/dashboard.c
     )
     target_include_directories(ekk PRIVATE src/hal/rpi3)
     target_compile_definitions(ekk PUBLIC EKK_PLATFORM_RPI3)

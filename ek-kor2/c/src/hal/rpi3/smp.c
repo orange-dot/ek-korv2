@@ -153,9 +153,12 @@ int smp_start_core(uint32_t core_id, void (*entry)(uint32_t))
  */
 void smp_start_all_cores(void (*entry)(uint32_t))
 {
+    uart_puts("smp_start_all_cores: starting...\n");
     for (uint32_t i = 1; i <= 3; i++) {
+        uart_printf("Starting core %d...\n", i);
         smp_start_core(i, entry);
     }
+    uart_puts("smp_start_all_cores: done\n");
 }
 
 /**
@@ -171,10 +174,18 @@ int smp_wait_core_ready(uint32_t core_id, uint32_t timeout_us)
         return -1;
     }
 
-    /* TODO: Implement timeout using timer */
-    (void)timeout_us;
+    /* Simple timeout with busy loop */
+    uint32_t loops = 0;
+    uint32_t max_loops = timeout_us / 10;  /* ~10us per loop estimate */
+    if (max_loops == 0) max_loops = 100000;
 
     while (!g_core_ready[core_id]) {
+        loops++;
+        if (loops > max_loops) {
+            uart_printf("Core %d: timeout waiting\n", core_id);
+            return -1;
+        }
+        for (volatile int i = 0; i < 100; i++) { }  /* Small delay */
         __asm__ volatile("yield");
     }
 

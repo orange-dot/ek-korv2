@@ -560,19 +560,20 @@ void ekk_hal_assert_fail(const char *file, int line, const char *expr)
  * @brief Secondary core entry point
  *
  * Called by boot.S after secondary core wakes up.
- * Default implementation just runs the EK-KOR main loop.
  */
 static void secondary_main(uint32_t core_id)
 {
     /* Initialize HAL for this core */
     ekk_hal_init();
 
-    uart_printf("Core %d: Entering main loop\n", core_id);
+    uart_printf("Core %d: Ready\n", core_id);
+    if (framebuffer_is_ready()) {
+        fb_printf("Core %d: Ready\n", core_id);
+    }
 
-    /* Simple loop - poll for messages */
+    /* Simple idle loop */
     while (1) {
-        msg_queue_poll();
-        __asm__ volatile("yield");
+        __asm__ volatile("wfe");
     }
 }
 
@@ -593,40 +594,22 @@ void kernel_main(void)
 
     /* Wait for all cores to be ready */
     uart_puts("Waiting for all cores...\n");
-    if (framebuffer_is_ready()) {
-        fb_puts("Waiting for all cores...\n");
-    }
-    uint32_t ready = smp_wait_all_cores_ready(1000000);  /* 1 second timeout */
+    uint32_t ready = smp_wait_all_cores_ready(1000000);
     uart_printf("%d cores ready\n", ready);
     if (framebuffer_is_ready()) {
         fb_printf("%d cores ready\n", ready);
     }
 
-    /* Print banner */
-    uart_puts("\n");
-    uart_puts("EK-KOR v2 ready on Raspberry Pi 3B+\n");
-    uart_puts("4 cores = 4 EK-KOR modules (IDs 1-4)\n");
-    uart_puts("Communication: Shared memory message queues\n");
-    uart_puts("\n");
-
+    /* Done */
+    uart_puts("\n=== ALL CORES BOOTED ===\n");
     if (framebuffer_is_ready()) {
-        fb_puts("\n");
         fb_set_colors(FB_COLOR_GREEN, FB_COLOR_BLACK);
-        fb_puts("EK-KOR v2 ready on Raspberry Pi 3B+\n");
-        fb_set_colors(FB_COLOR_WHITE, FB_COLOR_BLACK);
-        fb_puts("4 cores = 4 EK-KOR modules (IDs 1-4)\n");
-        fb_puts("Communication: Shared memory message queues\n");
-        fb_puts("\n");
+        fb_puts("\n=== ALL CORES BOOTED ===\n");
     }
 
-    /* Main loop for core 0 */
-    uart_puts("Core 0: Entering main loop\n");
-    if (framebuffer_is_ready()) {
-        fb_puts("Core 0: Entering main loop\n");
-    }
+    /* Idle loop */
     while (1) {
-        msg_queue_poll();
-        __asm__ volatile("yield");
+        __asm__ volatile("wfe");
     }
 }
 
