@@ -14,6 +14,7 @@ import V2GConceptPage from './pages/docs/V2GConceptPage';
 import RojOverviewPage from './pages/docs/RojOverviewPage';
 import CompetitionPage from './pages/docs/CompetitionPage';
 import SmallBatteryPage from './pages/docs/SmallBatteryPage';
+import EkKorPage from './pages/docs/EkKorPage';
 
 // Portal pages
 import { AuthProvider } from './context/AuthContext';
@@ -71,6 +72,7 @@ function App() {
       <Route path="/docs/roj-overview" element={<RojOverviewPage />} />
       <Route path="/docs/competition" element={<CompetitionPage />} />
       <Route path="/docs/small-battery" element={<SmallBatteryPage />} />
+      <Route path="/docs/ek-kor" element={<EkKorPage />} />
 
       {/* Portal routes */}
       <Route path="/portal/login" element={<LoginPage />} />

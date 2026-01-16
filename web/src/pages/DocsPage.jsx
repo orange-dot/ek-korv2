@@ -11,6 +11,7 @@ import {
   Hexagon,
   ArrowRight,
   Languages,
+  Cpu,
 } from 'lucide-react';
 
 // Documentation sections for public access
@@ -81,6 +82,17 @@ const DOC_SECTIONS = [
       sr: 'Zašto manje baterije + češće punjenje pobeđuje veće baterije. Ekonomija oportunističkog punjenja.',
     },
   },
+  {
+    id: 'ek-kor',
+    path: '/docs/ek-kor',
+    icon: Cpu,
+    color: 'orange',
+    title: { en: 'EK-KOR v2 Kernel', sr: 'EK-KOR v2 Kernel' },
+    description: {
+      en: 'Distributed RTOS without central scheduler. Potential field coordination inspired by starling flocks.',
+      sr: 'Distribuirani RTOS bez centralnog schedulera. Koordinacija potencijalnim poljima inspirisana jatima čvoraka.',
+    },
+  },
 ];
 
 function DocCard({ doc, lang }) {
@@ -92,6 +104,7 @@ function DocCard({ doc, lang }) {
     purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30 hover:border-purple-400',
     amber: 'bg-amber-500/20 text-amber-400 border-amber-500/30 hover:border-amber-400',
     cyan: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30 hover:border-cyan-400',
+    orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30 hover:border-orange-400',
   };
 
   return (
