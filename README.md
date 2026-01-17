@@ -2,7 +2,7 @@
 
 **Parallel C/Rust Development Project**
 
-A novel real-time operating system for distributed coordination of modular power electronics.
+Real-time coordination kernel for modular power electronics.
 
 ## Project Structure
 
@@ -42,7 +42,7 @@ ek-kor2/
     └── compare_outputs.py    # Output comparison tool
 ```
 
-## Key Innovations
+## Design
 
 1. **Potential Field Scheduling** - No central scheduler
 2. **Topological k=7 Coordination** - Scale-free neighbor selection
