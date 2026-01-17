@@ -8,6 +8,8 @@ import {
   Zap,
   Heart,
   Code,
+  Languages,
+  Github,
 } from 'lucide-react';
 
 const content = {
@@ -38,49 +40,142 @@ const content = {
         icon: 'heart',
       },
     ],
-    technicalTitle: 'Technical Details',
+    technicalTitle: 'Code Examples',
     codeExamples: [
       {
-        title: 'Field Publication',
-        description: 'No explicit message passing. Modules publish state as fields.',
-        code: `// Field publication - no explicit message passing
-ekk_field_publish(&module, EKK_FIELD_LOAD, load_value);
-ekk_field_publish(&module, EKK_FIELD_TEMP, temperature);
+        title: 'Module Initialization',
+        description: 'Each EK3 module initializes its own kernel instance.',
+        code: `// Initialize module with unique ID from hardware
+ekk_module_t module;
+ekk_init(&module, EKK_MODULE_ID_FROM_MAC);
 
-// Neighbors react to gradient automatically
-float gradient = neighbor_field - my_field;
-if (gradient > threshold) {
-    // Adjust behavior based on gradient
-    adjust_power_output(gradient);
+// Register fields this module will publish
+ekk_field_register(&module, EKK_FIELD_LOAD);
+ekk_field_register(&module, EKK_FIELD_TEMP);
+ekk_field_register(&module, EKK_FIELD_VOLTAGE);
+
+// Start the kernel - begins heartbeat and neighbor discovery
+ekk_start(&module);`,
+      },
+      {
+        title: 'Field Publication & Gradients',
+        description: 'Modules publish state as fields. Neighbors react to gradients.',
+        code: `// Publish current state - propagates to k=7 neighbors
+ekk_field_publish(&module, EKK_FIELD_LOAD, current_load);
+ekk_field_publish(&module, EKK_FIELD_TEMP, temperature_c);
+
+// Read neighbor fields and compute gradient
+ekk_neighbor_t neighbors[7];
+int n = ekk_get_neighbors(&module, neighbors, 7);
+
+float total_gradient = 0;
+for (int i = 0; i < n; i++) {
+    float neighbor_load = ekk_field_read(&neighbors[i], EKK_FIELD_LOAD);
+    total_gradient += (neighbor_load - current_load);
+}
+
+// Positive gradient = neighbors have higher load = I should take more
+if (total_gradient > EKK_GRADIENT_THRESHOLD) {
+    increase_power_output();
 }`,
       },
       {
-        title: 'SPSC Queue',
-        description: 'Lock-free inter-module communication.',
-        code: `// Producer side (one module)
-ekk_spsc_push(&queue, &message);
+        title: 'SPSC Lock-Free Queue',
+        description: 'Single Producer Single Consumer queue for IPC.',
+        code: `// Statically allocate queue (no malloc in kernel)
+EKK_SPSC_DEFINE(cmd_queue, ekk_cmd_t, 16);
 
-// Consumer side (another module)
-if (ekk_spsc_pop(&queue, &message)) {
-    process_message(&message);
+// Producer: power controller module
+ekk_cmd_t cmd = { .type = CMD_SET_POWER, .value = 3300 };
+if (!ekk_spsc_push(&cmd_queue, &cmd)) {
+    // Queue full - apply backpressure
+    ekk_field_publish(&module, EKK_FIELD_BUSY, 1);
 }
 
-// No locks, no blocking, no priority inversion
-// Guaranteed <100ns latency`,
+// Consumer: power stage module (different core)
+ekk_cmd_t received;
+while (ekk_spsc_pop(&cmd_queue, &received)) {
+    switch (received.type) {
+        case CMD_SET_POWER:
+            set_dab_power(received.value);
+            break;
+        case CMD_SHUTDOWN:
+            enter_safe_state();
+            break;
+    }
+}`,
       },
       {
-        title: 'Neighbor Discovery',
-        description: 'k=7 dynamic neighbor topology.',
-        code: `// Kernel maintains k=7 nearest neighbors
-ekk_neighbor_t neighbors[7];
-ekk_get_neighbors(&module, neighbors, 7);
+        title: 'Heartbeat & Fault Detection',
+        description: 'Kernel-level fault detection with 50ms heartbeat.',
+        code: `// Heartbeat runs in kernel, not application
+// Configured at compile time
+#define EKK_HEARTBEAT_MS      50
+#define EKK_DEAD_THRESHOLD    3  // 150ms to detect dead module
 
-// Field aggregation from neighbors
-float avg_load = 0;
-for (int i = 0; i < 7; i++) {
-    avg_load += neighbors[i].load_field;
+// Application registers fault handler
+void on_neighbor_fault(ekk_module_id_t dead_id, void* ctx) {
+    // Neighbor died - redistribute its load
+    float dead_load = last_known_load[dead_id];
+    float my_share = dead_load / surviving_neighbor_count();
+    increase_power_output_by(my_share);
+
+    // Log for diagnostics
+    ekk_log(EKK_LOG_WARN, "Module %04x died, absorbed %.1fW",
+            dead_id, my_share);
 }
-avg_load /= 7;`,
+
+ekk_on_neighbor_fault(&module, on_neighbor_fault, NULL);`,
+      },
+      {
+        title: 'Load Balancing via Fields',
+        description: 'Emergent load balancing from local gradient following.',
+        code: `// Main control loop - runs every 10ms
+void control_loop(ekk_module_t* m) {
+    // 1. Read local sensors
+    float load = adc_read_current() * adc_read_voltage();
+    float temp = adc_read_temperature();
+
+    // 2. Publish to neighbors
+    ekk_field_publish(m, EKK_FIELD_LOAD, load);
+    ekk_field_publish(m, EKK_FIELD_TEMP, temp);
+
+    // 3. Compute average neighbor load
+    float neighbor_avg = ekk_field_neighbor_avg(m, EKK_FIELD_LOAD);
+
+    // 4. Adjust toward average (gradient descent)
+    float error = neighbor_avg - load;
+    float adjustment = error * EKK_BALANCE_GAIN;
+
+    // 5. Apply with thermal limiting
+    if (temp < EKK_TEMP_LIMIT) {
+        adjust_power_setpoint(adjustment);
+    }
+}`,
+      },
+      {
+        title: 'Module Discovery Protocol',
+        description: 'Dynamic topology with k=7 nearest neighbors.',
+        code: `// Discovery runs automatically in kernel
+// Modules announce presence via CAN-FD broadcast
+
+// Application can query current topology
+ekk_topology_t topo;
+ekk_get_topology(&module, &topo);
+
+printf("Module %04x topology:\\n", module.id);
+printf("  Neighbors: %d/%d\\n", topo.neighbor_count, EKK_K_NEIGHBORS);
+printf("  Rack ID: %d\\n", topo.rack_id);
+printf("  Position: row=%d col=%d\\n", topo.row, topo.col);
+
+// Iterate neighbors
+for (int i = 0; i < topo.neighbor_count; i++) {
+    ekk_neighbor_t* n = &topo.neighbors[i];
+    printf("  [%d] id=%04x load=%.1fW temp=%.1fC\\n",
+           i, n->id,
+           ekk_field_read(n, EKK_FIELD_LOAD),
+           ekk_field_read(n, EKK_FIELD_TEMP));
+}`,
       },
     ],
     performanceTitle: 'Performance Metrics',
@@ -121,49 +216,142 @@ avg_load /= 7;`,
         icon: 'heart',
       },
     ],
-    technicalTitle: 'Tehnički Detalji',
+    technicalTitle: 'Primeri Koda',
     codeExamples: [
       {
-        title: 'Publikovanje Polja',
-        description: 'Bez eksplicitnog slanja poruka. Moduli objavljuju stanje kao polja.',
-        code: `// Publikovanje polja - bez eksplicitnog slanja poruka
-ekk_field_publish(&module, EKK_FIELD_LOAD, load_value);
-ekk_field_publish(&module, EKK_FIELD_TEMP, temperature);
+        title: 'Inicijalizacija Modula',
+        description: 'Svaki EK3 modul inicijalizuje sopstvenu instancu kernela.',
+        code: `// Inicijalizuj modul sa jedinstvenim ID iz hardvera
+ekk_module_t module;
+ekk_init(&module, EKK_MODULE_ID_FROM_MAC);
 
-// Susedi reaguju na gradijent automatski
-float gradient = neighbor_field - my_field;
-if (gradient > threshold) {
-    // Prilagodi ponašanje na osnovu gradijenta
-    adjust_power_output(gradient);
+// Registruj polja koja će ovaj modul objavljivati
+ekk_field_register(&module, EKK_FIELD_LOAD);
+ekk_field_register(&module, EKK_FIELD_TEMP);
+ekk_field_register(&module, EKK_FIELD_VOLTAGE);
+
+// Pokreni kernel - započinje heartbeat i otkrivanje suseda
+ekk_start(&module);`,
+      },
+      {
+        title: 'Publikovanje Polja i Gradijenti',
+        description: 'Moduli objavljuju stanje kao polja. Susedi reaguju na gradijente.',
+        code: `// Objavi trenutno stanje - propagira se do k=7 suseda
+ekk_field_publish(&module, EKK_FIELD_LOAD, current_load);
+ekk_field_publish(&module, EKK_FIELD_TEMP, temperature_c);
+
+// Pročitaj polja suseda i izračunaj gradijent
+ekk_neighbor_t neighbors[7];
+int n = ekk_get_neighbors(&module, neighbors, 7);
+
+float total_gradient = 0;
+for (int i = 0; i < n; i++) {
+    float neighbor_load = ekk_field_read(&neighbors[i], EKK_FIELD_LOAD);
+    total_gradient += (neighbor_load - current_load);
+}
+
+// Pozitivan gradijent = susedi imaju veće opterećenje = treba da preuzmem više
+if (total_gradient > EKK_GRADIENT_THRESHOLD) {
+    increase_power_output();
 }`,
       },
       {
-        title: 'SPSC Red',
-        description: 'Inter-modularna komunikacija bez zaključavanja.',
-        code: `// Strana producenta (jedan modul)
-ekk_spsc_push(&queue, &message);
+        title: 'SPSC Red bez Zaključavanja',
+        description: 'Single Producer Single Consumer red za IPC.',
+        code: `// Statička alokacija reda (bez malloc u kernelu)
+EKK_SPSC_DEFINE(cmd_queue, ekk_cmd_t, 16);
 
-// Strana konzumera (drugi modul)
-if (ekk_spsc_pop(&queue, &message)) {
-    process_message(&message);
+// Producent: modul kontrolera snage
+ekk_cmd_t cmd = { .type = CMD_SET_POWER, .value = 3300 };
+if (!ekk_spsc_push(&cmd_queue, &cmd)) {
+    // Red pun - primeni backpressure
+    ekk_field_publish(&module, EKK_FIELD_BUSY, 1);
 }
 
-// Bez lockova, bez blokiranja, bez inverzije prioriteta
-// Garantovana latencija <100ns`,
+// Konzumer: modul snage (drugo jezgro)
+ekk_cmd_t received;
+while (ekk_spsc_pop(&cmd_queue, &received)) {
+    switch (received.type) {
+        case CMD_SET_POWER:
+            set_dab_power(received.value);
+            break;
+        case CMD_SHUTDOWN:
+            enter_safe_state();
+            break;
+    }
+}`,
       },
       {
-        title: 'Otkrivanje Suseda',
-        description: 'k=7 dinamička topologija suseda.',
-        code: `// Kernel održava k=7 najbližih suseda
-ekk_neighbor_t neighbors[7];
-ekk_get_neighbors(&module, neighbors, 7);
+        title: 'Heartbeat i Detekcija Grešaka',
+        description: 'Detekcija grešaka na nivou kernela sa 50ms heartbeat-om.',
+        code: `// Heartbeat radi u kernelu, ne u aplikaciji
+// Konfigurisano u vreme kompajliranja
+#define EKK_HEARTBEAT_MS      50
+#define EKK_DEAD_THRESHOLD    3  // 150ms za detekciju mrtvog modula
 
-// Agregacija polja od suseda
-float avg_load = 0;
-for (int i = 0; i < 7; i++) {
-    avg_load += neighbors[i].load_field;
+// Aplikacija registruje handler za greške
+void on_neighbor_fault(ekk_module_id_t dead_id, void* ctx) {
+    // Sused je umro - preraspodeli njegovo opterećenje
+    float dead_load = last_known_load[dead_id];
+    float my_share = dead_load / surviving_neighbor_count();
+    increase_power_output_by(my_share);
+
+    // Logiraj za dijagnostiku
+    ekk_log(EKK_LOG_WARN, "Modul %04x umro, apsorbovao %.1fW",
+            dead_id, my_share);
 }
-avg_load /= 7;`,
+
+ekk_on_neighbor_fault(&module, on_neighbor_fault, NULL);`,
+      },
+      {
+        title: 'Balansiranje Opterećenja preko Polja',
+        description: 'Emergentno balansiranje iz lokalnog praćenja gradijenata.',
+        code: `// Glavna kontrolna petlja - izvršava se svakih 10ms
+void control_loop(ekk_module_t* m) {
+    // 1. Pročitaj lokalne senzore
+    float load = adc_read_current() * adc_read_voltage();
+    float temp = adc_read_temperature();
+
+    // 2. Objavi susedima
+    ekk_field_publish(m, EKK_FIELD_LOAD, load);
+    ekk_field_publish(m, EKK_FIELD_TEMP, temp);
+
+    // 3. Izračunaj prosečno opterećenje suseda
+    float neighbor_avg = ekk_field_neighbor_avg(m, EKK_FIELD_LOAD);
+
+    // 4. Prilagodi ka proseku (gradient descent)
+    float error = neighbor_avg - load;
+    float adjustment = error * EKK_BALANCE_GAIN;
+
+    // 5. Primeni sa termalnim ograničenjem
+    if (temp < EKK_TEMP_LIMIT) {
+        adjust_power_setpoint(adjustment);
+    }
+}`,
+      },
+      {
+        title: 'Protokol Otkrivanja Modula',
+        description: 'Dinamička topologija sa k=7 najbližih suseda.',
+        code: `// Otkrivanje radi automatski u kernelu
+// Moduli objavljuju prisustvo preko CAN-FD broadcast-a
+
+// Aplikacija može upitati trenutnu topologiju
+ekk_topology_t topo;
+ekk_get_topology(&module, &topo);
+
+printf("Topologija modula %04x:\\n", module.id);
+printf("  Susedi: %d/%d\\n", topo.neighbor_count, EKK_K_NEIGHBORS);
+printf("  Rack ID: %d\\n", topo.rack_id);
+printf("  Pozicija: red=%d kol=%d\\n", topo.row, topo.col);
+
+// Iteriraj susede
+for (int i = 0; i < topo.neighbor_count; i++) {
+    ekk_neighbor_t* n = &topo.neighbors[i];
+    printf("  [%d] id=%04x load=%.1fW temp=%.1fC\\n",
+           i, n->id,
+           ekk_field_read(n, EKK_FIELD_LOAD),
+           ekk_field_read(n, EKK_FIELD_TEMP));
+}`,
       },
     ],
     performanceTitle: 'Metrike Performansi',
@@ -191,6 +379,10 @@ export default function EkKorPage() {
   const lang = i18n.language?.startsWith('sr') ? 'sr' : 'en';
   const t = content[lang];
 
+  const toggleLanguage = () => {
+    i18n.changeLanguage(lang === 'sr' ? 'en' : 'sr');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
@@ -200,9 +392,27 @@ export default function EkKorPage() {
             <ArrowLeft className="w-5 h-5" />
             <span>{lang === 'sr' ? 'Nazad' : 'Back'}</span>
           </Link>
-          <Link to="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
-            <Home className="w-5 h-5" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://github.com/orange-dot/ek-korv2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 rounded-lg transition-colors"
+            >
+              <Github className="w-4 h-4" />
+              <span className="hidden sm:inline">Source</span>
+            </a>
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 rounded-lg transition-colors"
+            >
+              <Languages className="w-4 h-4" />
+              {lang === 'sr' ? 'EN' : 'SR'}
+            </button>
+            <Link to="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+              <Home className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </header>
 
