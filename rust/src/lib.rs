@@ -1,9 +1,8 @@
 //! # EK-KOR v2: Field-Centric Coordination RTOS
 //!
-//! A novel real-time operating system for distributed coordination
-//! of modular power electronics (EK3 charger modules).
+//! Real-time coordination kernel for modular power electronics (EK3 modules).
 //!
-//! ## Key Innovations
+//! ## Design
 //!
 //! ### 1. Potential Field Scheduling
 //!
