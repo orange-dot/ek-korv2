@@ -7,6 +7,7 @@
  */
 
 #include "jezgro.h"
+#include "hal.h"
 #include <string.h>
 
 #ifdef JEZGRO_SIM
@@ -15,6 +16,8 @@
     do { if (JEZGRO_DEBUG) printf("[SCHED] " fmt "\n", ##__VA_ARGS__); } while(0)
 #else
 #define SCHED_DEBUG(fmt, ...)
+/* ARM intrinsic for Wait For Interrupt */
+static inline void __WFI(void) { __asm volatile ("wfi"); }
 #endif
 
 /*===========================================================================*/
@@ -38,6 +41,9 @@ static uint32_t context_switches = 0;
 
 /** Scheduler lock count */
 static int sched_lock_count = 0;
+
+/** Context switch in progress flag - prevents nested switches */
+static volatile bool context_switch_pending = false;
 
 /*===========================================================================*/
 /* Private Functions                                                         */
@@ -126,11 +132,16 @@ int scheduler_add_task(task_t *task)
     SCHED_DEBUG("Adding task '%s' (id=%d, deadline=%u)",
                 task->name, task->id, task->deadline);
 
+    /* Critical section - protect ready_queue modification */
+    uint32_t irq_state = hal_disable_interrupts();
+
     task->state = TASK_STATE_READY;
     task->deadline_missed = false;
     task->next = NULL;
 
     insert_by_deadline(task);
+
+    hal_restore_interrupts(irq_state);
 
     return JEZGRO_OK;
 }
@@ -143,14 +154,22 @@ int scheduler_remove_task(task_t *task)
 
     SCHED_DEBUG("Removing task '%s' (id=%d)", task->name, task->id);
 
+    /* Critical section - protect ready_queue modification */
+    uint32_t irq_state = hal_disable_interrupts();
+
     remove_from_queue(task);
     task->state = TASK_STATE_TERMINATED;
+
+    hal_restore_interrupts(irq_state);
 
     return JEZGRO_OK;
 }
 
 task_t *scheduler_get_next(void)
 {
+    /* Critical section - protect ready_queue access and current_task update */
+    uint32_t irq_state = hal_disable_interrupts();
+
     task_t *next = NULL;
 
     /* Find first ready task in queue (already sorted by deadline) */
@@ -179,12 +198,25 @@ task_t *scheduler_get_next(void)
                     current_task->name, current_task->deadline);
     }
 
+    hal_restore_interrupts(irq_state);
+
     return current_task;
 }
 
 task_t *scheduler_get_current(void)
 {
     return current_task;
+}
+
+task_t *scheduler_peek_next(void)
+{
+    /* Find first ready task without changing state */
+    for (task_t *t = ready_queue; t != NULL; t = t->next) {
+        if (t->state == TASK_STATE_READY) {
+            return t;
+        }
+    }
+    return NULL;
 }
 
 void scheduler_tick(uint32_t elapsed_ms)
@@ -215,10 +247,165 @@ void scheduler_tick(uint32_t elapsed_ms)
 
 void scheduler_yield(void)
 {
-    if (current_task != NULL) {
-        current_task->state = TASK_STATE_READY;
-        scheduler_get_next();
+    if (current_task == NULL) {
+        return;
     }
+
+    #ifdef JEZGRO_SIM
+    /* In simulation, just switch state and get next */
+    current_task->state = TASK_STATE_READY;
+    scheduler_get_next();
+    #else
+    /* Critical section - protect scheduler state */
+    uint32_t irq_state = hal_disable_interrupts();
+
+    /* Find next ready task (different from current) */
+    task_t *next = NULL;
+    for (task_t *t = ready_queue; t != NULL; t = t->next) {
+        if (t->state == TASK_STATE_READY && t != current_task) {
+            next = t;
+            break;
+        }
+    }
+
+    if (next == NULL) {
+        /* No other ready task, continue running current */
+        hal_restore_interrupts(irq_state);
+        return;
+    }
+
+    /* Perform context switch */
+    task_t *prev = current_task;
+    prev->state = TASK_STATE_READY;
+    current_task = next;
+    next->state = TASK_STATE_RUNNING;
+    context_switches++;
+
+    SCHED_DEBUG("Yield: '%s' -> '%s'", prev->name, next->name);
+
+    /* Mark context switch as pending - prevents preemption during switch */
+    context_switch_pending = true;
+
+    /* Restore interrupts before triggering PendSV.
+     * PendSV needs interrupts enabled to run. */
+    hal_restore_interrupts(irq_state);
+
+    /* Trigger context switch - PendSV will run after we return */
+    hal_context_switch(&prev->sp, next->sp);
+
+    /* PendSV has completed - we're now back in this task */
+    context_switch_pending = false;
+
+    /* When we return here, this task has been restored */
+    #endif
+}
+
+void scheduler_preempt(void)
+{
+    #ifndef JEZGRO_SIM
+    /* Called from SysTick to check if preemption is needed.
+     * Note: This is called from interrupt context!
+     */
+
+    /* Don't preempt if a context switch is already in progress */
+    if (context_switch_pending) {
+        return;
+    }
+
+    /* Find next ready task */
+    task_t *next = NULL;
+    for (task_t *t = ready_queue; t != NULL; t = t->next) {
+        if (t->state == TASK_STATE_READY) {
+            next = t;
+            break;
+        }
+    }
+
+    if (next == NULL || next == current_task) {
+        return;  /* No preemption needed */
+    }
+
+    /* Only preempt if next has earlier deadline (EDF) */
+    if (current_task != NULL && next->deadline >= current_task->deadline) {
+        return;  /* Current task has priority */
+    }
+
+    /* Preemption needed - perform context switch */
+    task_t *prev = current_task;
+    if (prev != NULL) {
+        prev->state = TASK_STATE_READY;
+    }
+
+    current_task = next;
+    next->state = TASK_STATE_RUNNING;
+    context_switches++;
+
+    SCHED_DEBUG("Preempt: '%s' -> '%s'",
+                prev ? prev->name : "none", next->name);
+
+    /* Mark context switch as pending */
+    context_switch_pending = true;
+
+    /* Trigger context switch via PendSV.
+     * PendSV has lower priority than SysTick, so it will run
+     * after SysTick returns. */
+    if (prev != NULL) {
+        hal_context_switch(&prev->sp, next->sp);
+    } else {
+        hal_context_switch(NULL, next->sp);
+    }
+
+    /* Note: context_switch_pending will be cleared by the task
+     * that resumes, in its scheduler_yield() return path.
+     * For preemption, the preempted task will clear it when it
+     * next calls scheduler_yield(). */
+    #endif
+}
+
+void scheduler_start(void)
+{
+    SCHED_DEBUG("Starting scheduler");
+
+    /* Get first ready task */
+    task_t *first = NULL;
+    for (task_t *t = ready_queue; t != NULL; t = t->next) {
+        if (t->state == TASK_STATE_READY) {
+            first = t;
+            break;
+        }
+    }
+
+    if (first == NULL) {
+        SCHED_DEBUG("No tasks to run, entering idle loop");
+        /* No tasks, just idle forever */
+        while (1) {
+            #ifndef JEZGRO_SIM
+            __WFI();
+            #endif
+        }
+    }
+
+    SCHED_DEBUG("Starting first task: '%s' (sp=0x%08X)", first->name, first->sp);
+
+    current_task = first;
+    first->state = TASK_STATE_RUNNING;
+    context_switches++;
+
+    #ifdef JEZGRO_SIM
+    /* In simulation, just call the function directly */
+    if (first->func) {
+        first->func(first->arg);
+    }
+    #else
+    /* Mark context switch as starting - will be cleared by first yield */
+    context_switch_pending = true;
+
+    /* Perform first context switch (no save, just load) */
+    /* Pass NULL for current_sp to skip saving current context */
+    hal_context_switch(NULL, first->sp);
+
+    /* Never reached - we switched to first task */
+    #endif
 }
 
 int scheduler_check_deadlines(void)

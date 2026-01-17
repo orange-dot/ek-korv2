@@ -1,0 +1,1125 @@
+
+============================================================
+PAGE 8
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Architecture Overview
+1
+Architecture Overview
+This chapter gives an overview of the TriCore™ architecture.
+1.1
+Introduction
+TriCore is the first unified, single-core, 32-bit microcontroller-DSP architecture optimized for real-time
+embedded systems. The TriCore Instruction Set Architecture (ISA) combines the real-time capability of a
+microcontroller, the computational power of a DSP, and the high performance/price features of a RISC load/store
+architecture, in a compact re-programmable core.
+Bit-field, Bit-logical
+MAC, Saturated Math,
+Min/Max Comparison
+DSP Addressing Modes,
+Branch
+SIMD Packed Arithmetic
+Floating
+Point
+Load/Store
+Arithmetic, Logic
+Arithmetic
+Address Arithmetic
+Branch
+& Comparison,
+MCA05096
+Load/Store, Context Switch
+Figure 1 
+TriCore Architecture Overview
+The ISA supports a uniform, 32-bit address space, with optional virtual addressing and memory-mapped I/O. The
+architecture allows for a wide range of implementations, ranging from scalar through to superscalar, and is
+capable of interacting with different system architectures, including multiprocessing. This flexibility at the
+implementation and system levels allows for different trade-offs between performance and cost at any point in
+time.
+The architecture supports both 16-bit and 32-bit instruction formats. All instructions have a 32-bit format. The 16-
+bit instructions are a subset of the 32-bit instructions, chosen because of their frequency of use. These
+instructions significantly reduce code space, lowering memory requirements, system and power consumption.
+Real-time responsiveness is largely determined by interrupt latency and context-switch time. The high-
+performance architecture minimizes interrupt latency by avoiding long multi-cycle instructions and by providing
+a flexible hardware-supported interrupt scheme. The architecture also supports fast-context switching.
+1.1.1
+Feature Summary
+The key features of the TriCore Instruction Set Architecture (ISA) are:
+•
+32-bit architecture
+•
+4 GBytes of address space
+•
+16-bit and 32-bit instructions for reduced code size
+•
+Most instructions executed in one cycle
+•
+Branch instructions (using branch prediction)
+•
+Low interrupt latency with fast automatic context switch using wide pathway to on-chip memory
+•
+Dedicated interface to application-specific coprocessors to allow the addition of customised instructions
+•
+Zero overhead loop capabilities
+User Manual (Volume 1)
+1-1
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 9
+============================================================
+Address
+31
+A[15] (Implicit Base Address)
+A[14]
+A[13]
+A[12]
+A[11] (Return Address)
+A[10] (Stack Return)
+A[9] (Global Address Register)
+A[8] (Global Address Register)
+A[7]
+A[6]
+A[5]
+A[4]
+A[3]
+A[2]
+A[1] (Global Address Register)
+A[0] (Global Address Register)
+MCA05246
+Data
+0
+D[15] (Implicit Data)
+D[14]
+D[13]
+D[12]
+D[11]
+D[10]
+D[9]
+D[8]
+D[7]
+D[6]
+D[5]
+D[4]
+D[3]
+D[2]
+D[1]
+D[0]
+System
+31
+PCXI
+PSW
+PC
+0
+31
+0
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Architecture Overview
+•
+Dual, single-clock-cycle, 16x16-bit multiply-accumulate unit (with optional saturation)
+•
+Optional Floating-Point Unit (FPU) and Memory Management Unit (MMU)
+•
+Extensive bit handling capabilities
+•
+Single Instruction Multiple Data (SIMD) packed data operations (2x16-bit or 4x 8-bit operands)
+•
+Flexible interrupt prioritization scheme
+•
+Byte and bit addressing
+•
+Little-endian byte ordering for data memory and CPU registers
+•
+Memory protection
+•
+Debug support
+1.2
+Programming Model
+This section covers aspects of the architecture that are visible to software:
+•
+Architectural Registers Page 2
+•
+Data Types Page 3
+•
+Memory Model Page 3
+•
+Addressing Modes Page 3
+The Programming Model is described in detail in the chapter “Programming Model” on Page 1.
+1.2.1
+Architectural Registers
+The architectural registers consist of:
+•
+32 General Purpose Registers (GPRs)
+•
+Program Counter (PC)
+•
+Two 32-bit registers containing status flags, previous execution information and protection information (PCXI
+- Previous Context Information register, and PSW -Program Status Word)
+Figure 2 
+Architectural Registers
+User Manual (Volume 1)
+1-2
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 10
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Architecture Overview
+The PCXI, PSW and PC registers are crucial to the procedure for storing and restoring a task’s context.
+The 32 General Purpose Registers (GPRs) are divided into sixteen 32-bit data registers (D[0] through D[15]) and
+sixteen 32-bit address registers (A[0] through A[15]).
+Four of the General Purpose Registers (GPRs) also have special functions:
+•
+D[15] is used as an Implicit Data register
+•
+A[10] is the Stack Pointer (SP) register
+•
+A[11] is the Return Address (RA) register
+•
+A[15] is the Implicit Address register
+Registers [0H - 7H] are referred to as the ‘lower registers’ and registers [8H - FH] are called the ‘upper registers’.
+Registers A[0], A[1], A[8], and A[9] are defined as system global registers. These are not included in either the
+upper or lower context (see “Tasks and Functions” on Page 1) and are not saved and restored across calls or
+interrupts. They are normally used by the operating system to reduce system overhead“Run Control Features”
+on Page 1.
+In addition to the General Purpose Registers (GPRs), the core registers are composed of a certain number of Core
+Special Function Registers (CSFRs). See “General Purpose and System Registers” on Page 1.
+1.2.2
+Data Types
+The instruction set supports operations on:
+•
+Boolean
+•
+Bit String
+•
+Byte
+•
+Signed Fraction
+•
+Address
+•
+Signed / Unsigned Integer
+•
+IEEE-754 Single-Precision Floating-Point
+Most instructions work on a specific data type, while others are useful for manipulating several data types.
+1.2.3
+Memory Model
+The architecture can access up to 4 GBytes (address width is 32-bits) of unified program and I/O memory.
+The address space is divided into 16 regions or segments [0H - FH], each of 256 MBytes. The upper four bits of an
+address select the specific segment.
+1.2.4
+Addressing Modes
+Addressing modes allow load and store instructions to efficiently access simple data elements within data
+structures such as records, randomly and sequentially accessed arrays, stacks and circular buffers.
+The TriCore architecture supports seven addressing modes. The simple data elements are 8-bits, 16-bits, 32-bits
+and 64-bits wide.
+These addressing modes support efficient compilation of C/C++ programs, easy access to peripheral registers
+and efficient implementation of typical DSP data structures (circular buffers for filters and bit-reversed indexing
+for Fast Fourier Transformations).
+Addressing modes which are not directly supported in the hardware can be synthesized through short instruction
+sequences.
+For more information see “Synthesized Addressing Modes” on Page 12.
+User Manual (Volume 1)
+1-3
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 11
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Architecture Overview
+1.3
+Tasks and Contexts
+A task is an independent thread of control. There are two types: Software Managed Tasks (SMTs) and Interrupt
+Service Routines (ISRs).
+SMTs are created through the services of a real-time kernel or Operating System, and are dispatched under the
+control of scheduling software. ISRs are dispatched by hardware in response to an interrupt. An ISR is the code
+that is invoked directly by the processor on receipt of an interrupt. SMTs are sometimes referred to as user tasks,
+assuming that they execute in User Mode.
+Each task is allocated its own mode, depending on the task’s function:
+•
+User-0 Mode: Used for tasks that do not access peripheral devices. This mode cannot enable or disable
+interrupts.
+•
+User-1 Mode: Used for tasks that access common, unprotected peripherals. Typically this would be a read or
+write access to serial port, a read access to timer, and most I/O status registers. Tasks in this mode may disable
+interrupts for a short period. (The default behaviour of this mode may be overriden by the system control
+register).
+•
+Supervisor Mode: Permits read/write access to system registers and all peripheral devices. Tasks in this
+mode may disable interrupts.
+Individual modes are enabled or disabled primarily through the I/O mode bits in the Processor Status Word
+(PSW).
+A set of state elements are associated with any task, and these are known collectively as the task’s context. The
+context is everything the processor needs to define the state of the associated task and enable its continued
+execution. This includes the CPU General Registers that the task uses, the task’s Program Counter (PC), and its
+Program Status Information (PCXI and PSW). The architecture efficiently manages and maintains the context of
+the task through hardware. The context is subdivided into the upper context and the lower context.
+Context Save Areas
+The architecture uses linked lists of fixed-size Context Save Areas (CSAs). A CSA consists of 16 words of memory
+storage, aligned on a 16-word boundary. Each CSA can hold exactly one upper or one lower context. CSAs are
+linked together through a Link Word.
+The architecture saves and restores context more quickly than conventional microprocessors and
+microcontrollers. The unique memory subsystem design with a wide data path allows the architecture to perform
+rapid data transfers between processor registers and on-chip memory.
+Context switching occurs when an event or instruction causes a break in program execution. The CPU then needs
+to resolve this event before continuing with the program.
+The events and instructions which cause a break in program execution are:
+•
+Interrupt or service requests
+•
+Traps
+•
+Function calls
+See “Tasks and Functions” on Page 1.
+1.4
+Interrupt System
+A key feature of the architecture is its powerful and flexible interrupt system. The interrupt system is built around
+programmable Service Request Nodes (SRNs).
+A Service Request is defined as an interrupt request or a DMA (Direct Memory Access) request. A service request
+may come from an on-chip peripheral, external hardware, or software.
+User Manual (Volume 1)
+1-4
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 12
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Architecture Overview
+Conventional architectures generally take a long time to service interrupt requests, and they are normally
+handled by loading a new Program Status (PS) from a vector table in data memory. In the TriCore architecture,
+service requests jump to vectors in code memory to reduce response time. The entry code for the ISR is a block
+within a vector of code blocks. Each code block provides an entry for one interrupt source.
+1.4.1
+Interrupt Priority
+Service requests are prioritized, and prioritization allows for nested interrupts. The rules for prioritization are:
+•
+A service request can interrupt the servicing of a lower priority interrupt
+•
+Interrupt sources with the same priority cannot interrupt each other
+•
+The Interrupt Control Unit (ICU) determines which source will win arbitration based on the priority number
+All Service Requests are assigned Priority Numbers (SRPNs). Every ISR has its own priority number. Different
+service requests must be assigned different priority numbers.
+The maximum number of interrupt sources is 255. Programmable options range from one priority level with 255
+sources, up to 255 priority levels with one source each.
+Interrupt numbers are assumed to be assigned in linear order of interrupt priority. This is feasible because
+interrupt numbers are not hardwired to individual sources, but are assigned by software executed during the
+power-on boot sequence.
+See “Interrupt System” on Page 1.
+1.5
+Trap System
+A trap occurs as a result of an event such as a Non-Maskable Interrupt (NMI), an instruction exception or illegal
+access. The TriCore architecture contains eight trap classes and these traps are further classified as synchronous
+or asynchronous, hardware or software. Each trap is assigned a Trap Identification Number (TIN) that identifies
+the cause of the trap within its class. The entry code for the trap handler is comprised of a vector of code blocks.
+Each code block provides an entry for one trap. When a trap is taken, the TIN is placed in data register D[15].
+The trap classes are:
+•
+MMU (Memory Management Unit)
+•
+Internal Protection
+•
+Instruction Error
+•
+Context Management
+•
+System Bus and Peripherals
+•
+Assertion Trap
+•
+System Call
+•
+Non-Maskable Interrupt (NMI)
+See “Trap System” on Page 1.
+1.6
+Protection System
+One of the domains that TriCore supports is safety-critical embedded applications. The architecture features a
+protection system designed to protect core system functionality from the effects of software errors in less critical
+application tasks, and to prevent unauthorised tasks from accessing critical system peripherals.
+The protection system also facilitates debugging. It detects and traps errors that might otherwise go unnoticed
+until it was too late to identify the cause of the error.
+The overall protection system is composed of four main subsystems:
+1. The Trap System: Described briefly in Section 1.5, but covered in detail in “Trap System” on Page 1.
+User Manual (Volume 1)
+1-5
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 13
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Architecture Overview
+2. The I/O Privilege Level: TriCore supports three I/O modes: User-0 mode, User-1 mode and Supervisor mode.
+The User-1 mode allows application tasks to directly access non-critical system peripherals. This allows
+embedded systems to be implemented efficiently, without the loss of security inherent in the common
+practice of running everything in Supervisor mode. (The default behaviour of the User-1 mode may be
+overriden by the system control register).
+3. The Memory Protection System: This protection system provides control over which regions of memory a
+task is allowed to access, and what types of access it is permitted.
+4. The Temporal Protection system. This protection system provides protection against run-time overrun.
+For applications that require virtual memory, the optional Memory Management Unit (MMU) supports a familiar
+page-based model for memory protection. That model gives each memory page its own access permissions. The
+relatively conventional MMU design and the page-based memory protection model facilitate porting of standard
+operating systems that expect this model.
+For applications that do not require virtual memory there is a range-based memory protection system. This
+system and its interaction with I/O privilege level for access to peripherals, is detailed in “Memory Protection
+System” on Page 1.
+1.7
+Memory Management Unit
+TriCore can make use of an optional Memory Management Unit (MMU). When configured with an MMU, the
+memory space has two addressing regions; physical and virtual. The physical and virtual address space is 4
+GBytes in each instance, with those 4 GBytes each divided into sixteen, 256 MByte segments.
+Segments [8H-FH] bypass virtual mapping and are directly, physically used. Segments [0H-7H] are virtually
+mapped by the MMU when it is present and enabled, or physically mapped when the MMU is not present or
+disabled.
+Virtual addresses are always translated into physical addresses before accessing memory. This translation to a
+physical address is either a Direct Translation or a Page Table Entry (PTE) Translation, depending on MMU mode
+and virtual address region:
+•
+Direct Translation
+–
+If the virtual address belongs to the upper half of the virtual address space, then the virtual address is
+directly used as the physical address. If the virtual address belongs to the lower half of the address space
+and the processor is operating in Physical mode, then the virtual address is used indirectly as the physical
+address.
+•
+PTE
+–
+If the processor is operating in Virtual mode and the virtual address belongs to the lower half of the
+address space, then the virtual address is translated using PTE. PTE translation is performed by replacing
+the Virtual Page Number (VPN) of the virtual address by a Physical Page Number (PPN) to obtain a physical
+address.
+See “Memory Management Unit (MMU)” on Page 1.
+1.8
+Core Debug Controller
+The Core Debug Controller (CDC) is designed to support real-time systems that require non-intrusive debugging.
+Most of the architectural state in the CPU Core and Core on-chip memories can be accessed through the system
+Address Map. The debug functionality is an interface of architecture, implementation and software tools.
+Access to the CDC is typically provided via the On-Chip Debug Support (OCDS) of the system containing the CPU.
+A general description of the Core Debug mechanism and registers is detailed in “Core Debug Controller” on
+Page 1
+User Manual (Volume 1)
+1-6
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 14
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Architecture Overview
+1.9
+TriCore Coprocessor Interface
+TriCore implementations may choose to implement a coprocessor interface. Such interfaces allows hardware
+extensions to the standard TriCore instruction set.
+User Manual (Volume 1)
+1-7
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 15
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+2
+Programming Model
+This chapter discusses the following aspects of the TriCore™ architecture that are visible to software:
+•
+Supported data types Page 1
+•
+Data formats in registers and memory Page 2
+•
+The Memory model Page 6
+•
+Addressing modes Page 7
+2.1
+Data Types
+The instruction set supports operations on the following Data Types:
+•
+Boolean Page 1
+•
+Bit String Page 1
+•
+Byte Page 1
+•
+Signed Fraction Page 1
+•
+Address Page 1
+•
+Signed and Unsigned Integers Page 2
+•
+IEEE-754 Single-precision Floating-point Number Page 2
+Most instructions operate on a specific Data Type, while others are useful for manipulating several Data Types.
+2.1.1
+Boolean
+A Boolean is either TRUE or FALSE:
+•
+TRUE is the value one (1) when generated and non-zero when tested
+•
+FALSE is the value zero (0)
+Booleans are produced as the result in comparison and logic instructions, and are used as source operands in
+logical and conditional jump instructions.
+2.1.2
+Bit String
+A bit string is a packed field of bits.
+Bit strings are produced and used by logical, shift, and bit field instructions.
+2.1.3
+Byte
+A byte is an 8-bit value that can be used for a character or a very short integer. No specific coding is assumed.
+2.1.4
+Signed Fraction
+The architecture supports 16-bit, 32-bit and 64-bit signed fractional data for DSP arithmetic. Data values in this
+format have a single high-order sign bit, where 0 represents positive (+) and 1 represents negative (-), followed by
+an implied binary point and fraction. Their values are therefore in the range [-1,1).
+2.1.5
+Address
+An address is a 32-bit unsigned value.
+User Manual (Volume 1)
+2-1
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 16
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+2.1.6
+Signed and Unsigned Integers
+Signed and unsigned integers are normally 32 bits. Shorter signed or unsigned integers are sign-extended or
+zero-extended to 32 bits when loaded from memory into a register.
+Multi-precision
+Multi-precision integers are supported with addition and subtraction using carry. Integers are considered to be
+bit strings for shifting and masking operations. Multi-precision shifts can be made using a combination of single-
+precision shifts and bit field extracts.
+2.1.7
+IEEE-754 Single-Precision Floating-Point Number
+Depending on the particular implementation of the core architecture, IEEE-754 floating-point numbers are
+supported by coprocessor hardware instructions or by software calls to a library.
+2.2
+Data Formats
+All General Purpose Registers (GPRs) are 32 bits wide, and most instructions operate on word (32-bit) values.
+When byte or half-word data elements are loaded from memory, they are automatically sign-extended or zero-
+extended to fill the register. The type of filling is implicit in the load instruction. For example, LD.B to load a byte
+with sign extension, or LD.BU to load a byte with zero extension.
+The supported Data Formats are:
+•
+Bit
+•
+Byte: signed, unsigned
+•
+Half-word: signed, unsigned, fraction
+•
+Word: signed, unsigned, fraction, floating-point
+•
+48-bit: signed, unsigned, fraction
+•
+Double-word: signed, unsigned, fraction
+User Manual (Volume 1)
+2-2
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 17
+============================================================
+BIT 0
+Boolean
+7
+Character / Very Short Integer
+15
+Short Integer
+15
+Short Fraction
+S
+Binary Point
+0
+31
+Integer
+31 30
+Fraction
+Binary Point
+0
+31
+bk...b1b0
+Bit String
+0
+31 30
+Floating-Point
+Exponent
+Long Integer
+DOUBLE-WORD
+63
+0
+Multi-Precision Accumulator
+63
+Binary Point
+Multi-Precision Fraction
+63 62
+S
+Binary Point
+S = Signed Bit
+TC1004
+BYTE
+HALF-WORD
+0
+WORD
+0
+S
+23 22
+S
+Fraction
+47 46
+0
+0
+0
+0
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+Figure 3 
+Supported Data Formats
+User Manual (Volume 1)
+2-3
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 18
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+2.2.1
+Alignment Requirements
+Alignment requirements differ for addresses and data (see Table 1). Address variables loaded into or stored from
+address registers, must always be Word-aligned.
+Data can be aligned on any Half-Word boundary, regardless of size, except where noted below. This facilitates the
+use of packed arithmetic operations in DSP applications, by allowing two or four packed 16-bit data elements to
+be loaded or stored together on any Half-Word boundary.
+Programming Restrictions
+There are some restrictions of which programmers must be aware, specifically:
+•
+The LDMST, CMPSWAP.W, SWAPMSK.W and SWAP.W instructions require their operands to be Word-aligned.
+•
+Byte operations LD.B, ST.B, LD.BU, ST.T may be byte aligned.
+•
+All accesses to peripheral space must be naturally aligned. (Double-Word accesses may be Word aligned).
+Alignment Rules
+Table 1 
+Alignment rules for non-peripheral space
+Access type
+Alignment of address in memory
+Load, Store Data Register
+Byte (1H)
+2 bytes (2H)
+2 bytes (2H)
+2 bytes (2H)
+Load, Store Address Register
+4 bytes (4H)
+4 bytes (4H)
+SWAP.W, LDMST
+4 bytes (4H)
+CMPSWAP.W, SWAPMSK.W
+4 bytes (4H)
+ST.T
+Byte (1H)
+Context Load / Store / Restore /
+64 bytes (40H)
+Save
+Table 2 
+Alignment rules for peripheral space
+Access type
+Alignment of address in memory
+Load, Store Data Register
+Byte (1H)
+2 bytes (2H)
+4 bytes (4H)
+8 bytes (8H)
+Load, Store Address Register
+4 bytes (4H)
+8 bytes (8H)
+SWAP.W, LDMST, ST.T
+4 bytes (4H)
+CMPSWAP.W, SWAPMSK.W
+4 bytes (4H)
+Context Load / Store / Restore /
+Not Permitted
+Save
+User Manual (Volume 1)
+2-4
+V1.2.2
+2020-01-15
+Access size
+Byte
+Half-Word
+Word
+Double-Word
+Word
+Double-Word
+Word
+Word
+Byte
+16 x 32-bit registers
+Access size
+Byte
+Half-Word
+Word
+Double-Word
+Word
+Double-Word
+Word
+Word
+16 x 32-bit registers
+
+
+============================================================
+PAGE 19
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+2.2.2
+Byte Ordering
+The data memory and CPU registers store data in little-endian byte order (the least-significant bytes are at lower
+addresses). The following figure illustrates byte ordering. Little-endian memory referencing is used consistently
+for data and instructions.
+Byte23
+Byte22
+Byte21
+Byte20
+Word 5
+Double-word
+Byte19
+Byte18
+Byte17
+Byte16
+Word 4
+Byte15
+Byte14
+Byte13
+Byte12
+Word 3
+Half-word
+Byte11
+Byte10
+Byte9
+Byte8
+Word 2
+Word
+Byte7
+Byte6
+Byte5
+Byte4
+Word 1
+Byte
+Byte3
+Byte2
+Byte1
+Byte0
+Word 0
+TC1005
+Figure 4 
+Byte Ordering
+User Manual (Volume 1)
+2-5
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 20
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+2.3
+Memory Model
+The architecture has an address width of 32 bits and can access up to 4 GBytes of memory. The address space is
+divided into 16 regions or segments, [0H - FH]. Each segment is 256 MBytes. The upper 4 bits of an address select
+the specific segment. The first 16 KBytes of each segment can be accessed using absolute addressing.
+Many data accesses use addresses computed by adding a displacement to the value of a base address register.
+Using a displacement to cross one of the segment boundaries is not allowed and if attempted causes a MEM trap.
+This restriction allows direct determination of the accessed segment from the base address.
+See “Trap System” on Page 1 for more information on Traps.
+Physical Memory Attributes
+The physical memory attributes of segments zero to seven are implementation dependent. If an MMU is present
+and enabled, segments [0H - 7H] are considered virtual addresses that must be translated. If an MMU is not present
+the access characteristics are implementation dependent and may cause a trap.
+Physical Memory Addresses
+Physical memory addresses in segment FH are guaranteed to be peripheral space and therefore all accesses are
+non-speculative and are not accessible to User-0 mode..
+The Core Special Function Registers (CSFRs) are mapped to a 64 KBytes space in the memory map. The base
+location of this 64 KBytes space is implementation-dependent.
+Segments 8H to DH have further limitations placed upon them in some implementations. For example, specific
+segments for program and data may be defined by device-specific implementations. Other details of the memory
+mapping are implementation-specific.
+For more information see “Physical Memory Attributes (PMA)” on Page 1.
+Table 3 
+Physical Address Space
+Address
+Description
+FFFF FFFFH : E000 0000H
+Peripheral space.
+DFFF FFFFH : 8000 0000H
+Detailed limitations are implementation specific.
+7FFF FFFFH : 0000 0000H
+Implementation dependent.
+User Manual (Volume 1)
+2-6
+V1.2.2
+2020-01-15
+Segments
+EH - FH
+8H - DH
+0H - 7H
+
+
+============================================================
+PAGE 21
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+2.4
+Semaphores and Atomic Operations
+The following instructions read and/or write memory in atomic fashion:
+•
+LDMST (Load, Modify, Store)
+•
+SWAP.W (Swap register with memory)
+•
+ST.T (Store bit)
+•
+CMPSWAP.W
+•
+SWAPMSK.W
+LDMST uses a mask register to write selected bits from a source register into a memory word. However it does not
+return a value, so it can not be used as an atomic "test and set" type operations for binary semaphores. The
+SWAP.W is provided for this purpose. If memory protection is enabled, the effective address of the LDMST,
+CMPSWAP.W, SWAPMSK.W, SWAP.W or ST.T instruction must lie within a range which has both read and write
+permissions enabled.
+The CMPSWAP.W instruction conditionally swaps a source register with a memory word. The SWAPMSK.W
+instructions swaps through a mask the contents of a source register with a memory word.
+The execution of an atomc instruction forces the completion of all data accesses symantically ahead of the
+instruction. This ensures that any buffered state is written to memory prior to the atomic operation.
+2.5
+Addressing Modes
+Addressing modes allow load and store instructions to access simple data elements such as records, randomly
+and sequentially accessed arrays, stacks, and circular buffers.
+The simple data elements are 8-bits, 16-bits, 32-bits, or 64-bits wide. The architecture supports seven addressing
+modes.
+The addressing modes support efficient compilation of C/C++, give easy access to peripheral registers, and
+efficient implementation of typical DSP data structures (circular buffers for filters and bit-reversed indexing for
+FFTs).
+Table 4 
+Addressing Modes
+Addressing Mode
+Address Register Use
+Absolute
+None
+Base + Short Offset
+Address Register
+Base + Long Offset
+Address Register
+Pre-increment
+Address Register
+Post-increment
+Address Register
+Circular
+Address Register Pair
+Bit-reverse
+Address Register Pair
+Addressing modes which are not directly supported in the hardware can be synthesized through short instruction
+sequences.
+For more information see “Synthesized Addressing Modes” on Page 12.
+Instruction Formats
+The instruction formats provide as many bits of address as possible for absolute addressing, and as large a range
+of offsets as possible for base + offset addressing.
+User Manual (Volume 1)
+2-7
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 22
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+It is possible for an address register to be both the target of a load and an update associated with a particular
+addressing mode. In the following case for example, the contents of the address register are not architecturally
+defined:
+ld.a
+a0, [a0+]4
+Similarly, consider the following case:
+st.a
+[+a0]4, a0
+It is not architecturally defined whether the original or updated value of A[0] is stored into memory. This is true
+for all addressing modes in which there is an update of the address register.
+2.5.1
+Absolute Addressing
+Absolute addressing is useful for referencing I/O peripheral registers and global data.
+Absolute addressing uses an 18-bit constant specified by the instruction as the memory address. The full 32-bit
+address results from moving the most significant 4 bits of the 18-bit constant to the most significant bits of the
+32-bit address (Figure 5). Other bits are zero-filled.
+4
+14
+18-bit constant
+00000000000000
+32-bit address
+4
+14
+14
+TC1006
+Figure 5 
+Translation of Absolute Address to Full Effective Address
+2.5.2
+Base + Offset Addressing
+Base + offset addressing is useful for referencing record elements, local variables (using Stack Pointer (SP) as the
+base), and static data (using an address register pointing to the static data area). The full effective address is the
+sum of an address register and the sign-extended 10-bit offset.
+A subset of the memory operations are provided with a Base + Long Offset addressing mode. In this mode the
+offset is a 16-bit sign-extended value. This allows any location in memory to be addressed using a two instruction
+sequence.
+2.5.3
+Pre-Increment and Pre-Decrement Addressing
+Pre-increment and pre-decrement addressing (where pre-decrement addressing is obtained by the use of a
+negative offset), may be used to push onto an upward or downward-growing stack, respectively.
+The pre-increment addressing mode uses the sum of the address register and the offset both as the effective
+address and as the value written back into the address register.
+2.5.4
+Post-Increment and Post-Decrement Addressing
+Post-increment and post-decrement addressing (where post-decrement addressing is obtained by the use of a
+negative offset), may be used for forward or backward sequential access of arrays respectively. Furthermore, the
+two versions of the mode may be used to pop from a downward-growing or upward-growing stack, respectively.
+The post-increment addressing mode uses the value of the address register as the effective address and then
+updates this register by adding the sign-extended 10-bit offset to its previous value.
+User Manual (Volume 1)
+2-8
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 23
+============================================================
+tmp = I + sign_ext(offset10);
+if (tmp < 0)
+I = tmp + L;
+else if (tmp >= L)
+I = tmp - L;
+else
+TC1009
+I = tmp;
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+2.5.5
+Circular Addressing
+The primary use of circular addressing (Figure 6) is for accessing data values in circular buffers while performing
+filter calculations.
+Aodd
+L
+I
+Aeven
+B
+TC1008
+Figure 6 
+Circular Addressing Mode
+The circular addressing mode uses an address register pair to hold the state it requires:
+•
+The even register is always a base address (B).
+•
+The most significant half of the odd register is the buffer size (L).
+•
+The least significant half holds the index into the buffer (I).
+•
+The effective address is (B+I).
+•
+The buffer occupies memory from addresses B to B+L-1.
+The index is post-incremented using the following algorithm:
+Figure 7 
+Circular Addressing Index Algorithm
+The 10-bit offset is specified in the instruction word and is a byte-offset that can be either positive or negative.
+Note that correct ‘wrap around’ behaviour is guaranteed as long as the magnitude of the offset is smaller than
+the size of the buffer.
+To illustrate the use of circular addressing, consider a circular buffer consisting of 25, 16-bit values. If the current
+index is 48, then the next item is obtained using an offset of two (2-bytes per value). The new value of the index
+‘wraps around’ to zero. If we are at an index of 48 and use an offset of four, the new value of the index is two. If the
+current index is four and we use an offset of -8, then the new index is 46 (4-8+50).
+In the end case, where a memory access runs off the end of the circular buffer (Figure 8), the data access also
+wraps around to the start of the buffer. For example, consider a circular buffer containing n+1 elements where
+each element is a 16-bit value. If a load word is performed using the circular addressing mode and the effective
+address of the operation points to element n, the 32-bit result contains element n in the bottom 16 bits and
+element 0 in the top 16 bits.
+User Manual (Volume 1)
+2-9
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 24
+============================================================
+Circular Buffer of n+1 16-bit Elements
+bn-1
+b0
+bn
+b1
+b...
+15
+Result of a circular addressing load
+b0
+Word with an effective address
+pointing to element n
+31
+TC1010C
+0 15
+bn
+16 15
+0
+0
+15
+0 15
+0
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+Figure 8 
+Circular Buffer End Case
+The size and length of a circular buffer has the following restrictions:
+•
+The start of the buffer must be aligned to a 64-bit boundary. An implementation is free to advise the user of
+optimal alignment of circular buffers etc., but must support alignment to the 64-bit boundary.
+•
+The length of the buffer must be a multiple of the data size, where the data size is determined from the
+instruction being used to access the buffer. For example, a buffer accessed using a load-word instruction must
+be a multiple of 4 bytes in length, and a buffer accessed using a load double-word instruction must be a
+multiple of 8-bytes in length.
+If these restrictions are not met the implementation takes an alignment trap (ALN). An alignment trap is also
+taken if the index (I) >= length (L).
+Accesses to peripheral space using circular addressing are not permitted. Such accesses will result in a MEM trap.
+User Manual (Volume 1)
+2-10
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 25
+============================================================
+TriCoreTM TC1.6.2 core architecture manual
+32-bit microcontroller
+Programming Model
+2.5.6
+Bit-Reverse Addressing
+Bit-reverse addressing is used to access arrays used in FFT algorithms. The most common implementation of the
+FFT ends with results stored in bit-reversed order (“Bit-Reverse Addressing” on Page 11).
+PASS 1
+PASS 2
+PASS 3
+X(0)
+X(0)
+X(1)
+X(1)
+W0
+W0
+X(2)
+X(2)
+W0
+X(3)
+X(3)
+W2
+W0
+X(4)
+X(4)
+W0
+X(5)
+X(5)
+W1
+W2
+W0
+X(6)
+X(6)
+W2
+W3
+W0
+X(7)
+X(7)
+Key: X(n) is data point n.
+Wn is twiddle factor n.
+TC1011
+Figure 9 
+Bit-Reverse Addressing
+Bit-reverse addressing uses an address register pair to hold the required state:
+Aodd
+M
+I
+Aeven
+B
+TC1012
+Figure 10 
+Register Pair for Bit-Reverse Addressing
+•
+The even register is the base address of the array (B).
+•
+The least-significant half of the odd register is the index into the array (I).
+•
+The most-significant half is the modifier (M), used to update I after every access.
+•
+The effective address is B+I.
+•
+The index, I, is post-incremented and its new value is reverse [reverse (I) + reverse (M)]. The reverse(I) function
+exchanges bit n with bit (15–n) for n = 0, ... 7.
+To illustrate for a 1024 point real FFT using 16-bit values, the buffer size is 2048 bytes. Stepping through this array
+using a bit-reverse index would give the sequence of byte indices: 0, 1024, 512, 1536, and so on. This sequence
+can be obtained by initializing I to 0 and M to 0400H.
+Table 5 
+1024-point FFT Using 16-bit Values
+I (decimal)
+Rev[Rev(I) + Rev(M)]
+0
+0000010000000000B
+1024
+0000001000000000B
+User Manual (Volume 1)
+2-11
+V1.2.2
+2020-01-15
+I (binary)
+Reverse(I)
+0000000000000000B
+0000000000000000B
+0000010000000000B
+0000000000100000B
+

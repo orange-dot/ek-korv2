@@ -1,0 +1,52 @@
+# Node
+**/node_modules
+**/npm-debug.log
+
+# Build outputs
+**/dist
+**/.next
+**/build
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Temp files
+**/*.log
+**/tmp
+**/temp
+tmpclaude-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/venv
+**/.venv
+*.egg-info
+
+# SQLite databases (we'll create fresh)
+**/*.db
+
+# Large binary files
+**/*.vdi
+**/*.vhdx
+**/*.zip
+**/*.pdf
+**/*.docx
+
+# Keep only necessary folders
+!web/
+!tehnika/
+!patent/

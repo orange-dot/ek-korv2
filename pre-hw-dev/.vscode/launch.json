@@ -2,6 +2,37 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug JEZGRO (Renode)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "executable": "${workspaceFolder}/build-arm/jezgro_firmware",
+            "device": "STM32G474RE",
+            "svdFile": "${workspaceFolder}/renode/STM32G474.svd",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "ARM Build",
+            "gdbPath": "arm-none-eabi-gdb",
+            "showDevDebugOutput": "raw",
+            "preLaunchCommands": [
+                "set remotetimeout 60"
+            ],
+            "postLaunchCommands": [
+                "monitor start"
+            ]
+        },
+        {
+            "name": "Attach to Renode",
+            "type": "cortex-debug",
+            "request": "attach",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "executable": "${workspaceFolder}/build-arm/jezgro_firmware",
+            "device": "STM32G474RE",
+            "svdFile": "${workspaceFolder}/renode/STM32G474.svd",
+            "gdbPath": "arm-none-eabi-gdb"
+        },
+        {
             "name": "Debug Tests (GDB)",
             "type": "cppdbg",
             "request": "launch",

@@ -19,7 +19,7 @@ import {
   Clock,
   FastForward,
 } from 'lucide-react';
-import PasswordGate from '../components/PasswordGate';
+import PasswordGate, { ACCESS_TIERS } from '../components/PasswordGate';
 import MetricsDashboard from '../components/simulation/MetricsDashboard';
 
 // Demo scenarios
@@ -424,11 +424,7 @@ cd simulator/api && npm run dev`}
 
 export default function SimulatorDemoPage() {
   return (
-    <PasswordGate
-      password="kassad"
-      storageKey="ek_simulator_demo_unlocked"
-      title="EK3 Simulator Demo"
-    >
+    <PasswordGate tier={ACCESS_TIERS.PARTNER}>
       <SimulatorDemoContent />
     </PasswordGate>
   );

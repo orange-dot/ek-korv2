@@ -88,6 +88,13 @@ void hal_delay_ms(uint32_t ms);
  */
 int hal_systick_init(uint32_t tick_hz);
 
+/**
+ * @brief Increment HAL system tick counter
+ *
+ * Call this from your SysTick_Handler to keep HAL timing functions working.
+ */
+void hal_systick_increment(void);
+
 /*===========================================================================*/
 /* Interrupts                                                                */
 /*===========================================================================*/

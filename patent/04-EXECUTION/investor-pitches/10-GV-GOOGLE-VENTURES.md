@@ -1,4 +1,7 @@
-# GV (Google Ventures) - Tailored Pitch
+# GV (Google Ventures) - EK-KOR2 Open Source Pitch
+
+**Updated: January 2026**
+**Focus: EK-KOR2 Open-Source Coordination RTOS + Autonomous Energy Infrastructure**
 
 ## Investor Profile
 
@@ -10,66 +13,166 @@ AUM:        $8B+
 Ticket:     $1M-25M (seed to growth)
 Focus:      Life sciences, enterprise, consumer, frontier tech
 Climate:    Active - Climeworks, Commonwealth Fusion, Fervo, Form Energy
+OSS DNA:    Android, Kubernetes, TensorFlow, Chromium → they GET open-source
 Approach:   Patient capital, access to Google resources
 Website:    gv.com
 
 KEY PARTNERS FOR OUR PITCH:
 ─────────────────────────────────────────────────────────────
-DAVID KRANE (CEO & Managing Partner)
-• Google employee #84, built Google comms
-• Focus: Mission-driven companies, brand building
-• Style: Long-term thinking, transformative bets
-
-KARIM FARIS (General Partner)
+KARIM FARIS (General Partner) ← PRIMARY TARGET
 • Former Google engineer (Ads, YouTube)
 • Focus: Enterprise infrastructure, deep tech
 • Climate investments: Led Climeworks, Commonwealth Fusion
-→ PRIMARY TARGET: Climate + infrastructure = our sweet spot
-
-TOM HULME (General Partner, Europe)
-• IDEO alum, Design Council UK
-• Focus: Design-led companies, European deals
-• Style: Product elegance, user experience
-→ SECONDARY TARGET: EU market entry angle
+• OSS understanding: YouTube scale infrastructure
+→ PRIMARY: Climate + infrastructure + OSS strategy
 
 ERIK NORDLANDER (Partner)
 • Focus: Climate tech, sustainability
 • Led: Fervo Energy (geothermal), Form Energy (storage)
 → STRONG FIT: Energy infrastructure specialist
+
+TOM HULME (General Partner, Europe)
+• IDEO alum, Design Council UK
+• Focus: Design-led companies, European deals
+→ EU market entry angle
+
+DAVID KRANE (CEO & Managing Partner)
+• Google employee #84, built Google comms
+• Focus: Mission-driven companies
+• Style: Long-term thinking, transformative bets
 ```
 
 ---
 
-## GV Investment Philosophy
+## NEW: EK-KOR2 - Layered Open-Source Strategy
 
-### What Makes GV Different From Traditional VCs:
+### Google's Playbook - Android Model Applied to Energy
+
+```
+THE ANDROID INSIGHT - LAYERED IP STRATEGY:
+════════════════════════════════════════════════════════════════
+
+Android (OSS) + Google Apps (proprietary) = ecosystem dominance
+Kubernetes (OSS) + GKE (proprietary) = cloud revenue
+Chromium (OSS) + Google services (proprietary) = browser dominance
+
+OUR APPROACH:
+EK-KOR2/JEZGRO (OSS) + Hardware/Apps (proprietary) = energy standard
+
+┌─────────────────────────────────────────────────────────────┐
+│  PROPRIETARY LAYER (Closed Source)                          │
+│  ─────────────────────────────────────────────────────────  │
+│  • Fleet Management System (AI scheduling, logistics)       │
+│  • EK3 Hardware Design (power electronics, thermals)        │
+│  • Application Layer (web apps, APIs, integrations)         │
+│  • Robotic Swap System (mechanical design, control)         │
+│                                                             │
+│  → Revenue generation, competitive moat                     │
+├─────────────────────────────────────────────────────────────┤
+│  OPEN SOURCE LAYER (MIT License)                            │
+│  ─────────────────────────────────────────────────────────  │
+│  • EK-KOR2 RTOS (coordination, consensus, topology)         │
+│  • JEZGRO Kernel (real-time scheduling, HAL)                │
+│  • Communication Protocols (CAN-FD messaging)               │
+│                                                             │
+│  → Industry standard, ecosystem adoption, talent magnet     │
+└─────────────────────────────────────────────────────────────┘
+
+GV understands this playbook DEEPLY - it's Google's own strategy.
+```
+
+### EK-KOR2: What It Is
+
+```
+EK-KOR2: FIELD-CENTRIC COORDINATION RTOS
+════════════════════════════════════════════════════════════════
+
+WHAT IT IS:
+Novel real-time operating system for distributed coordination
+of modular power electronics. No central scheduler - modules
+self-organize through potential field gradients.
+
+OPEN SOURCE:
+MIT License. Parallel C/Rust implementations.
+"Kubernetes for distributed energy infrastructure."
+
+KEY INNOVATIONS:
+1. Potential Field Scheduling    - No central coordinator
+2. Topological k=7 Coordination  - Scale-free neighbor selection
+3. Threshold Consensus           - Distributed voting
+4. Adaptive Mesh Reformation     - Self-healing topology
+
+THE PARALLEL TO KUBERNETES:
+┌─────────────────────────────────────────────────────────────┐
+│  Kubernetes: Coordinates containers across nodes            │
+│  EK-KOR2: Coordinates power modules across chargers         │
+│                                                             │
+│  Both: No single point of failure, self-healing, scalable   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Technical Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    EK-KOR2 ARCHITECTURE                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐     │
+│  │Module 1 │   │Module 2 │   │Module 3 │   │Module N │     │
+│  │ Field:  │   │ Field:  │   │ Field:  │   │ Field:  │     │
+│  │ [0.5]   │──▶│ [0.3]   │──▶│ [0.7]   │──▶│ [0.4]   │     │
+│  │ Load    │   │ Load    │   │ Load    │   │ Load    │     │
+│  └────┬────┘   └────┬────┘   └────┬────┘   └────┬────┘     │
+│       │             │             │             │           │
+│       └─────────────┴──────┬──────┴─────────────┘           │
+│                            │                                 │
+│                   Gradient Flow                              │
+│              (work flows to low-load modules)                │
+│                                                             │
+│  NO CENTRAL SCHEDULER - EMERGENT COORDINATION               │
+└─────────────────────────────────────────────────────────────┘
+
+SPECIFICATIONS:
+• Languages:        C (embedded) + Rust (safety-critical)
+• Target MCU:       STM32G474 (Cortex-M4, 170MHz)
+• Communication:    CAN-FD @ 5Mbps
+• Latency:          Field publish <100ns (lock-free)
+• Consensus:        Threshold voting (50ms timeout)
+• Heartbeat:        10ms period, 5-miss = dead
+• Neighbors:        k=7 topological (scale-free)
+```
+
+---
+
+## GV Investment Philosophy Alignment
+
+### What Makes GV Different - And Why We Fit
 
 1. **Patient Capital**
    - Alphabet backing = no fund timeline pressure
-   - Can wait 10+ years for hardware bets
-   - Perfect for infrastructure plays
+   - Can wait 10+ years for infrastructure plays
+   - **EK-KOR2**: Standard adoption takes time (like Kubernetes)
 
 2. **Google Resources ("GV Startup Lab")**
    - Access to Google engineering expertise
-   - Design sprints methodology
-   - Recruiting, marketing, legal support
    - Cloud credits (GCP)
+   - **EK-KOR2**: Fleet AI/ML runs on GCP, predictive maintenance
 
-3. **Climate Conviction**
-   - Active climate portfolio: Climeworks (DAC), Commonwealth Fusion
-     (fusion), Fervo (geothermal), Form Energy (iron-air batteries)
-   - Thesis: Breakthrough energy tech needs patient, deep-pocketed capital
-   - NOT looking for incremental improvements
+3. **Open-Source DNA**
+   - Android, Kubernetes, TensorFlow, Chromium
+   - **EK-KOR2**: Same playbook - open foundation, ecosystem monetization
+   - Google GETS this strategy intuitively
 
-4. **Technical Depth**
-   - Many partners are ex-Google engineers
-   - Appreciate technical complexity
-   - Want to understand HOW it works, not just WHAT
+4. **Climate Conviction + Technical Depth**
+   - Climeworks, Commonwealth Fusion, Fervo, Form Energy
+   - NOT incremental improvements - breakthrough tech
+   - **EK-KOR2**: Novel coordination paradigm, not better charger
 
 5. **Portfolio Synergies**
-   - Google Maps/Waymo for fleet logistics
-   - Google Cloud for AI/ML infrastructure
-   - Potential Alphabet strategic interest
+   - Waymo: Autonomous systems expertise
+   - Google Cloud: AI/ML infrastructure
+   - **EK-KOR2**: Autonomous coordination + cloud telemetry
 
 ---
 
@@ -79,16 +182,20 @@ ERIK NORDLANDER (Partner)
 
 | GV Investment | What They Do | Our Parallel |
 |---------------|--------------|--------------|
-| **Climeworks** | Carbon capture modules that scale | Power modules that scale (3kW→3MW) |
-| **Commonwealth Fusion** | Breakthrough energy generation | Breakthrough energy distribution |
+| **Climeworks** | Modular carbon capture | Modular power electronics (same scaling thesis) |
+| **Commonwealth Fusion** | Breakthrough generation | Breakthrough distribution |
 | **Fervo Energy** | Geothermal infrastructure | EV charging infrastructure |
 | **Form Energy** | Grid-scale storage | Grid-connected charging |
-| **Cruise** (Alphabet) | Autonomous vehicles | Autonomous maintenance robots |
+| **Cruise/Waymo** | Autonomous vehicles | Autonomous coordination (EK-KOR2) |
 
-### Talking Point:
-> "You've invested in breakthrough energy generation (Commonwealth Fusion)
-> and storage (Form Energy). We're the missing piece: breakthrough energy
-> DISTRIBUTION for electric fleets."
+### Talking Points:
+
+> "You've invested in breakthrough energy generation (Fusion) and storage (Form).
+> We're the missing piece: breakthrough energy DISTRIBUTION with an open-source
+> coordination layer - like what Kubernetes did for cloud infrastructure."
+
+> "Climeworks proved modular scaling works. EK-KOR2 proves modular coordination
+> works. Same thesis: standardized units, manufacturing scale, open ecosystem."
 
 ---
 
@@ -96,153 +203,175 @@ ERIK NORDLANDER (Partner)
 
 ### DON'T say → DO say:
 
-| Generic | GV-optimized |
+| Generic | GV-Optimized |
 |---------|--------------|
-| "EV charger startup" | "Energy infrastructure platform with robotic maintenance" |
-| "Better chargers" | "Modular architecture enabling autonomous operations" |
-| "Fleet charging" | "Critical infrastructure for transportation electrification" |
-| "Robot maintenance" | "Autonomous systems reducing operational complexity" |
-| "Patents pending" | "Deep technical moat + first-mover advantage" |
-| "Need funding" | "Seeking partner with patient capital and technical depth" |
+| "Open-source charger software" | "Kubernetes for distributed energy" |
+| "Better coordination" | "Potential field scheduling - no central coordinator" |
+| "We want Google's money" | "Seeking partner with OSS DNA and patient capital" |
+| "Robot maintenance" | "Self-healing infrastructure (Waymo autonomy principles)" |
+| "Patents pending" | "OSS foundation + hardware IP moat (Android model)" |
 
 ### GV resonance keywords:
-- "Breakthrough" (not incremental)
-- "Platform" (not product)
-- "Autonomous" (Waymo/Cruise connection)
-- "Infrastructure" (long-term, defensible)
-- "Modular" (scalable, like Climeworks)
+- "Open-source" / "MIT licensed"
+- "Ecosystem" / "Standard creation"
+- "Kubernetes model"
+- "Self-healing" / "No SPOF"
+- "Modular" (Climeworks parallel)
+- "Patient capital" / "Infrastructure"
 - "Technical moat"
 
 ---
 
-## Email Template A: To Erik Nordlander (Climate Partner)
+## Email Template A: To Karim Faris (Primary Target)
 
 ```
-Subject: Autonomous EV Charging Infrastructure - Climeworks Model for Fleet Electrification
+Subject: Open-Source Coordination for Distributed Energy - Kubernetes Model
 
-Erik,
+Karim,
 
-GV's climate thesis is clear: back breakthrough technologies that
-can scale. Climeworks for carbon capture. Commonwealth Fusion for
-generation. Fervo for geothermal. Form for storage.
+You led GV's investment in Climeworks - modular carbon capture that scales.
+We're building the coordination layer for modular energy infrastructure,
+with the same open-source strategy that made Kubernetes the cloud standard.
 
-We're building the missing layer: breakthrough DISTRIBUTION
-infrastructure for electric fleets.
+THE BREAKTHROUGH: EK-KOR2 RTOS
 
-THE PROBLEM
-───────────
-Electric bus operators face 15-30% charger downtime. Current
-chargers are monolithic—when they fail, buses don't charge.
-Operators are hesitant to electrify because infrastructure
-reliability isn't there.
+An open-source coordination system for distributed power electronics.
+No central scheduler - modules self-organize through potential field
+gradients, like biological swarms.
 
-THE BREAKTHROUGH
-────────────────
-Modular "blade server" architecture for EV charging:
+┌────────────────────────────────────────────────────────────┐
+│  KUBERNETES : CONTAINERS :: EK-KOR2 : POWER MODULES        │
+├────────────────────────────────────────────────────────────┤
+│  • No single point of failure                              │
+│  • Self-healing on node loss                               │
+│  • Scale from small to massive                             │
+│  • Open-source foundation + commercial ecosystem           │
+└────────────────────────────────────────────────────────────┘
 
-┌──────────────────────────────────────────────────────────┐
-│  ┌───┐ ┌───┐ ┌───┐ ┌─X─┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐       │
-│  │3kW│ │3kW│ │3kW│ │ ↓ │ │3kW│ │3kW│ │3kW│ │3kW│       │
-│  └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘       │
-│         Autonomous robot swaps failed module in 40 sec   │
-│              Zero truck rolls. Zero downtime.            │
-└──────────────────────────────────────────────────────────┘
+THE STRATEGY:
 
-• Single 3kW module scales from 3kW to 3MW
-• Hot-swappable during operation (graceful degradation)
-• Robotic swap station—no human intervention
-• Fleet logistics: buses transport spare modules
-• AI ROJ coordination across depot
+Google pioneered this playbook:
+• Android → mobile ecosystem
+• Kubernetes → cloud infrastructure
+• TensorFlow → AI/ML foundation
 
-THE CLIMEWORKS PARALLEL
-───────────────────────
-Climeworks proved modular DAC could scale.
-We're proving modular charging can scale.
+EK-KOR2 → distributed energy coordination
 
-Same thesis: Small, standardized units.
-Manufacturing scale. Autonomous operation.
+Open-source the RTOS, build community adoption, sell certified
+hardware and services. "Red Hat of distributed energy."
 
-WHY GV
-──────
-This is a 10-year infrastructure bet. We need patient capital
-with technical depth. GV's climate portfolio shows you understand
-breakthrough energy infrastructure plays.
+WHY THIS MATTERS:
 
-TRACTION
-────────
-• 5 patent concepts (WIPO PROOF priority Jan 2026)
-• EK3 module: 3.3kW, 900V SiC, LLC topology
-• Technical architecture validated
-• Target: EU transit operators (100% electric mandate by 2035)
+Every modular energy system needs coordination:
+• EV charging (depot, fast charging, MCS)
+• Grid storage (battery farms, V2G)
+• Microgrids (campus, industrial, residential)
 
-ASK
-───
-$2M seed for prototype + first pilot deployment in Europe.
+Today: proprietary, brittle, no interoperability.
+Tomorrow: open standard, like TCP/IP for energy.
 
-Happy to walk through the technical architecture with your team.
+TECHNICAL MOAT:
 
-Bojan Janjatović
+• Novel scheduling paradigm (potential fields)
+• Dual C/Rust implementation (embedded + safety-critical)
+• k=7 topological neighbors (scale-free network)
+• Threshold consensus (distributed voting)
+• Lock-free IPC (<100ns latency)
+
+THE CLIMEWORKS PARALLEL:
+
+Climeworks: Modular DAC units that scale.
+EK-KOR2: Modular coordination that scales.
+Same thesis: Open foundation, manufacturing scale, ecosystem.
+
+TRACTION:
+
+• EK-KOR2: Working C implementation, 22 test vectors passing
+• EK3 module: Complete 3.3kW design (900V SiC, LLC topology)
+• 5 patent concepts on hardware (WIPO PROOF Jan 2026)
+• Ready to open-source on funding
+
+ASK:
+
+$2M seed to open-source EK-KOR2 and deploy certified hardware pilot.
+
+This is a 10-year infrastructure play. We need patient capital with
+technical depth and OSS DNA. That's GV.
+
+Happy to walk through the coordination architecture with your team.
+
+Bojan Janjatovic
 Founder, Elektrokombinacija
-bojan@elektrokombinacija.com
+https://github.com/elektrokombinacija/ek-kor2 (private, invite on request)
 ```
 
 ---
 
-## Email Template B: To Karim Faris (Infrastructure + Climate)
+## Email Template B: To Erik Nordlander (Climate Partner)
 
 ```
-Subject: Infrastructure Layer for Fleet Electrification
+Subject: Open-Source Coordination Layer for Fleet Electrification
 
-Karim,
+Erik,
 
-You led GV's investment in Climeworks—modular carbon capture
-that can scale. We're building the same model for a different
-problem: EV fleet charging infrastructure.
+GV's climate thesis is clear: back breakthrough technologies that can scale.
+Climeworks for carbon capture. Fervo for geothermal. Form for storage.
 
-THE INSIGHT
-───────────
-Data centers went from monolithic servers to blade architecture.
-Energy infrastructure is stuck in the monolithic era.
+We're building the missing layer: open-source COORDINATION for distributed
+energy infrastructure.
 
-THE BREAKTHROUGH
-────────────────
-• Modular 3kW power units (EK3) that scale to 3MW
-• Autonomous robotic maintenance—40-second module swap
-• Self-healing infrastructure, zero human intervention
-• Technical depth: 900V SiC MOSFETs, LLC topology, CAN-FD
+THE PROBLEM:
+────────────
+Electric fleet operators face 15-30% charger downtime. But the deeper
+problem: every vendor builds proprietary coordination. No standard.
+No interoperability. Brittle systems.
 
-WHY NOW
-───────
-• EU mandates 100% electric city buses by 2035
-• $100B+ infrastructure buildout happening now
-• Current charger reliability (70-85%) blocks fleet adoption
-• First-mover advantage on autonomous maintenance architecture
+THE BREAKTHROUGH: EK-KOR2
+─────────────────────────
+Open-source RTOS for modular power electronics:
 
-THE TECHNICAL MOAT
-──────────────────
-5 patent concepts, WIPO PROOF priority established:
-1. Modular hot-swap architecture
-2. Robotic swap mechanism
-3. Fleet-integrated logistics
-4. Distributed sparing system
-5. Dual-robot coordination
+• Potential field scheduling (no central coordinator)
+• Self-organizing distributed consensus
+• Self-healing mesh topology
+• MIT license - "Kubernetes for energy infrastructure"
 
-This is hard engineering. Power electronics + robotics +
-AI coordination. Others won't replicate quickly.
+WHY OPEN SOURCE WINS:
+─────────────────────
+Google proved this playbook works:
+• Android dominated mobile through open ecosystem
+• Kubernetes dominated cloud through open ecosystem
+• EK-KOR2 will dominate distributed energy coordination
 
-THE MARKET
-──────────
-TAM: €100B (EU bus fleet electrification)
-SAM: €10B (charging infrastructure)
-SOM: €500M (reliability/maintenance layer—our wedge)
+THE CLIMEWORKS PARALLEL:
+────────────────────────
+Climeworks: Modular carbon capture → open ecosystem for DAC
+EK-KOR2: Modular coordination → open ecosystem for energy
 
-ASK
-───
-$2M seed. Prototype + EU pilot deployment.
+Same thesis: standardize the building blocks, open the platform,
+monetize hardware and services.
 
-Would value 30 minutes to discuss the technical approach.
+MARKET TIMING:
+──────────────
+• EU mandates 100% electric buses by 2035
+• $100B+ infrastructure buildout happening NOW
+• No open coordination standard exists
+• First-mover advantage on ecosystem creation
 
-Bojan Janjatović
+THE TECHNICAL MOAT:
+───────────────────
+• Novel scheduling paradigm (potential fields, no SPOF)
+• Dual C/Rust implementation
+• 5 patent concepts on hardware
+• 12-18 month ecosystem head start
+
+ASK:
+────
+$2M seed to open-source EK-KOR2 and deploy pilot with EU operator.
+
+This is a patient capital play. Infrastructure standards take time
+to establish. GV's Alphabet backing makes you the right partner.
+
+Bojan Janjatovic
 Founder, Elektrokombinacija
 ```
 
@@ -251,184 +380,302 @@ Founder, Elektrokombinacija
 ## Email Template C: To Tom Hulme (Europe + Design)
 
 ```
-Subject: European EV Infrastructure - Design-Led Approach
+Subject: Open-Source Energy Infrastructure Standard - European Launch
 
 Tom,
 
-With your IDEO background and European focus, wanted to share
-what we're building: elegantly simple EV charging infrastructure
-that maintains itself.
+With your European focus and design background, wanted to share what
+we're building: an open-source coordination standard for modular
+energy infrastructure, launching from Europe.
 
-THE DESIGN PRINCIPLE
-────────────────────
-Current EV chargers are like 1990s servers—monolithic, fragile,
-requiring expert intervention when they fail.
+THE DESIGN PRINCIPLE:
+─────────────────────
+Current energy coordination is like pre-Kubernetes cloud:
+• Every vendor's proprietary solution
+• No interoperability
+• Central schedulers = single points of failure
 
-We designed for autonomous operation from first principles:
-• Modular units that a robot can handle
-• Standardized form factor (blade server aesthetic)
-• Graceful degradation, not catastrophic failure
-• Self-healing through automated swap
+EK-KOR2: Designed for distributed autonomy from first principles.
+No central coordinator. Self-healing. Open-source.
 
-THE EUROPEAN OPPORTUNITY
-────────────────────────
+THE EUROPEAN OPPORTUNITY:
+─────────────────────────
 • EU mandates 100% electric buses by 2035
-• Transit operators desperate for reliable charging
-• European transit authorities prefer local partners
 • €100B+ infrastructure investment coming
+• European transit authorities prefer open standards
+• GAIA-X initiative favors open-source infrastructure
 
-WHY GV FOR EUROPE
+WHY EUROPE FIRST:
 ─────────────────
-We're targeting EU transit operators for first deployment.
-Your European presence + Alphabet's resources would accelerate
-market entry significantly.
+• Regulatory tailwind (EU 2035 mandate)
+• Open-source friendly (vs US proprietary bias)
+• GV's European presence through you
+• Serbia base = EU-adjacent, cost-effective R&D
 
-Would love to share the industrial design work and discuss
-GV's European strategy.
+THE STRATEGY:
+─────────────
+Open-source EK-KOR2 (MIT license) → build European developer community
+→ first hardware pilots with EU transit operators → expand globally.
 
-Bojan Janjatović
+Would love to discuss GV's European strategy and how EK-KOR2 fits
+your open infrastructure thesis.
+
+Bojan Janjatovic
 Founder, Elektrokombinacija
 ```
 
 ---
 
-## One-Pager Content (GV-optimized)
+## One-Pager (GV-Optimized)
 
 ### Header
 ```
 ELEKTROKOMBINACIJA
-Autonomous EV Charging Infrastructure
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-"What Climeworks did for carbon capture,
- we're doing for energy distribution"
+Open-Source Coordination for Distributed Energy
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"What Kubernetes did for cloud, we're doing for energy infrastructure"
 ```
 
 ### Problem
 ```
-FLEET ELECTRIFICATION IS BLOCKED BY INFRASTRUCTURE RELIABILITY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISTRIBUTED ENERGY LACKS A COORDINATION STANDARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Modular energy systems are emerging everywhere:
+• EV charging (depot, opportunity, MCS)
+• Grid storage (battery farms, V2G)
+• Microgrids (campus, industrial, residential)
 
 Current state:
-• Chargers have 15-30% downtime
-• Each failure = stranded buses, service disruption
-• Maintenance requires technician trucks, days of delay
-• Operators hesitant to commit to full electrification
+• Every vendor builds proprietary coordination
+• Central schedulers = single point of failure
+• No interoperability between systems
+• Brittle, expensive, non-scalable
 
-The blocker isn't batteries or buses.
-It's charging infrastructure reliability.
+Sound familiar?
+This was cloud infrastructure before Kubernetes.
 ```
 
 ### Solution
 ```
-MODULAR ARCHITECTURE + AUTONOMOUS MAINTENANCE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EK-KOR2: OPEN-SOURCE COORDINATION RTOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-┌─────────────────────────────────────────────────────────────┐
-│  BLADE SERVER MODEL FOR ENERGY INFRASTRUCTURE               │
-│  ─────────────────────────────────────────────────────────  │
-│                                                              │
-│  ┌───┐ ┌───┐ ┌───┐ ┌─X─┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐          │
-│  │3kW│ │3kW│ │3kW│ │ ↓ │ │3kW│ │3kW│ │3kW│ │3kW│          │
-│  └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘          │
-│                                                              │
-│  Module fails → Robot detects → Swaps in 40 seconds         │
-│  Zero truck rolls. Zero downtime. Zero human intervention.  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│  KUBERNETES : CONTAINERS :: EK-KOR2 : POWER MODULES     │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌──────┐   ┌──────┐   ┌──────┐   ┌──────┐            │
+│  │Mod 1 │   │Mod 2 │   │Mod 3 │   │Mod N │            │
+│  │[0.5] │──▶│[0.3] │──▶│[0.7] │──▶│[0.4] │            │
+│  └──────┘   └──────┘   └──────┘   └──────┘            │
+│                                                         │
+│  Modules publish "fields" (load, thermal, power)        │
+│  Work flows along gradients - NO CENTRAL SCHEDULER     │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 
-THE TECHNOLOGY:
-• EK3 Module: 3.3kW, 200×320×44mm, hot-swappable
-• Power: 900V SiC MOSFETs, LLC topology, 97%+ efficiency
-• Comms: CAN-FD @ 5Mbps, ROJ coordination
-• Scale: Same module from 3kW to 3MW
+KEY INNOVATIONS:
+1. Potential Field Scheduling - swarm-like coordination
+2. Topological k=7 Neighbors - scale-free network
+3. Threshold Consensus - distributed voting
+4. Adaptive Mesh - self-healing on failures
 
-THE CLIMEWORKS PARALLEL:
-Modular → Manufacturing scale → Autonomous operation → Global deployment
+IMPLEMENTATION:
+• Dual C/Rust (embedded + safety-critical)
+• STM32G474 target (Cortex-M4, 170MHz)
+• CAN-FD @ 5Mbps communication
+• MIT License - fully open-source
 ```
 
-### Why Now
-```
-MARKET TIMING
-━━━━━━━━━━━━━
-• EU mandate: 100% electric city buses by 2035
-• €100B+ infrastructure investment required
-• Transit operators actively seeking reliable solutions
-• First-mover advantage on autonomous maintenance
+### Why Layered Open Source
 
-TECHNOLOGY READINESS
-━━━━━━━━━━━━━━━━━━━━
-• SiC MOSFETs now cost-effective at scale
-• Robotics mature for industrial application
-• AI/ML for predictive maintenance proven
-• Hot-swap architectures validated in data centers
+```
+GOOGLE'S LAYERED STRATEGY APPLIED TO ENERGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GOOGLE'S PROVEN MODEL:
+Android (OSS)    + Google Apps (proprietary)  = Mobile dominance
+Kubernetes (OSS) + GKE (proprietary)          = Cloud revenue
+Chromium (OSS)   + Google services (propri.)  = Browser dominance
+
+OUR MODEL:
+EK-KOR2/JEZGRO (OSS) + Hardware/Apps (proprietary) = Energy standard
+
+┌─────────────────────────────────────────────────────────┐
+│  PROPRIETARY: Hardware, Fleet Mgmt, Applications        │
+│  ─────────────────────────────────────────────────────  │
+│  OPEN SOURCE: EK-KOR2 RTOS, JEZGRO Kernel               │
+└─────────────────────────────────────────────────────────┘
+
+WHY LAYERED STRATEGY WINS:
+✓ OS layer: Network effects, community, standard creation
+✓ App layer: Revenue protection, competitive differentiation
+✓ Hardware: Margins, certification moat, quality control
+✓ Best of both: adoption + revenue
+
+BUSINESS MODEL:
+1. Open-source OS layer (EK-KOR2 RTOS, JEZGRO kernel)
+2. Build community/ecosystem → becomes standard
+3. Sell proprietary hardware (EK3 modules)
+4. Proprietary fleet management + applications
+5. Cloud telemetry (GCP opportunity)
+
+GV UNDERSTANDS THIS - IT'S YOUR OWN STRATEGY.
 ```
 
-### Technical Moat
-```
-5 PATENT CONCEPTS (WIPO PROOF PRIORITY JAN 2026)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. Modular hot-swap power architecture
-2. Robotic swap mechanism for field deployment
-3. Fleet-integrated logistics (buses carry spares)
-4. Distributed sparing optimization
-5. Dual-robot coordination protocol
+### Why GV
 
-HARD ENGINEERING MOAT:
-• Power electronics expertise (SiC, LLC topology)
-• Robotics integration for harsh environments
-• Real-time ROJ coordination
-• Others would need 18-24 months to replicate
+```
+PERFECT FIT FOR GV'S THESIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CLIMATE PORTFOLIO EXTENSION:
+✓ Climeworks: Modular carbon capture (parallel thesis)
+✓ Commonwealth Fusion: Breakthrough generation
+✓ Fervo: Geothermal infrastructure
+✓ Form Energy: Grid storage
+✓ EK-KOR2: Distribution coordination (missing layer)
+
+OPEN-SOURCE DNA:
+✓ GV backed Android, Kubernetes precursors
+✓ Understands ecosystem monetization
+✓ Patient capital for standard adoption
+
+GOOGLE SYNERGIES:
+✓ Google Cloud for fleet telemetry
+✓ AI/ML for predictive maintenance
+✓ Waymo autonomy principles (self-healing)
+✓ Design sprint methodology
+
+PATIENT CAPITAL:
+✓ Infrastructure standards take time
+✓ Alphabet backing = no fund pressure
+✓ Can wait for ecosystem to mature
 ```
 
 ### Market
+
 ```
 TAM: €100B+ - EU bus fleet electrification by 2035
 SAM: €10B   - Charging infrastructure
-SOM: €500M  - Reliability/maintenance layer (entry wedge)
+SOM: €500M  - Coordination/reliability layer
+
+TIMING:
+• EU 2035 mandate creates guaranteed demand
+• No open coordination standard exists
+• First-mover advantage on ecosystem
 
 EXPANSION PATH:
-Depot charging → Opportunity charging → Pantograph → MCS (trucks)
-```
-
-### GV Strategic Fit
-```
-WHY THIS IS A GV DEAL
-━━━━━━━━━━━━━━━━━━━━━
-✓ Breakthrough infrastructure (like Climeworks, Commonwealth Fusion)
-✓ Patient capital required (10-year infrastructure buildout)
-✓ Technical depth appreciated (ex-Google engineers understand this)
-✓ Autonomous systems (Waymo/Cruise DNA)
-✓ European market entry (Tom Hulme's territory)
-✓ Google Cloud/AI synergies for fleet optimization
-
-WHAT WE'D VALUE FROM GV:
-• Patient capital for hardware development
-• Design sprint methodology for product refinement
-• Google Cloud for AI/ML infrastructure
-• European network for transit operator introductions
+Bus depot → fast charging → MCS trucks → grid storage → microgrids
+(Same RTOS coordinates all of them)
 ```
 
 ### Team
+
 ```
-BOJAN JANJATOVIĆ - Founder
-[Add: Technical background, relevant experience]
+BOJAN JANJATOVIC - Founder
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 15 years enterprise software experience
+• Postal & logistics systems - international projects for
+  Toshiba (via Serbian engineering subcontractor)
+• NCR Voyix - current, development team
+• Power electronics + embedded systems (personal projects)
+• RTOS development - EK-KOR2, JEZGRO kernels
+
+WHY THIS BACKGROUND MATTERS:
+• Enterprise-grade reliability mindset (NCR/Toshiba scale)
+• Large-scale distributed systems experience
+• Real-time logistics optimization (postal sorting)
+• Production-quality code standards
 
 BUILDING:
-• Power electronics engineer (SiC expertise)
-• Robotics/mechatronics engineer
-• Embedded systems (STM32, CAN-FD)
+• Embedded systems community (post open-source)
+• Power electronics engineers (EK3 hardware)
+• Rust/C systems programmers
 ```
 
 ### Ask
+
 ```
 $2M SEED ROUND
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Prototype development      $800K (EK3 modules + robot)
-EU pilot deployment        $500K (transit operator)
-Team expansion            $400K (3 engineers)
-IP protection             $200K (patent filing)
-Operations                $100K (12 months)
-────────────────────────────────────────────────
-MILESTONE: Working pilot with EU operator, 12 months
+════════════════════════════════════════════════════
+EK-KOR2 open-source launch      $300K (docs, CI/CD, community)
+EK3 hardware development        $700K (prototype, certification)
+EU pilot deployment             $500K (transit operator)
+Team expansion                  $400K (4 engineers)
+IP protection                   $100K (hardware patents)
+────────────────────────────────────────────────────
+MILESTONE: Open-source ecosystem launch + hardware pilot, 12-18 months
+EXIT PATH: Strategic acquisition or Series A
+```
+
+---
+
+## GV Conversation Prep
+
+### Expected Questions:
+
+1. **"How does this relate to Kubernetes?"**
+   → "Same coordination problem, different domain. Kubernetes schedules
+      containers across nodes. EK-KOR2 schedules power delivery across
+      modules. Both: no SPOF, self-healing, open-source ecosystem."
+
+2. **"What's the Google Cloud angle?"**
+   → "Fleet telemetry and predictive maintenance run on GCP. Every module
+      reports health data. ML models predict failures. This is a natural
+      GCP workload - high-frequency industrial IoT."
+
+3. **"Why won't existing charger vendors open-source?"**
+   → "Classic innovator's dilemma. ABB and Siemens monetize through
+      proprietary lock-in. Open-sourcing would cannibalize their
+      service revenue. We have nothing to lose, everything to gain."
+
+4. **"What's the Waymo connection?"**
+   → "Autonomous systems principles. Waymo coordinates sensors and
+      actuators without central control. EK-KOR2 coordinates power
+      modules the same way. Self-healing, distributed intelligence."
+
+5. **"How do you monetize open-source?"**
+   → "Same as Android: open the platform, monetize the hardware.
+      EK-KOR2 is free. EK3 certified modules are not. Plus
+      professional services for enterprise deployments."
+
+### Technical Deep-Dive Points:
+
+```
+ARCHITECTURE HIGHLIGHTS FOR ENGINEERS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. POTENTIAL FIELD SCHEDULING
+   - Inspired by robotics path planning
+   - Each module publishes "field" (load, thermal, power)
+   - Work flows along gradients (like water downhill)
+   - No central coordinator needed
+
+2. K=7 TOPOLOGICAL NEIGHBORS
+   - Scale-free network structure
+   - Each module tracks 7 nearest neighbors
+   - Network remains connected even with failures
+   - Inspired by small-world network research
+
+3. THRESHOLD CONSENSUS
+   - Distributed voting for decisions
+   - No leader election required
+   - Supermajority (67%) for critical ops
+   - 50ms timeout, fast convergence
+
+4. LOCK-FREE IPC
+   - Sequence counter pattern
+   - <100ns field publish latency
+   - No mutex contention
+   - Safe for real-time constraints
+
+5. DUAL IMPLEMENTATION (C + Rust)
+   - C: Legacy embedded compatibility
+   - Rust: Memory safety for critical paths
+   - Cross-validation catches bugs
+   - Attracts both developer communities
 ```
 
 ---
@@ -438,155 +685,117 @@ MILESTONE: Working pilot with EU operator, 12 months
 ### Approach Order:
 
 ```
-1. ERIK NORDLANDER (Climate Partner)          ← PRIMARY
-   - Direct fit with climate infrastructure thesis
-   - Led Fervo, Form Energy investments
-   - Email Template A
-
-2. KARIM FARIS (Infrastructure + Climate)     ← SECONDARY
+1. KARIM FARIS (Infrastructure + Climate)       ← PRIMARY
    - Led Climeworks investment
    - Technical depth, ex-Google engineer
+   - OSS understanding from YouTube scale
+   - Email Template A
+
+2. ERIK NORDLANDER (Climate Partner)            ← SECONDARY
+   - Direct fit with climate thesis
+   - Led Fervo, Form Energy investments
    - Email Template B
 
-3. TOM HULME (Europe)                         ← EUROPEAN ANGLE
-   - If initial outreach doesn't work
+3. TOM HULME (Europe)                           ← EU ANGLE
+   - If US outreach doesn't work
    - European market positioning
    - Email Template C
 
-4. GENERAL APPLICATION (gv.com)               ← PARALLEL TRACK
+4. GENERAL APPLICATION (gv.com)                 ← PARALLEL TRACK
    - Submit while doing direct outreach
-   - Lower probability but worth doing
 ```
 
-### LinkedIn Strategy
+### Follow-up Strategy
 
 ```
-WEEK 1:
-□ Connect with Erik Nordlander
-  "Working on autonomous EV charging infrastructure—saw your work
-   with Fervo and Form Energy. Would value your perspective."
+DAY 1: Submit GV general application
+       (emphasize OSS strategy, Kubernetes parallel)
 
-□ Connect with Karim Faris
-  "Building modular energy infrastructure, similar thesis to
-   Climeworks. Would appreciate connecting."
+DAY 2-3: LinkedIn connection to Karim Faris
+         "Building open-source coordination for distributed energy.
+          Similar playbook to Kubernetes. Would value your perspective."
 
-WEEK 2:
-□ Send direct emails (Templates A & B)
-□ Submit general GV application
+DAY 4-5: Direct email to Karim (Template A)
+         Subject: "Open-Source Coordination for Distributed Energy"
 
-WEEK 3:
-□ Follow-up if no response
-□ Engage with GV content on LinkedIn/X
+WEEK 2: If no response:
+        - Make EK-KOR2 repo public, generate GitHub buzz
+        - HackerNews technical post
+        - Engage with GV portfolio companies
 
-WEEK 4:
-□ Try Tom Hulme European angle
-□ Look for warm introductions through GV portfolio founders
+WEEK 3: Follow-up email with traction update
+        "Just open-sourced EK-KOR2. X stars in first week.
+         Community response is strong. Happy to discuss."
+
+PARALLEL TRACK:
+- Connect through Climeworks/Fervo network
+- Google Cloud for Startups program
+- CNCF connections (Kubernetes community)
 ```
 
 ---
 
-## Conversation Prep
+## Key Phrases (GV Language)
 
-### Expected Questions from GV:
+### USE:
+- "Kubernetes for energy"
+- "Open-source foundation"
+- "Ecosystem monetization"
+- "Standard creation"
+- "Self-healing infrastructure"
+- "No single point of failure"
+- "Patient capital"
+- "Climeworks thesis"
+- "Technical depth"
+- "Google Cloud synergies"
 
-1. **"How does this relate to our climate portfolio?"**
-   → "You've invested in generation (Commonwealth Fusion), storage
-      (Form Energy), and carbon capture (Climeworks). We're the
-      distribution layer—getting clean energy to electric fleets
-      reliably."
-
-2. **"What's the technical risk?"**
-   → "Power electronics and robotics integration is challenging,
-      but both technologies are proven. We're combining them in
-      a novel architecture. The real risk is execution, not physics."
-
-3. **"Why won't ABB/Siemens do this?"**
-   → "They're invested in monolithic architectures. Switching would
-      cannibalize existing products. Classic innovator's dilemma.
-      By the time they react, we'll have deployed base + IP moat."
-
-4. **"What's the Google synergy?"**
-   → "Fleet optimization uses routing/logistics (Maps DNA).
-      Predictive maintenance is an ML problem (Cloud AI).
-      Autonomous systems are core Alphabet competency (Waymo).
-      We'd leverage GV Startup Lab for all of these."
-
-5. **"Why do you need patient capital?"**
-   → "Hardware for infrastructure takes time. We're not building
-      an app—we're building critical infrastructure that needs
-      to last 20+ years. GV's Alphabet backing means you can wait
-      for the right outcome, not force premature exit."
-
----
-
-## Key Differentiators for GV
-
-### What sets us apart from other climate deals:
-
-```
-1. IMMEDIATE REVENUE PATH
-   Unlike fusion or DAC, EV charging has paying customers TODAY.
-   Transit operators have budgets allocated.
-
-2. CLEAR REGULATORY TAILWIND
-   EU 2035 mandate is law, not aspiration.
-   Demand is guaranteed.
-
-3. MODULAR = LOWER CAPITAL INTENSITY
-   Don't need to build one big factory.
-   Can scale manufacturing gradually.
-
-4. AUTONOMOUS = LOWER OPEX
-   Self-maintaining infrastructure is a defensible business model.
-   Not just a product—a platform.
-
-5. EUROPEAN BEACHHEAD
-   Tom Hulme's European presence = strategic advantage.
-   EU transit operators prefer European partners.
-```
+### AVOID:
+- "Better chargers" (too incremental)
+- "Green tech" (unless economic angle)
+- "Revolutionary" (let them say it)
+- Timeline estimates
+- Comparisons to non-Google OSS projects
 
 ---
 
 ## Competitive Positioning
 
-### If asked about competition:
-
 ```
-TRADITIONAL CHARGER COMPANIES:
-"ABB, Siemens, ChargePoint are optimizing monolithic architecture.
- We're replacing the architecture entirely."
+IF ASKED ABOUT COMPETITION:
 
-OTHER MODULAR APPROACHES (Kempower, etc.):
-"Others do modular for manufacturing efficiency.
- We do modular + autonomous maintenance = different business model.
- They still send technicians. We don't."
+"Why won't ABB/Siemens open-source?"
+→ "They're invested in proprietary lock-in. Their business model
+   is service revenue on closed systems. Open-sourcing would
+   cannibalize that. Classic innovator's dilemma."
 
-SOFTWARE SOLUTIONS:
-"Software optimizes around broken hardware.
- We fix the hardware. Fundamentally different approach."
+"What about OpenEMS or other energy OSS?"
+→ "OpenEMS does building energy management (BMS level). We're doing
+   real-time coordination for power electronics (module level).
+   Different layer - actually complementary."
 
-WHY THEY WON'T COPY:
-"Requires power electronics + robotics + AI expertise.
- Incumbents are charger companies, not autonomous systems companies.
- 18-24 month head start + IP moat."
+"Why won't someone fork and compete?"
+→ "That's success, not failure. When Android got forked, Google won
+   because the ecosystem grew. We're building the foundation - forks
+   validate the standard."
+
+"What's the moat if code is open?"
+→ "Standard creation moat. Once EK-KOR2 is THE coordination layer,
+   switching costs are high. Plus hardware patents on EK3 implementation.
+   Same model as Android - open software, proprietary hardware."
 ```
 
 ---
 
-## GV Portfolio Connections
-
-### Potential warm intro paths:
-
-| Portfolio Company | Connection Angle |
-|-------------------|------------------|
-| Climeworks | Modular scaling thesis |
-| Form Energy | Grid infrastructure |
-| Fervo Energy | Industrial energy systems |
-| Cruise | Autonomous systems |
-| Stripe | Infrastructure platform thinking |
+*Document updated: 2026-01-12*
+*Target: Karim Faris, Erik Nordlander - GV (Google Ventures)*
+*Strategy: Open-source standard creation (Kubernetes model)*
 
 ---
 
-*Document created: 2026-01-03*
-*Target: GV (Google Ventures) - Erik Nordlander, Karim Faris*
-*Strategy: Climate infrastructure parallel (Climeworks model)*
+## Sources
+
+- [GV Climate Portfolio](https://www.gv.com/portfolio/?sector=Climate)
+- [Google Open Source](https://opensource.google/)
+- [Kubernetes Origin Story](https://kubernetes.io/blog/2018/07/20/the-history-of-kubernetes-the-community-behind-it/)
+- [Android Open Source Project](https://source.android.com/)
+- [EK-KOR2 Technical Specification](../../ek-kor2/spec/api.md)

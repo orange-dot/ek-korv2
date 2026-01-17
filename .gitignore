@@ -2,12 +2,41 @@
 .ftp-credentials
 *.env
 .env.*
+ugovor-o-saradnji-draft.*
+
+# Claude Code local settings
+.claude/settings.local.json
 
 # Node modules
 node_modules/
 
 # Build outputs
 web/dist/
+**/build/
+**/build-arm/
+**/build_arm/
+**/build_manual/
+**/target/
+*.o
+*.a
+*.obj
+*.exe
+*.bin
+*.elf
+*.map
+*.img
+nul
+
+# Downloaded tools and packages
+renode-portable/
+renode*.zip
+*.pkg.tar
+*.pkg.tar.zst
+OVMF.fd
+
+# Procurement (sensitive)
+nabavka/*.xlsx
+nabavka/*.py
 
 # IDE
 .idea/
@@ -18,3 +47,27 @@ web/dist/
 .DS_Store
 Thumbs.db
 deploy-ftp.ps1
+ACCESS-CREDENTIALS.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+venv/
+
+# SQLite databases (local dev)
+*.db
+
+# Claude temp files
+tmpclaude-*
+
+# Large binary files (OS dev)
+*.vdi
+*.vhdx
+*.iso
+*.fd
+serial.log

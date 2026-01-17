@@ -48,6 +48,15 @@ task_t *scheduler_get_next(void);
 task_t *scheduler_get_current(void);
 
 /**
+ * @brief Peek at next ready task without switching
+ * @return Pointer to highest priority ready task, or NULL
+ *
+ * This function returns the next task that would run without
+ * actually performing a context switch. Used for preemption checks.
+ */
+task_t *scheduler_peek_next(void);
+
+/**
  * @brief Process system tick
  * @param elapsed_ms Milliseconds since last tick
  */
@@ -57,6 +66,23 @@ void scheduler_tick(uint32_t elapsed_ms);
  * @brief Yield current task
  */
 void scheduler_yield(void);
+
+/**
+ * @brief Start the scheduler
+ *
+ * This function starts executing the first ready task.
+ * It performs the initial context switch and never returns.
+ * Call this after all tasks have been created.
+ */
+void scheduler_start(void);
+
+/**
+ * @brief Check and perform preemption if needed
+ *
+ * Called from SysTick handler to check if a higher priority
+ * task should preempt the current one. Uses EDF scheduling.
+ */
+void scheduler_preempt(void);
 
 /**
  * @brief Check for deadline misses

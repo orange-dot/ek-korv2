@@ -1,0 +1,37 @@
+Subject: RFQ EK-NAB-2026-008 - XMC4400 / AURIX TC397 / Gate Drivers
+
+Dear Infineon Team,
+
+We are developing modular EV charging infrastructure for electric bus fleets, built around Infineon components.
+
+Our architecture:
+- EK3 module (3.3kW): XMC4400 for LLC control (HRPWM)
+- Charger level: TC397 for ROJ coordination (multi-module, multi-charger)
+- Software: JEZGRO - custom microkernel RTOS, portable across Cortex-M4 and TriCore
+
+Current status:
+- JEZGRO running on STM32G474 (Renode) and TC397XP (custom emulator)
+- XMC4400 port planned (same Cortex-M4 core)
+- Hardware needed to validate against real silicon
+
+Please find attached our RFQ covering:
+- XMC4400 / XMC4700 development kits and MCUs
+- AURIX TC397 TriBoard and MCUs
+- TLE9251V CAN-FD transceivers
+- EiceDRIVER gate drivers for SiC MOSFETs
+- Power management and current sensing ICs
+
+We would appreciate pricing and lead time information.
+
+Best regards,
+
+--
+Bojan Janjatović
+Elektrokombinacija
+
+Gavrila Principa 28, Kikinda, Serbia
++381 61 147 87 26
+https://elektrokombinacija.com
+
+---
+Attachment: EK-NAB-2026-008-Infineon-Technologies.xlsx

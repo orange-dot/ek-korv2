@@ -1,0 +1,106 @@
+// STM32G474 Minimal Platform for Renode 1.16.0
+// JEZGRO Development - Basic boot test
+
+// CPU Core - ARM Cortex-M4F
+cpu: CPU.CortexM @ sysbus
+    cpuType: "cortex-m4f"
+    nvic: nvic
+
+// Nested Vectored Interrupt Controller (includes SysTick)
+nvic: IRQControllers.NVIC @ sysbus 0xE000E000
+    priorityMask: 0xF0
+    systickFrequency: 170000000
+    -> cpu@0
+
+// Memory Regions
+flash: Memory.MappedMemory @ sysbus 0x08000000
+    size: 0x80000
+
+sram1: Memory.MappedMemory @ sysbus 0x20000000
+    size: 0x14000
+
+sram2: Memory.MappedMemory @ sysbus 0x20014000
+    size: 0x4000
+
+ccmram: Memory.MappedMemory @ sysbus 0x10000000
+    size: 0x8000
+
+// USART1 - Debug console
+usart1: UART.STM32F7_USART @ sysbus 0x40013800
+    frequency: 170000000
+    IRQ -> nvic@37
+
+// RCC - Clock control (stub)
+rcc: Python.PythonPeripheral @ sysbus 0x40021000
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    AHB2ENR = 0x00000000
+    APB2ENR = 0x00000000
+
+if request.isRead:
+    if request.offset == 0x4C:
+        request.value = AHB2ENR
+    elif request.offset == 0x60:
+        request.value = APB2ENR
+    else:
+        request.value = 0xFFFFFFFF
+
+if request.isWrite:
+    if request.offset == 0x4C:
+        AHB2ENR = request.value
+    elif request.offset == 0x60:
+        APB2ENR = request.value
+'''
+
+// GPIO Port A (stub for UART pins)
+gpioa: Python.PythonPeripheral @ sysbus 0x48000000
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+    MODER = 0xABFFFFFF
+    AFR0 = 0x00000000
+    AFR1 = 0x00000000
+
+if request.isRead:
+    if request.offset == 0x00:
+        request.value = MODER
+    elif request.offset == 0x20:
+        request.value = AFR0
+    elif request.offset == 0x24:
+        request.value = AFR1
+    else:
+        request.value = 0
+
+if request.isWrite:
+    if request.offset == 0x00:
+        MODER = request.value
+    elif request.offset == 0x20:
+        AFR0 = request.value
+    elif request.offset == 0x24:
+        AFR1 = request.value
+'''
+
+// CAN Message SRAM (3KB shared) - must be defined before FDCAN
+can_sram: Memory.MappedMemory @ sysbus 0x4000A400
+    size: 0xC00
+
+// FDCAN1 - CAN-FD Controller 1
+fdcan1: CAN.MCAN @ sysbus 0x40006400
+    messageRAM: can_sram
+    Line0 -> nvic@21
+    Line1 -> nvic@22
+
+// FDCAN2 - CAN-FD Controller 2
+fdcan2: CAN.MCAN @ sysbus 0x40006800
+    messageRAM: can_sram
+    Line0 -> nvic@86
+    Line1 -> nvic@87
+
+// FDCAN3 - CAN-FD Controller 3
+fdcan3: CAN.MCAN @ sysbus 0x40006C00
+    messageRAM: can_sram
+    Line0 -> nvic@88
+    Line1 -> nvic@89

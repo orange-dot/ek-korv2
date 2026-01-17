@@ -1,0 +1,531 @@
+
+============================================================
+PAGE 22
+============================================================
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+2
+Instruction Set Overview
+This chapter provides an overview of the TriCore Instruction Set Architecture (ISA). The basic properties and use 
+of each instruction type are described, together with a description of the selection and use of the 16-bit (short)   
+instructions. 
+2.1
+Integer Arithmetic
+This section covers the following topics:
+•
+Move, page 2-1
+•
+Addition and Subtraction, page 2-1
+•
+Multiply and Multiply-Add, page 2-2
+•
+Division, page 2-2
+•
+Absolute Value, Absolute Difference, page 2-2
+•
+Min, Max, Saturate, page 2-2
+•
+Conditional Arithmetic Instructions, page 2-3
+•
+Logical, page 2-3
+•
+Count Leading Zeros, Ones and Signs, page 2-3
+•
+Shift, page 2-4
+•
+Bit-Field Extract and Insert, page 2-4
+2.1.1
+Move
+The move instructions move a value in a data register or a constant value in the instruction to a destination data
+register, and can be used to quickly load a large constant into a data register.
+A 16-bit constant is created using MOV (which sign-extends the value to 32-bits) or MOV.U (which zero-extends to
+32-bits).
+The MOVH (Move High-word) instruction loads a 16-bit constant into the most-significant 16 bits of the register
+and zero fills the least-significant 16-bits. This is useful for loading a left-justified constant fraction.
+Loading a 32-bit constant is achieved by using a MOVH instruction followed by an ADDI (Add Immediate), or a
+MOV.U followed by ADDIH (Add Immediate High-word).
+2.1.2
+Addition and Subtraction
+The addition instructions have three versions:
+•
+ADD (No saturation)
+•
+ADDS (Signed saturation)
+•
+ADDS.U (Unsigned saturation)
+For extended precision addition, the ADDX (Add Extended) instruction sets the PSW carry bit to the value of the
+ALU carry out. The ADDC (Add with Carry) instruction uses the PSW carry bit as the carry in, and updates the PSW
+carry bit with the ALU carry out. For extended precision addition, the least-significant word of the operands is
+added using the ADDX instruction, and the remaining words are added using the ADDC instruction. The ADDC and
+ADDX instructions do not support saturation.
+It is often necessary to add 16-bit or 32-bit constants to integers. The ADDI (Add Immediate) and ADDIH (Add
+Immediate High) instructions add a 16-bit, sign-extended constant or a 16-bit constant, left-shifted by 16.
+Addition of any 32-bit constant is carried out using ADDI followed by an ADDIH.
+All add instructions except those with constants, have similar corresponding subtract instructions. Because the
+immediate of ADDI is sign-extended, it may be used for both addition and subtraction.
+User Manual (Volume 2)
+2-1
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 23
+============================================================
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+The RSUB (Reverse Subtract) instruction subtracts a register from a constant. Using zero as the constant yields
+negation as a special case.
+2.1.3
+Multiply and Multiply-Add
+For the multiplication of 32-bit integers, the available mnemonics are:
+•
+MUL (Multiply Signed)
+•
+MULS (Multiply Signed with Saturation)
+•
+MULS.U (Multiply Unsigned with Saturation)
+These translate to machine instructions producing either 32-bit or 64-bit results, depending on whether the
+destination operand encoded in the assembly instruction is a single data register D[n] (where n = 0, 1, …15), or an
+extended data register E[n] (where n = 0, 2, …14).
+In those cases where the number of bits in the destination is 32-bit, the result is taken from the lower bits of the
+product. This corresponds to the standard ‘C’ multiplication of two integers.
+The MAC instructions (Multiplication with Accumulation) follow the instruction forms for multiplication; MADD,
+MADDS, MADD.U, MADDS.U, and MSUB, MSUBS, MSUB.U, MSUBS.U.
+In all cases a third source operand register is specified, which provides the accumulator to which the multiplier
+results are added.
+2.1.4
+Division
+Division of 32-bit by 32-bit integers is supported for both signed and unsigned integers. Because an atomic divide
+instruction would require an excessive number of cycles to execute, a divide-step sequence is used, which keeps
+interrupt latency down. The divide step sequence allows the divide time to be proportional to the number of
+significant quotient bits expected.
+The sequence begins with a Divide-Initialize instruction: DVINIT(.U), DVINIT.H(U) or DVINIT.B(U), depending on
+the size of the quotient and on whether the operands are to be treated as signed or unsigned. The divide
+initialization instruction extends the 32-bit dividend to 64-bits, then shifts it left by 0, 16 or 24-bits. It
+simultaneously shifts in that many copies of the quotient sign bit to the low-order bit positions. 4, 2 or 1 Divide-
+Step instructions (DVSTEP or DVSTEP.U) then follow. Each Divide-Step instruction develops eight bits of quotient.
+At the end of the divide step sequence, the 32-bit quotient occupies the low-order word of the 64-bit dividend
+register pair, and the remainder is held in the high-order word. If the divide operation was signed, the Divide-
+Adjust instruction (DVADJ) is required to perform a final adjustment of negative values. If the dividend and the
+divisor are both known to be positive, the DVADJ instruction can be omitted.
+2.1.5
+Absolute Value, Absolute Difference
+A common operation on data is the computation of the absolute value of a signed number or the absolute value
+of the difference between two signed numbers. These operations are provided directly by the ABS and ABSDIF
+instructions. There is a version of each instruction which saturates when the result is too large to be represented
+as a signed number.
+2.1.6
+Min, Max, Saturate
+Instructions are provided that directly calculate the minimum or maximum of two operands. The MIN and MAX
+instructions are used for signed integers, and MIN.U and MAX.U are used for unsigned integers.
+The SAT instructions can be used to saturate the result of a 32-bit calculation before storing it in a byte or half-
+word, in memory or a register.
+User Manual (Volume 2)
+2-2
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 24
+============================================================
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+2.1.7
+Conditional Arithmetic Instructions
+Conditional arithmetic instructions are:
+•
+CADD (Conditional Add) and CADDN (Conditional Add-Not)
+•
+CSUB (Conditional Subtract) and CSUBN (Conditional Subtract-Not)
+•
+SEL (Select) and SELN (Select-Not)
+The conditional instructions provide efficient alternatives to conditional jumps around very short sequences of
+code. All of the conditional instructions use a condition operand that controls the execution of the instruction.
+The condition operand is a data register, with any non-zero value interpreted as TRUE, and a zero value
+interpreted as FALSE. For the CADD and CSUB instructions, the addition/subtraction is performed if the condition
+is TRUE. For the CADDN and CSUBN instructions it is performed if the condition is FALSE.
+The SEL instruction copies one of its two source operands to its destination operand, with the selection of source
+operands determined by the value of the condition operand (This operation is the same as the C language ?
+operation). A typical use might be to record the index value yielding the larger of two array elements:
+index_max = (a[i] > a[j]) ? i : j;
+If one of the two source operands in a SEL instruction is the same as the destination operand, then the SEL
+instruction implements a simple conditional move. This occurs often in source statements of the general form:
+if (<condition>) then <variable> = <expression>;
+Provided that <expression> is simple, it is more efficient to evaluate it unconditionally into a source register,
+using a SEL instruction to perform the conditional assignment, rather than conditionally jumping around the
+assignment statement.
+2.1.8
+Logical
+The TriCore architecture provides a complete set of two-operand, bit-wise logic operations. In addition to the
+AND, OR, and XOR functions, there are the negations of the output; NAND, NOR, and XNOR, and negations of one
+of the inputs; ANDN and ORN (the negation of an input for XOR is the same as XNOR).
+2.1.9
+Count Leading Zeros, Ones and Signs
+To provide efficient support for normalization of numerical results, prioritization, and certain graphics
+operations, three Count Leading instructions are provided:
+•
+CLZ (Count Leading Zeros)
+•
+CLO (Count Leading Ones)
+•
+CLS (Count Leading Signs)
+These instructions are used to determine the amount of left shifting necessary to remove redundant zeros, ones,
+or signs.
+Note:
+The CLS instruction returns the number of leading redundant signs, which is the number of leading
+signs minus one.
+The following special cases are defined:
+•
+CLZ(0) = 32, CLO(-1) = 32
+•
+CLS(0) = CLS(-1) = 31
+For example, CLZ returns the number of consecutive zeros starting from the most significant bit of the value in
+the source data register. In the example shown in Figure 2, there are seven zeros in the most significant portion
+of the input register. If the most significant bit of the input is a 1, CLZ returns 0:
+User Manual (Volume 2)
+2-3
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 25
+============================================================
+Data Register
+0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 1 0 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 1 0 1
+Count Leading Zero Logic
+0
+0
+1
+TC1044
+1
+1
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+Figure 2 
+Operation of the CLZ Instruction
+2.1.10
+Shift
+The shift instructions support multi-bit shifts.
+The shift amount is specified by a signed integer (n), which may be the contents of a register or a sign-extended
+constant in the instruction.
+If n >= 0, the data is shifted left by n[4:0]; otherwise, the data is shifted right by (-n)[4:0].
+The (logical) shift instruction SH, shifts in zeros for both right and left shifts.
+The arithmetic shift instruction SHA, shifts in sign bits for right shifts and zeros for left shifts.
+The arithmetic shift with saturation instruction SHAS, will saturate (on a left shift) if the sign bits that are shifted
+out are not identical to the sign bit of the result.
+2.1.11
+Bit-Field Extract and Insert
+The TriCore architecture supports three, bit-field extract instructions:
+•
+EXTR (Extract bit field)
+•
+EXTR.U (Extract bit field unsigned)
+•
+DEXTR (Extract from Double Register)
+The INSERT instruction is described on Page 6.
+EXTR and EXTR.U
+The EXTR and EXTR.U instructions extract width consecutive bits from the source, beginning with the bit number
+specified by the pos (position) operand. The width and pos can be specified by two immediate values, by an
+immediate value and a data register, or by a data register pair.
+The EXTR instruction fills the most-significant bits of the result by sign-extending the bit field extracted
+(duplicating the most-significant bit of the bit field). See Figure 3.
+EXTR.U zero-fills the most significant (32-w) bits of the result. See Figure 4.
+User Manual (Volume 2)
+2-4
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 26
+============================================================
+Pos
+63 
+32 31 
+0
+Source Registers
+31 
+0
+Destination Register
+TC1047B
+Pos
+31
+S
+Source Registers
+31
+Destination Register
+S
+S
+Sign Fill
+Width
+TC1046B
+Pos
+31
+Source Registers
+31
+0
+Destination Register
+Zero fill
+Width
+TC1045B
+0
+0
+0
+0
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+Figure 3 
+EXTR Operation
+Figure 4 
+EXTR.U Operation
+DEXTR
+The DEXTR instruction concatenates two data register sources to form a 64-bit value from which 32 consecutive
+bits are extracted. The operation can be thought of as a left shift by pos bits, followed by the truncation of the
+least-significant 32-bits of the result. The value of pos is contained in a data register, or is an immediate value in
+the instruction.
+The DEXTR instruction can be used to normalize the result of a DSP filter accumulation in which a 64-bit
+accumulator is used with several guard bits. The value of pos can be determined by using the CLS (Count Leading
+Signs) instruction. The DEXTR instruction can also be used to perform a multi-bit rotation by using the same
+source register for both of the sources (that are concatenated).
+Figure 5 
+DEXTR Operation
+User Manual (Volume 2)
+2-5
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 27
+============================================================
+Width
+31 
+0
+Source Register
+31 
+0
+Destination Register
+Pos
+TC1048B
+Half-word 1
+Operand m
+Half-word 1
+Operand n
+Operation
+Result
+Destination 1
+TC1049B
+Half-word 0
+Half-word 0
+Destination 0
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+INSERT
+The INSERT instruction takes the width least-significant bits of a source data register, shifted left by pos bits and
+substitutes them into the value of another source register. All other (32-w) bits of the value of the second register
+are passed through. The width and pos can be specified by two immediate values, by an immediate value and a
+data register, or by a data register pair.
+There is also an alternative form of INSERT that allows a zero-extended 4-bit constant to be the value which is
+inserted.
+Figure 6 
+INSERT Operation
+2.2
+Packed Arithmetic
+The packed arithmetic instructions partition a 32-bit word into several identical objects which can then be
+fetched, stored, and operated on in parallel. These instructions in particular allow the full exploitation of the
+32-bit word of the TriCore architecture in signal and data processing applications.
+The TriCore architecture supports two packed formats:
+•
+Packed Half-word Data format
+•
+Packed Byte Data format
+The Packed Half-word Data format divides the 32-bit word into two, 16-bit (half-word) values. Instructions which
+operate on data in this way are denoted in the instruction mnemonic by the .H and .HU modifiers.
+Figure 7 
+Packed Half-word Data Format
+The Packed Byte Data format divides the 32-bit word into four, 8-bit values. Instructions which operate on the
+data in this way are denoted by the .B and .BU data type modifiers.
+V1.2.2
+User Manual (Volume 2)
+2-6
+2020-01-15
+
+
+============================================================
+PAGE 28
+============================================================
+Byte 3
+Byte 2
+Byte 1
+Byte 0
+Operand m
+Byte 3
+Byte 2
+Operand n
+Operation
+Destination 3
+Destination 1
+Destination 0
+Result
+TC1050B
+Byte 1
+Destination 2
+Byte 0
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+Figure 8 
+Packed Byte Data Format
+The loading and storing of packed values into data registers is supported by the normal Load Word and Store
+Word instructions (LD.W and ST.W). The packed objects can then be manipulated in parallel by a set of special
+packed arithmetic instructions that perform such arithmetic operations as addition, subtraction, multiplication,
+and so on.
+Addition is performed on individual packed bytes or half-words using the ADD.B and ADD.H instructions. The
+saturating variation (ADDS.H) only exists for half-words.
+The ADD.H instruction ignores overflow or underflow within individual half-words. ADDS.H will saturate
+individual half-words to the most positive 16-bit signed integer (215-1) on individual overflow, or to the most
+negative 16-bit signed integer (-215) on individual underflow. Saturation for unsigned integers is also supported
+by the ADDS.HU instruction. Similarly, all packed addition operations have an equivalent subtraction.
+Besides addition and subtraction, arithmetic on packed data includes absolute value, absolute difference, shift,
+and count leading operations.
+Packed multiplication is described in the section Packed Multiply and Packed MAC, page 2-10.
+Compare instructions are described in Compare Instructions, page 2-11.
+User Manual (Volume 2)
+2-7
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 29
+============================================================
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+2.3
+PSW (Program Status Word) Status Flags and Arithmetic Instructions
+Arithmetic instructions operate on data and addresses in registers. Status information about the result of the
+arithmetic operations is recorded in the five status flags in the Program Status Word (PSW) register.
+2.3.1
+Usage
+The status flags can be read by software using the Move From Core Register (MFCR) instruction, and can be
+written using the Move to Core Register (MTCR) instruction.
+Note:
+MTCR is only available in Supervisor mode.
+The Trap on Overflow (TRAPV) and Trap on Sticky Overflow (TRAPSV) instructions can be used to cause a trap if
+the respective V (overflow) and SV (sticky overflow) bits are set. The overflow bits can be cleared using the Reset
+Overflow Bits instruction (RSTV).
+Individual arithmetic operations can be checked for overflow by reading and testing V.
+If it is only necessary to determine if an overflow occurred somewhere in an entire block of computation, then the
+SV bit is reset before the block (using the RSTV instruction) and tested after completion of the block (using MFCR).
+Jumping based on the overflow result is achieved by using a MFCR instruction followed by a JZ.T or JNZ.T
+(conditional jump on the value of a bit) instruction.
+2.3.2
+Saturation
+Because most signal-processing applications can handle overflow by simply saturating the result, most of the
+arithmetic instructions have a saturating version for signed and unsigned overflow.
+Note:
+Saturating versions of all instructions can be synthesized using short code sequences.
+When saturation is used for 32-bit signed arithmetic overflow, if the true result of the computation is greater than
+(231-1) or less than -231, the result is set to (231-1) or -231, respectively.
+The bounds for 16-bit signed arithmetic are (215-1) and -215, and the bounds for 8-bit signed arithmetic are (27-1)
+and -27.
+When saturation is used for unsigned arithmetic, the lower bound is always zero and the upper bounds are (232-1),
+(216-1), and (28-1).
+Saturation is indicated in the instruction mnemonic by an S and unsigned is indicated by a U following the period
+(.). For example, the instruction mnemonic for a signed saturating addition is ADDS, and the mnemonic for an
+unsigned saturating addition is ADDS.U.
+2.4
+DSP Arithmetic
+DSP arithmetic instructions operate on 16-bit signed fractional data in the 1.15 format (also known as Q15), and
+32-bit signed fractional data in 1.31 format (Q31).
+Data values in this format have a single, high-order sign bit, with a value of 0 or -1, followed by an implied binary
+point and fraction. Their values are in the range [-1, 1).
+2.4.1
+Scaling
+The multiplier result can be treated in one of two ways:
+•
+Left shifted by 1
+– One sign bit is suppressed and the result is left-aligned, so conserving the input format.
+•
+Not shifted
+User Manual (Volume 2)
+2-8
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 30
+============================================================
+TriCoreTM TC1.6.2 core architecture manual - Instruction set
+32-bit Unified Processor Core
+Instruction Set Overview
+– The result retains its two sign bits (2.30 format). This format can be used with IIR (Infinite Impulse
+Response) filters for example, in which some of the coefficients are between 1 and 2, and to have one guard
+bit for accumulation.
+2.4.2
+Special Case: -1 * -1
+When multiplying two maximum-negative 1.15 format values (-1), the result is the positive number (+1). For
+example:
+8000H * 8000H = 4000 0000H
+This is correctly interpreted in Q format as:
+-1(1.15 format) * -1(1.15 format) = +1 (2.30 format)
+However, when the result is shifted left by 1 (left-justified), the result is 8000 0000H. This is incorrectly interpreted
+as:
+-1(1.15 format) * -1(1.15 format) = -1 (1.31 format)
+To avoid this problem, the result of a Q format operation (-1 * -1) that has been left-shifted by 1, is saturated to
+the maximum positive value. Therefore:
+8000H * 8000H = 7FFF FFFFH
+This is correctly interpreted in Q format as:
+-1(1.15 format) * -1(1.15 format) = (nearest representation of)+1 (1.31 format)
+This operation is completely transparent to the user and does not set the overflow flags. It applies only to 16-bit
+by 16-bit multiplies and does not apply to 16 by 32-bit or 32 by 32-bit multiplies.
+2.4.3
+Guard Bits
+When accumulating sums (in filter calculations for example), guard bits are often required to prevent overflow.
+The instruction set directly supports the use of one guard bit when using a 32-bit accumulator (2.30 format, where
+left shift by 1-bit of result is not requested).
+When more guard bits are required a register pair (64-bits) can be used. In that instance the intermediate result
+(also in 2.30 format, where left shift by 1-bit is not performed) is left shifted by 16-bits giving effectively a 18.46
+format.
+2.4.4
+Rounding
+Rounding is used to retain the 16 most-significant bits of a 32-bit result.
+Rounding is implemented by adding 1 to bit 15 of a 32-bit intermediate result.
+If the operation writes a full 32-bit register (i.e. is not a component of a packed half-word operation), it then clears
+the lower 16-bits.
+2.4.5
+Overflow and Saturation
+Saturation on overflow is available on all DSP instructions.
+2.4.6
+Sticky Advance Overflow and Block Scaling if FFT
+The Sticky Advance Overflow (SAV) bit, which is set whenever an overflow ‘almost’ occurred, can be used in block
+scaling of intermediate results during an FFT calculation.
+Before each pass of applying a butterfly operation, the SAV bit is cleared.
+After the pass the SAV bit is tested. If it is set then all of the data is scaled (using an arithmetic right shift) before
+starting the next pass.
+User Manual (Volume 2)
+2-9
+V1.2.2
+2020-01-15
+
+
+============================================================
+PAGE 31
+============================================================
+Traceback (most recent call last):
+  File "D:\work\autobusi-punjaci\reference\inf-data\extract_pdf.py", line 146, in <module>
+    print(doc[page_num].get_text())
+  File "C:\Python310\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 686: character maps to <undefined>

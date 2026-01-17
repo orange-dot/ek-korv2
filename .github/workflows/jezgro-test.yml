@@ -1,0 +1,87 @@
+# JEZGRO RTOS - CI/CD Pipeline
+# Builds ARM firmware and runs Renode tests
+
+name: JEZGRO Test
+
+on:
+  push:
+    paths:
+      - 'pre-hw-dev/**'
+      - '.github/workflows/jezgro-test.yml'
+  pull_request:
+    paths:
+      - 'pre-hw-dev/**'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ARM Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi cmake ninja-build
+
+      - name: Build ARM Firmware
+        working-directory: pre-hw-dev
+        run: |
+          mkdir -p build-arm
+          cd build-arm
+          cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/arm-none-eabi.cmake -G Ninja ..
+          cmake --build .
+          arm-none-eabi-size jezgro_firmware
+
+      - name: Upload Firmware Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jezgro-firmware
+          path: |
+            pre-hw-dev/build-arm/jezgro_firmware
+            pre-hw-dev/build-arm/jezgro_firmware.bin
+            pre-hw-dev/build-arm/jezgro_firmware.hex
+
+      - name: Run Renode Tests
+        uses: antmicro/renode-test-action@v4
+        with:
+          renode-revision: 'v1.16.0'
+          tests-to-run: 'pre-hw-dev/tests/jezgro.robot'
+          artifacts-path: 'pre-hw-dev/test-results'
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: pre-hw-dev/test-results/
+
+  # Host simulation tests (native)
+  host-simulation:
+    name: Host Simulation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
+
+      - name: Build Host Simulation
+        working-directory: pre-hw-dev
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DBUILD_SIM=ON -G Ninja ..
+          cmake --build .
+
+      - name: Run Host Tests
+        working-directory: pre-hw-dev/build
+        run: |
+          ./jezgro_test

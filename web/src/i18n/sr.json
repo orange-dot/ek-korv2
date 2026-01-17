@@ -15,9 +15,14 @@
     "patent": "Patenti",
     "internal": "Interno",
     "jezgroDev": "JEZGRO Dev",
+    "ekKor2Dev": "EK-KOR v2",
     "roj": "ROJ",
     "quickPitch": "Brzi Pitch",
-    "v2g": "V2G"
+    "v2g": "V2G",
+    "docs": "Dokumentacija",
+    "partner": "Partner",
+    "investor": "Investitor",
+    "portals": "Portali"
   },
   "simulation": {
     "title": "Simulacija Sistema",
@@ -136,7 +141,7 @@
       "description": "Kombinujemo najbolje iz oba sveta: visoko modularni dizajn koji omogućava brzu zamenu na terenu, sa modernom AI dijagnostikom koja predviđa kvarove i robotskom automatizacijom zamene.",
       "features": [
         "AI predviđa kvar 2 nedelje unapred",
-        "Robot menja modul za 60 sekundi",
+        "Robot menja modul za manje od minut",
         "Tehničar nije potreban na terenu",
         "Modul se popravlja u servisu - od strane ljudi"
       ],
@@ -149,12 +154,12 @@
         {
           "title": "AI Detekcija",
           "description": "Sistem detektuje degradaciju modula i predviđa kvar",
-          "time": "14 dana unapred"
+          "time": "Danima unapred"
         },
         {
           "title": "Automatska Zamena",
           "description": "Robot na swap stanici zamenjuje modul bez ljudske intervencije",
-          "time": "60 sekundi"
+          "time": "Manje od minut"
         },
         {
           "title": "Transport",
@@ -173,7 +178,7 @@
       "field": {
         "title": "Na Terenu",
         "subtitle": "Automatizovano, brzo, bez čekanja",
-        "point1": "Robotska zamena modula - 60 sekundi",
+        "point1": "Brza robotska zamena modula",
         "point2": "AI dijagnostika - zna tačno šta treba zameniti",
         "point3": "Bez potrebe za tehničarem na lokaciji",
         "note": "Bez izlazaka tehničara na teren"
@@ -185,6 +190,63 @@
         "point2": "Kvalifikovani tehničari sa pravom opremom",
         "point3": "Refurbishment do fabričkih specifikacija",
         "note": "Cirkularna ekonomija - moduli se vraćaju u upotrebu"
+      }
+    }
+  },
+  "selfHealingFleet": {
+    "title": "Samoizlečiva Flota",
+    "subtitle": "Bez tehničara na terenu. Nikad.",
+    "description": "Autobusi nose rezervne EK3 module. Roboti brzo menjaju pokvarene module. Pokvareni moduli putuju nazad u servis redovnim autobuskim linijama. Nula izlazaka servisnih vozila.",
+    "steps": {
+      "predict": {
+        "title": "AI Predviđa",
+        "description": "Pre kvara, AI detektuje degradaciju",
+        "icon": "brain"
+      },
+      "carry": {
+        "title": "Autobus Nosi Rezerve",
+        "description": "Svaki autobus nosi 2-4 rezervna EK3 modula",
+        "icon": "bus"
+      },
+      "swap": {
+        "title": "Robot Menja",
+        "description": "Brza robotska zamena, bez čoveka",
+        "icon": "robot"
+      },
+      "transport": {
+        "title": "Transport Flotom",
+        "description": "Pokvareni modul putuje u depo sledećim autobusom",
+        "icon": "route"
+      }
+    },
+    "comparison": {
+      "traditional": {
+        "title": "Tradicionalno",
+        "time": "3-4 sata",
+        "steps": ["Alarm", "Pozovi tehničara", "Vožnja do lokacije", "Dijagnostika", "Naruči delove", "Popravka"]
+      },
+      "ek": {
+        "title": "ELEKTROKOMBINACIJA",
+        "time": "2 minuta",
+        "steps": ["AI detektuje", "Robot A dijagnostikuje", "Robot B menja", "Autobus nastavlja"]
+      }
+    },
+    "benefits": {
+      "noTruckRolls": {
+        "title": "Nula izlazaka",
+        "description": "Pokvareni moduli putuju redovnim linijama"
+      },
+      "noFieldTech": {
+        "title": "Bez tehničara na terenu",
+        "description": "Roboti obavljaju sve terenske operacije"
+      },
+      "fleetSpares": {
+        "title": "Flota = skladište rezervi",
+        "description": "Autobusi nose distribuirani rezervni kapacitet"
+      },
+      "circular": {
+        "title": "Cirkularna ekonomija",
+        "description": "Moduli se popravljaju u depou, vraćaju u upotrebu"
       }
     }
   },
@@ -232,22 +294,22 @@
       "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
       "description": "Standardni modul za sve primene",
-      "specs": ["200 × 320 × 44mm (1U pola širine)", "~3.5 kg - za robotsku zamenu", "SiC MOSFET, >97% efikasnost", "Samopozicionirajući konektori"]
+      "specs": ["Kompaktan blade format", "Lagan, spreman za robot", "SiC MOSFET, visoka efikasnost", "Samopozicionirajući konektori"]
     },
     "phase2": {
       "title": "SISTEM ORMARA",
-      "power": "252 kW",
-      "description": "84 modula u standardnom 19\" ormaru",
-      "specs": ["Široko raspoređivanje - opterećenje na SVE module", "Bez rezervnih modula - svi rade", "Robotska zamena za 40 sekundi", "Postepena degradacija"]
+      "power": "Stotine kW",
+      "description": "Više modula u standardnom 19\" ormaru",
+      "specs": ["Široko raspoređivanje - opterećenje na SVE module", "Bez rezervnih modula - svi rade", "Brza robotska zamena", "Postepena degradacija"]
     },
     "features": {
       "title": "Zašto jedan modul za sve?",
       "modular": "Masovna proizvodnja",
       "modularDesc": "Jedan dizajn, milionski tiraž = niska cena",
       "hotswap": "Fino granulisana pouzdanost",
-      "hotswapDesc": "1 od 334 otkaže = 0.3% gubitak, ne 10%",
+      "hotswapDesc": "Jedan modul otkaže = minimalan gubitak, ne 10%",
       "protection": "Robotska zamena",
-      "protectionDesc": "40 sekundi zamena, bez tehničara",
+      "protectionDesc": "Brza zamena, bez tehničara",
       "local": "3PAR inspiracija",
       "localDesc": "Dokazani koncepti iz industrije skladištenja podataka"
     }
@@ -266,18 +328,18 @@
     "opportunity": {
       "title": "Brzo DC Punjenje",
       "power": "50-350 kW",
-      "modules": "17-117 × EK3",
-      "price": "€2,500 - €18,000",
+      "modules": "Više EK3",
+      "price": "Po dogovoru",
       "description": "Automobili, autoputne stanice. Ormar sistem, robotska zamena modula.",
-      "features": ["1-2 ormara", "40 sek zamena", "99.9% dostupnost"]
+      "features": ["1-2 ormara", "Brza zamena", "99.9% dostupnost"]
     },
     "swap": {
       "title": "Teška vozila + MCS",
       "power": "500 kW - 3 MW",
-      "modules": "167-1000 × EK3",
+      "modules": "Mnogo EK3",
       "price": "Po dogovoru",
       "description": "Autobusi, kamioni, MCS. Više ormara, robotska zamena, postepena degradacija.",
-      "features": ["4-12 ormara", "2 robota paralelno", "0.1% gubitak po kvaru"]
+      "features": ["Više ormara", "Paralelni roboti", "Minimalan gubitak po kvaru"]
     }
   },
   "timeline": {
@@ -287,19 +349,19 @@
       "title": "Faza 1: EK3 Modul",
       "duration": "4 meseca",
       "description": "Format kartice, dizajn za robotsku zamenu",
-      "items": ["SiC MOSFET naponski stepen", "Samopozicionirajući konektori", "AI procesor na ivici", "~3.5 kg, 1U pola širine"]
+      "items": ["SiC MOSFET naponski stepen", "Samopozicionirajući konektori", "AI procesor na ivici", "Kompaktan blade format"]
     },
     "phase2": {
       "title": "Faza 2: Sistem Ormara",
       "duration": "3 meseca",
-      "description": "84 modula u 19\" ormaru",
-      "items": ["Dizajn zadnje ploče", "Algoritam širokog raspoređivanja", "Raspodeljeni rezervni kapacitet", "252 kW po ormaru"]
+      "description": "Više modula u 19\" ormaru",
+      "items": ["Dizajn zadnje ploče", "Algoritam širokog raspoređivanja", "Raspodeljeni rezervni kapacitet", "Skalabilna snaga"]
     },
     "phase3": {
       "title": "Faza 3: Robot Sistem",
       "duration": "4 meseca",
       "description": "Namenski roboti za zamenu",
-      "items": ["Robot A (na autobusu)", "Robot B (na stanici)", "Koordinacioni protokol", "40 sek zamena"]
+      "items": ["Robot A (na autobusu)", "Robot B (na stanici)", "Koordinacioni protokol", "Brza zamena"]
     },
     "phase4": {
       "title": "Faza 4: Samoizlečenje",
@@ -317,11 +379,11 @@
   "team": {
     "title": "Naša Vizija",
     "subtitle": "Povratak modularnosti",
-    "mission": "Industrija je krenula putem integracije - sve u jednom čipu, nemoguće popraviti, planirano zastarevanje. Ali infrastruktura nije telefon. EV punjač treba da traje 15+ godina. Mi kombinujemo modularnost iz 1970-ih sa AI tehnologijom 2020-ih: zamena modula na terenu za 60 sekundi, bez tehničara, a AI predvidi kvar dve nedelje unapred.",
+    "mission": "Industrija je krenula putem integracije - sve u jednom čipu, nemoguće popraviti, planirano zastarevanje. Ali infrastruktura nije telefon. EV punjač treba da traje 15+ godina. Mi kombinujemo modularnost iz 1970-ih sa AI tehnologijom 2020-ih: brza zamena modula na terenu, bez tehničara, a AI predviđa kvar danima unapred.",
     "stats": {
       "guarantee": "15+",
       "guaranteeLabel": "godina životnog veka",
-      "refund": "60s",
+      "refund": "<1m",
       "refundLabel": "zamena modula"
     }
   },

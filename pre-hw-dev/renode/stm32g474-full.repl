@@ -126,9 +126,7 @@ timer16: Timers.STM32_Timer @ sysbus 0x40014400
     initialLimit: 0xFFFF
     -> nvic@25
 
-// SysTick - System timer
-systick: Timers.CortexM_SysTick @ sysbus 0xE000E010
-    frequency: 170000000
+// SysTick - System timer (handled by CPU/NVIC automatically)
 
 // -----------------------------------------------------------------------------
 // GPIO Ports
