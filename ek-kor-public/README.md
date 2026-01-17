@@ -87,14 +87,14 @@ python tools/run_tests.py
 
 ## Module Development Order
 
-| Week | Module | Focus |
-|------|--------|-------|
-| 1-2 | field | Simplest, learn basics |
-| 3-4 | topology | k-neighbor algorithm |
-| 5-6 | heartbeat | Timing, state machines |
-| 7-8 | consensus | Most complex, voting |
-| 9-10 | module | Integration |
-| 11+ | hal | Hardware abstraction |
+| Module | Focus |
+|--------|-------|
+| field | Simplest, learn basics |
+| topology | k-neighbor algorithm |
+| heartbeat | Timing, state machines |
+| consensus | Most complex, voting |
+| module | Integration |
+| hal | Hardware abstraction |
 
 ## License
 
