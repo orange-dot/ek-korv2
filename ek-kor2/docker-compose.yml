@@ -1,0 +1,201 @@
+# EK-KOR v2 Docker Compose - Test Orchestration
+#
+# Usage:
+#   docker-compose build                    # Build the image
+#   docker-compose run test-posix           # Run POSIX unit tests
+#   docker-compose run test-renode          # Run Renode emulation tests
+#   docker-compose run bench                # Run benchmarks
+#   docker-compose run examples             # Run all POSIX examples
+#   docker-compose up                       # Run all tests
+#
+# Copyright (c) 2026 Elektrokombinacija
+# SPDX-License-Identifier: MIT
+
+services:
+  # ============================================================================
+  # POSIX Unit Tests - Fast, no emulation
+  # ============================================================================
+  test-posix:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:rw
+    working_dir: /workspace
+    command: >
+      bash -c "
+        echo '=== EK-KOR v2 POSIX Tests ===' &&
+        cd c &&
+        mkdir -p build &&
+        cd build &&
+        cmake .. -G Ninja -DEKK_PLATFORM=posix -DEKK_BUILD_TESTS=ON -DEKK_BUILD_EXAMPLES=ON &&
+        ninja &&
+        echo '' &&
+        echo '--- Unit Tests ---' &&
+        ctest --output-on-failure &&
+        echo '' &&
+        echo '--- Test Vectors ---' &&
+        ./test_harness ../../spec/test-vectors/*.json &&
+        echo '' &&
+        echo '=== All POSIX tests PASSED ==='
+      "
+
+  # ============================================================================
+  # Renode Emulation Tests - STM32G474 target (headless)
+  # ============================================================================
+  test-renode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:rw
+    working_dir: /workspace
+    environment:
+      - DISPLAY=  # Disable X11
+    command: >
+      bash -c "
+        echo '=== EK-KOR v2 Renode Tests ===' &&
+        cd c &&
+        rm -rf build-stm32 && mkdir -p build-stm32 &&
+        cd build-stm32 &&
+        cmake .. -G Ninja -DEKK_PLATFORM=stm32g474 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY -DCMAKE_C_COMPILER=/usr/bin/arm-none-eabi-gcc -DCMAKE_OBJCOPY=/usr/bin/arm-none-eabi-objcopy -DCMAKE_SIZE=/usr/bin/arm-none-eabi-size &&
+        ninja ekk_test &&
+        echo 'STM32G474 firmware built successfully' &&
+        echo '' &&
+        echo '--- Running Renode Headless ---' &&
+        cd ../.. &&
+        renode --disable-xwt --console -e 'include @renode/run_tests.resc' 2>&1 | head -200 &&
+        echo '' &&
+        echo '=== Renode tests completed ==='
+      "
+
+  # ============================================================================
+  # Benchmarks - Performance testing
+  # ============================================================================
+  bench:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:rw
+    working_dir: /workspace
+    command: >
+      bash -c "
+        echo '=== EK-KOR v2 Benchmarks ===' &&
+        cd c &&
+        mkdir -p build &&
+        cd build &&
+        cmake .. -G Ninja -DEKK_PLATFORM=posix -DEKK_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release &&
+        ninja bench_spsc bench_auth &&
+        echo '' &&
+        echo '--- SPSC Ring Buffer Benchmark ---' &&
+        ./bench_spsc &&
+        echo '' &&
+        echo '--- Chaskey Auth Benchmark ---' &&
+        ./bench_auth &&
+        echo '' &&
+        echo '=== Benchmarks completed ==='
+      "
+
+  # ============================================================================
+  # Examples - Run all POSIX examples
+  # ============================================================================
+  examples:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:rw
+    working_dir: /workspace
+    command: >
+      bash -c "
+        echo '=== EK-KOR v2 Examples ===' &&
+        cd c &&
+        mkdir -p build &&
+        cd build &&
+        cmake .. -G Ninja -DEKK_PLATFORM=posix -DEKK_BUILD_EXAMPLES=ON &&
+        ninja example_basic example_multi_module example_consensus &&
+        echo '' &&
+        echo '=== Example 1: Basic Lifecycle ===' &&
+        ./example_basic &&
+        echo '' &&
+        echo '=== Example 2: Multi-Module Topology ===' &&
+        ./example_multi_module &&
+        echo '' &&
+        echo '=== Example 3: Consensus Voting ===' &&
+        ./example_consensus &&
+        echo '' &&
+        echo '=== All examples completed ==='
+      "
+
+  # ============================================================================
+  # Interactive Shell - For debugging
+  # ============================================================================
+  shell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:rw
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    command: bash
+
+  # ============================================================================
+  # CI - Run all tests (for GitHub Actions / CI pipelines)
+  # ============================================================================
+  ci:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:rw
+    working_dir: /workspace
+    command: >
+      bash -c "
+        echo '========================================' &&
+        echo '  EK-KOR v2 CI Pipeline' &&
+        echo '========================================' &&
+        echo '' &&
+
+        # Build POSIX
+        echo '[1/4] Building POSIX target...' &&
+        cd c &&
+        mkdir -p build && cd build &&
+        cmake .. -G Ninja -DEKK_PLATFORM=posix -DEKK_BUILD_TESTS=ON -DEKK_BUILD_EXAMPLES=ON &&
+        ninja &&
+        cd ../.. &&
+        echo 'POSIX build: OK' &&
+        echo '' &&
+
+        # Run unit tests
+        echo '[2/4] Running unit tests...' &&
+        cd c/build &&
+        ctest --output-on-failure &&
+        cd ../.. &&
+        echo 'Unit tests: OK' &&
+        echo '' &&
+
+        # Run test vectors
+        echo '[3/4] Running test vectors...' &&
+        cd c/build &&
+        ./test_harness ../../spec/test-vectors/*.json &&
+        cd ../.. &&
+        echo 'Test vectors: OK' &&
+        echo '' &&
+
+        # Build STM32G474
+        echo '[4/4] Building STM32G474 target...' &&
+        cd c &&
+        rm -rf build-stm32 && mkdir -p build-stm32 && cd build-stm32 &&
+        cmake .. -G Ninja -DEKK_PLATFORM=stm32g474 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY -DCMAKE_C_COMPILER=/usr/bin/arm-none-eabi-gcc -DCMAKE_OBJCOPY=/usr/bin/arm-none-eabi-objcopy -DCMAKE_SIZE=/usr/bin/arm-none-eabi-size &&
+        ninja ekk_test &&
+        cd ../.. &&
+        echo 'STM32G474 build: OK' &&
+        echo '' &&
+
+        echo '========================================' &&
+        echo '  CI Pipeline: ALL PASSED' &&
+        echo '========================================'
+      "

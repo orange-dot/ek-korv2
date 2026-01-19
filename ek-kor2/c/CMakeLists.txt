@@ -82,12 +82,18 @@ if(EKK_PLATFORM STREQUAL "posix")
     target_link_libraries(ekk PUBLIC Threads::Threads)
 
 elseif(EKK_PLATFORM STREQUAL "stm32g474")
+    # Cortex-M4F compiler flags
+    set(STM32_FLAGS "-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${STM32_FLAGS}")
+    set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${STM32_FLAGS}")
+
     target_sources(ekk PRIVATE src/hal/ekk_hal_stm32g474.c)
     target_compile_definitions(ekk PUBLIC EKK_PLATFORM_STM32G474)
 
     # Startup code for bare-metal
     add_library(ekk_startup STATIC startup_stm32g474.c)
     target_compile_definitions(ekk_startup PRIVATE EKK_PLATFORM_STM32G474)
+    target_compile_options(ekk_startup PRIVATE -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16)
 
     # Linker script
     set(EKK_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/stm32g474.ld" CACHE FILEPATH "Linker script")
@@ -115,8 +121,27 @@ elseif(EKK_PLATFORM STREQUAL "rpi3")
         src/hal/rpi3/mailbox.c
         src/hal/rpi3/framebuffer.c
         src/hal/rpi3/dashboard.c
+        src/hal/rpi3/shell.c
+        # USB Host Controller
+        src/hal/rpi3/usb_dwc2.c
+        src/hal/rpi3/usb_hid.c
+        # EKKFS - Custom filesystem
+        src/hal/rpi3/sd.c
+        src/hal/rpi3/fs_server.c
+        src/ekkfs.c
+        src/ekk_fs_client.c
+        # EKKFS Test Suite
+        src/hal/rpi3/ekkfs_test.c
+        # EKKDB - Database module
+        src/hal/rpi3/db_server.c
+        src/ekkdb_kv.c
+        src/ekkdb_ts.c
+        src/ekkdb_log.c
+        src/ekkdb_client.c
+        # EKKDB Test Suite
+        src/hal/rpi3/ekkdb_test.c
     )
-    target_include_directories(ekk PRIVATE src/hal/rpi3)
+    target_include_directories(ekk PRIVATE src/hal/rpi3 src)
     target_compile_definitions(ekk PUBLIC EKK_PLATFORM_RPI3)
 
     # Boot assembly
@@ -162,6 +187,8 @@ if(EKK_PLATFORM STREQUAL "stm32g474")
             -Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.map
             -Wl,--gc-sections
             -Wl,--print-memory-usage
+            --specs=nosys.specs
+            --specs=nano.specs
         )
         set_target_properties(${TARGET} PROPERTIES
             LINK_DEPENDS ${EKK_LINKER_SCRIPT}
