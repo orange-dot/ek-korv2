@@ -12,8 +12,9 @@ node_modules/
 
 # Build outputs
 web/dist/
+web/.vite/
 **/build/
-**/build-arm/
+**/build-*/
 **/build_arm/
 **/build_manual/
 **/target/
