@@ -1,0 +1,85 @@
+# HAX Demo - Dedicated Docker Stack
+# Runs the full simulation stack optimized for HAX presentation
+#
+# Usage:
+#   cd hax-demo
+#   docker-compose up -d
+#   Open: http://localhost:3000/hax-demo
+#
+# To view logs:
+#   docker-compose logs -f
+#
+# To stop:
+#   docker-compose down
+
+version: '3.8'
+
+services:
+  web:
+    build: ../web
+    container_name: hax-web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    environment:
+      - VITE_HAX_DEMO_MODE=true
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000
+    networks:
+      - hax
+
+  engine:
+    build: ../simulator/engine
+    container_name: hax-engine
+    depends_on:
+      - redis
+      - mongo
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://mongo:27017/hax
+      - TICK_RATE=100ms
+      - TIME_SCALE=10
+      - MODULE_COUNT=84
+      - CITY=noviSad
+    networks:
+      - hax
+
+  api:
+    build: ../simulator/api
+    container_name: hax-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - mongo
+      - engine
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://mongo:27017/hax
+      - PORT=8000
+    networks:
+      - hax
+
+  redis:
+    image: redis:7-alpine
+    container_name: hax-redis
+    networks:
+      - hax
+
+  mongo:
+    image: mongo:7
+    container_name: hax-mongo
+    volumes:
+      - hax-mongodata:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=hax
+    networks:
+      - hax
+
+networks:
+  hax:
+    driver: bridge
+
+volumes:
+  hax-mongodata:

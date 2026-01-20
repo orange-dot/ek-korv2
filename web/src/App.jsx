@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import SimulationPage from './pages/SimulationPage';
 import LADeliveryPage from './pages/LADeliveryPage';
 import SimulatorDemoPage from './pages/SimulatorDemoPage';
+import HAXDemoPage from './pages/HAXDemoPage';
 
 // Documentation pages (public)
 import DocsPage from './pages/DocsPage';
@@ -63,6 +64,7 @@ function App() {
       <Route path="/la-delivery" element={<LADeliveryPage />} />
       <Route path="/gv-demo" element={<LADeliveryPage />} />
       <Route path="/simulator-demo" element={<SimulatorDemoPage />} />
+      <Route path="/hax-demo" element={<HAXDemoPage />} />
 
       {/* Public documentation */}
       <Route path="/docs" element={<DocsPage />} />
