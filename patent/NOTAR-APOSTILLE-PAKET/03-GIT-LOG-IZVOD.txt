@@ -1,0 +1,170 @@
+Commit: 3e6772df86d48b1ef18ce1351c2f2d8e6bb40ecf
+Date: 2026-01-13 20:36:59 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Add investor pitch packages and team role documents
+
+----
+
+Commit: e6bfb6403a89c25158759fd02fb5e06eb70397ea
+Date: 2026-01-12 21:12:34 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Web: Remove sensitive pages, add partner proposals
+
+----
+
+Commit: 70c61ae1f5fbf917e43e8bec45d821f18cbdc81c
+Date: 2026-01-09 21:20:38 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Add EK-KOR v2 RTOS, EK-OS kernel, and project infrastructure
+
+----
+
+Commit: 2676976542b9968cee0c9ec79625663fed26dc5d
+Date: 2026-01-05 12:10:56 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Add SWARM CORE spec, JEZGRO ecosystem, and multi-vehicle swap patents
+
+----
+
+Commit: 15449baafd91bbcd9c5507f7efe29c4659960532
+Date: 2026-01-04 16:31:17 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Add JEZGRO dev plan, BOM, and web page
+
+----
+
+Commit: b0c824a783b73f78718e55ea678875cabaa4e7c4
+Date: 2026-01-04 02:02:57 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Add EK-RTOS: MINIX-inspired microkernel for power electronics
+
+----
+
+Commit: 5fa3ea7c0382add08a110e21fd30922b23956986
+Date: 2026-01-04 01:36:35 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Add protected pages, LA delivery sim, investor pitches
+
+----
+
+Commit: 760f701734bb35b386943c38363ef79d37fdc7f9
+Date: 2026-01-04 01:34:42 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Standardize bilingual docs: English primary everywhere
+
+----
+
+Commit: ef5da7de349fa82153adda1a7907e72a08516883
+Date: 2026-01-03 20:40:03 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Bilingual documentation + skills + web enhancements
+
+----
+
+Commit: 079fca268af685c4f6b13d9ffe456d59a3887d6d
+Date: 2026-01-03 16:27:18 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Reorganizacija dokumentacije + web ažuriranje
+
+----
+
+Commit: 0f9e7d0c37230d6e94d7e8948c915f0ab30af53e
+Date: 2026-01-03 09:04:47 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Update EK3 module dimensions to realistic 1U half-width format
+
+----
+
+Commit: 2ad286be7b7fd5ff39ab8dc2fdd2c69a17e0f749
+Date: 2026-01-03 07:54:09 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Add technical documentation and investor pitch materials
+
+----
+
+Commit: dd14f6f63aa97a7985efbaad55a5372d9ad3e1fc
+Date: 2026-01-02 23:40:54 +0100
+Author: bojan <bojan.janjatovic@gmail.com>
+GPG Status: G
+GPG Key: E09C48462307C204
+Message: Patent disclosure documents - Priority date 2026-01-02
+
+----
+
+Commit: 2833a8949f6ba47278ef5345bd7db53ca11cc2a4
+Date: 2026-01-02 19:02:30 +0100
+Author: bojan <Bojan.Janjatovic@ncrvoyix.com>
+GPG Status: N
+GPG Key: 
+Message: Patent filing strategy: Hybrid approach (3 patents)
+
+----
+
+Commit: 694bfa5b6422f4477209be77149cd2497d9d1f97
+Date: 2026-01-02 18:45:14 +0100
+Author: bojan <Bojan.Janjatovic@ncrvoyix.com>
+GPG Status: N
+GPG Key: 
+Message: Prior art research: What exists vs ELEKTROKOMBINACIJA innovations
+
+----
+
+Commit: 53a26493e7bf200877dcfc858716fe5ca9e735f1
+Date: 2026-01-02 18:16:54 +0100
+Author: bojan <Bojan.Janjatovic@ncrvoyix.com>
+GPG Status: N
+GPG Key: 
+Message: NEW PATENT: EK-2026-005 Coordinated Dual-Robot System
+
+----
+
+Commit: 4b2aa5626f5c90bdc29d19bb31c6092422614172
+Date: 2026-01-02 18:08:20 +0100
+Author: bojan <Bojan.Janjatovic@ncrvoyix.com>
+GPG Status: N
+GPG Key: 
+Message: Update proof log - OpenTimestamps plan for later
+
+----
+
+Commit: 8bfe05fff3635a17fd3a167b813792b25889e22e
+Date: 2026-01-02 18:00:21 +0100
+Author: bojan <Bojan.Janjatovic@ncrvoyix.com>
+GPG Status: N
+GPG Key: 
+Message: Add priority proof log - tracking timestamp evidence
+
+----
+
+Commit: 0ef3b1c827a188ed2b917899e00284919b767156
+Date: 2026-01-02 17:55:07 +0100
+Author: bojan <Bojan.Janjatovic@ncrvoyix.com>
+GPG Status: N
+GPG Key: 
+Message: Patent disclosure documents - Priority date 2026-01-02
+
+----

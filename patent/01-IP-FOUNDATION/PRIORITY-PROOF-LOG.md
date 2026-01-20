@@ -80,7 +80,37 @@ Broj overe: _____________
 
 ```
 Status: NEDOSTUPAN (503 error na dan 2026-01-02)
-Alternativa: OriginStamp blockchain
+Alternativa: Bernstein.io blockchain
+```
+
+---
+
+## Bernstein.io Blockchain Timestamp
+
+```
+Status: PENDING
+Website: https://www.bernstein.io
+Cena: BESPLATNO (basic tier)
+
+PAKET ZA UPLOAD (Opcija C - 6 disclosures):
+patent/NOTAR-APOSTILLE-PAKET/OPCIJA-C/EK3-OPCIJA-C-2026-01-20.zip
+
+SADRŽAJ ZIP-a:
+- 01-invention-disclosure-modular-architecture.md
+- 02-invention-disclosure-swap-station.md
+- 03-invention-disclosure-distributed-sparing.md
+- 04-invention-disclosure-fleet-logistics.md
+- 05-invention-disclosure-coordinated-robots.md
+- 10-invention-disclosure-jezgro-ecosystem.md
+- MANIFEST.md
+
+NAKON UPLOADA POPUNITI:
+- SHA-256 hash: _______________
+- Bitcoin TX ID: _______________
+- Block number: _______________
+- IPFS CID: _______________
+- Timestamp UTC: _______________
+- Certificate saved: [ ]
 ```
 
 ---
@@ -105,8 +135,8 @@ Alternativa: OriginStamp blockchain
 ```
 ✅ Git commit - 2026-01-02
 ✅ GitHub push - 2026-01-02
-□  OriginStamp certificate
-□  Notar overa
+□  Bernstein.io certificate (Opcija C paket)
+□  Notar overa (Opcija C - 6 disclosures)
 □  Email backup
 ```
 
@@ -159,4 +189,4 @@ Git commit: [TBD - nakon commit-a]
 
 ---
 
-Poslednji update: 2026-01-04
+Poslednji update: 2026-01-20
