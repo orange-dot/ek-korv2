@@ -135,8 +135,7 @@ skip_bss_clear:
     b       .halt
 
 /* -----------------------------------------------------------------
- * Spin table for secondary cores
- * Written by SMP code to wake secondary cores
+ * Spin table for secondary cores (QEMU only)
  * ----------------------------------------------------------------- */
 .align 4
 .global spin_table
@@ -144,6 +143,91 @@ spin_table:
     .quad 0                         /* Core 1 entry point */
     .quad 0                         /* Core 2 entry point */
     .quad 0                         /* Core 3 entry point */
+
+/* -----------------------------------------------------------------
+ * Secondary core entry point (Real Hardware)
+ *
+ * GPU firmware releases cores 1-3 by writing to mailbox addresses
+ * 0xE0/0xE8/0xF0. The core jumps here in EL2, no stack set up.
+ * We must:
+ *   1. Drop to EL1
+ *   2. Set up stack
+ *   3. Call C entry function
+ * ----------------------------------------------------------------- */
+.global secondary_entry_asm
+secondary_entry_asm:
+    /* Get core ID */
+    mrs     x0, mpidr_el1
+    and     x19, x0, #0xFF          /* Save core ID in callee-saved reg */
+
+    /* Check exception level */
+    mrs     x0, CurrentEL
+    lsr     x0, x0, #2
+    cmp     x0, #3
+    b.eq    .sec_el3_to_el2         /* At EL3 - need to drop to EL2 first */
+    cmp     x0, #2
+    b.eq    .sec_el2_to_el1         /* At EL2 - drop to EL1 */
+    b       .sec_el1_setup          /* Already at EL1 */
+
+/* EL3 to EL2 transition */
+.sec_el3_to_el2:
+    /* Set EL2 to AArch64 */
+    mov     x0, #(1 << 10)          /* RW bit for EL2 */
+    orr     x0, x0, #(1 << 0)       /* NS bit - non-secure */
+    msr     scr_el3, x0
+
+    mov     x0, #0x3C9              /* EL2h, DAIF masked */
+    msr     spsr_el3, x0
+
+    adr     x0, .sec_el2_to_el1
+    msr     elr_el3, x0
+    eret
+
+/* EL2 to EL1 transition */
+.sec_el2_to_el1:
+    mov     x0, #(1 << 31)          /* RW bit: EL1 uses AArch64 */
+    msr     hcr_el2, x0
+
+    ldr     x0, =0x30D00800
+    msr     sctlr_el1, x0
+
+    mov     x0, #0x33FF
+    msr     cptr_el2, x0
+    msr     hstr_el2, xzr
+
+    mov     x0, #(3 << 20)
+    msr     cpacr_el1, x0
+
+    mov     x0, #0x3C5              /* EL1h, DAIF masked */
+    msr     spsr_el2, x0
+
+    adr     x0, .sec_el1_setup
+    msr     elr_el2, x0
+
+    eret
+
+.sec_el1_setup:
+    /* Install exception vectors */
+    adr     x0, exception_vectors
+    msr     vbar_el1, x0
+    isb
+
+    /* Set up per-core stack */
+    ldr     x1, =__stack_start
+    mov     x2, #0x4000             /* 16KB per core */
+    add     x0, x19, #1             /* Core ID + 1 */
+    mul     x2, x0, x2
+    add     x1, x1, x2
+    mov     sp, x1
+
+    /* Call C entry with core_id as argument */
+    mov     x0, x19
+    bl      secondary_core_c_entry
+
+    /* Should not return, but if it does, halt */
+.sec_halt:
+    wfe
+    b       .sec_halt
 
 /* -----------------------------------------------------------------
  * Exception vectors (minimal - just halt on exception)

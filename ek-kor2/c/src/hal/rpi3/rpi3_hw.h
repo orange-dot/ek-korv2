@@ -244,6 +244,118 @@
 #define IRQ_UART                (IRQ_SPI_BASE + 57)   /* PL011 UART */
 
 /* ============================================================================
+ * EMMC (SD CARD) REGISTERS
+ * ============================================================================ */
+
+#define EMMC_BASE               (PERIPHERAL_BASE + 0x300000UL)
+
+/* EMMC registers */
+#define EMMC_ARG2               (EMMC_BASE + 0x00)  /* ACMD23 argument */
+#define EMMC_BLKSIZECNT         (EMMC_BASE + 0x04)  /* Block size and count */
+#define EMMC_ARG1               (EMMC_BASE + 0x08)  /* Command argument */
+#define EMMC_CMDTM              (EMMC_BASE + 0x0C)  /* Command and transfer mode */
+#define EMMC_RESP0              (EMMC_BASE + 0x10)  /* Response bits 31:0 */
+#define EMMC_RESP1              (EMMC_BASE + 0x14)  /* Response bits 63:32 */
+#define EMMC_RESP2              (EMMC_BASE + 0x18)  /* Response bits 95:64 */
+#define EMMC_RESP3              (EMMC_BASE + 0x1C)  /* Response bits 127:96 */
+#define EMMC_DATA               (EMMC_BASE + 0x20)  /* Data FIFO */
+#define EMMC_STATUS             (EMMC_BASE + 0x24)  /* Status */
+#define EMMC_CONTROL0           (EMMC_BASE + 0x28)  /* Host control 0 */
+#define EMMC_CONTROL1           (EMMC_BASE + 0x2C)  /* Host control 1 */
+#define EMMC_INTERRUPT          (EMMC_BASE + 0x30)  /* Interrupt flags */
+#define EMMC_IRPT_MASK          (EMMC_BASE + 0x34)  /* Interrupt mask */
+#define EMMC_IRPT_EN            (EMMC_BASE + 0x38)  /* Interrupt enable */
+#define EMMC_CONTROL2           (EMMC_BASE + 0x3C)  /* Host control 2 */
+#define EMMC_FORCE_IRPT         (EMMC_BASE + 0x50)  /* Force interrupt */
+#define EMMC_BOOT_TIMEOUT       (EMMC_BASE + 0x70)  /* Boot timeout */
+#define EMMC_DBG_SEL            (EMMC_BASE + 0x74)  /* Debug bus select */
+#define EMMC_EXRDFIFO_CFG       (EMMC_BASE + 0x80)  /* Extended FIFO config */
+#define EMMC_EXRDFIFO_EN        (EMMC_BASE + 0x84)  /* Extended FIFO enable */
+#define EMMC_TUNE_STEP          (EMMC_BASE + 0x88)  /* Tuning step */
+#define EMMC_TUNE_STEPS_STD     (EMMC_BASE + 0x8C)  /* Tuning steps standard */
+#define EMMC_TUNE_STEPS_DDR     (EMMC_BASE + 0x90)  /* Tuning steps DDR */
+#define EMMC_SPI_INT_SPT        (EMMC_BASE + 0xF0)  /* SPI interrupt support */
+#define EMMC_SLOTISR_VER        (EMMC_BASE + 0xFC)  /* Slot ISR version */
+
+/* EMMC_STATUS bits */
+#define EMMC_STATUS_CMD_INHIBIT     (1 << 0)
+#define EMMC_STATUS_DAT_INHIBIT     (1 << 1)
+#define EMMC_STATUS_DAT_ACTIVE      (1 << 2)
+#define EMMC_STATUS_WRITE_TRANSFER  (1 << 8)
+#define EMMC_STATUS_READ_TRANSFER   (1 << 9)
+#define EMMC_STATUS_DAT0_LEVEL      (1 << 20)
+#define EMMC_STATUS_CMD_LEVEL       (1 << 24)
+
+/* EMMC_CONTROL0 bits */
+#define EMMC_C0_HCTL_DWIDTH         (1 << 1)    /* 4-bit data width */
+#define EMMC_C0_HCTL_HS_EN          (1 << 2)    /* High speed enable */
+#define EMMC_C0_HCTL_8BIT           (1 << 5)    /* 8-bit data width */
+
+/* EMMC_CONTROL1 bits */
+#define EMMC_C1_CLK_INTLEN          (1 << 0)    /* Internal clock enable */
+#define EMMC_C1_CLK_STABLE          (1 << 1)    /* Internal clock stable */
+#define EMMC_C1_CLK_EN              (1 << 2)    /* SD clock enable */
+#define EMMC_C1_CLK_GENSEL          (1 << 5)    /* Clock generator select */
+#define EMMC_C1_SRST_HC             (1 << 24)   /* Reset host circuit */
+#define EMMC_C1_SRST_CMD            (1 << 25)   /* Reset command circuit */
+#define EMMC_C1_SRST_DATA           (1 << 26)   /* Reset data circuit */
+
+/* EMMC_INTERRUPT bits */
+#define EMMC_INT_CMD_DONE           (1 << 0)
+#define EMMC_INT_DATA_DONE          (1 << 1)
+#define EMMC_INT_BLOCK_GAP          (1 << 2)
+#define EMMC_INT_WRITE_RDY          (1 << 4)
+#define EMMC_INT_READ_RDY           (1 << 5)
+#define EMMC_INT_CARD               (1 << 8)
+#define EMMC_INT_RETUNE             (1 << 12)
+#define EMMC_INT_BOOTACK            (1 << 13)
+#define EMMC_INT_ENDBOOT            (1 << 14)
+#define EMMC_INT_ERR                (1 << 15)
+#define EMMC_INT_CTO_ERR            (1 << 16)   /* Command timeout */
+#define EMMC_INT_CCRC_ERR           (1 << 17)   /* Command CRC error */
+#define EMMC_INT_CEND_ERR           (1 << 18)   /* Command end bit error */
+#define EMMC_INT_CBAD_ERR           (1 << 19)   /* Command index error */
+#define EMMC_INT_DTO_ERR            (1 << 20)   /* Data timeout */
+#define EMMC_INT_DCRC_ERR           (1 << 21)   /* Data CRC error */
+#define EMMC_INT_DEND_ERR           (1 << 22)   /* Data end bit error */
+#define EMMC_INT_ACMD_ERR           (1 << 24)   /* Auto CMD error */
+
+#define EMMC_INT_ERROR_MASK         (EMMC_INT_CTO_ERR | EMMC_INT_CCRC_ERR | \
+                                     EMMC_INT_CEND_ERR | EMMC_INT_CBAD_ERR | \
+                                     EMMC_INT_DTO_ERR | EMMC_INT_DCRC_ERR | \
+                                     EMMC_INT_DEND_ERR | EMMC_INT_ACMD_ERR | \
+                                     EMMC_INT_ERR)
+
+/* EMMC_CMDTM bits */
+#define EMMC_CMD_RSPNS_TYPE_NONE    (0 << 16)
+#define EMMC_CMD_RSPNS_TYPE_136     (1 << 16)   /* R2 */
+#define EMMC_CMD_RSPNS_TYPE_48      (2 << 16)   /* R1, R3, R6, R7 */
+#define EMMC_CMD_RSPNS_TYPE_48B     (3 << 16)   /* R1b */
+#define EMMC_CMD_CRCCHK_EN          (1 << 19)
+#define EMMC_CMD_IXCHK_EN           (1 << 20)
+#define EMMC_CMD_ISDATA             (1 << 21)
+#define EMMC_CMD_TM_DAT_DIR_HC      (0 << 4)    /* Host to card */
+#define EMMC_CMD_TM_DAT_DIR_CH      (1 << 4)    /* Card to host */
+#define EMMC_CMD_TM_BLKCNT_EN       (1 << 1)
+#define EMMC_CMD_TM_MULTI_BLOCK     (1 << 5)
+#define EMMC_CMD_TM_AUTO_CMD12      (1 << 2)
+
+/* SD Commands */
+#define SD_CMD_GO_IDLE              0
+#define SD_CMD_ALL_SEND_CID         2
+#define SD_CMD_SEND_REL_ADDR        3
+#define SD_CMD_SELECT_CARD          7
+#define SD_CMD_SEND_IF_COND         8
+#define SD_CMD_STOP_TRANSMISSION    12
+#define SD_CMD_READ_SINGLE_BLOCK    17
+#define SD_CMD_READ_MULTIPLE_BLOCK  18
+#define SD_CMD_WRITE_SINGLE_BLOCK   24
+#define SD_CMD_WRITE_MULTIPLE_BLOCK 25
+#define SD_CMD_APP_CMD              55
+#define SD_CMD_SET_BUS_WIDTH        (0x80 + 6)  /* ACMD6 */
+#define SD_CMD_SEND_OP_COND         (0x80 + 41) /* ACMD41 */
+
+/* ============================================================================
  * MEMORY MAP
  * ============================================================================ */
 

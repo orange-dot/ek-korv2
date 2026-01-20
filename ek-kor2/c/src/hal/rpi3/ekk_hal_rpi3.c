@@ -22,9 +22,21 @@
 #include "smp.h"
 #include "msg_queue.h"
 #include "framebuffer.h"
+#include "mailbox.h"
+#include "fs_server.h"
+#include "ekkfs_test.h"
+#include "ekkdb_test.h"
+#include "dashboard.h"
+#include "shell.h"
+#include "usb_dwc2.h"
 
 #include <stdarg.h>
 #include <string.h>
+
+/* Enable EKKFS tests at boot (set to 1 to run tests) */
+#ifndef EKKFS_RUN_TESTS
+#define EKKFS_RUN_TESTS         0
+#endif
 
 /* ============================================================================
  * External Symbols
@@ -364,10 +376,10 @@ ekk_error_t ekk_hal_init(void)
             fb_printf("Timer: %llu Hz\n", timer_get_frequency());
         }
 
-        /* Initialize GIC distributor */
+        /* Initialize GIC (with QEMU detection) */
         uart_puts("Initializing GIC...\n");
-        gic_dist_init();
-        uart_puts("GIC distributor initialized\n");
+        gic_init();
+        uart_puts("GIC initialized\n");
 
         /* Initialize SMP */
         smp_init();
@@ -560,6 +572,7 @@ void ekk_hal_assert_fail(const char *file, int line, const char *expr)
  * @brief Secondary core entry point
  *
  * Called by boot.S after secondary core wakes up.
+ * Core 3 runs the filesystem server.
  */
 static void secondary_main(uint32_t core_id)
 {
@@ -571,7 +584,47 @@ static void secondary_main(uint32_t core_id)
         fb_printf("Core %d: Ready\n", core_id);
     }
 
-    /* Simple idle loop */
+    /* Core 3 runs the filesystem server */
+    if (core_id == 3) {
+        uart_puts("Core 3: Starting FS server...\n");
+        if (framebuffer_is_ready()) {
+            fb_puts("Core 3: Starting FS server...\n");
+        }
+
+        if (fs_server_init() == 0) {
+            uart_puts("Core 3: FS server initialized\n");
+            if (framebuffer_is_ready()) {
+                fb_set_colors(FB_COLOR_GREEN, FB_COLOR_BLACK);
+                fb_puts("FS Server: Ready\n");
+                fb_set_colors(FB_COLOR_WHITE, FB_COLOR_BLACK);
+            }
+
+#if EKKFS_RUN_TESTS
+            /* Run EKKDB tests before entering main loop */
+            uart_puts("\nCore 3: Running EKKDB tests...\n");
+            if (framebuffer_is_ready()) {
+                fb_puts("\nRunning EKKDB tests...\n");
+            }
+            ekkdb_test_run();
+            uart_puts("\nCore 3: EKKDB tests complete, entering main loop\n");
+            if (framebuffer_is_ready()) {
+                fb_puts("EKKDB tests complete\n");
+            }
+#endif
+
+            /* Run FS server main loop (does not return) */
+            fs_server_main();
+        } else {
+            uart_puts("Core 3: FS server init failed!\n");
+            if (framebuffer_is_ready()) {
+                fb_set_colors(FB_COLOR_RED, FB_COLOR_BLACK);
+                fb_puts("FS Server: Init failed!\n");
+                fb_set_colors(FB_COLOR_WHITE, FB_COLOR_BLACK);
+            }
+        }
+    }
+
+    /* Simple idle loop for other cores */
     while (1) {
         __asm__ volatile("wfe");
     }
@@ -584,6 +637,35 @@ void kernel_main(void)
 {
     /* Primary initialization */
     ekk_hal_init();
+
+#if EKKFS_RUN_TESTS
+    /* Run EKKFS tests on Core 0 before starting other cores */
+    uart_puts("\n");
+    if (framebuffer_is_ready()) {
+        fb_puts("\n");
+    }
+
+    int test_failures = ekkfs_run_all_tests();
+
+    if (test_failures == 0) {
+        uart_puts("\nEKKFS tests completed successfully.\n");
+        uart_puts("Continuing with normal boot...\n\n");
+        if (framebuffer_is_ready()) {
+            fb_puts("\nContinuing with normal boot...\n\n");
+        }
+    } else {
+        uart_printf("\nWARNING: %d EKKFS tests failed!\n", test_failures);
+        uart_puts("Continuing anyway...\n\n");
+        if (framebuffer_is_ready()) {
+            fb_set_colors(FB_COLOR_YELLOW, FB_COLOR_BLACK);
+            fb_printf("\nWARNING: %d tests failed!\n", test_failures);
+            fb_set_colors(FB_COLOR_WHITE, FB_COLOR_BLACK);
+        }
+    }
+
+    /* Small delay before continuing */
+    timer_delay_us(500000);
+#endif
 
     /* Start secondary cores */
     uart_puts("\nStarting secondary cores...\n");
@@ -605,12 +687,93 @@ void kernel_main(void)
     if (framebuffer_is_ready()) {
         fb_set_colors(FB_COLOR_GREEN, FB_COLOR_BLACK);
         fb_puts("\n=== ALL CORES BOOTED ===\n");
+        fb_set_colors(FB_COLOR_WHITE, FB_COLOR_BLACK);
     }
 
-    /* Idle loop */
-    while (1) {
-        __asm__ volatile("wfe");
+    /* Display hardware info from VideoCore mailbox */
+    uart_puts("\n--- Hardware Info ---\n");
+    if (framebuffer_is_ready()) {
+        fb_puts("\n--- Hardware Info ---\n");
     }
+
+    uart_puts("Reading SoC temperature...\n");
+    int32_t temp = mbox_get_temperature();
+    uart_puts("Reading max temperature...\n");
+    int32_t max_temp = mbox_get_max_temperature();
+    uart_puts("Reading ARM clock...\n");
+    uint32_t arm_clock = mbox_get_arm_clock();
+    uart_puts("Done reading hardware info.\n");
+    if (temp > 0) {
+        uart_printf("SoC Temperature: %d.%d C\n", temp / 1000, (temp % 1000) / 100);
+    } else {
+        uart_puts("SoC Temperature: N/A\n");
+    }
+    if (max_temp > 0) {
+        uart_printf("Max Temperature: %d.%d C\n", max_temp / 1000, (max_temp % 1000) / 100);
+    }
+    if (arm_clock > 0) {
+        uart_printf("ARM Clock: %d MHz\n", arm_clock / 1000000);
+    } else {
+        uart_puts("ARM Clock: N/A\n");
+    }
+
+    if (framebuffer_is_ready()) {
+        if (temp > 0) {
+            fb_printf("SoC Temperature: %d.%d C\n", temp / 1000, (temp % 1000) / 100);
+        } else {
+            fb_puts("SoC Temperature: N/A\n");
+        }
+        if (max_temp > 0) {
+            fb_printf("Max Temperature: %d.%d C\n", max_temp / 1000, (max_temp % 1000) / 100);
+        }
+        if (arm_clock > 0) {
+            fb_printf("ARM Clock: %d MHz\n", arm_clock / 1000000);
+        } else {
+            fb_puts("ARM Clock: N/A\n");
+        }
+    }
+
+    /* Initialize USB host controller */
+    uart_puts("\n--- USB Initialization ---\n");
+    if (framebuffer_is_ready()) {
+        fb_puts("\n--- USB Initialization ---\n");
+    }
+
+    if (usb_init() == 0) {
+        if (usb_keyboard_ready()) {
+            uart_puts("USB: Keyboard ready - type on USB keyboard!\n");
+            if (framebuffer_is_ready()) {
+                fb_set_colors(FB_COLOR_GREEN, FB_COLOR_BLACK);
+                fb_puts("USB Keyboard: Ready\n");
+                fb_set_colors(FB_COLOR_WHITE, FB_COLOR_BLACK);
+            }
+        } else if (usb_device_connected()) {
+            uart_puts("USB: Device connected (not a keyboard)\n");
+            if (framebuffer_is_ready()) {
+                fb_puts("USB: Device connected (not keyboard)\n");
+            }
+        } else {
+            uart_puts("USB: No device connected\n");
+            if (framebuffer_is_ready()) {
+                fb_puts("USB: No device connected\n");
+            }
+        }
+    } else {
+        uart_puts("USB: Initialization failed (keyboard via UART only)\n");
+        if (framebuffer_is_ready()) {
+            fb_set_colors(FB_COLOR_YELLOW, FB_COLOR_BLACK);
+            fb_puts("USB: Init failed (UART only)\n");
+            fb_set_colors(FB_COLOR_WHITE, FB_COLOR_BLACK);
+        }
+    }
+
+    /* Wait a bit before starting shell */
+    uart_puts("\nWaiting 1s before shell...\n");
+    timer_delay_us(1000000);
+
+    /* Initialize and run shell (never returns) */
+    shell_init();
+    shell_run();
 }
 
 /* ============================================================================

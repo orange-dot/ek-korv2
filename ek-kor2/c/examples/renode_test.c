@@ -37,7 +37,7 @@ void SystemInit(void)
 }
 
 /**
- * @brief Print module status
+ * @brief Print module status with CAN statistics
  */
 static void print_status(void)
 {
@@ -53,10 +53,20 @@ static void print_status(void)
                    (long)g_module.my_field.components[EKK_FIELD_THERMAL],
                    (long)g_module.my_field.components[EKK_FIELD_POWER]);
 
-    /* Topology info */
-    ekk_hal_printf("Known: %u, Neighbors: %u\n",
+    /* Topology info - key for multi-module testing */
+    ekk_hal_printf("Known: %u, Neighbors: %u (k=%u target)\n",
                    g_module.topology.known_count,
-                   g_module.topology.neighbor_count);
+                   g_module.topology.neighbor_count,
+                   EKK_K_NEIGHBORS);
+
+    /* List discovered neighbors if any */
+    if (g_module.topology.neighbor_count > 0) {
+        ekk_hal_printf("Neighbor IDs: ");
+        for (uint8_t i = 0; i < g_module.topology.neighbor_count && i < 8; i++) {
+            ekk_hal_printf("%u ", g_module.topology.neighbors[i].id);
+        }
+        ekk_hal_printf("\n");
+    }
 
     ekk_hal_printf("Ticks: %lu, Field updates: %lu\n",
                    g_module.ticks_total, g_module.field_updates);

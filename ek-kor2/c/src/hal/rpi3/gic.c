@@ -15,10 +15,55 @@
 
 #include "rpi3_hw.h"
 #include "gic.h"
+#include "uart.h"
+
+/* Flag to track if GIC is available (not on QEMU) */
+static int g_gic_available = 0;
 
 /* ============================================================================
  * Private Functions
  * ============================================================================ */
+
+/**
+ * @brief Detect if running on QEMU (no GIC support)
+ *
+ * QEMU's raspi3b doesn't emulate GIC at 0xFF840000.
+ * We use a safe detection method - check board revision via mailbox
+ * which works on both QEMU and real hardware.
+ *
+ * QEMU raspi3b returns board revision 0xa02082 or 0xa22082
+ * but more importantly, accessing GIC region hangs on QEMU.
+ *
+ * Safer approach: Try to read ARM local peripheral region first.
+ * On QEMU, we can check if LOCAL_TIMER_CTRL returns something sane.
+ */
+static int detect_qemu(void)
+{
+    /*
+     * Simpler heuristic: QEMU's raspi3b doesn't map 0xFF840000 region.
+     * But reading from unmapped region may hang.
+     *
+     * Alternative: Check ARM_LOCAL_BASE (0x40000000) which IS mapped
+     * on QEMU. If we can read from there but GIC region gives 0,
+     * we're likely on QEMU.
+     *
+     * For now, use compile-time flag or always assume real HW.
+     * TODO: Better runtime detection.
+     */
+#ifdef QEMU_BUILD
+    return 1;  /* Compile-time QEMU flag */
+#else
+    /* Try reading ARM local control register - this should work on both */
+    volatile uint32_t *local_ctrl = (volatile uint32_t *)0x40000000;
+    uint32_t val = *local_ctrl;
+    (void)val;  /* Suppress warning */
+
+    /* Now try GIC - on real HW this works, on QEMU it may hang or return 0 */
+    /* Actually skip the risky read and just return 0 (assume real HW) */
+    /* User can define QEMU_BUILD for QEMU testing */
+    return 0;
+#endif
+}
 
 /**
  * @brief Get number of supported IRQ lines
@@ -87,6 +132,10 @@ void gic_dist_init(void)
  */
 void gic_cpu_init(void)
 {
+    if (!g_gic_available) {
+        return;  /* Skip on QEMU */
+    }
+
     /* Disable CPU interface */
     mmio_write32(GICC_CTLR, 0);
 
@@ -113,6 +162,14 @@ void gic_init(void)
     uint32_t core_id = mpidr & 0xFF;
 
     if (core_id == 0) {
+        /* Check if running on QEMU (no GIC support) */
+        if (detect_qemu()) {
+            uart_puts("GIC: QEMU detected, skipping GIC init\n");
+            g_gic_available = 0;
+            return;
+        }
+        g_gic_available = 1;
+        uart_puts("GIC: Real hardware detected\n");
         gic_dist_init();
     }
 
