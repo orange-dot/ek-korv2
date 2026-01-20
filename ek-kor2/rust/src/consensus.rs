@@ -88,8 +88,8 @@ pub struct Ballot {
     /// When voting ends
     pub deadline: TimeUs,
 
-    /// Votes from neighbors (indexed by position in neighbor list)
-    votes: Vec<VoteValue, K_NEIGHBORS>,
+    /// Votes from neighbors (indexed by voter_id % K_NEIGHBORS for deduplication)
+    votes: [VoteValue; K_NEIGHBORS],
     /// Number of votes received
     pub vote_count: u8,
     /// Number of approvals
@@ -120,7 +120,7 @@ impl Ballot {
             data,
             threshold,
             deadline,
-            votes: Vec::new(),
+            votes: [VoteValue::Abstain; K_NEIGHBORS],
             vote_count: 0,
             yes_count: 0,
             no_count: 0,
@@ -129,7 +129,37 @@ impl Ballot {
         }
     }
 
-    /// Record a vote
+    /// Record a vote from a specific voter (with deduplication)
+    ///
+    /// Uses voter_id % K_NEIGHBORS as slot index to detect duplicate votes.
+    /// Returns true if vote was recorded, false if duplicate.
+    pub fn record_vote_from(&mut self, voter_id: ModuleId, vote: VoteValue) -> bool {
+        let slot = (voter_id as usize) % K_NEIGHBORS;
+
+        // Check for duplicate vote
+        if self.votes[slot] != VoteValue::Abstain {
+            return false; // Already voted
+        }
+
+        // Record vote in slot
+        self.votes[slot] = vote;
+        self.vote_count += 1;
+
+        match vote {
+            VoteValue::Yes => self.yes_count += 1,
+            VoteValue::No => self.no_count += 1,
+            VoteValue::Inhibit => {
+                self.result = VoteResult::Cancelled;
+                self.completed = true;
+            }
+            VoteValue::Abstain => {}
+        }
+
+        true
+    }
+
+    /// Record a vote (legacy method for backwards compatibility)
+    /// Note: This does not deduplicate - use record_vote_from for proper deduplication
     pub fn record_vote(&mut self, vote: VoteValue) {
         match vote {
             VoteValue::Yes => self.yes_count += 1,
@@ -141,7 +171,6 @@ impl Ballot {
             VoteValue::Abstain => {}
         }
         self.vote_count += 1;
-        let _ = self.votes.push(vote);
     }
 
     /// Check if threshold is reached
@@ -282,16 +311,23 @@ impl Consensus {
     }
 
     /// Process incoming vote
+    ///
+    /// Uses voter_id % K_NEIGHBORS as slot index for deduplication.
+    /// Duplicate votes from the same slot are ignored.
     pub fn on_vote(
         &mut self,
-        _voter_id: ModuleId,
+        voter_id: ModuleId,
         ballot_id: BallotId,
         vote: VoteValue,
         total_voters: u8,
     ) -> Result<()> {
         for ballot in self.ballots.iter_mut() {
             if ballot.id == ballot_id {
-                ballot.record_vote(vote);
+                // Use record_vote_from for proper deduplication
+                if !ballot.record_vote_from(voter_id, vote) {
+                    // Duplicate vote - ignore but don't error
+                    return Ok(());
+                }
                 ballot.check_threshold(total_voters);
 
                 if ballot.completed {
