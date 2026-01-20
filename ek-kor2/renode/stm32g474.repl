@@ -97,19 +97,10 @@ gpioD: GPIOPort.STM32_GPIOPort @ sysbus <0x48000C00, +0x400>
     [0-15] -> exti@[0-15]
 
 // External Interrupt Controller
-exti: IRQControllers.STM32G0_EXTI @ sysbus 0x40010400
-    numberOfOutputLines: 44
+// Note: Simplified EXTI for Renode 1.14 compatibility (demo doesn't use GPIO IRQs)
+exti: IRQControllers.STM32F4_EXTI @ sysbus 0x40010400
+    numberOfOutputLines: 16
     [0-4] -> nvic@[6-10]
-    [5-9] -> nvicInput23@[0-4]
-    [10-15] -> nvicInput40@[0-5]
-
-nvicInput23: Miscellaneous.CombinedInput @ none
-    numberOfInputs: 5
-    -> nvic@23
-
-nvicInput40: Miscellaneous.CombinedInput @ none
-    numberOfInputs: 6
-    -> nvic@40
 
 // USART1 - Debug output
 usart1: UART.STM32F7_USART @ sysbus 0x40013800
@@ -134,14 +125,14 @@ i2c1: I2C.STM32F7_I2C @ sysbus 0x40005400
 spi1: SPI.STM32SPI @ sysbus 0x40013000
     -> nvic@35
 
-// ADC1 - For voltage/current sensing
-adc1: Analog.STM32G4_ADC @ sysbus 0x50000000
+// ADC1 - Stub for voltage/current sensing (not used in demo)
+// Note: STM32G4_ADC not available in Renode 1.14, using STM32_ADC
+adc1: Analog.STM32_ADC @ sysbus 0x50000000
     referenceVoltage: 3.3
     -> nvic@18
 
-// DMA1
-dma1: DMA.STM32G4DMA @ sysbus 0x40020000
-    numberOfChannels: 8
+// DMA1 - Using STM32DMA for Renode 1.14 compatibility
+dma1: DMA.STM32DMA @ sysbus 0x40020000
     [0-7] -> nvic@[11-17, 96]
 
 // FDCAN1 - Primary CAN bus (Segment bus)

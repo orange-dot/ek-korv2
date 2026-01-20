@@ -67,49 +67,62 @@ connector Connect fdcan1 segmentBus
 machine SetSerialExecution true
 showAnalyzer usart1 "Module 7"
 
-# Macro to load ELF to all modules
+# Module ID override address and magic pattern
+# Address: 0x20017FFC (end of SRAM2)
+# Format: 0xECC0XXXX where XX is module ID (1-254)
+# HAL reads this at startup to determine module ID
+
+# Macro to load ELF to all modules (different ELFs per module)
 macro loadAll
 """
     mach set "ekk_module_1"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00001
     sysbus LoadELF @../build/c/ekk_module_1.elf
     mach set "ekk_module_2"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00002
     sysbus LoadELF @../build/c/ekk_module_2.elf
     mach set "ekk_module_3"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00003
     sysbus LoadELF @../build/c/ekk_module_3.elf
     mach set "ekk_module_4"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00004
     sysbus LoadELF @../build/c/ekk_module_4.elf
     mach set "ekk_module_5"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00005
     sysbus LoadELF @../build/c/ekk_module_5.elf
     mach set "ekk_module_6"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00006
     sysbus LoadELF @../build/c/ekk_module_6.elf
     mach set "ekk_module_7"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00007
     sysbus LoadELF @../build/c/ekk_module_7.elf
 """
 
 # Macro to load same ELF to all modules (typical case)
+# Writes module ID to memory BEFORE loading ELF so HAL reads correct ID
 macro loadSame
 """
     mach set "ekk_module_1"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00001
     sysbus LoadELF @ekk_test.elf
-    cpu SetRegisterUnsafe 0 1
     mach set "ekk_module_2"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00002
     sysbus LoadELF @ekk_test.elf
-    cpu SetRegisterUnsafe 0 2
     mach set "ekk_module_3"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00003
     sysbus LoadELF @ekk_test.elf
-    cpu SetRegisterUnsafe 0 3
     mach set "ekk_module_4"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00004
     sysbus LoadELF @ekk_test.elf
-    cpu SetRegisterUnsafe 0 4
     mach set "ekk_module_5"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00005
     sysbus LoadELF @ekk_test.elf
-    cpu SetRegisterUnsafe 0 5
     mach set "ekk_module_6"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00006
     sysbus LoadELF @ekk_test.elf
-    cpu SetRegisterUnsafe 0 6
     mach set "ekk_module_7"
+    sysbus WriteDoubleWord 0x20017FFC 0xECC00007
     sysbus LoadELF @ekk_test.elf
-    cpu SetRegisterUnsafe 0 7
 """
 
 # Macro to start all modules simultaneously

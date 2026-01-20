@@ -24,8 +24,8 @@
 # Test duration in virtual seconds
 $test_duration = 15
 
-# Path to ELF (copied to renode/ directory by CMake)
-$elf_path = @renode/ekk_test.elf
+# Path to ELF (from build-stm32 directory)
+$elf_path = @c/build-stm32/ekk_test.elf
 
 # ============================================================================
 # Machine Setup

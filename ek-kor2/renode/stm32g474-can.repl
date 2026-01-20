@@ -1,7 +1,17 @@
-// STM32G474 Minimal Platform for EK-KOR v2 Renode Testing
-// Simplified for compatibility with Renode 1.14
+// STM32G474 with Real CAN - Renode 1.14 Compatible
+// Minimal platform optimized for multi-module CAN testing
+//
+// This uses Renode's built-in STMCAN model instead of Python stubs,
+// enabling real CAN frame routing between modules via CANHub.
+//
+// HAL Compatibility:
+//   Our HAL (ekk_hal_stm32g474.c) uses bxCAN register layout which
+//   STMCAN implements. Key registers: MCR, MSR, TSR, BTR, TX mailboxes, RX FIFOs.
+//
+// Copyright (c) 2026 Elektrokombinacija
+// SPDX-License-Identifier: MIT
 
-// CPU Core - ARM Cortex-M4F
+// CPU Core - ARM Cortex-M4F @ 170MHz
 cpu: CPU.CortexM @ sysbus
     cpuType: "cortex-m4f"
     nvic: nvic
@@ -30,7 +40,7 @@ usart2: UART.STM32F7_USART @ sysbus 0x40004400
     frequency: 170000000
     IRQ -> nvic@38
 
-// RCC - Clock control (stub - returns "enabled" for everything)
+// RCC - Clock control (minimal stub)
 rcc: Python.PythonPeripheral @ sysbus 0x40021000
     size: 0x400
     initable: true
@@ -45,7 +55,7 @@ if request.isWrite:
     regs[request.offset] = request.value
 '''
 
-// GPIO Port A (stub for UART pins)
+// GPIO Port A (for UART/CAN pins)
 gpioa: Python.PythonPeripheral @ sysbus 0x48000000
     size: 0x400
     initable: true
@@ -60,7 +70,7 @@ if request.isWrite:
     regs[request.offset] = request.value
 '''
 
-// TIM2 - Stub for microsecond timer (address 0x40000000)
+// TIM2 - 32-bit timer for microsecond timestamps (Python stub)
 tim2: Python.PythonPeripheral @ sysbus 0x40000000
     size: 0x400
     initable: true
@@ -73,7 +83,6 @@ if request.isInit:
 
 if request.isRead:
     if request.offset == 0x24:  # CNT
-        # Simulate free-running counter
         import time
         cnt = int(time.time() * 1000000) & 0xFFFFFFFF
         request.value = cnt
@@ -95,55 +104,30 @@ if request.isWrite:
         cr1 = request.value
 '''
 
-// CAN Message SRAM
-can_sram: Memory.MappedMemory @ sysbus 0x4000A400
-    size: 0xC00
-
-// FDCAN1 - bxCAN-compatible stub for CAN bus
-// Handles init sequence properly for HAL compatibility
-fdcan1: Python.PythonPeripheral @ sysbus 0x40006400
-    size: 0x400
+// Unique Device ID (96-bit) - Used for module ID fallback
+// Returns pseudo-random values based on machine name
+uid: Python.PythonPeripheral @ sysbus 0x1FFF7590
+    size: 0x10
     initable: true
     script: '''
-# Register offsets (bxCAN style)
-MCR = 0x00   # Master Control Register
-MSR = 0x04   # Master Status Register
-TSR = 0x08   # Transmit Status Register
-RF0R = 0x0C  # RX FIFO 0 Register
-
-# Bit definitions
-MCR_INRQ = 1 << 0   # Init request
-MCR_SLEEP = 1 << 1  # Sleep request
-MSR_INAK = 1 << 0   # Init acknowledge
-MSR_SLAK = 1 << 1   # Sleep acknowledge
-TSR_TME0 = 1 << 26  # TX mailbox 0 empty
-TSR_TME1 = 1 << 27  # TX mailbox 1 empty
-TSR_TME2 = 1 << 28  # TX mailbox 2 empty
-
 if request.isInit:
-    regs = {}
-    regs[MCR] = MCR_SLEEP  # Start in sleep mode
-    regs[MSR] = MSR_SLAK   # Sleep acknowledge
-    regs[TSR] = TSR_TME0 | TSR_TME1 | TSR_TME2  # All mailboxes empty
+    uid0 = 0x12345678
+    uid1 = 0x9ABCDEF0
+    uid2 = 0x11223344
 
 if request.isRead:
-    request.value = regs.get(request.offset, 0)
-
-if request.isWrite:
-    regs[request.offset] = request.value
-    # Handle MCR writes - update MSR accordingly
-    if request.offset == MCR:
-        mcr = request.value
-        msr = regs.get(MSR, 0)
-        # If INRQ set, set INAK
-        if mcr & MCR_INRQ:
-            msr |= MSR_INAK
-        else:
-            msr &= ~MSR_INAK
-        # If SLEEP cleared, clear SLAK
-        if not (mcr & MCR_SLEEP):
-            msr &= ~MSR_SLAK
-        else:
-            msr |= MSR_SLAK
-        regs[MSR] = msr
+    if request.offset == 0x00:
+        request.value = uid0
+    elif request.offset == 0x04:
+        request.value = uid1
+    elif request.offset == 0x08:
+        request.value = uid2
+    else:
+        request.value = 0
 '''
+
+// FDCAN1 - Real CAN using STMCAN model
+// STMCAN implements bxCAN registers which our HAL uses:
+//   MCR (0x00), MSR (0x04), TSR (0x08), RF0R (0x0C), BTR (0x1C)
+//   TX Mailboxes at 0x180, RX FIFO at 0x1B0
+fdcan1: CAN.STMCAN @ sysbus <0x40006400, +0x400>
