@@ -138,14 +138,14 @@
     "era3": {
       "title": "ELEKTROKOMBINACIJA",
       "period": "Modularnost 1970s + AI 2020s",
-      "description": "Kombinujemo najbolje iz oba sveta: visoko modularni dizajn koji omogućava brzu zamenu na terenu, sa modernom AI dijagnostikom koja predviđa kvarove i robotskom automatizacijom zamene.",
+      "description": "Modularan dizajn za zamenu na terenu, AI dijagnostika za predviđanje kvarova, robotska zamena za brzinu.",
       "features": [
-        "AI predviđa kvar 2 nedelje unapred",
-        "Robot menja modul za manje od minut",
-        "Tehničar nije potreban na terenu",
+        "AI prati zdravlje modula za rano upozorenje",
+        "Dizajnirano za robotsku zamenu modula",
+        "Terenske operacije bez tehničara (cilj dizajna)",
         "Modul se popravlja u servisu - od strane ljudi"
       ],
-      "result": "Životni vek 15+ godina, zero downtime, cirkularna ekonomija"
+      "result": "Ciljevi dizajna: 15+ godina životnog veka, visoka dostupnost, cirkularna ekonomija"
     },
     "workflow": {
       "title": "Proces Servisiranja",
@@ -159,7 +159,7 @@
         {
           "title": "Automatska Zamena",
           "description": "Robot na swap stanici zamenjuje modul bez ljudske intervencije",
-          "time": "Manje od minut"
+          "time": "Cilj: <1 min"
         },
         {
           "title": "Transport",
@@ -195,8 +195,8 @@
   },
   "selfHealingFleet": {
     "title": "Samoizlečiva Flota",
-    "subtitle": "Bez tehničara na terenu. Nikad.",
-    "description": "Autobusi nose rezervne EK3 module. Roboti brzo menjaju pokvarene module. Pokvareni moduli putuju nazad u servis redovnim autobuskim linijama. Nula izlazaka servisnih vozila.",
+    "subtitle": "Autonomni servis na terenu",
+    "description": "Autobusi nose rezervne EK3 module. Roboti menjaju module za manje od 60 sekundi. Pokvareni moduli putuju nazad u servis redovnim autobuskim linijama. Nula izlazaka servisnih vozila.",
     "steps": {
       "predict": {
         "title": "AI Predviđa",
@@ -226,8 +226,8 @@
         "steps": ["Alarm", "Pozovi tehničara", "Vožnja do lokacije", "Dijagnostika", "Naruči delove", "Popravka"]
       },
       "ek": {
-        "title": "ELEKTROKOMBINACIJA",
-        "time": "2 minuta",
+        "title": "ELEKTROKOMBINACIJA (cilj)",
+        "time": "~2 min (dizajn)",
         "steps": ["AI detektuje", "Robot A dijagnostikuje", "Robot B menja", "Autobus nastavlja"]
       }
     },
@@ -254,15 +254,13 @@
     "title": "ELEKTRO",
     "subtitle": "KOMBINACIJA",
     "tagline": "EV punjač sa prediktivnom dijagnostikom",
-    "description": "AI koji prati zdravlje sistema, predviđa probleme i omogućava intervenciju pre kvara. Cilj: maksimalna pouzdanost.",
+    "description": "Prati zdravlje sistema, predviđa kvarove, omogućava proaktivnu zamenu.",
     "cta": "Saznaj više",
     "stats": {
-      "power": "99%",
-      "powerLabel": "stopa uspešnosti",
-      "weight": "2 ned",
-      "weightLabel": "predviđanje kvara",
-      "price": "0",
-      "priceLabel": "iznenađenja"
+      "power": "71%",
+      "powerLabel": "industrijski FTCSR",
+      "weight": "Cilj:",
+      "weightLabel": "prediktivno održavanje"
     }
   },
   "problem": {
@@ -289,7 +287,7 @@
   "product": {
     "title": "EK3 Modul",
     "subtitle": "Jedan modul za sve - od 3 kW do 3 MW",
-    "description": "Radikalna modularnost inspirisana 3PAR storage arhitekturom. Isti modul skalira od e-bicikla do MCS stanice.",
+    "description": "Modularan dizajn inspirisan 3PAR storage arhitekturom. Isti modul skalira od e-bicikla do MCS stanice.",
     "phase1": {
       "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
@@ -331,7 +329,7 @@
       "modules": "Više EK3",
       "price": "Po dogovoru",
       "description": "Automobili, autoputne stanice. Ormar sistem, robotska zamena modula.",
-      "features": ["1-2 ormara", "Brza zamena", "99.9% dostupnost"]
+      "features": ["1-2 ormara", "<60 sek zamena (cilj)", "AI dijagnostika"]
     },
     "swap": {
       "title": "Teška vozila + MCS",
@@ -377,19 +375,19 @@
     }
   },
   "team": {
-    "title": "Naša Vizija",
+    "title": "Filozofija dizajna",
     "subtitle": "Povratak modularnosti",
-    "mission": "Industrija je krenula putem integracije - sve u jednom čipu, nemoguće popraviti, planirano zastarevanje. Ali infrastruktura nije telefon. EV punjač treba da traje 15+ godina. Mi kombinujemo modularnost iz 1970-ih sa AI tehnologijom 2020-ih: brza zamena modula na terenu, bez tehničara, a AI predviđa kvar danima unapred.",
+    "mission": "Modularnost iz 1970-ih + moderna dijagnostika: dizajnirano za brzu zamenu modula i prediktivno održavanje.",
     "stats": {
       "guarantee": "15+",
-      "guaranteeLabel": "godina životnog veka",
+      "guaranteeLabel": "godina projektovano",
       "refund": "<1m",
-      "refundLabel": "zamena modula"
+      "refundLabel": "cilj zamene"
     }
   },
   "contact": {
     "title": "Kontakt",
-    "subtitle": "Spremni za budućnost bez kompromisa?",
+    "subtitle": "Javite nam se",
     "form": {
       "name": "Ime i prezime",
       "email": "Email adresa",
@@ -431,7 +429,7 @@
     "coordination": "Koordinacija",
     "wireless": "Bežična sinhronizacija",
     "selfHealing": {
-      "title": "Samoizlečenje: Tradicionalno vs ELEKTROKOMBINACIJA",
+      "title": "Vreme odziva: Tradicionalno vs ELEKTROKOMBINACIJA",
       "traditional": {
         "title": "Tradicionalni pristup",
         "steps": [
@@ -454,7 +452,7 @@
           "Punjenje OK",
           "Bus nastavlja"
         ],
-        "result": "Ukupno: 2 minuta!"
+        "result": "Cilj: ~2 minuta"
       }
     },
     "stats": {

@@ -1,0 +1,37 @@
+TC397XP Emulator - JEZGRO Firmware Boot Log
+============================================
+Date: 2026-01-20
+Firmware: jezgro-tricore.elf
+Emulator: tcpxxx-emu (commit: see git log)
+
+=== Execution Summary ===
+  Instructions:  1,000,000
+  Cycles:        12,293,552
+  Final PC:      0x8000560A (idle loop)
+  Final State:   RUNNING
+
+=== Boot Sequence ===
+1. ELF loaded with toolchain bug workarounds
+2. crt0 startup assembly executed
+3. CSA initialization (128 entries)
+4. .data/.bss initialization complete
+5. C startup (_startup_tc397xp) called
+6. Idle loop entered - calling __nop repeatedly
+
+=== CSA Configuration ===
+  Region: 0x70033D40
+  Entries: 128 (8KB total)
+  FCX/LCX: Properly initialized
+  Link format: bits[19:16]=segment, bits[15:0]=offset/64
+
+=== Notes ===
+- Single core (CPU0) active
+- Timing annotations present but NOT validated
+- Peripheral stubs (STM, ASCLIN) not exercised in this run
+
+=== Verification ===
+This log demonstrates functional instruction execution.
+It does NOT validate:
+- Cycle timing accuracy
+- Peripheral behavior
+- Multi-core operation

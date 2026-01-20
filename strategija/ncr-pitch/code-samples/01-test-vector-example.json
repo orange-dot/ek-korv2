@@ -1,0 +1,20 @@
+{
+  "description": "Example test vector - shared between C and Rust implementations",
+  "test": "leader_election_timeout",
+  "initial_state": {
+    "role": "follower",
+    "term": 5,
+    "votes_received": 0,
+    "election_timeout_ms": 150
+  },
+  "input": {
+    "event": "timeout_elapsed",
+    "elapsed_ms": 200
+  },
+  "expected_output": {
+    "role": "candidate",
+    "term": 6,
+    "voted_for": "self",
+    "action": "broadcast_vote_request"
+  }
+}

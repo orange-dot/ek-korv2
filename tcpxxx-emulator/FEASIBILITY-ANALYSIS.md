@@ -91,10 +91,12 @@ This level of fidelity costs **100-1000x performance** compared to functional em
 | Task scheduling | Functional | Preemption logic, not performance |
 | Multi-core sync | Functional + ordering | Happens-before relationships matter, not cycles |
 | Driver development | Functional + peripheral timing | Register access correctness |
-| WCET analysis | Instruction-accurate (~10% error) | Rough timing bounds |
+| WCET analysis | Instruction-accurate (theoretical) | Rough timing bounds |
 | Hard real-time validation | **Hardware only** | Cannot rely on emulation |
 
-The recommended architecture: **functional emulation (QEMU-based) with timing annotations** for memory access wait states and instruction classes. This achieves ~10% cycle count error at speeds comparable to native execution—acceptable for all OS development activities except final timing certification, which requires hardware validation regardless.
+> **Note:** The "instruction-accurate" timing for WCET analysis is a theoretical goal. Current emulator status: Timing accuracy is NOT validated (SCU/PLL emulation incomplete).
+
+The recommended architecture: **functional emulation (QEMU-based) with timing annotations** for memory access wait states and instruction classes. This can theoretically achieve ~10% cycle count error at speeds comparable to native execution—acceptable for all OS development activities except final timing certification, which requires hardware validation regardless.
 
 ## Legal path is clear; patent risk requires professional assessment
 

@@ -1,5 +1,7 @@
 # EK-KOR v2 HAL for Raspberry Pi 3B+ (BCM2837B0)
 
+> **⚠️ Experimental:** This HAL was developed because we had RPi3 hardware available for testing. It is NOT the target production platform. Production deployment targets STM32G474 (L1) and AURIX TC375 (L2).
+
 Bare-metal AArch64 HAL for running EK-KOR v2 on the Raspberry Pi 3B+.
 
 ## Features

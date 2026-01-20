@@ -191,7 +191,7 @@ Continuous integration should include cargo clippy for linting, cargo test with 
 
 ## 5. Novel RTOS Feature Implementation
 
-### 5.1 Potential Field Scheduler
+### 5.1 Potential Field Scheduler [Production]
 
 The potential field scheduler replaces traditional priority-based scheduling with gradient-mediated coordination. Each module maintains decaying potential fields in shared memory indicating execution load, thermal state, and power consumption trajectory. Scheduling decisions emerge from gradient-following behavior rather than explicit priority assignment.
 
@@ -207,7 +207,7 @@ Shared memory synchronization employs double-buffering with sequence counters fo
 
 The coordination field structure in memory comprises a 32-bit load potential with decay time constant τ = 100 ms, a 32-bit thermal gradient tracking heat diffusion, a 32-bit power trajectory for consumption prediction, a 32-bit timestamp for staleness detection, and a 32-bit sequence counter for consistency checking.
 
-### 5.2 Topological Coordination with k=7 Neighbors
+### 5.2 Topological Coordination with k=7 Neighbors [Production]
 
 The breakthrough insight from Cavagna and Giardina's 2010 study of starling flocks reveals that collective behavior maintains scale-free correlations when each individual interacts with a fixed number of topological neighbors regardless of absolute distance. Their empirical observation of k ≈ 6-7 neighbors provides the theoretical foundation for the EK-KOR coordination protocol.
 
@@ -221,7 +221,7 @@ The coordination protocol operates as follows. Each module periodically broadcas
 
 Fault detection leverages the topological structure. When a neighbor misses three consecutive heartbeats, the detecting module initiates Byzantine-tolerant consensus among its remaining neighbors. With k=7, the system tolerates up to 2 malicious or faulty neighbors per node while achieving consensus with 5 agreeing votes, satisfying the N ≥ 3f + 1 requirement for f Byzantine faults.
 
-### 5.3 Threshold Consensus Protocol
+### 5.3 Threshold Consensus Protocol [Production]
 
 The threshold consensus mechanism enables distributed decision-making for system-wide mode transitions without requiring a central coordinator. The protocol draws inspiration from quorum sensing in biological systems, where organisms respond to population density through concentration-dependent signaling.
 
@@ -233,7 +233,7 @@ Mutual inhibition prevents conflicting proposals from achieving simultaneous con
 
 Density-dependent activation provides natural scaling behavior. The activation threshold adjusts based on the number of participating modules, preventing small subsets from achieving consensus on decisions affecting the entire fleet. A minimum participation requirement ensures that consensus represents genuine fleet-wide agreement.
 
-### 5.4 Zero-Copy IPC Implementation
+### 5.4 Zero-Copy IPC Implementation [Production]
 
 Zero-copy inter-process communication minimizes latency for intra-module data exchange between tasks. The implementation adapts principles from Eclipse iceoryx, which achieves sub-microsecond IPC latency in Linux environments.
 
@@ -243,7 +243,7 @@ Performance measurements on STM32G474 at 170 MHz demonstrate typical put operati
 
 CAN-FD serves as a synchronization signal layer for cross-node coordination rather than a data transport mechanism. Notification messages with minimal payload (single byte containing sequence number) trigger consumers to check shared memory for new data. This hybrid approach combines the reliability of CAN arbitration with the efficiency of shared memory access.
 
-### 5.5 Capability-Based Isolation
+### 5.5 Capability-Based Isolation [Prototype]
 
 Hardware capability enforcement as implemented in CHERIoT requires specialized silicon not available in standard Cortex-M4 devices. The EK-KOR system approximates capability semantics through MPU regions combined with cryptographic tokens.
 
@@ -255,7 +255,7 @@ Token verification costs approximately 70-110 µs (12,000-18,000 cycles at 170 M
 
 Revocation maintains a kernel-space list of invalidated nonces, checked during token verification. Periodic compaction removes expired entries to bound list size. The revocation list size of 64 entries accommodates typical task churn while limiting search overhead.
 
-### 5.6 Adaptive Mesh Reformation
+### 5.6 Adaptive Mesh Reformation [Production]
 
 When modules fail, the surviving network must redistribute load and reform logical topology without manual intervention. The adaptive mesh reformation protocol enables self-healing behavior that maintains system functionality despite component failures.
 
@@ -267,7 +267,9 @@ Topology rebuild selects replacement neighbors using the same logical distance m
 
 Load redistribution uses the potential field mechanism. Failed node's load creates an attractive potential, and surviving neighbors absorb load proportional to their available capacity. The process completes within seconds without central coordination.
 
-### 5.7 Differentiable Symbolic Policy Learning
+### 5.7 Differentiable Symbolic Policy Learning [Research]
+
+> **Note:** This feature requires offline training infrastructure. Training is performed on development workstations, not on embedded targets. Only the inference (compiled decision trees/rule bases) runs on the STM32G474.
 
 While the previous features are directly implementable on the STM32G474, learned symbolic policies represent a more speculative capability requiring offline training infrastructure. The pathway from training to deployment is nonetheless tractable for the EK-KOR system.
 

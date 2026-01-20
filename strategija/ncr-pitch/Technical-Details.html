@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Technical Details</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Technical Details</h1>
+</header>
+<h1
+id="technical-details-engineering-practices-from-side-project">Technical
+Details: Engineering Practices from Side Project</h1>
+<p><strong>Supplementary material for email to NCR Voyix CTO</strong>
+<strong>Author:</strong> Bojan Janjatovic, Senior Software Engineer,
+Platform Engineering <strong>Date:</strong> January 2026</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li>Dual-Implementation Verification</li>
+<li>Agentic AI Development with Guardrails</li>
+<li>Go for Backend Services</li>
+<li>Rust for Security-Critical Parsers</li>
+<li>Distributed Consensus for Edge Devices</li>
+<li>Emulation-Based Testing</li>
+<li>Symbolic AI for Deterministic Systems</li>
+</ol>
+<hr />
+<h2 id="dual-implementation-verification">1. Dual-Implementation
+Verification</h2>
+<h3 id="architecture">Architecture</h3>
+<pre><code>┌─────────────┐                           ┌─────────────┐
+│  C impl     │                           │  Rust impl  │
+│  (embedded) │                           │  (verification) │
+└──────┬──────┘                           └──────┬──────┘
+       │                                         │
+       ▼                                         ▼
+┌─────────────────────────────────────────────────────────┐
+│              Shared JSON Test Vectors                   │
+│              (human-written, canonical)                 │
+│                                                         │
+│  • Input states, expected outputs                       │
+│  • Edge cases defined once, tested in both languages    │
+│  • Language-agnostic specification                      │
+└─────────────────────────────────────────────────────────┘
+       │                                         │
+       ▼                                         ▼
+   ┌───────┐                                 ┌───────┐
+   │ Pass? │                                 │ Pass? │
+   └───────┘                                 └───────┘
+       │                                         │
+       └──────────────────┬──────────────────────┘
+                          ▼
+                   Both must match</code></pre>
+<h3 id="test-vector-example">Test Vector Example</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;test&quot;</span><span class="fu">:</span> <span class="st">&quot;leader_election_timeout&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;initial_state&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;follower&quot;</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;term&quot;</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;votes_received&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;election_timeout_ms&quot;</span><span class="fu">:</span> <span class="dv">150</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;input&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;event&quot;</span><span class="fu">:</span> <span class="st">&quot;timeout_elapsed&quot;</span><span class="fu">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;elapsed_ms&quot;</span><span class="fu">:</span> <span class="dv">200</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;expected_output&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;candidate&quot;</span><span class="fu">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;term&quot;</span><span class="fu">:</span> <span class="dv">6</span><span class="fu">,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;voted_for&quot;</span><span class="fu">:</span> <span class="st">&quot;self&quot;</span><span class="fu">,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;action&quot;</span><span class="fu">:</span> <span class="st">&quot;broadcast_vote_request&quot;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="why-this-works">Why This Works</h3>
+<ul>
+<li><strong>Different failure modes</strong>: C bugs (buffer overflows,
+pointer errors) differ from Rust bugs (logic errors, type
+mismatches)</li>
+<li><strong>AI cross-check</strong>: If AI generates C code with a
+subtle bug, it’s unlikely to generate the identical bug in Rust</li>
+<li><strong>Specification as code</strong>: JSON vectors serve as
+executable documentation</li>
+</ul>
+<hr />
+<h2 id="agentic-ai-development---two-modes">2. Agentic AI Development -
+Two Modes</h2>
+<p>Not all tasks are equal. I distinguish between two fundamentally
+different modes of AI-assisted development:</p>
+<h3 id="mode-a-extreme-agentic-autonomous">Mode A: Extreme Agentic
+(Autonomous)</h3>
+<pre><code>EXTREME AGENTIC MODE
+─────────────────────────────────────────────────────────────
+When to use:
+  • Well-defined implementation task
+  • Clear success criteria exist (test vectors, specs)
+  • Correctness is automatically verifiable
+
+How it works:
+  1. Human defines task and success criteria
+  2. AI works autonomously for 1+ hours
+  3. No human input during session
+  4. AI commits to git, runs tests, iterates
+  5. Human reviews RESULT, not every step
+
+Verification:
+  • Test vectors pass in both C and Rust → implementation correct
+  • Emulation tests pass → behavior correct
+  • Human reviews final diff, not intermediate steps
+
+Example tasks:
+  • &quot;Implement heartbeat protocol per this spec&quot;
+  • &quot;Add thermal derating per this formula&quot;
+  • &quot;Parse CAN message ID 0x300 per this format&quot;
+─────────────────────────────────────────────────────────────</code></pre>
+<h3 id="mode-b-human-in-the-loop-guided">Mode B: Human-in-the-Loop
+(Guided)</h3>
+<pre><code>HUMAN-IN-THE-LOOP MODE
+─────────────────────────────────────────────────────────────
+When to use:
+  • Exploratory work, research
+  • Architecture decisions
+  • No clear test criteria
+  • Correctness cannot be automatically verified
+
+How it works:
+  1. Human and AI collaborate step-by-step
+  2. Human reviews each proposed change
+  3. Explicit permission grants per action
+  4. Slower, but necessary for ambiguous tasks
+
+Example tasks:
+  • &quot;Help me design the state machine&quot;
+  • &quot;What&#39;s the best approach for X?&quot;
+  • &quot;Refactor this module for clarity&quot;
+  • &quot;Write documentation for this feature&quot;
+─────────────────────────────────────────────────────────────</code></pre>
+<h3 id="decision-matrix">Decision Matrix</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   Can correctness be          YES → EXTREME AGENTIC         │
+│   automatically verified?           (autonomous, fast)      │
+│   (test vectors, specs)                                     │
+│                               NO  → HUMAN-IN-THE-LOOP       │
+│                                     (guided, careful)       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="key-insight">Key Insight</h3>
+<p>Test vectors are the enabler of autonomous AI development. Without
+them, human oversight is mandatory. The dual-implementation approach (C
++ Rust + shared vectors) creates the verification infrastructure that
+makes extreme agentic mode safe.</p>
+<pre><code>TEST VECTORS → AUTONOMOUS AI POSSIBLE
+NO TEST VECTORS → HUMAN MUST GUIDE</code></pre>
+<p>This matches how we think about other automation: automated testing
+enables continuous deployment; without tests, manual QA is required.</p>
+<hr />
+<h2 id="go-for-backend-services">3. Go for Backend Services</h2>
+<h3 id="no-magic-programming">No Magic Programming</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Go: Explicit error handling - no hidden control flow</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Simulation<span class="op">)</span> AddModule<span class="op">(</span>id <span class="dt">uint8</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> id <span class="op">&gt;=</span> MaxModules <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;module ID %d exceeds max %d&quot;</span><span class="op">,</span> id<span class="op">,</span> MaxModules<span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> exists <span class="op">:=</span> s<span class="op">.</span>modules<span class="op">[</span>id<span class="op">];</span> exists <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ErrModuleAlreadyExists</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>What “no magic” means in practice:</strong> - No exceptions
+flying up the stack invisibly - No inheritance hierarchies to trace - No
+decorators, annotations, or runtime reflection surprises - No dependency
+injection frameworks with hidden wiring - Code reads top-to-bottom,
+left-to-right</p>
+<p><em>When debugging at 3 AM, “boring” code is a feature.</em></p>
+<h3 id="docker-container-benefits">Docker / Container Benefits</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Go Dockerfile - entire thing</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> scratch</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> myservice /myservice</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">ENTRYPOINT</span> [<span class="st">&quot;/myservice&quot;</span>]</span></code></pre></div>
+<h3 id="container-image-size-comparison">Container Image Size
+Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Image Size</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Java (Spring Boot)</td>
+<td>400-800 MB</td>
+<td>JVM + dependencies</td>
+</tr>
+<tr>
+<td>Python (Flask)</td>
+<td>150-400 MB</td>
+<td>Interpreter + packages</td>
+</tr>
+<tr>
+<td>Node.js (Express)</td>
+<td>150-300 MB</td>
+<td>Runtime + node_modules</td>
+</tr>
+<tr>
+<td><strong>Go</strong></td>
+<td><strong>10-20 MB</strong></td>
+<td>Static binary, no runtime</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why this matters:</strong> - Faster deployments (10 MB pulls
+faster than 400 MB) - Smaller attack surface (no runtime = fewer CVEs) -
+FROM scratch possible (empty base image) - No runtime dependencies -
+Millisecond startup (no JVM warmup)</p>
+<h3 id="go-benefits-summary">Go Benefits Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Go Advantage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Error handling</td>
+<td>Explicit, in-band, no hidden flow</td>
+</tr>
+<tr>
+<td>Inheritance</td>
+<td>None - composition only</td>
+</tr>
+<tr>
+<td>Dependencies</td>
+<td>Single binary, zero runtime deps</td>
+</tr>
+<tr>
+<td>Containers</td>
+<td>10 MB images, FROM scratch</td>
+</tr>
+<tr>
+<td>Startup</td>
+<td>Milliseconds</td>
+</tr>
+<tr>
+<td>Concurrency</td>
+<td>Built-in race detector</td>
+</tr>
+<tr>
+<td>Learning curve</td>
+<td>Small language, readable in days</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="rust-for-security-critical-parsers">4. Rust for
+Security-Critical Parsers</h2>
+<h3 id="code-example">Code Example</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Rust: Compiler enforces handling all cases</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> ModuleState <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    Offline<span class="op">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    Initializing <span class="op">{</span> start_time<span class="op">:</span> Instant <span class="op">},</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    Online <span class="op">{</span> neighbor_count<span class="op">:</span> <span class="dt">u8</span> <span class="op">},</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    Fault <span class="op">{</span> code<span class="op">:</span> FaultCode<span class="op">,</span> recoverable<span class="op">:</span> <span class="dt">bool</span> <span class="op">},</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="cf">match</span> module<span class="op">.</span>state <span class="op">{</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="pp">ModuleState::</span>Offline <span class="op">=&gt;</span> <span class="kw">self</span><span class="op">.</span>start_discovery()<span class="op">,</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="pp">ModuleState::</span>Fault <span class="op">{</span> recoverable<span class="op">:</span> <span class="cn">true</span><span class="op">,</span> <span class="op">..</span> <span class="op">}</span> <span class="op">=&gt;</span> <span class="kw">self</span><span class="op">.</span>attempt_recovery()<span class="op">,</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="pp">ModuleState::</span>Fault <span class="op">{</span> recoverable<span class="op">:</span> <span class="cn">false</span><span class="op">,</span> <span class="op">..</span> <span class="op">}</span> <span class="op">=&gt;</span> <span class="kw">self</span><span class="op">.</span>halt()<span class="op">,</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Compiler error if cases not exhaustive</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="rust-benefits">Rust Benefits</h3>
+<ul>
+<li>No null pointer dereferences (Option<T> instead)</li>
+<li>No data races (borrow checker enforces at compile time)</li>
+<li>Pattern matching forces handling all cases</li>
+<li>Memory safety without garbage collection</li>
+</ul>
+<hr />
+<h2 id="distributed-consensus-for-edge-devices">5. Distributed Consensus
+for Edge Devices</h2>
+<h3 id="architecture-comparison">Architecture Comparison</h3>
+<pre><code>TRADITIONAL                      DISTRIBUTED
+─────────────────────────────────────────────────────────────
+┌─────────────┐                 ┌─────────────┐
+│  Central    │                 │  Device A   │◄──┐
+│  Controller │                 └─────────────┘   │
+└──────┬──────┘                 ┌─────────────┐   │ peer-to-peer
+       │                        │  Device B   │◄──┼─── consensus
+       ▼                        └─────────────┘   │
+┌──────────────┐                ┌─────────────┐   │
+│ All devices  │                │  Device C   │◄──┘
+│ depend on it │                └─────────────┘
+└──────────────┘
+                                Any device can lead.
+Single point of failure.        Others continue if one fails.</code></pre>
+<h3 id="key-insight-1">Key Insight</h3>
+<p>The same Raft consensus used in etcd/Consul works for coordinating
+physical devices, not just database replicas.</p>
+<hr />
+<h2 id="emulation-based-testing">6. Emulation-Based Testing</h2>
+<h3 id="renode-architecture">Renode Architecture</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    RENODE EMULATOR                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ STM32G474   │  │  CAN-FD     │  │  Simulated  │         │
+│  │ (emulated)  │──│  Bus        │──│  Neighbors  │         │
+│  │             │  │  (virtual)  │  │             │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│                                                             │
+│  Runs ACTUAL firmware binary, not simulation                │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="benefits">Benefits</h3>
+<ul>
+<li>Test firmware without hardware</li>
+<li>Reproducible CI/CD pipeline</li>
+<li>Catch “works on my machine” issues</li>
+<li>Test failure scenarios safely</li>
+</ul>
+<hr />
+<h2 id="symbolic-ai-for-deterministic-systems">7. Symbolic AI for
+Deterministic Systems</h2>
+<h3 id="llm-vs-safety-critical-requirements">LLM vs Safety-Critical
+Requirements</h3>
+<pre><code>LLM CHARACTERISTICS
+─────────────────────────────────────────────────────────────
+✗ Non-deterministic    Same input can produce different output
+✗ No guarantees        &quot;Usually correct&quot; ≠ &quot;always correct&quot;
+✗ Black box            Cannot prove why a decision was made
+✗ Hallucinations       Confidently wrong outputs
+✗ No formal verification possible
+
+REQUIRED FOR SAFETY-CRITICAL SYSTEMS
+─────────────────────────────────────────────────────────────
+✓ Deterministic        Same input → same output, always
+✓ Provable             Can formally verify correctness
+✓ Explainable          Clear audit trail of decisions
+✓ Bounded behavior     Known limits, predictable edge cases
+✓ Certifiable          Meets ISO 26262, IEC 61508, etc.</code></pre>
+<h3 id="symbolic-ai-approach">Symbolic AI Approach</h3>
+<pre><code>RULE ENGINE EXAMPLE
+─────────────────────────────────────────────────────────────
+IF voltage &gt; 920V AND current &gt; 0
+  THEN fault(OVERVOLTAGE), action(DISCONNECT)
+
+IF temperature &gt; 85°C AND power &gt; 2.5kW
+  THEN action(DERATE), set_power(2.0kW)
+
+IF heartbeat_timeout &gt; 500ms
+  THEN state(SUSPECT), action(PROBE)
+─────────────────────────────────────────────────────────────
+
+Results:
+• DETERMINISTIC  - Same conditions → same actions
+• EXPLAINABLE    - &quot;Why did it disconnect?&quot; → logged rule
+• TESTABLE       - Every rule has explicit test cases
+• CERTIFIABLE    - Formal methods can prove properties</code></pre>
+<h3 id="automotive-certification-example-iso-26262">Automotive
+Certification Example (ISO 26262)</h3>
+<p><strong>Requirement:</strong> Demonstrate that software behaves
+correctly under ALL conditions</p>
+<ul>
+<li><strong>LLM approach:</strong> “It worked in 99.7% of test cases” →
+NOT CERTIFIABLE</li>
+<li><strong>Symbolic approach:</strong> “Here is formal proof that
+condition X always produces action Y” → CERTIFIABLE</li>
+</ul>
+<h3 id="hybrid-approach-llm-symbolic">Hybrid Approach: LLM +
+Symbolic</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   LLM (Claude, GPT)              SYMBOLIC LAYER             │
+│   ─────────────────              ─────────────────          │
+│   • Development assistance       • Runtime decisions        │
+│   • Code generation              • Safety interlocks        │
+│   • Documentation                • Fault handling           │
+│   • Test case ideation           • State machine logic      │
+│                                                             │
+│   Used at DESIGN TIME            Used at RUN TIME           │
+│   (human in the loop)            (deterministic execution)  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<p><strong>My project uses both:</strong> - LLM (Claude) helps write
+code, explore designs, generate documentation - Symbolic logic (state
+machines, explicit rules) runs on the actual device - The LLM never runs
+in production - only deterministic code does</p>
+<h3 id="expert-systems-renaissance">Expert Systems Renaissance</h3>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 37%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>Era</th>
+<th>Approach</th>
+<th>Limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1980s</td>
+<td>Expert systems</td>
+<td>Knowledge acquisition bottleneck</td>
+</tr>
+<tr>
+<td>2020s</td>
+<td>LLMs</td>
+<td>Non-deterministic, can’t certify</td>
+</tr>
+<tr>
+<td>Now</td>
+<td>Hybrid</td>
+<td>LLM helps BUILD expert systems, symbolic logic RUNS them</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="contact">Contact</h2>
+<p>Bojan Janjatovic Senior Software Engineer, Platform Engineering NCR
+Voyix</p>
+<p><em>Available for deeper discussion on any of these topics.</em></p>
+</body>
+</html>

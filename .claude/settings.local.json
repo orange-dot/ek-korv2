@@ -170,7 +170,17 @@
       "Bash(python3:*)",
       "WebFetch(domain:www.zephyrproject.org)",
       "WebFetch(domain:docs.zephyrproject.org)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(pandoc:*)",
+      "WebFetch(domain:www.infineon.com)",
+      "Bash(xargs ls:*)",
+      "Bash(robocopy:*)",
+      "Bash([ $? -lt 8 ])",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File deploy-ftp.ps1)",
+      "WebFetch(domain:rockstart.com)",
+      "WebFetch(domain:rockstart.pr.co)",
+      "Bash(certutil:*)",
+      "Bash(7z l:*)"
     ]
   }
 }

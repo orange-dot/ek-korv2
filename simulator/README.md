@@ -1,123 +1,54 @@
-# EK Simulator: Physics-First Digital Twin
+# EK Simulator
 
-## Why This Matters for Google
+## Overview
 
-**One sentence:** We built a physics-accurate digital twin before spending a dollar on hardware.
+Physics simulation of the EK3 charging system built in Go. Enables pre-hardware validation of distributed RTOS algorithms and power electronics control strategies.
 
-### The Problem with Traditional Hardware Development
+### Simulation Capabilities
 
-1. **Build first, learn later** - Traditional approach builds prototypes, finds problems, iterates
-2. **Expensive failures** - Hardware bugs cost 10-100x more to fix than software bugs
-3. **Integration surprises** - System behaviors emerge only when components connect
-4. **Slow iteration** - Each hardware cycle takes weeks/months
+- **Thermal modeling** - 3-node RC network with Arrhenius degradation
+- **Electrical modeling** - LLC converter with V2G droop control
+- **Battery modeling** - SoC/SoH with CC/CV charging
+- **Reliability modeling** - Bayesian RUL estimation
 
-### Our Approach: Simulate Everything First
-
-We built a complete physics simulation of the EK3 charging system in Go:
+### Technical Stack
 
 ```
 simulator/
 ├── engine/           # Go physics engine (3,700+ LOC)
-│   ├── models/       # Physical models
-│   │   ├── thermal.go      # RC network + Arrhenius degradation
-│   │   ├── electrical.go   # LLC converter + V2G droop control
-│   │   ├── battery.go      # SoC/SoH + CC/CV charging
-│   │   └── reliability.go  # Bayesian fault prediction
-│   └── engine/       # Entity simulation
-│       ├── module.go       # EK3 3.3kW module
-│       ├── entities.go     # Racks, buses, stations, robots
-│       ├── canbus.go       # CAN-FD network simulation
-│       └── simulation.go   # Main loop + Redis pub/sub
+│   └── models/       # Physical models (thermal, electrical, battery, reliability)
 └── api/              # TypeScript API (WebSocket + REST)
 ```
 
-### Physics Models - Not Mockups
+### Use Cases
 
-**Thermal Model** (`thermal.go`)
-- 3-node RC network (junction → heatsink → ambient)
-- Arrhenius degradation: lifetime halves every 10°C above rated
-- Coffin-Manson thermal cycling: ΔT impacts fatigue life
-
-**Electrical Model** (`electrical.go`)
-- LLC resonant converter with variable frequency control
-- MOSFET conduction + switching losses with RdsOn aging
-- V2G droop control: frequency → active power, voltage → reactive power
-
-**Battery Model** (`battery.go`)
-- Equivalent circuit with R0, R1||C1
-- CC/CV charging with temperature-dependent C-rate limits
-- Calendar + cycle aging using Arrhenius + Ah-throughput
-
-**Reliability Model** (`reliability.go`)
-- Exponential failure rate with Weibull early/wear-out
-- Bayesian RUL estimation from ESR/RdsOn measurements
-- Swarm intelligence for distributed sparing
-
-### Why Go?
-
-1. **Concurrency** - Each entity (module, bus, robot) runs in its own goroutine
-2. **Performance** - 10,000 tick/sec simulation with 84+ modules
-3. **Simplicity** - Single binary, no runtime dependencies
-4. **Type safety** - Catch physics errors at compile time
-
-### Demo Scenarios
-
-The API supports injecting scenarios for live demos:
-
-| Scenario | What Happens | What It Shows |
-|----------|--------------|---------------|
-| `normal` | Standard day operation | Baseline metrics |
-| `peak` | 250kW demand spike | Module coordination |
-| `module-failure` | Single module fault | Swarm redistribution |
-| `cascade` | 5 simultaneous faults | Resilience under stress |
-| `v2g-response` | Grid frequency dip | Automatic V2G dispatch |
-
-### Architecture Benefits
-
-```
-┌─────────────────────────────────────────────────────┐
-│                     Web Frontend                      │
-│  (React + WebSocket)                                  │
-└─────────────────────────┬───────────────────────────┘
-                          │ WebSocket
-┌─────────────────────────▼───────────────────────────┐
-│                   TypeScript API                      │
-│  (Fastify + Redis Pub/Sub)                           │
-└─────────────────────────┬───────────────────────────┘
-                          │ Redis
-┌─────────────────────────▼───────────────────────────┐
-│                   Go Physics Engine                   │
-│  - 100ms tick rate                                    │
-│  - Parallel entity updates                            │
-│  - Time scaling (1x - 1000x)                         │
-└─────────────────────────────────────────────────────┘
-```
-
-**Decoupled layers:**
-- Frontend can be replaced (React → Flutter → native)
-- API can scale horizontally
-- Engine can run headless in CI/CD
-
-### What This Enables
-
-1. **Design validation** - Test algorithms before building hardware
+1. **Algorithm development** - Test RTOS coordination without hardware
 2. **Failure mode analysis** - Inject faults safely
-3. **Performance optimization** - Profile thermal/electrical tradeoffs
-4. **Training data generation** - ML models need labeled data
-5. **Customer demos** - Show behavior without physical prototype
+3. **Thermal/electrical tradeoffs** - Optimize before building
+4. **Demo scenarios** - Show system behavior to stakeholders
 
-### The Pitch
+---
 
-> "Most hardware startups show you a prototype and hope it works.
-> We show you a simulation that already works, then build hardware
-> that matches it."
+## Validation Status
 
-This is the same approach used by:
-- SpaceX (Falcon 9 sim before launch)
-- Tesla (Autopilot sim before road testing)
-- Waymo (simulation miles before real miles)
+> **Important:** This simulator is a physics-based model. It has NOT been validated against real hardware measurements.
 
-We're applying it to power electronics.
+| Model | Validation Status |
+|-------|-------------------|
+| Thermal (RC network) | Simulated only - parameters from datasheets |
+| Electrical (LLC) | Simulated only - efficiency curves estimated |
+| Battery (SoC/SoH) | Simulated only - no real cell data |
+| Reliability | Simulated only - statistical models |
+
+### What This Means
+- Performance numbers (10,000 tick/sec, 84 modules) are simulation metrics
+- Physics models use textbook parameters, not measured values
+- Real hardware may behave differently
+
+### Planned Validation
+- [ ] Compare thermal model with thermocouple measurements
+- [ ] Validate electrical efficiency against bench tests
+- [ ] Calibrate battery model with actual cell cycling data
 
 ---
 
@@ -216,6 +147,16 @@ curl -X POST http://localhost:8000/api/simulation/scenario \
   -d '{"scenario": "cascade"}'
 ```
 
+## Demo Scenarios
+
+| Scenario | What Happens | What It Shows |
+|----------|--------------|---------------|
+| `normal` | Standard day operation | Baseline metrics |
+| `peak` | 250kW demand spike | Module coordination |
+| `module-failure` | Single module fault | Swarm redistribution |
+| `cascade` | 5 simultaneous faults | Resilience under stress |
+| `v2g-response` | Grid frequency dip | Automatic V2G dispatch |
+
 ## Entity States
 
 ### EK3 Module
@@ -263,9 +204,9 @@ curl -X POST http://localhost:8000/api/simulation/scenario \
 ### Thermal Model
 - Junction temperature (Tj) based on power loss
 - 3-node RC thermal network
-- Arrhenius degradation for capacitors (lifetime halves per 10°C)
+- Arrhenius degradation for capacitors (lifetime halves per 10C)
 - Coffin-Manson thermal cycling
-- Derating curve: 100% @ 35°C → 0% @ 60°C
+- Derating curve: 100% @ 35C -> 0% @ 60C
 
 ### Electrical Model
 - LLC resonant converter efficiency curves

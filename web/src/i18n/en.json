@@ -208,14 +208,14 @@
     "era3": {
       "title": "ELEKTROKOMBINACIJA",
       "period": "1970s Modularity + 2020s AI",
-      "description": "We combine the best of both worlds: highly modular design enabling fast field replacement, with modern AI diagnostics that predict failures and robotic automation for swap.",
+      "description": "Modular design for field replacement, AI diagnostics for failure prediction, robotic swap for speed.",
       "features": [
-        "AI predicts failure 2 weeks ahead",
-        "Robot swaps module under a minute",
-        "No technician needed in the field",
-        "Module is repaired at service center - by humans"
+        "AI monitors module health for early warning",
+        "Designed for robotic module swap",
+        "Field operations without technician (design goal)",
+        "Module repaired at service center - by humans"
       ],
-      "result": "15+ year lifespan, zero downtime, circular economy"
+      "result": "Design goals: 15+ year lifespan, high availability, circular economy"
     },
     "workflow": {
       "title": "Service Process",
@@ -229,7 +229,7 @@
         {
           "title": "Automatic Swap",
           "description": "Robot at swap station replaces module without human intervention",
-          "time": "Under a minute"
+          "time": "Target: <1 min"
         },
         {
           "title": "Transport",
@@ -265,8 +265,8 @@
   },
   "selfHealingFleet": {
     "title": "Self-Healing Fleet",
-    "subtitle": "No technicians in the field. Ever.",
-    "description": "Buses carry spare EK3 modules. Robots quickly swap failed modules. Failed modules travel back to service center on regular bus routes. Zero truck rolls.",
+    "subtitle": "Autonomous field service",
+    "description": "Buses carry spare EK3 modules. Robots swap modules in under 60 seconds. Failed modules travel back to service center on regular bus routes. Zero truck rolls.",
     "steps": {
       "predict": {
         "title": "AI Predicts",
@@ -296,8 +296,8 @@
         "steps": ["Alarm", "Dispatch technician", "Drive to site", "Diagnose", "Order parts", "Repair"]
       },
       "ek": {
-        "title": "ELEKTROKOMBINACIJA",
-        "time": "2 minutes",
+        "title": "ELEKTROKOMBINACIJA (target)",
+        "time": "~2 min (design)",
         "steps": ["AI detects", "Robot A diagnoses", "Robot B swaps", "Bus continues"]
       }
     },
@@ -324,15 +324,13 @@
     "title": "ELEKTRO",
     "subtitle": "KOMBINACIJA",
     "tagline": "EV charger with predictive diagnostics",
-    "description": "AI that monitors system health, predicts issues, and enables intervention before failure. Goal: maximum reliability.",
+    "description": "Monitors system health, predicts failures, enables proactive replacement.",
     "cta": "Learn more",
     "stats": {
-      "power": "99%",
-      "powerLabel": "success rate",
-      "weight": "2 wks",
-      "weightLabel": "failure prediction",
-      "price": "0",
-      "priceLabel": "surprises"
+      "power": "71%",
+      "powerLabel": "industry FTCSR",
+      "weight": "Target:",
+      "weightLabel": "predictive maintenance"
     }
   },
   "problem": {
@@ -359,7 +357,7 @@
   "product": {
     "title": "EK3 Module",
     "subtitle": "One module for everything - from 3 kW to 3 MW",
-    "description": "Radical modularity inspired by 3PAR storage architecture. Same module scales from e-bike to MCS station.",
+    "description": "Modular design inspired by 3PAR storage architecture. Same module scales from e-bike to MCS station.",
     "phase1": {
       "title": "EK3 - BLADE FORMAT",
       "power": "3 kW",
@@ -401,7 +399,7 @@
       "modules": "Multiple EK3",
       "price": "Contact us",
       "description": "Cars, highway stations. Rack system, robot-ready module swap.",
-      "features": ["1-2 racks", "Fast swap", "99.9% uptime"]
+      "features": ["1-2 racks", "<60 sec swap (target)", "AI diagnostics"]
     },
     "swap": {
       "title": "Heavy Duty + MCS",
@@ -447,19 +445,19 @@
     }
   },
   "team": {
-    "title": "Our Vision",
+    "title": "Design Philosophy",
     "subtitle": "Return to modularity",
-    "mission": "The industry went down the integration path - everything in one chip, impossible to repair, planned obsolescence. But infrastructure isn't a phone. An EV charger should last 15+ years. We combine 1970s modularity with 2020s AI technology: fast module swap in the field, no technician needed, and AI predicts failures days ahead.",
+    "mission": "1970s-style modularity + modern diagnostics: designed for fast module swap and predictive maintenance.",
     "stats": {
       "guarantee": "15+",
-      "guaranteeLabel": "years lifespan",
+      "guaranteeLabel": "year design life",
       "refund": "<1m",
-      "refundLabel": "module swap"
+      "refundLabel": "swap target"
     }
   },
   "contact": {
     "title": "Contact",
-    "subtitle": "Ready for a no-compromise future?",
+    "subtitle": "Get in touch",
     "form": {
       "name": "Full name",
       "email": "Email address",
@@ -501,7 +499,7 @@
     "coordination": "Coordination",
     "wireless": "Wireless synchronization",
     "selfHealing": {
-      "title": "Self-Healing: Traditional vs ELEKTROKOMBINACIJA",
+      "title": "Response Time: Traditional vs ELEKTROKOMBINACIJA",
       "traditional": {
         "title": "Traditional approach",
         "steps": [
@@ -524,7 +522,7 @@
           "Charging OK",
           "Bus continues"
         ],
-        "result": "Total: 2 minutes!"
+        "result": "Target: ~2 minutes"
       }
     },
     "stats": {

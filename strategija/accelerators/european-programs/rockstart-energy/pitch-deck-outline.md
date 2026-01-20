@@ -2,8 +2,8 @@
 
 > **Document Purpose**: Structure and content guide for Rockstart Energy accelerator pitch deck
 > **Focus**: European market, energy transition, transport electrification
-> **Version**: 1.0
-> **Last Updated**: 2026-01-19
+> **Version**: 1.1
+> **Last Updated**: 2026-01-20
 > **Target Length**: 12-15 slides
 
 ---
@@ -324,7 +324,7 @@ IMPACT:
 ---
 
 ### Slide 11: Team
-**Header:** Hardware + Business, Serbia-Based
+**Header:** Hardware + Business, EU Company
 
 **Content:**
 ```
@@ -337,22 +337,22 @@ Operations & Business            Hardware & Technology
 • 100% full-time                 • Component-level debugging
                                  • 100% full-time
 
-SERBIA BASE ADVANTAGES:
-• Cost-effective R&D
-• EU candidate country
-• Technical talent pool
-• Gateway to Western Balkans
+COMPANY STRUCTURE:
+• Netherlands BV (EU incorporated)
+• R&D operations in Serbia
+• Cost-effective development
+• Full EU market access
 
 ADVISORY:
 • US-based infrastructure advisor (Microsoft/AT&T)
 ```
 
-**Visual:** Team photos + Serbia map showing EU proximity
+**Visual:** Team photos + Netherlands/Serbia map
 
 **Speaker Notes:**
 - "CEO handles business, CTO handles technology - classic split"
-- "Serbia is an EU candidate country with strong engineering talent"
-- "Cost-effective base with EU market access"
+- "Netherlands BV gives us full EU incorporation"
+- "Serbia R&D base keeps costs competitive while we scale"
 - "Both founders 100% committed"
 
 ---
@@ -378,8 +378,9 @@ PHASE 3: EU Scale (2028-2030)
 • MCS truck charging corridor
 
 MARKET SIZE (Bus Charging):
-• EU total: €XX billion by 2030
-• Target: 1% = €XX million
+• EU TAM: €6.8 billion by 2030
+• SAM (5 key countries): €1.34 billion
+• SOM (1% target by 2030): €13.4 million
 ```
 
 **Visual:** EU map with expansion arrows
@@ -467,14 +468,19 @@ ELEKTROKOMBINACIJA
 
 EK3: Modular EV Charging Infrastructure
 
-[Contact details]
-[LinkedIn profiles]
-[Website/demo link]
+Website: [to be added]
+Email: [to be added]
+Company: Netherlands BV
+R&D Base: Serbia
+
+GitHub Demo: github.com/elektrokombinacija/ek-kor2
 
 Ready to electrify Europe's bus fleets.
 ```
 
-**Visual:** Logo + contact info
+**Visual:** Logo + contact info + QR code to demo
+
+**Note:** Contact details to be filled by founders before submission
 
 ---
 
@@ -588,8 +594,8 @@ EK3 OPPORTUNITY:
 **"V2G regulatory challenges?"**
 > "EU is leading on V2G regulation. EN 50549 provides framework. Netherlands, Germany, UK have active V2G markets. Our modular approach makes compliance easier."
 
-**"Why Serbia as a base?"**
-> "EU candidate country with strong engineering talent. Cost-effective R&D. Direct experience with emerging market challenges. Gateway to Western Balkans - 20 million people electrifying transport."
+**"Why Netherlands incorporation with Serbia R&D?"**
+> "Netherlands BV gives us full EU company status - banking, contracts, IP protection. Serbia R&D keeps development costs 3-4x lower than Western Europe while we scale. We get the best of both: EU credibility and cost efficiency."
 
 ---
 
@@ -598,3 +604,4 @@ EK3 OPPORTUNITY:
 | Date | Change |
 |------|--------|
 | 2026-01-19 | Initial outline for Rockstart Energy application |
+| 2026-01-20 | Added market size numbers, contact details placeholder |

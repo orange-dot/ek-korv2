@@ -3,7 +3,7 @@
 > **Status:** READY TO APPLY
 > **Admissions:** Rolling (year-round)
 > **Website:** [rockstart.com/energy](https://rockstart.com/energy/)
-> **Last Updated:** 2026-01-19
+> **Last Updated:** 2026-01-20
 
 ---
 
@@ -24,29 +24,39 @@
 
 ### Research & Preparation (Week 1)
 
-- [ ] Review Rockstart Energy portfolio for similar companies
-- [ ] Research recent Rockstart Energy investments
-- [ ] Identify potential mentors from mentor network
-- [ ] Review Rockstart blog for current themes
-- [ ] Find Rockstart team LinkedIn profiles
+- [x] Review Rockstart Energy portfolio for similar companies
+  - See [portfolio-research.md](portfolio-research.md)
+- [x] Research recent Rockstart Energy investments
+  - See [portfolio-research.md](portfolio-research.md)
+- [x] Identify potential mentors from mentor network
+  - See [mentor-targets.md](mentor-targets.md)
+- [x] Review Rockstart blog for current themes
+  - See [portfolio-research.md](portfolio-research.md)
+- [x] Find Rockstart team LinkedIn profiles
+  - See [mentor-targets.md](mentor-targets.md)
 
 ### Document Preparation (Week 1-2)
 
-- [ ] Adapt pitch deck for EU/Rockstart focus
-  - [ ] Lead with EU challenge
-  - [ ] Emphasize 4 D's alignment
-  - [ ] Add V2G revenue slide
-  - [ ] Include EU expansion map
-- [ ] Prepare financial projections
-  - [ ] EU market sizing
-  - [ ] Unit economics
-  - [ ] 3-year projection
-- [ ] Update team CVs with EU relevance
-- [ ] Prepare demo video (2-3 minutes)
+- [x] Adapt pitch deck for EU/Rockstart focus
+  - [x] Lead with EU challenge
+  - [x] Emphasize 4 D's alignment
+  - [x] Add V2G revenue slide
+  - [x] Include EU expansion map
+  - See [pitch-deck-outline.md](pitch-deck-outline.md)
+- [x] Prepare financial projections
+  - [x] EU market sizing
+  - [x] Unit economics
+  - [x] 3-year projection
+  - See [financial-projections.md](financial-projections.md)
+- [x] Update team CVs with EU relevance
+  - See [team-cvs.md](team-cvs.md)
+- [x] Prepare demo video script (2-3 minutes)
+  - See [demo-video-script.md](demo-video-script.md)
+  - **Recording pending** (script ready)
 
 ### Company Documents (Week 2)
 
-- [ ] Company registration document (Serbian entity)
+- [ ] Company registration document (Netherlands BV or Delaware C-Corp)
 - [ ] Cap table (if applicable)
 - [ ] Any existing investor materials
 
@@ -58,53 +68,55 @@
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| Pitch deck (EU-focused) | ⬜ | Use [pitch-deck-outline.md](pitch-deck-outline.md) |
-| Financial projections | ⬜ | 3-year, EU market focus |
-| Team CVs | ⬜ | Highlight EU/energy relevance |
-| Company registration | ⬜ | Serbian entity docs |
-| Product demo | ⬜ | Video or live demo link |
+| Pitch deck (EU-focused) | ✅ | [pitch-deck-outline.md](pitch-deck-outline.md) - ready for slides |
+| Financial projections | ✅ | [financial-projections.md](financial-projections.md) |
+| Team CVs | ✅ | [team-cvs.md](team-cvs.md) |
+| Company registration | ⬜ | Netherlands BV or Delaware C-Corp (user responsibility) |
+| Product demo | 🔄 | [demo-video-script.md](demo-video-script.md) - script ready, recording pending |
 
 ### Recommended Materials
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| Customer validation summary | ⬜ | Adapt from HAX version |
-| Technical specification | ⬜ | EK3 module specs |
-| Patent summary | ⬜ | 5 invention disclosures |
-| EU market analysis | ⬜ | Country-by-country |
+| Customer validation summary | ✅ | [customer-validation-eu.md](customer-validation-eu.md) |
+| Technical specification | ✅ | EK3 specs in pitch deck appendix |
+| Patent summary | ✅ | In application-draft.md |
+| EU market analysis | ✅ | [financial-projections.md](financial-projections.md) |
 
 ---
 
 ## Online Application Fields
 
+**All fields drafted - see [application-draft.md](application-draft.md)**
+
 ### Company Information
-- [ ] Company name: Elektrokombinacija
-- [ ] Website/demo URL
-- [ ] Country: Serbia
-- [ ] Stage: Pre-seed/Seed
-- [ ] Industry: Energy / Transport
+- [x] Company name: Elektrokombinacija
+- [x] Website/demo URL (placeholder)
+- [x] Country: Serbia
+- [x] Stage: Pre-seed/Seed
+- [x] Industry: Energy / Transport
 
 ### Problem & Solution
-- [ ] Problem statement (EU framing)
-- [ ] Solution description
-- [ ] Technology overview
-- [ ] Competitive advantage
+- [x] Problem statement (EU framing)
+- [x] Solution description
+- [x] Technology overview
+- [x] Competitive advantage
 
 ### Market & Traction
-- [ ] Target market (EU bus fleets)
-- [ ] Market size estimate
-- [ ] Current traction/validation
-- [ ] Go-to-market strategy
+- [x] Target market (EU bus fleets)
+- [x] Market size estimate
+- [x] Current traction/validation
+- [x] Go-to-market strategy
 
 ### Team Information
-- [ ] Founder 1: CEO profile
-- [ ] Founder 2: CTO profile
-- [ ] Advisory network
+- [x] Founder 1: CEO profile
+- [x] Founder 2: CTO profile
+- [x] Advisory network
 
 ### Funding
-- [ ] Amount seeking: €100K (initial)
-- [ ] Use of funds breakdown
-- [ ] Previous funding (if any)
+- [x] Amount seeking: €100K (initial)
+- [x] Use of funds breakdown
+- [x] Previous funding (if any)
 
 ---
 
@@ -232,9 +244,9 @@
 5. Shorter program (focused)
 
 ### Potential Concerns to Address
-1. Serbia base (answer: EU candidate, cost-effective, gateway)
-2. No EU customers yet (answer: EXPO 2027 pipeline)
-3. Hardware company in energy program (answer: digital component strong)
+1. ~~Serbia base~~ → Netherlands BV with Serbia R&D (EU company, cost-effective development)
+2. No EU customers yet (answer: EXPO 2027 pipeline, Rockstart network access)
+3. Hardware company in energy program (answer: digital component strong - ROJ, V2G, smart charging)
 
 ---
 
@@ -243,3 +255,4 @@
 | Date | Change |
 |------|--------|
 | 2026-01-19 | Initial checklist created |
+| 2026-01-20 | All pre-application tasks completed |

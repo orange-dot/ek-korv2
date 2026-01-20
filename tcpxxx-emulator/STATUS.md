@@ -1,6 +1,6 @@
 # TriCore TC397XP Emulator - Development Status
 
-**Last Updated:** 2026-01-07
+**Last Updated:** 2026-01-20
 
 ## Current State
 
@@ -48,9 +48,12 @@ The firmware:
 ## Test Command
 
 ```bash
-cd D:/work/autobusi-punjaci/tcpxxx-emulator
+# From the emulator directory:
 cmake --build build --config Debug
-./build/Debug/tcpxxx-emu.exe --no-gdb ../pre-hw-dev-tricore/build/manual/jezgro-tricore.elf
+./build/Debug/tcpxxx-emu.exe --no-gdb <path-to-firmware.elf>
+
+# Example with test firmware:
+./build/Debug/tcpxxx-emu.exe --no-gdb test-firmware/jezgro-tricore.elf
 ```
 
 ## Key Files

@@ -1,32 +1,58 @@
 # TC397XP Functional Emulator
 
-Functional emulator for Infineon AURIX TC397XP (TriCore TC1.6.2P) with timing annotations.
+Functional emulator for Infineon AURIX TC397XP (TriCore TC1.6.2P).
 
-**Target accuracy:** ~10% cycle count error for RTOS development.
+> **Note:** This is a functional emulator for firmware bring-up. Timing/cycle accuracy is NOT validated (SCU/PLL emulation incomplete).
 
 ## Features
 
-- TriCore TC1.6.2P instruction set emulation
-- 6-core TC397XP configuration
-- Memory system with wait state modeling
+- TriCore TC1.6.2P instruction set emulation (~150 instructions)
+- 6-core TC397XP configuration (single core active)
+- Memory system with basic wait state stubs
 - CSA (Context Save Area) hardware emulation
-- Essential peripherals: STM, ASCLIN (UART), IR, SCU
-- Timing annotations for instruction and memory access cycles
-- GDB remote debugging support
+- Essential peripherals: STM, ASCLIN (UART) - stubs only
+- GDB remote debugging framework (in progress)
 
 ## Status
 
-This is a project skeleton. Current implementation status:
+**Current state:** ✅ Functional - JEZGRO firmware runs to idle loop
 
 | Component | Status |
 |-----------|--------|
-| Instruction Decoder | Foundation (~100 instructions) |
-| Instruction Executor | Stub |
-| Timing Engine | Stub |
-| Memory System | Stub |
-| CSA Emulation | Stub |
-| Peripherals | Stubs |
-| GDB Server | Stub |
+| Instruction Decoder | ✅ Complete (~150 instructions) |
+| Instruction Executor | ✅ Functional (boots RTOS) |
+| Timing Engine | ⚠️ Basic annotations (not validated) |
+| Memory System | ✅ Functional with wait states* |
+| CSA Emulation | ✅ Complete (linked list, CALL/RET) |
+| Peripherals | ⚠️ STM, ASCLIN stubs |
+| GDB Server | ⚠️ Framework ready |
+
+*Wait states are stub values from datasheet, not validated against real hardware.
+
+See [STATUS.md](STATUS.md) for latest development log.
+
+## ISA Coverage
+
+Implemented instruction categories (~150 instructions):
+
+| Category | Status | Notes |
+|----------|--------|-------|
+| Load/Store (LD.*, ST.*) | ✅ Functional | 16-bit and 32-bit variants |
+| Arithmetic (ADD, SUB, MUL) | ✅ Functional | Including saturating |
+| Logic (AND, OR, XOR, NOT) | ✅ Functional | |
+| Shift (SH, SHA, EXTR) | ✅ Functional | |
+| Compare (EQ, LT, GE) | ✅ Functional | |
+| Branch (J, JL, CALL, RET) | ✅ Functional | CSA integration |
+| CSA (CALL, RET, SVLCX, RSLCX) | ✅ Functional | Linked list complete |
+| Address arithmetic (LEA, ADDSC.A) | ✅ Functional | |
+| Move (MOV, MOV.A, MTCR, MFCR) | ✅ Functional | |
+| Loop (LOOP, LOOPU) | ✅ Functional | |
+| Bit operations (INSERT, EXTR.U) | ✅ Functional | |
+| NOP, DEBUG, ISYNC | ✅ Functional | |
+
+**Not yet implemented:** FPU instructions, some SIMD/packed operations, certain privileged instructions.
+
+See [STATUS.md](STATUS.md) for detailed bug fix history.
 
 ## Building
 
@@ -82,12 +108,14 @@ tcpxxx-emulator/
 
 ## Memory Map
 
-| Region | Address Range | Wait States |
+| Region | Address Range | Wait States* |
 |--------|--------------|-------------|
 | PFLASH | 0x80000000 | 5 cycles |
 | DSPR (local) | 0x70000000 | 0 cycles |
 | LMU | 0x90000000 | 1 cycle |
 | Peripherals | 0xF0000000 | 2 cycles |
+
+*Wait state values are from datasheet; timing accuracy is NOT validated.
 
 ## References
 
