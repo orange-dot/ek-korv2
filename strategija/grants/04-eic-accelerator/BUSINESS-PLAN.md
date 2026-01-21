@@ -94,15 +94,31 @@ Hardware reference implementation:
 
 ## 3. Technology Readiness
 
-### Current Status
+### Current Status (January 2026)
 
 | Component | TRL | Evidence |
 |-----------|-----|----------|
-| EK-KOR2 scheduler | 4 | 22 tests passing, simulation validated |
-| Consensus protocol | 4 | Property-based testing |
-| Lock-free IPC | 4 | Benchmarks <100ns |
+| EK-KOR2 scheduler | 5 | 27 tests passing, dual C/Rust validation |
+| Potential field scheduler | 5 | MAPF-HET integration validated |
+| Consensus protocol | 5 | 6-layer testing pyramid |
+| Lock-free IPC | 5 | Benchmarks <100ns |
 | EK3 design | 3 | Complete specifications, BOM |
 | Fleet simulator | 5 | 100+ node scenarios |
+| EKKL interpreter | 4 | Working Rust implementation |
+
+### Research Achievements
+
+**MAPF-HET (Multi-Agent Path Finding for Heterogeneous Fleets):**
+- 7,060 lines of validated algorithm code
+- 6 algorithm variants: HYBRID-CBS, MIXED-CBS, DEADLINE-CBS, STOCHASTIC-ECBS, ENERGY-CBS, FIELD-GUIDED MCTS
+- Prior art analysis: No blocking IP found
+- 536-page technical documentation
+
+**EKKL Scripting Language:**
+- Domain-specific language for RTOS specification
+- Complete Rust interpreter with error handling
+- Formal grammar specification
+- Evidence of engineering maturity and rigor
 
 ### External Validation
 
@@ -116,11 +132,15 @@ Hardware reference implementation:
 - PhD advisor (distributed systems)
 - Publication roadmap: ICRA, IEEE TSG, IJRR
 
+**Investor Interest (January 2026):**
+- Khosla Ventures: Initial contact Jan 21
+- GV (Google Ventures): Initial contact Jan 20
+
 ### What This Grant Achieves
 
 | Current | After Grant |
 |---------|-------------|
-| TRL 4 (lab) | TRL 6-7 (prototype in relevant environment) |
+| TRL 5 (validated) | TRL 6-7 (prototype in relevant environment) |
 | Simulation | Hardware validated |
 | Design | Certified product |
 | 0 pilots | 2-3 operational pilots |
@@ -248,7 +268,6 @@ Community tools          Premium support
 ### Advisors
 
 - PhD (distributed systems, Western Europe) - official
-- Infrastructure specialist (US) - informal
 - Automotive sensors (Germany) - in discussion
 
 ### Hiring Plan
@@ -407,3 +426,4 @@ Marija Janjatovic (CEO) | Bojan Janjatovic (CTO)
 
 *Business Plan prepared: January 2026*
 *For: EIC Accelerator Application*
+*Version: 1.1 - Updated TRL levels, added MAPF-HET and EKKL achievements*

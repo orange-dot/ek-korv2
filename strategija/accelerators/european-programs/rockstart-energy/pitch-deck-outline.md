@@ -344,7 +344,7 @@ COMPANY STRUCTURE:
 • Full EU market access
 
 ADVISORY:
-• US-based infrastructure advisor (Microsoft/AT&T)
+• PhD distributed systems advisor (EU defense/telecom)
 ```
 
 **Visual:** Team photos + Netherlands/Serbia map

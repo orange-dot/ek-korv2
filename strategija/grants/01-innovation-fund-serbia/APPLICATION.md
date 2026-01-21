@@ -223,7 +223,6 @@ Electric bus fleets need coordinated charging infrastructure:
 ### Advisory
 
 - PhD advisor (distributed systems) - official, under NDA
-- Infrastructure advisor (US) - informal
 - Automotive sensors advisor - in discussion
 
 ---

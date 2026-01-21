@@ -225,30 +225,21 @@ RESULT:
 
 **Content:**
 ```
-FOUNDER & CTO                    CO-FOUNDER
-Hardware & Firmware              Infrastructure
+FOUNDER & CTO                    CO-FOUNDER & CEO
+Hardware & Firmware              Operations & Business
 ─────────────────────            ─────────────────────
-• 22 years combined experience   • Microsoft - Software Engineer (5 yrs)
-• 7 years electronics repair     • AT&T - Infrastructure (17 yrs)
-• NCR - IoT systems (5 yrs)      • First responders network
-• Component-level debugging      • Location: Towaco, NJ
-                                   (30 min from HAX Newark)
-
-CO-FOUNDER
-Operations & Business
-─────────────────────
-• Economics background
-• Operations, finance, BD
-• Part-time → full-time with traction
+• 22 years combined experience   • Economics background
+• 7 years electronics repair     • Operations, finance, BD
+• NCR - IoT systems (5 yrs)      • 100% full-time committed
+• Component-level debugging      • Partnerships & fundraising
 ```
 
 **Visual:** Team photos + key credentials
 
 **Speaker Notes:**
 - "I bring 22 years of hardware and software experience"
-- "My co-founder is at Microsoft, previously 17 years at AT&T building critical infrastructure"
-- "He's already in New Jersey - 30 minutes from HAX"
-- "Third co-founder handles operations and finance"
+- "My co-founder handles operations, finance, and business development"
+- "Both founders are 100% committed full-time"
 
 ---
 
@@ -394,7 +385,6 @@ LET'S BUILD THIS TOGETHER
 - "HAX is the ideal partner for hardware like this"
 - "Your manufacturing connections and engineering support accelerate everything"
 - "We have the software and architecture proven - we need help getting to production"
-- "Our co-founder is already in New Jersey, ready to start"
 
 ---
 

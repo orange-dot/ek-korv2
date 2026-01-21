@@ -11,13 +11,15 @@
 ### Why Research Grants Before VC?
 
 ```
-CURRENT STATUS:
+CURRENT STATUS (Updated Jan 21, 2026):
 ═══════════════════════════════════════════════════════════════
-✓ Working technology (EK-KOR2 RTOS, 22 tests passing)
-✓ Novel algorithms (potential field scheduling, MAPF-HET)
+✓ Working technology (EK-KOR2 RTOS, TRL 5, 27 tests passing)
+✓ Novel algorithms (MAPF-HET: 7,060 LoC validated)
 ✓ Hardware design complete (EK3 3.3kW module)
 ✓ IP protected (Bernstein blockchain, Jan 2026)
 ✓ Industry validation (Infineon engagement)
+✓ EKKL scripting language (working Rust interpreter)
+✓ Investor interest (Khosla Jan 21, GV Jan 20)
 
 ✗ No paying customers
 ✗ No pilot deployments
@@ -240,17 +242,23 @@ strategija/grants/
 
 ## Key Metrics to Track
 
-### Application Status Dashboard
+### Application Status Dashboard (Updated Jan 21, 2026)
 
-| Program | Status | Submitted | Decision | Result |
-|---------|--------|-----------|----------|--------|
-| Innovation Fund Serbia | NOT STARTED | - | - | - |
-| WBSO Netherlands | NOT STARTED | - | - | - |
-| MIT Haalbaarheid | NOT STARTED | - | - | - |
-| EIC Accelerator | NOT STARTED | - | - | - |
-| Horizon Europe | NOT STARTED | - | - | - |
-| EIC Pathfinder | NOT STARTED | - | - | - |
-| NWO Netherlands | NOT STARTED | - | - | - |
+| Program | Status | Target | Decision | Result |
+|---------|--------|--------|----------|--------|
+| Innovation Fund Serbia | NOT STARTED | Q1 2026 | - | - |
+| WBSO Netherlands | NOT STARTED | Q1 2026 | - | - |
+| MIT Haalbaarheid | NOT STARTED | Q2 2026 | - | - |
+| **EIC Accelerator** | **IN PREPARATION** | **March 2026** | - | - |
+| Horizon Europe | CONCEPT READY | Q3 2026 | - | - |
+| EIC Pathfinder | NOT STARTED | Q4 2026 | - | - |
+| NWO Netherlands | NOT STARTED | Q4 2026 | - | - |
+
+**Shared Content Library:** UPDATED (Jan 21, 2026)
+- TRL levels refreshed (TRL 4 → TRL 5)
+- MAPF-HET details added (7,060 LoC)
+- Test coverage updated (27 vectors, 6-layer pyramid)
+- EKKL interpreter documented
 
 ### Success Criteria
 
@@ -297,22 +305,32 @@ Primary focus for Q1-Q2 2026
 
 ## Next Steps
 
-### Immediate Actions (This Week)
+### Completed (Jan 21, 2026)
 
-- [ ] Create `_shared/` content library
-- [ ] Complete Innovation Fund Serbia skeleton
-- [ ] Complete WBSO Netherlands skeleton
-- [ ] Research TU Delft embedded systems contacts
-- [ ] Schedule call with PhD advisor about NWO
+- [x] Create `_shared/` content library
+- [x] Update shared content with MAPF-HET, TRL 5, EKKL
+- [x] Condense EIC pitch deck to 10 slides
+- [x] Update EIC business plan technology section
+- [x] Set EIC checklist dates (March 2026 target)
+- [x] Update Horizon Europe concept note
+- [x] Create Horizon Europe consortium strategy
 
 ### Before End of January
 
 - [ ] Submit WBSO application
 - [ ] Submit Innovation Fund Serbia application
-- [ ] Draft EIC Accelerator pitch deck
-- [ ] Initial contact with 2-3 potential Horizon Europe partners
+- [ ] Start video production for EIC
+- [ ] Initial contact with TU Delft, TU Eindhoven
+
+### February 2026
+
+- [ ] Complete EIC video (by Feb 15)
+- [ ] Finalize EIC pitch deck (by Feb 20)
+- [ ] Short application ready (by Feb 25)
+- [ ] Begin Horizon Europe partner outreach
 
 ---
 
 *Master Plan created: January 2026*
+*Updated: January 21, 2026 - EIC Accelerator preparation, shared content refresh*
 *Next review: February 2026*

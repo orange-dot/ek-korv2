@@ -97,16 +97,6 @@ SOFTWARE CAREER (10+ years):
 - NeurIPS (ML/AI)
 - Transportation Science (logistics)
 
-### Infrastructure Advisor (Informal)
-
-| Attribute | Detail |
-|-----------|--------|
-| Location | United States |
-| Experience | 17 years critical infrastructure |
-| Background | First responders network, mission-critical systems |
-| Software | 5+ years engineering experience |
-| Connection | Personal (childhood friend) |
-
 ### Sensors & Automotive Advisor (In Discussion)
 
 | Attribute | Detail |

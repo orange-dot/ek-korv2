@@ -97,53 +97,6 @@ This team structure qualifies us for: HAX, Rockstart Energy, Chalmers Ventures, 
 
 ---
 
-### Advisor - Infrastructure & Software Engineering (ADVISORY)
-
-*Not counted as FTE for accelerator applications. Potential future full-time role.*
-
-#### Background
-
-| Period | Company | Role |
-|--------|---------|------|
-| **17 years** | AT&T | First responders network infrastructure |
-| **5+ years** | Microsoft | Software Engineer (infrastructure) |
-
-### Location
-**Towaco, New Jersey, USA**
-- 30 minutes from HAX Newark HQ
-- Immediate US presence for programs requiring it
-
-### Expertise
-
-#### Software Engineering
-- **Microsoft** software engineer for 5+ years
-- Infrastructure-focused development
-- Modern development practices and tools
-- Cloud-native systems
-
-#### Critical Infrastructure
-- **First responders network** = Mission-critical, zero-downtime systems
-- 17 years maintaining infrastructure that lives depend on
-- Disaster recovery and redundancy planning
-- 24/7 operations management
-
-#### Enterprise Scale
-- AT&T network = massive scale operations
-- Microsoft = enterprise-grade systems and code
-- Understanding of reliability requirements
-- DevOps and infrastructure-as-code
-
-### Why This Matters for EK3
-
-1. **Infrastructure + code** = Can build AND maintain systems
-2. **Critical infrastructure mindset** = Charging networks must be reliable
-3. **First responders experience** = Understands mission-critical operations
-4. **US-based** = Can represent company in US, attend HAX, meet investors
-5. **Microsoft engineering** = Modern dev practices, code quality
-6. **22+ years total experience** = Senior-level expertise
-
----
-
 ## Team Dynamics
 
 ### Skill Matrix (Active Team)
@@ -166,14 +119,12 @@ This team structure qualifies us for: HAX, Rockstart Energy, Chalmers Ventures, 
 |--------|----------|----------|
 | CTO | Serbia | CET (UTC+1) |
 | CEO | Serbia | CET (UTC+1) |
-| Advisor (Infra) | New Jersey, USA | EST (UTC-5) |
 
-**Coverage**: Serbia-based team, US advisor for market access
+**Coverage**: Serbia-based team, EU-focused
 
 ### Working Relationship
 
 - CEO + CTO: Married, maximum alignment, both 100% full-time
-- CTO + Advisor: Childhood friends, long-term trust
 
 ---
 

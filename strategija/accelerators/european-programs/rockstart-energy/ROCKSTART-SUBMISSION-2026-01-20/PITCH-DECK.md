@@ -180,24 +180,24 @@ Factory → Deploy → Operate (5+ yrs) → Degrade detected → Bus to Depot �
 
 **ADVISORY NETWORK:**
 
-| Distributed Systems Advisor | Infrastructure Advisor |
-|-----------------------------|------------------------|
-| PhD in Computer Science (Western Europe) | US-based |
-| Specialized: distributed algorithms, mesh networks | 17 yrs critical infrastructure |
-| 15+ years research (Germany, France) | First responders network |
-| Published: topology control, wireless sensor networks | 5+ yrs software engineering |
-| Currently: EU defense/telecom sector | Mission-critical systems |
-| *Official - identity disclosed under NDA* | *Informal advisor* |
+| Distributed Systems Advisor |
+|-----------------------------|
+| PhD in Computer Science (Western Europe) |
+| Specialized: distributed algorithms, mesh networks |
+| 15+ years research (Germany, France) |
+| Published: topology control, wireless sensor networks |
+| Currently: EU defense/telecom sector |
+| *Official - identity disclosed under NDA* |
 
-**NOTE:** Distributed systems advisor officially involved, identity confidential due to defense sector employment. Full credentials disclosed under NDA. Infrastructure advisor provides informal guidance.
+**NOTE:** Distributed systems advisor officially involved, identity confidential due to defense sector employment. Full credentials disclosed under NDA.
 
 **WHY THIS NETWORK MATTERS:**
 - Distributed systems expertise directly applicable to ROJ consensus
-- Real-world experience deploying mission-critical infrastructure
+- Academic rigor in algorithm design
 
 **COMPANY STRUCTURE:**
 - Netherlands BV (Haarlem based, registered Zandvoort)
-- Advisory network: Germany, France, USA
+- Advisory network: Germany, France
 
 ---
 

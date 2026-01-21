@@ -292,20 +292,6 @@ The innovation is architectural, not component-level. We use proven technology (
 - Enterprise IoT scales to connected infrastructure
 - International deployment experience
 
-### Advisor
-
-**Role:** Infrastructure & Software (Advisory)
-
-**Background:**
-- AT&T (17 years) - First responders network
-- Microsoft (5+ years) - Software engineering
-- US-based (New Jersey)
-
-**Value:**
-- Critical infrastructure experience
-- US market presence
-- Cloud-native systems expertise
-
 ---
 
 ## Funding Information

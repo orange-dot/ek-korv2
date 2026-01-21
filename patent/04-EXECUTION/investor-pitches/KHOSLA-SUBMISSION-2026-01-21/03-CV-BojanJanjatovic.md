@@ -344,16 +344,6 @@ Not ideal practice - but proves ability to deliver under constraints
 | Connection | Personal (high school classmate) |
 | Status | *Official advisor - identity confidential due to employer; disclosed under NDA* |
 
-### Infrastructure Advisor (Informal)
-
-| Attribute | Detail |
-|-----------|--------|
-| Location | United States |
-| Experience | 17 years critical infrastructure |
-| Background | First responders network, mission-critical systems |
-| Experience | 5+ years software engineering |
-| Connection | Personal (childhood friend) |
-
 ### Sensors & Automotive Advisor (In Discussion)
 
 | Attribute | Detail |

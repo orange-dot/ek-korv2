@@ -3,6 +3,7 @@
 **Program:** European Innovation Council Accelerator
 **Amount Requested:** €2,500,000 (grant only)
 **Company:** Elektrokombinacija B.V.
+**Slides:** 10 (EIC maximum)
 
 ---
 
@@ -84,59 +85,34 @@ Module 1    Module 2    Module 3    Module 4
 
 ---
 
-## Slide 5: Technical Innovation
+## Slide 5: Technical Innovation & Business Model
 
-### Three Breakthroughs
+### Three Breakthroughs + Revenue Strategy
 
-| Innovation | Description | Status |
-|------------|-------------|--------|
-| **Potential Field Scheduling** | Emergent work distribution without coordinator | TRL 4, validated |
-| **k=7 Topological Consensus** | Distributed decisions (starling flock research) | TRL 4, 22 tests |
-| **Lock-Free IPC** | <100ns latency, deterministic timing | TRL 4, benchmarked |
+| Innovation | Status | Evidence |
+|------------|--------|----------|
+| **Potential Field Scheduling** | TRL 5 | 27 test vectors, MAPF-HET validated |
+| **k=7 Topological Consensus** | TRL 5 | 6-layer testing pyramid |
+| **Lock-Free IPC** | TRL 5 | <100ns benchmarked |
+| **MAPF-HET Algorithms** | 7,060 LoC | 6 algorithm variants validated |
 
-**External Validation:** Infineon Technologies engaged for emulator development partnership.
+**Business Model (Android/Linux Playbook):**
+- OPEN SOURCE: EK-KOR2 RTOS, reference designs, documentation
+- REVENUE: Certified EK3 hardware, fleet management platform, services
 
----
-
-## Slide 6: Business Model
-
-### The Android/Linux Playbook
-
-```
-LAYERED OPEN SOURCE MODEL:
-═══════════════════════════════════════════════════════════════
-
-OPEN SOURCE (Free)          REVENUE
-├── EK-KOR2 RTOS            ├── Certified EK3 Hardware
-├── Reference designs       ├── Fleet Management Platform
-├── Documentation           ├── Support & Services
-└── Community tools         └── Training & Consulting
-
-PRECEDENTS:
-• Linux → Red Hat ($34B acquisition)
-• Android → Google Play services
-• Kubernetes → Cloud provider premium
-```
+**External Validation:** Infineon Technologies engaged for emulator partnership.
 
 ---
 
-## Slide 7: Market Size
+## Slide 6: Market & Competition
 
-### €10B+ Serviceable Market
+### €10B+ Serviceable Market | Why We Win
 
-| Segment | TAM | Our Focus |
-|---------|-----|-----------|
+| Segment | Size | Focus |
+|---------|------|-------|
 | EU bus depot charging | €3-5B | PRIMARY |
 | EU logistics depots | €2-3B | SECONDARY |
 | Emerging markets | €1-2B | EXPANSION |
-
-**5-Year Target:** €50-100M revenue, 50-100 depot installations
-
----
-
-## Slide 8: Competitive Advantage
-
-### Why We Win
 
 | Factor | Incumbents | Elektrokombinacija |
 |--------|------------|-------------------|
@@ -149,22 +125,24 @@ PRECEDENTS:
 
 ---
 
-## Slide 9: Traction
+## Slide 7: Traction
 
 ### What We've Built
 
 | Asset | Status |
 |-------|--------|
-| EK-KOR2 RTOS | Working C implementation, 22 tests passing |
+| EK-KOR2 RTOS | TRL 5, 27 tests passing, dual C/Rust |
+| MAPF-HET research | 7,060 lines validated algorithm code |
 | Fleet simulator | 100+ node scenarios validated |
 | EK3 design | Complete 3.3kW module specifications |
 | IP protection | 10 inventions, blockchain timestamped |
 | Industry validation | Infineon partnership |
 | Academic validation | PhD advisor, publication roadmap |
+| Investor interest | Khosla Ventures (Jan 21), GV (Jan 20) |
 
 ---
 
-## Slide 10: Team
+## Slide 8: Team
 
 ### Technical Depth + Execution Track Record
 
@@ -176,17 +154,18 @@ PRECEDENTS:
 - 2 years EE + Stanford AI Course (Thrun/Norvig, 2011)
 - 7 years electronics repair + 10+ years software
 - Shipped: Toshiba postal+customs (solo), NCR Voyix (enterprise)
-- Designed: EK-KOR2, EK3, engaged Infineon
+- Designed: EK-KOR2, EK3, MAPF-HET, engaged Infineon
 
 **Advisors:**
 - PhD (distributed systems, Western Europe) - official
-- Infrastructure (US, mission-critical) - informal
 
 ---
 
-## Slide 11: Ask & Use of Funds
+## Slide 9: Ask & Milestones
 
-### €2.5M Grant Request
+### €2.5M Grant Request | 24-Month Plan
+
+**Use of Funds:**
 
 | Category | Amount | Purpose |
 |----------|--------|---------|
@@ -196,11 +175,7 @@ PRECEDENTS:
 | Subcontracting | €350K | Safety certification, legal |
 | Operations | €250K | Infrastructure, travel, overhead |
 
----
-
-## Slide 12: Milestones
-
-### 24-Month Plan
+**Milestones:**
 
 | Month | Milestone | Deliverable |
 |-------|-----------|-------------|
@@ -211,34 +186,22 @@ PRECEDENTS:
 
 ---
 
-## Slide 13: Why EIC?
-
-### This is a Black Swan Bet
-
-| Factor | Assessment |
-|--------|------------|
-| Technical risk | HIGH (novel algorithms, distributed consensus) |
-| Market risk | LOW (EU mandates guarantee infrastructure spend) |
-| Impact potential | VERY HIGH (standard for €100B+ market) |
-| EU alignment | PERFECT (digital sovereignty, green transition) |
-
-**EIC is designed for exactly this:** High-risk, high-impact deep tech.
-
----
-
-## Slide 14: Contact
+## Slide 10: Contact
 
 ### Elektrokombinacija B.V.
 
 **Marija Janjatovic** (CEO) | **Bojan Janjatovic** (CTO)
 
-📧 bojan.janjatovic@gmail.com
-🌐 github.com/elektrokombinacija (private - access on request)
+bojan.janjatovic@gmail.com
+github.com/elektrokombinacija (private - access on request)
 
 **Location:** Netherlands (Haarlem / Zandvoort)
 **Priority Date:** January 2, 2026 (Bernstein blockchain verified)
+
+**Why EIC?** High technical risk (novel algorithms) + Low market risk (EU mandates) + Very high impact potential (€100B+ market standard) = Perfect EIC fit.
 
 ---
 
 *Pitch deck prepared: January 2026*
 *For: EIC Accelerator Application*
+*Version: 2.0 - Condensed to 10 slides, updated TRL and traction metrics*

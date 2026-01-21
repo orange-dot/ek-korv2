@@ -248,76 +248,20 @@ Designer of all 5 invention disclosures:
 
 ---
 
-# Advisor - Infrastructure & Software Engineering
-
-## Summary
-
-Advisory role (not FTE). 22+ years experience at AT&T (17 years, first responders network) and Microsoft (5+ years, software engineering). US-based in New Jersey, 30 minutes from HAX Newark.
-
----
-
-## Professional Profile
-
-| Attribute | Details |
-|-----------|---------|
-| **Role** | Technical Advisor |
-| **Experience** | 22+ years |
-| **Status** | Advisory (potential future FTE) |
-| **Location** | Towaco, New Jersey, USA |
-
----
-
-## Background
-
-| Period | Company | Role |
-|--------|---------|------|
-| **17 years** | AT&T | First responders network infrastructure |
-| **5+ years** | Microsoft | Software Engineer (infrastructure) |
-
----
-
-## Expertise
-
-### Critical Infrastructure (AT&T)
-- First responders network = Mission-critical, zero-downtime systems
-- Disaster recovery and redundancy planning
-- 24/7 operations management
-- Massive scale operations
-
-### Software Engineering (Microsoft)
-- Infrastructure-focused development
-- Cloud-native systems
-- Enterprise-grade code quality
-- Modern DevOps practices
-
----
-
-## Value to EK3
-
-1. **Infrastructure + code** - Can build AND maintain systems
-2. **Critical infrastructure mindset** - Charging networks must be reliable
-3. **First responders experience** - Understands mission-critical operations
-4. **US presence** - Available for US market activities
-
----
-
----
-
 # Team Dynamics
 
 ## Skill Coverage Matrix
 
-| Skill | CTO | CEO | Advisor |
-|-------|-----|-----|---------|
-| Hardware design | High | - | - |
-| Firmware/embedded | High | - | Medium |
-| Backend/cloud | High | - | High |
-| Power electronics | High | - | - |
-| Business operations | - | High | - |
-| Finance | - | High | - |
-| Legal/IP | - | High | - |
-| Marketing/Sales | Low | High | - |
-| Infrastructure | Medium | - | High |
+| Skill | CTO | CEO |
+|-------|-----|-----|
+| Hardware design | High | - |
+| Firmware/embedded | High | - |
+| Backend/cloud | High | - |
+| Power electronics | High | - |
+| Business operations | - | High |
+| Finance | - | High |
+| Legal/IP | - | High |
+| Marketing/Sales | Low | High |
 
 ## Geographic Coverage
 
@@ -325,12 +269,10 @@ Advisory role (not FTE). 22+ years experience at AT&T (17 years, first responder
 |--------|----------|----------|-----------|
 | CEO | Serbia | CET | Direct (EU candidate) |
 | CTO | Serbia | CET | Direct (EU candidate) |
-| Advisor | New Jersey | EST | US market |
 
 ## Working Relationship
 
 - **CEO + CTO**: Married, maximum alignment, both 100% full-time
-- **CTO + Advisor**: Childhood friends, 30+ year relationship, trust established
 
 ---
 
@@ -353,7 +295,7 @@ Advisory role (not FTE). 22+ years experience at AT&T (17 years, first responder
 | Business fundamentals | Economics background, insurance compliance |
 | Full commitment | Both founders 100% dedicated |
 | Serbia advantage | Cost-effective R&D, EU candidate country |
-| US presence | Advisor in New Jersey for market access |
+| EU focus | Netherlands BV, EU market access |
 
 ## What We Need from Rockstart
 

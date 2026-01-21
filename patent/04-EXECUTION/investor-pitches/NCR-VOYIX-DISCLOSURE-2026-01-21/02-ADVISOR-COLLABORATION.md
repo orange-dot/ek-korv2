@@ -7,27 +7,27 @@
 
 ## Overview
 
-I have research collaborations with two technical advisors. I'm providing details here for full transparency, while respecting their privacy requirements.
+I have a research collaboration with a PhD-level distributed systems advisor. I'm providing details here for full transparency, while respecting their privacy requirements.
 
 ---
 
 ## Advisor Summary
 
-| Distributed Systems & Optimization Advisor | Infrastructure Advisor |
-|--------------------------------------------|------------------------|
-| **PhD INRIA Lille** (2008-2011) | US-based (East Coast) |
-| Postdoc: Novi Sad → Compiègne → Koblenz | **Bell Labs** education |
-| DFG-funded research, TU Hamburg-Harburg collab | 17 yrs critical infrastructure |
-| Thesis: "Algorithms for Realistic WSN" | First responders network (East Coast) |
-| Specialization: topology control, belief functions | Currently: **commercial** Azure (NOT military) |
-| Currently: **EU defense - tactical comms, military cloud** | Former US security clearance |
-| *Official advisor - full academic CV below* | *Informal only - general principles, no proprietary details* |
+| Distributed Systems & Optimization Advisor |
+|--------------------------------------------|
+| **PhD INRIA Lille** (2008-2011) |
+| Postdoc: Novi Sad → Compiègne → Koblenz |
+| DFG-funded research, TU Hamburg-Harburg collab |
+| Thesis: "Algorithms for Realistic WSN" |
+| Specialization: topology control, belief functions |
+| Currently: **EU defense - tactical comms, military cloud** |
+| *Official advisor - full academic CV below* |
 
 ---
 
 ## Benefits to NCR Voyix
 
-Working with these advisors on my personal project brings knowledge and skills that benefit my work at NCR Voyix:
+Working with this advisor on my personal project brings knowledge and skills that benefit my work at NCR Voyix:
 
 | Area | Skills Developed | NCR Voyix Relevance |
 |------|------------------|---------------|
@@ -35,22 +35,6 @@ Working with these advisors on my personal project brings knowledge and skills t
 | **Real-time systems** | RTOS design, deterministic scheduling, low-latency IPC | Performance-critical components |
 | **Embedded development** | Bare-metal programming, HAL design, memory-constrained systems | IoT, edge computing |
 | **Formal methods** | Property-based testing, cross-validation, verification | Code quality, reliability |
-| **Mission-critical design** | Patterns from 911 systems, Azure infrastructure | High-availability systems |
-
-### The Informal Advisor Angle
-
-My infrastructure advisor friend cannot participate formally—his employer strictly prohibits it. But what he *can* share privately, without violating any agreements, is **decades of hard-won experience**:
-
-| Experience Source | What I Learn | NCR Voyix Benefit |
-|-------------------|--------------|-------------|
-| **Bell Labs training** | Engineering discipline, rigorous thinking | Better architecture decisions |
-| **First responders network** | Systems where failure = lives lost | Reliability-first mindset |
-| **Critical Azure infrastructure** | Hyperscale operations, incident response | Cloud operations perspective |
-| **17 years mission-critical** | Patterns that survive production | Fewer "learning the hard way" moments |
-
-This is knowledge that would cost a fortune to acquire through formal consulting. He shares it freely with me as a friend—lessons learned, patterns that work, mistakes to avoid. No proprietary details, no current project specifics, just the wisdom that comes from building systems that *cannot fail*.
-
-**NCR Voyix gets this for free** through my improved engineering judgment.
 
 ### Open Source Commitment
 
@@ -152,67 +136,11 @@ Recent session focused on integrating Multi-Agent Path Finding (MAPF-HET) algori
 
 ---
 
-## Infrastructure Advisor
-
-### Background
-
-| Attribute | Detail |
-|-----------|--------|
-| Location | United States (East Coast) |
-| Education | Bell Labs (yes, *that* Bell Labs) |
-| Experience | 17 years critical infrastructure |
-| Domain | First responders network (East Coast) |
-| Current role | **Commercial** critical Azure infrastructure |
-| Clarification | **NOT military cloud** - commercial Azure only |
-| Previous | US security clearance (sensitive government work, no longer active) |
-| Software | 5+ years software engineering |
-| Focus | Mission-critical systems |
-| Relationship | Personal friend (childhood connection) |
-
-### Nature of Collaboration
-
-**This is informal—formal participation is not possible.**
-
-He works on critical Azure infrastructure. His employer does not allow him to share any details about current projects with anyone, under any circumstances. Formal advisory roles, public attribution, or disclosure of project specifics are strictly prohibited.
-
-**What he shares vs. what he doesn't:**
-
-| NOT Shared (prohibited) | Shared (permitted) |
-|-------------------------|-------------------|
-| Azure-specific architecture | General design principles |
-| Internal tooling, source code | Patterns that work in mission-critical systems |
-| Customer data, security details | Lessons learned from 17-year career |
-| Current project specifics | "When building reliable systems, think about X" |
-
-**Security clearance context:** He previously held US security clearance for sensitive government work. He no longer works on military cloud or classified projects. Clearance restrictions apply only to classified information from that period—not to general engineering wisdom accumulated over a career. This distinction is well-understood in the industry; engineers move between companies and carry their *experience* (not proprietary details) with them.
-
-**What he can do:** Share general experience and lessons learned from 17 years in critical infrastructure—the kind of wisdom that comes from building systems where failure means people don't get help when they call 911. No Azure internals, no proprietary details, just career-spanning engineering judgment shared between friends.
-
-We've thought this through carefully. He stays well within his contractual boundaries. I get invaluable perspective. NCR Voyix benefits from my improved engineering judgment. Everyone wins.
-
-### Characteristics
-
-- **Informal only** - No formal advisory agreement
-- **Personal friendship** - Known each other for decades
-- **Occasional guidance** - When relevant topics come up
-- **No commercial involvement** - Just a friend sharing perspective
-- **No expectation of attribution** - He doesn't want or need credit
-
-### Why Mentioned
-
-I'm including this relationship for completeness. It's relevant because his experience with first-responder networks has influenced how I think about reliability and fault tolerance. But it's a personal friendship, not a business relationship.
-
----
-
 ## Confidentiality Request
 
-Both advisors prefer discretion:
+The advisor prefers discretion due to defense sector employment. I can disclose identity to NCR Voyix under confidence if needed.
 
-1. **Distributed Systems Advisor:** Defense sector employment requires it. I can disclose identity to NCR Voyix under confidence if needed.
-
-2. **Infrastructure Advisor:** Simply doesn't want attention. Personal friend helping out, not seeking recognition.
-
-I've disclosed these relationships here because I believe in transparency. I'm asking that NCR Voyix treat these details as confidential internal information.
+I've disclosed this relationship here because I believe in transparency. I'm asking that NCR Voyix treat these details as confidential internal information.
 
 ---
 

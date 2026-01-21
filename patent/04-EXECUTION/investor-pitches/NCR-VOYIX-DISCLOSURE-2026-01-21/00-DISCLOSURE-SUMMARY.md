@@ -59,29 +59,26 @@ I provide technical oversight when needed, but this is advisory, not development
 
 ## Weekend Research Collaboration
 
-I have research collaborations with two advisors—one PhD-level distributed systems expert (official), one infrastructure veteran (informal childhood friend). Important context:
+I have a research collaboration with a PhD-level distributed systems expert (official advisor). Important context:
 
 - **Timing:** Weekends only (suits all our work schedules)
 - **Nature:** Academic research, algorithm formalization
 - **Pace:** Slow, no deadlines, no production pressure
 - **Purpose:** Potential academic publications, not commercial development
 
-Details on both advisors are in the accompanying document (02-ADVISOR-COLLABORATION.md).
+Details on the advisor are in the accompanying document (02-ADVISOR-COLLABORATION.md).
 
 ---
 
 ## How This Benefits NCR Voyix
 
-Working with these advisors brings knowledge back to NCR Voyix—at no cost to the company:
+Working with this advisor brings knowledge back to NCR Voyix—at no cost to the company:
 
 | Source | What I Learn | NCR Voyix Benefit |
 |--------|--------------|-------------|
 | **PhD distributed systems advisor** | Consensus algorithms, formal methods | Better architecture decisions |
-| **Bell Labs-trained infrastructure advisor** | Engineering discipline from 911 systems | Reliability-first mindset |
-| **17 years mission-critical experience** | Patterns that survive production | Fewer costly mistakes |
-| **Critical Azure infrastructure insights** | Hyperscale operations perspective | Cloud operations knowledge |
-
-My infrastructure advisor friend can't participate formally—his employer prohibits it. But he *can* share decades of hard-won experience privately: lessons learned, patterns that work, mistakes to avoid. No proprietary details, just wisdom from building systems where failure means people don't get help when they call 911.
+| **15+ years academic research** | Rigorous algorithm design | Higher code quality |
+| **Defense sector experience** | Mission-critical systems patterns | Reliability-first mindset |
 
 **This is knowledge that would cost a fortune through formal consulting. NCR Voyix gets it for free through my improved engineering judgment.**
 

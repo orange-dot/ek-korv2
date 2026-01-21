@@ -93,20 +93,27 @@ SCALING:
 
 ## Technology Readiness Level (TRL)
 
-| Component | Current TRL | Target TRL (18mo) |
-|-----------|-------------|-------------------|
-| EK-KOR2 RTOS (C) | TRL 4 | TRL 6 |
-| Potential field scheduler | TRL 4 | TRL 6 |
-| Consensus protocol | TRL 4 | TRL 5 |
-| EK3 power design | TRL 3 | TRL 5 |
-| Fleet simulator | TRL 5 | TRL 6 |
-| CAN-FD protocol | TRL 4 | TRL 6 |
+| Component | Current TRL | Target TRL (18mo) | Evidence |
+|-----------|-------------|-------------------|----------|
+| EK-KOR2 RTOS (C) | TRL 5 | TRL 6 | 27 test vectors, dual C/Rust validation |
+| Potential field scheduler | TRL 5 | TRL 6 | MAPF-HET integration validated |
+| Consensus protocol | TRL 5 | TRL 6 | 6-layer testing pyramid |
+| EK3 power design | TRL 3 | TRL 5 | Complete specs + BOM |
+| Fleet simulator | TRL 5 | TRL 6 | 100+ node scenarios |
+| CAN-FD protocol | TRL 4 | TRL 6 | Protocol specification complete |
+| EKKL interpreter | TRL 4 | TRL 5 | Working Rust implementation |
 
 **TRL Definitions:**
 - TRL 3: Proof of concept
 - TRL 4: Lab validation
 - TRL 5: Relevant environment validation
 - TRL 6: Prototype demonstration
+
+**TRL 5 Milestone Achievement (January 2026):**
+Core RTOS components advanced from TRL 4 to TRL 5 based on:
+- 7,060 lines of validated MAPF-HET algorithm code
+- Complete 6-layer testing pyramid (unit → property → integration → simulation → validation → acceptance)
+- EKKL scripting language enabling formal specification
 
 ---
 
@@ -116,11 +123,13 @@ SCALING:
 
 | Claim | Evidence |
 |-------|----------|
-| Potential field scheduling works | 22 test vectors passing, dual C/Rust implementation |
+| Potential field scheduling works | 27 test vectors passing, dual C/Rust implementation |
+| MAPF-HET algorithms work | 7,060 LoC validated, 6 algorithm variants tested |
 | Consensus converges | Property-based testing, 100+ node simulations |
 | Lock-free IPC achieves <100ns | Benchmark measurements |
 | k=7 topology is optimal | Based on peer-reviewed Cavagna/Giardina research |
 | EK3 design is feasible | Complete specifications, BOM, thermal analysis |
+| EKKL specification language | Working Rust interpreter, formal semantics |
 
 ### What Remains to Be Proven
 
@@ -198,5 +207,5 @@ LAYER 3 - CERTIFIED PRODUCTS (Revenue):
 
 ---
 
-*Last updated: January 2026*
-*Version: 1.0*
+*Last updated: January 21, 2026*
+*Version: 1.1 - TRL updates (TRL 4→5 for core components), added MAPF-HET and EKKL evidence*

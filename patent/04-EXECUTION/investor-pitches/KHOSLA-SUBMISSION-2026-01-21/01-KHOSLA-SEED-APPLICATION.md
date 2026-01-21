@@ -447,18 +447,18 @@ The battery swap station presents unique challenges not addressed by existing MA
 
 ### Advisory Network
 
-| Distributed Systems & Optimization Advisor | Infrastructure Advisor |
-|--------------------------------------------|------------------------|
-| PhD in Computer Science (Western Europe) | US-based |
-| Specialized: distributed algorithms, mesh networks, optimization | 17 yrs critical infrastructure |
-| 15+ years research (Germany, France) | First responders network |
-| Published: topology control, wireless sensor networks | 5+ yrs software engineering |
-| Focus: MAPF-HET, V2G optimization, fleet logistics | Mission-critical systems |
-| Publication targets: ICRA, IROS, IEEE TSG | |
-| Currently: EU defense/telecom sector | |
-| *Official advisor - identity disclosed under NDA* | *Informal advisor (childhood friend)* |
+| Distributed Systems & Optimization Advisor |
+|--------------------------------------------|
+| PhD in Computer Science (Western Europe) |
+| Specialized: distributed algorithms, mesh networks, optimization |
+| 15+ years research (Germany, France) |
+| Published: topology control, wireless sensor networks |
+| Focus: MAPF-HET, V2G optimization, fleet logistics |
+| Publication targets: ICRA, IROS, IEEE TSG |
+| Currently: EU defense/telecom sector |
+| *Official advisor - identity disclosed under NDA* |
 
-**NOTE:** Distributed Systems advisor officially involved. Identity confidential due to defense sector employment - full credentials disclosed under NDA. Infrastructure advisor provides informal guidance.
+**NOTE:** Distributed Systems advisor officially involved. Identity confidential due to defense sector employment - full credentials disclosed under NDA.
 
 **Sensors & Automotive Advisor (In Discussion)**
 - PhD Engineering (France), MSc (Serbia)

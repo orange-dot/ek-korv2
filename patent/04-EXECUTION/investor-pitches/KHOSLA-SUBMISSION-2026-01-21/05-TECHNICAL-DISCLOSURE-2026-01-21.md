@@ -17,7 +17,7 @@ This document discloses significant technical developments completed in a single
 2. **EKKL Interpreter** - Domain-specific language for deterministic test oracle
 3. **Multi-Layer Test System** - Comprehensive validation infrastructure
 
-**Collaboration acknowledgment:** This work was developed in collaboration with our Distributed Systems & Optimization Advisor (PhD, identity confidential due to defense sector employment - disclosed under NDA) and informal guidance from our Infrastructure Advisor (US-based, 17 years critical infrastructure experience).
+**Collaboration acknowledgment:** This work was developed in collaboration with our Distributed Systems & Optimization Advisor (PhD, identity confidential due to defense sector employment - disclosed under NDA).
 
 ---
 
@@ -389,12 +389,6 @@ Grid-aware charger placement optimization:
 - Publication venue targeting
 
 **Identity:** Confidential due to EU defense/telecom sector employment. Full credentials disclosed under NDA.
-
-### Infrastructure Advisor
-
-**Role:** Informal advisor
-**Background:** US-based, 17 years critical infrastructure, first responders network
-**Contribution:** Mission-critical systems perspective, reliability patterns
 
 ---
 

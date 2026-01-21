@@ -161,12 +161,6 @@ go test ./...
 - Deadline-aware CBS algorithm (deadline_cbs.go:231-270)
 - Capability-based task assignment framework
 
-### Infrastructure Advisor (Informal)
-
-- US-based, 17 years critical infrastructure
-- First responders network experience
-- Mission-critical systems perspective
-
 ---
 
 ## What This Demonstrates

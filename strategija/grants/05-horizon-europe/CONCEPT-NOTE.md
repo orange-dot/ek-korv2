@@ -59,8 +59,10 @@ Develop and validate an open-source coordination standard for distributed EV cha
 
 ### WP2: RTOS Development (Lead: Elektrokombinacija)
 - M1-M24
-- EK-KOR2 core development
+- EK-KOR2 core development (starting TRL 5)
 - Dual C/Rust implementation
+- MAPF-HET algorithm integration (7,060 LoC validated)
+- EKKL specification language development
 - Safety certification preparation
 
 ### WP3: Hardware Platform (Lead: [Academic/Industry Partner])
@@ -194,15 +196,19 @@ OPENCHARGE advances:
 1. **Potential field scheduling:** Novel application to temporal task coordination
 2. **Scale-free consensus:** k=7 topological neighbors for optimal propagation
 3. **Lock-free IPC:** <100ns deterministic communication
-4. **Open-source ecosystem:** Community-driven innovation
+4. **MAPF-HET algorithms:** 7,060 LoC of heterogeneous fleet coordination (6 validated algorithms)
+5. **EKKL specification language:** Formal DSL for RTOS configuration and validation
+6. **Open-source ecosystem:** Community-driven innovation
 
 ### TRL Progression
 
-| Component | Start TRL | End TRL |
-|-----------|-----------|---------|
-| EK-KOR2 RTOS | 4 | 7 |
-| EK3 Hardware | 3 | 7 |
-| Fleet coordination | 3 | 6 |
+| Component | Start TRL | End TRL | Starting Evidence |
+|-----------|-----------|---------|-------------------|
+| EK-KOR2 RTOS | 5 | 7 | 27 test vectors, dual C/Rust validation |
+| Potential field scheduler | 5 | 7 | MAPF-HET integration validated |
+| EKKL specification language | 4 | 6 | Working Rust interpreter |
+| EK3 Hardware | 3 | 7 | Complete specs + BOM |
+| Fleet coordination | 5 | 7 | 100+ node simulations |
 
 ---
 
@@ -248,4 +254,5 @@ OPENCHARGE advances:
 ---
 
 *Concept note prepared: January 2026*
+*Updated: January 21, 2026 - TRL 5 starting points, MAPF-HET/EKKL deliverables*
 *For: Horizon Europe Cluster 5 applications*

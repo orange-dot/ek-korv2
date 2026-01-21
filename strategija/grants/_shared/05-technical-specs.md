@@ -285,11 +285,43 @@ INDEPENDENCE:
 
 | Category | Tests | Status |
 |----------|-------|--------|
-| Scheduler unit tests | 8 | All passing |
+| Scheduler unit tests | 10 | All passing |
 | Consensus protocol | 6 | All passing |
 | IPC mechanisms | 4 | All passing |
 | Topology management | 4 | All passing |
-| **Total** | **22** | **All passing** |
+| MAPF-HET integration | 3 | All passing |
+| **Total** | **27** | **All passing** |
+
+### 6-Layer Testing Pyramid
+
+```
+MULTI-LAYER TESTING ARCHITECTURE:
+═══════════════════════════════════════════════════════════════
+
+Layer 6: ACCEPTANCE TESTS
+├── End-to-end fleet scenarios
+└── Performance benchmarks
+
+Layer 5: VALIDATION TESTS
+├── MAPF-HET algorithm validation
+└── Cross-implementation verification (C vs Rust)
+
+Layer 4: SIMULATION TESTS
+├── 100+ node scenarios
+└── Fault injection and recovery
+
+Layer 3: INTEGRATION TESTS
+├── Module coordination
+└── Protocol compliance
+
+Layer 2: PROPERTY-BASED TESTS
+├── Scheduler invariants
+└── Consensus correctness
+
+Layer 1: UNIT TESTS
+├── Individual component tests
+└── Edge case coverage
+```
 
 ### Simulation Coverage
 
@@ -302,5 +334,49 @@ INDEPENDENCE:
 
 ---
 
-*Last updated: January 2026*
-*Version: 1.0*
+## EKKL Scripting Language
+
+### Overview
+
+EKKL (EK Kernel Language) is a domain-specific language for specifying and validating RTOS behavior.
+
+```
+EKKL INTERPRETER ARCHITECTURE:
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│                     EKKL Script                             │
+│   field_config { load_weight: 0.4, thermal_weight: 0.3 }   │
+├─────────────────────────────────────────────────────────────┤
+│                     EKKL Parser (Rust)                      │
+│   Tokenizer → AST Builder → Semantic Analyzer               │
+├─────────────────────────────────────────────────────────────┤
+│                     EKKL Interpreter                        │
+│   Type Checker → Evaluator → Runtime                        │
+├─────────────────────────────────────────────────────────────┤
+│                     EK-KOR2 Integration                     │
+│   Configuration generation → Validation → Deployment        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Capabilities
+
+| Feature | Status | Purpose |
+|---------|--------|---------|
+| Field configuration | Implemented | Define potential field weights |
+| Consensus rules | Implemented | Specify voting thresholds |
+| Topology constraints | Implemented | Define neighbor requirements |
+| Test specification | Implemented | Formal test case definition |
+| Simulation scripting | Planned | Automated scenario testing |
+
+### Engineering Maturity Evidence
+
+- Complete Rust implementation with error handling
+- Formal grammar specification
+- Integration with MAPF-HET test harness
+- Documentation and examples
+
+---
+
+*Last updated: January 21, 2026*
+*Version: 1.1 - Updated test count (22→27), added 6-layer testing pyramid and EKKL section*

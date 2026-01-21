@@ -2,18 +2,18 @@
 
 **Program:** European Innovation Council Accelerator
 **Amount:** €2.5M grant (option: + €15M equity)
-**Status:** NOT STARTED
-**Next Cut-off:** [Check EIC website - typically March, June, October]
+**Status:** IN PREPARATION
+**Target Cut-off:** March 2026
 
 ---
 
 ## Eligibility Verification
 
-- [ ] Company registered in EU member state (Netherlands ✓)
-- [ ] SME status (under 250 employees, <€50M turnover)
-- [ ] Not received EIC Accelerator before
-- [ ] Technology at TRL 5-6 minimum (or path to)
-- [ ] For-profit company
+- [x] Company registered in EU member state (Netherlands ✓)
+- [x] SME status (under 250 employees, <€50M turnover)
+- [x] Not received EIC Accelerator before
+- [x] Technology at TRL 5 (core RTOS components validated Jan 2026)
+- [x] For-profit company
 
 ## Application Components
 
@@ -78,25 +78,28 @@
 
 ## Pitch Deck Finalization
 
+- [x] Condense to exactly 10 slides (done Jan 21, 2026)
+- [x] Update TRL to TRL 5 with evidence
+- [x] Add MAPF-HET metrics (7,060 LoC, 27 tests)
+- [x] Add investor interest (Khosla, GV)
 - [ ] Convert PITCH-DECK.md to PowerPoint/PDF
-- [ ] Check slide count (max 10)
 - [ ] Verify all visuals render correctly
 - [ ] Proofread for errors
 - [ ] Get external feedback
 
-## Timeline
+## Timeline (March 2026 Cut-off)
 
 | Task | Target Date | Status |
 |------|-------------|--------|
-| Decide on cut-off date | [Date] | NOT STARTED |
-| Complete short application | [Cutoff - 2 weeks] | NOT STARTED |
-| Record and edit video | [Cutoff - 3 weeks] | NOT STARTED |
-| Finalize pitch deck | [Cutoff - 2 weeks] | NOT STARTED |
-| Submit application | [Cutoff] | NOT STARTED |
-| Step 1 result | [Cutoff + 4-6 weeks] | - |
-| Full application (if invited) | [Result + 2-3 weeks] | - |
-| Interview (if shortlisted) | [Varies] | - |
-| Final decision | [Interview + 4-6 weeks] | - |
+| Shared content library update | Jan 21, 2026 | IN PROGRESS |
+| Pitch deck finalized (10 slides) | Feb 20, 2026 | IN PROGRESS |
+| Video production complete | Feb 15, 2026 | NOT STARTED |
+| Short application ready | Feb 25, 2026 | NOT STARTED |
+| Final review & submission | March cut-off | NOT STARTED |
+| Step 1 result | ~April/May 2026 | - |
+| Full application (if invited) | +2-3 weeks | - |
+| Interview (if shortlisted) | ~June/July 2026 | - |
+| Final decision | ~August 2026 | - |
 
 ## EIC Accelerator Success Factors
 
@@ -152,3 +155,4 @@ If shortlisted:
 ---
 
 *Checklist created: January 2026*
+*Updated: January 21, 2026 - Set March 2026 target, marked shared content updates in progress*
