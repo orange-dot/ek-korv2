@@ -180,7 +180,16 @@
       "WebFetch(domain:rockstart.com)",
       "WebFetch(domain:rockstart.pr.co)",
       "Bash(certutil:*)",
-      "Bash(7z l:*)"
+      "Bash(7z l:*)",
+      "Bash(copy \"D:\\\\work\\\\autobusi-punjaci\\\\patent\\\\04-EXECUTION\\\\investor-pitches\\\\10-GV-GOOGLE-VENTURES-FULL-PACKAGE.md\" \"D:\\\\work\\\\autobusi-punjaci\\\\patent\\\\04-EXECUTION\\\\investor-pitches\\\\GV-SUBMISSION-2026-01-20\\\\01-GV-PITCH-AND-EMAILS.md\")",
+      "Bash(7z a:*)",
+      "WebFetch(domain:www.browserstack.com)",
+      "Bash(cargo check:*)",
+      "Bash(cargo test:*)",
+      "Bash(cargo build:*)",
+      "Bash(go test:*)",
+      "Bash(./mapfhet.exe)",
+      "Bash(go vet:*)"
     ]
   }
 }
