@@ -189,7 +189,11 @@
       "Bash(cargo build:*)",
       "Bash(go test:*)",
       "Bash(./mapfhet.exe)",
-      "Bash(go vet:*)"
+      "Bash(go vet:*)",
+      "Bash(git fetch:*)",
+      "Bash(git subtree split:*)",
+      "Bash(git branch:*)",
+      "WebFetch(domain:doc.akka.io)"
     ]
   }
 }

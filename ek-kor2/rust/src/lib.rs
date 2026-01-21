@@ -85,6 +85,7 @@ pub mod consensus;
 pub mod heartbeat;
 pub mod module;
 pub mod hal;
+pub mod gossip;
 
 // Re-exports for convenience
 pub use types::*;
@@ -94,6 +95,7 @@ pub use consensus::{Consensus, ConsensusConfig, Ballot, ProposalType, VoteMessag
 pub use heartbeat::{Heartbeat, HeartbeatConfig, HeartbeatMessage};
 pub use module::{Module, ModuleCallbacks, ModuleStatus, InternalTask, TaskState, TaskFn};
 pub use hal::{Hal, MsgType, ReceivedMessage, CriticalSection};
+pub use gossip::{GossipContext, VersionVector, VVOrder, EventV2, LWWTimestamp, GossipStats};
 
 /// Prelude - commonly used items
 pub mod prelude {
@@ -104,6 +106,7 @@ pub mod prelude {
     pub use crate::heartbeat::Heartbeat;
     pub use crate::module::Module;
     pub use crate::hal::Hal;
+    pub use crate::gossip::{GossipContext, VersionVector};
 }
 
 // ============================================================================
