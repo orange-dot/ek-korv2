@@ -35,8 +35,8 @@ pub const VOTE_TIMEOUT_US: u64 = 50_000;
 /// Maximum concurrent ballots
 pub const MAX_BALLOTS: usize = 4;
 
-/// Maximum field components
-pub const FIELD_COUNT: usize = 5;
+/// Maximum field components (6 with MAPF-HET slack integration)
+pub const FIELD_COUNT: usize = 6;
 
 // ============================================================================
 // Basic Types
@@ -203,6 +203,8 @@ pub enum FieldComponent {
     Custom0 = 3,
     /// Application-defined 1
     Custom1 = 4,
+    /// Deadline slack (MAPF-HET integration)
+    Slack = 5,
 }
 
 impl FieldComponent {
@@ -213,6 +215,7 @@ impl FieldComponent {
         FieldComponent::Power,
         FieldComponent::Custom0,
         FieldComponent::Custom1,
+        FieldComponent::Slack,
     ];
 }
 
@@ -325,6 +328,8 @@ pub struct Neighbor {
     pub logical_distance: i32,
     /// Consecutive missed heartbeats
     pub missed_heartbeats: u8,
+    /// Neighbor's capabilities (MAPF-HET integration)
+    pub capabilities: Capability,
 }
 
 impl Neighbor {
@@ -340,6 +345,136 @@ impl Neighbor {
     /// Check if neighbor is healthy
     pub fn is_healthy(&self) -> bool {
         matches!(self.health, HealthState::Alive | HealthState::Suspect)
+    }
+}
+
+// ============================================================================
+// Capability Bitmask (MAPF-HET Integration)
+// ============================================================================
+
+/// Module capability bitmask
+///
+/// Even identical EK3 modules have runtime heterogeneity:
+/// - Thermal state varies (some modules cooler than others)
+/// - V2G capability depends on configuration
+/// - Gateway role assigned dynamically
+///
+/// MAPF-HET Integration: Enables capability-based task assignment
+/// where tasks are only assigned to modules with matching capabilities.
+pub type Capability = u16;
+
+/// Standard capability flags
+pub mod capability {
+    use super::Capability;
+
+    /// Within thermal limits
+    pub const THERMAL_OK: Capability = 1 << 0;
+    /// High power mode available
+    pub const POWER_HIGH: Capability = 1 << 1;
+    /// Can aggregate/route messages
+    pub const GATEWAY: Capability = 1 << 2;
+    /// Bidirectional power capable
+    pub const V2G: Capability = 1 << 3;
+    /// Reserved for future use
+    pub const RESERVED_4: Capability = 1 << 4;
+    /// Reserved for future use
+    pub const RESERVED_5: Capability = 1 << 5;
+    /// Reserved for future use
+    pub const RESERVED_6: Capability = 1 << 6;
+    /// Reserved for future use
+    pub const RESERVED_7: Capability = 1 << 7;
+    /// Application-defined 0
+    pub const CUSTOM_0: Capability = 1 << 8;
+    /// Application-defined 1
+    pub const CUSTOM_1: Capability = 1 << 9;
+    /// Application-defined 2
+    pub const CUSTOM_2: Capability = 1 << 10;
+    /// Application-defined 3
+    pub const CUSTOM_3: Capability = 1 << 11;
+}
+
+/// Check if module has required capabilities
+///
+/// # Arguments
+/// * `have` - Module's current capabilities
+/// * `need` - Required capabilities for task
+///
+/// # Returns
+/// `true` if all required capabilities are present
+#[inline]
+pub fn can_perform(have: Capability, need: Capability) -> bool {
+    (have & need) == need
+}
+
+// ============================================================================
+// Deadline / Slack (MAPF-HET Integration)
+// ============================================================================
+
+/// Slack threshold for critical deadline detection (10 seconds in microseconds)
+///
+/// Tasks with slack below this threshold are marked critical and get
+/// priority in gradient-based scheduling decisions.
+pub const SLACK_THRESHOLD_US: TimeUs = 10_000_000;
+
+/// Normalization constant for slack field (100 seconds in microseconds)
+///
+/// Slack values are normalized to [0, 1] where:
+/// - 0.0 = critical (at deadline or past due)
+/// - 1.0 = maximum slack (100+ seconds)
+pub const SLACK_NORMALIZE_US: TimeUs = 100_000_000;
+
+/// Deadline information for a task
+///
+/// Used for deadline-aware task selection via slack field gradient.
+/// Slack computation: slack = deadline - (now + duration_estimate)
+///
+/// MAPF-HET Integration: From deadline_cbs.go:231-270
+/// Modules with tight deadlines (low slack) get priority through
+/// the FieldComponent::Slack gradient mechanism.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Deadline {
+    /// Absolute deadline timestamp (microseconds)
+    pub deadline: TimeUs,
+    /// Estimated task duration (microseconds)
+    pub duration_est: TimeUs,
+    /// Computed slack (Q16.16 normalized to [0, 1])
+    pub slack: Fixed,
+    /// True if slack < SLACK_THRESHOLD_US
+    pub critical: bool,
+}
+
+impl Deadline {
+    /// Create a new deadline
+    pub fn new(deadline: TimeUs, duration_est: TimeUs) -> Self {
+        Self {
+            deadline,
+            duration_est,
+            slack: Fixed::ZERO,
+            critical: false,
+        }
+    }
+
+    /// Compute slack based on current time
+    ///
+    /// Updates `slack` and `critical` fields based on:
+    /// - slack_us = deadline - (now + duration_est)
+    /// - critical = slack_us < SLACK_THRESHOLD_US
+    /// - slack (normalized) = slack_us / SLACK_NORMALIZE_US, clamped to [0, 1]
+    pub fn compute_slack(&mut self, now: TimeUs) {
+        let completion_time = now.saturating_add(self.duration_est);
+        let slack_us = self.deadline.saturating_sub(completion_time) as i64;
+
+        self.critical = slack_us < SLACK_THRESHOLD_US as i64;
+
+        // Normalize to [0, 1]
+        let slack_normalized = slack_us as f32 / SLACK_NORMALIZE_US as f32;
+        let slack_clamped = slack_normalized.clamp(0.0, 1.0);
+        self.slack = Fixed::from_num(slack_clamped);
+    }
+
+    /// Check if deadline has passed
+    pub fn is_past_due(&self, now: TimeUs) -> bool {
+        now >= self.deadline
     }
 }
 

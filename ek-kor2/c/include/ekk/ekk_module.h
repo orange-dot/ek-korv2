@@ -64,6 +64,11 @@ typedef struct {
     ekk_time_us_t next_run;         /**< Next scheduled run time */
     uint32_t run_count;             /**< Execution count */
     ekk_time_us_t total_runtime;    /**< Total runtime in microseconds */
+
+    /* MAPF-HET Integration: Deadline-aware scheduling */
+    bool has_deadline;              /**< True if task has a deadline */
+    ekk_deadline_t deadline;        /**< Deadline info (valid if has_deadline) */
+    ekk_capability_t required_caps; /**< Capabilities required to run this task */
 } ekk_internal_task_t;
 
 /* ============================================================================
@@ -111,6 +116,9 @@ typedef struct ekk_module {
     uint32_t field_updates;
     uint32_t topology_changes;
     uint32_t consensus_rounds;
+
+    /* MAPF-HET Integration: Capability-based coordination */
+    ekk_capability_t capabilities;      /**< This module's current capabilities */
 
     /* Callbacks */
     void (*on_field_change)(struct ekk_module *self);
@@ -248,6 +256,92 @@ ekk_error_t ekk_module_update_field(ekk_module_t *mod,
  */
 ekk_fixed_t ekk_module_get_gradient(const ekk_module_t *mod,
                                      ekk_field_component_t component);
+
+/* ============================================================================
+ * DEADLINE / SLACK OPERATIONS (MAPF-HET)
+ * ============================================================================ */
+
+/**
+ * @brief Compute slack for all tasks with deadlines
+ *
+ * Updates the slack field for each task that has a deadline:
+ *   slack = deadline - (now + duration_estimate)
+ *   critical = slack < EKK_SLACK_THRESHOLD_US
+ *
+ * Also updates the module's EKK_FIELD_SLACK component with the minimum
+ * slack across all deadline-constrained tasks (normalized to 0.0-1.0).
+ *
+ * Algorithm from MAPF-HET deadline_cbs.go:231-270
+ *
+ * @param mod Module
+ * @param now Current timestamp
+ * @return EKK_OK on success
+ */
+ekk_error_t ekk_module_compute_slack(ekk_module_t *mod, ekk_time_us_t now);
+
+/**
+ * @brief Set task deadline
+ *
+ * @param mod Module
+ * @param task_id Task to modify
+ * @param deadline Absolute deadline timestamp
+ * @param duration_est Estimated task duration
+ * @return EKK_OK on success
+ */
+ekk_error_t ekk_module_set_task_deadline(ekk_module_t *mod,
+                                          ekk_task_id_t task_id,
+                                          ekk_time_us_t deadline,
+                                          ekk_time_us_t duration_est);
+
+/**
+ * @brief Clear task deadline
+ *
+ * @param mod Module
+ * @param task_id Task to modify
+ * @return EKK_OK on success
+ */
+ekk_error_t ekk_module_clear_task_deadline(ekk_module_t *mod,
+                                            ekk_task_id_t task_id);
+
+/* ============================================================================
+ * CAPABILITY OPERATIONS (MAPF-HET)
+ * ============================================================================ */
+
+/**
+ * @brief Set module capabilities
+ *
+ * Updates the module's capability bitmask. Typically called when:
+ * - Thermal state changes (enable/disable EKK_CAP_THERMAL_OK)
+ * - Configuration changes (V2G, gateway role)
+ *
+ * @param mod Module
+ * @param caps New capability bitmask
+ * @return EKK_OK on success
+ */
+ekk_error_t ekk_module_set_capabilities(ekk_module_t *mod, ekk_capability_t caps);
+
+/**
+ * @brief Get module capabilities
+ *
+ * @param mod Module
+ * @return Current capability bitmask
+ */
+ekk_capability_t ekk_module_get_capabilities(const ekk_module_t *mod);
+
+/**
+ * @brief Set required capabilities for a task
+ *
+ * Task will only be selected for execution if the module has all
+ * required capabilities (checked via ekk_can_perform).
+ *
+ * @param mod Module
+ * @param task_id Task to modify
+ * @param caps Required capabilities
+ * @return EKK_OK on success
+ */
+ekk_error_t ekk_module_set_task_capabilities(ekk_module_t *mod,
+                                              ekk_task_id_t task_id,
+                                              ekk_capability_t caps);
 
 /* ============================================================================
  * CONSENSUS SHORTCUTS

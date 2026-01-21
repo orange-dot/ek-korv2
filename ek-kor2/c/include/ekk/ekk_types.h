@@ -136,7 +136,8 @@ typedef enum {
     EKK_FIELD_POWER         = 2,    /**< Power consumption */
     EKK_FIELD_CUSTOM_0      = 3,    /**< Application-defined */
     EKK_FIELD_CUSTOM_1      = 4,    /**< Application-defined */
-    EKK_FIELD_COUNT         = 5,
+    EKK_FIELD_SLACK         = 5,    /**< Deadline slack (MAPF-HET integration) */
+    EKK_FIELD_COUNT         = 6,
 } ekk_field_component_t;
 
 /* ============================================================================
@@ -264,6 +265,77 @@ typedef enum {
 } ekk_error_t;
 
 /* ============================================================================
+ * DEADLINE / SLACK (MAPF-HET Integration)
+ * ============================================================================ */
+
+/**
+ * @brief Slack threshold for critical deadline detection (10 seconds)
+ *
+ * Tasks with slack below this threshold are marked critical and get
+ * priority in gradient-based scheduling decisions.
+ */
+#define EKK_SLACK_THRESHOLD_US      10000000
+
+/**
+ * @brief Deadline information for a task
+ *
+ * Used for deadline-aware task selection via slack field gradient.
+ * Slack computation: slack = deadline - (now + duration_estimate)
+ *
+ * MAPF-HET Integration: From deadline_cbs.go:231-270
+ * Modules with tight deadlines (low slack) get priority through
+ * the EKK_FIELD_SLACK gradient mechanism.
+ */
+typedef struct {
+    ekk_time_us_t deadline;         /**< Absolute deadline timestamp */
+    ekk_time_us_t duration_est;     /**< Estimated task duration */
+    ekk_fixed_t slack;              /**< Computed slack (Q16.16) */
+    bool critical;                  /**< True if slack < SLACK_THRESHOLD_US */
+} ekk_deadline_t;
+
+/* ============================================================================
+ * CAPABILITY BITMASK (MAPF-HET Integration)
+ * ============================================================================ */
+
+/**
+ * @brief Module capability bitmask
+ *
+ * Even identical EK3 modules have runtime heterogeneity:
+ * - Thermal state varies (some modules cooler than others)
+ * - V2G capability depends on configuration
+ * - Gateway role assigned dynamically
+ *
+ * MAPF-HET Integration: Enables capability-based task assignment
+ * where tasks are only assigned to modules with matching capabilities.
+ */
+typedef uint16_t ekk_capability_t;
+
+/* Standard capability flags */
+#define EKK_CAP_THERMAL_OK      (1 << 0)    /**< Within thermal limits */
+#define EKK_CAP_POWER_HIGH      (1 << 1)    /**< High power mode available */
+#define EKK_CAP_GATEWAY         (1 << 2)    /**< Can aggregate/route messages */
+#define EKK_CAP_V2G             (1 << 3)    /**< Bidirectional power capable */
+#define EKK_CAP_RESERVED_4      (1 << 4)    /**< Reserved for future use */
+#define EKK_CAP_RESERVED_5      (1 << 5)    /**< Reserved for future use */
+#define EKK_CAP_RESERVED_6      (1 << 6)    /**< Reserved for future use */
+#define EKK_CAP_RESERVED_7      (1 << 7)    /**< Reserved for future use */
+#define EKK_CAP_CUSTOM_0        (1 << 8)    /**< Application-defined 0 */
+#define EKK_CAP_CUSTOM_1        (1 << 9)    /**< Application-defined 1 */
+#define EKK_CAP_CUSTOM_2        (1 << 10)   /**< Application-defined 2 */
+#define EKK_CAP_CUSTOM_3        (1 << 11)   /**< Application-defined 3 */
+
+/**
+ * @brief Check if module has required capabilities
+ *
+ * @param have Module's current capabilities
+ * @param need Required capabilities for task
+ * @return true if all required capabilities are present
+ */
+static inline bool ekk_can_perform(ekk_capability_t have, ekk_capability_t need) {
+    return (have & need) == need;
+}
+
+/* ============================================================================
  * MODULE ROLE
  * ============================================================================ */
 
@@ -374,6 +446,7 @@ typedef struct {
     ekk_field_t last_field;                    /**< Last received field */
     int32_t logical_distance;                  /**< Distance metric for k-selection */
     uint8_t missed_heartbeats;                 /**< Consecutive missed */
+    ekk_capability_t capabilities;             /**< Neighbor's capabilities (MAPF-HET) */
 } ekk_neighbor_t;
 
 /* ============================================================================

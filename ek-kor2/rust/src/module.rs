@@ -18,6 +18,7 @@ use crate::field::{FieldEngine, FieldRegion};
 use crate::heartbeat::Heartbeat;
 use crate::topology::Topology;
 use crate::types::*;
+use crate::types::{Capability, Deadline, can_perform, SLACK_NORMALIZE_US};
 use heapless::Vec;
 
 // ============================================================================
@@ -64,6 +65,12 @@ pub struct InternalTask {
     pub run_count: u32,
     /// Total runtime in microseconds
     pub total_runtime: TimeUs,
+
+    // MAPF-HET Integration: Deadline-aware scheduling
+    /// Deadline information (None = no deadline)
+    pub deadline: Option<Deadline>,
+    /// Capabilities required to run this task
+    pub required_caps: Capability,
 }
 
 impl Default for InternalTask {
@@ -79,6 +86,8 @@ impl Default for InternalTask {
             next_run: 0,
             run_count: 0,
             total_runtime: 0,
+            deadline: None,
+            required_caps: 0,
         }
     }
 }
@@ -191,6 +200,10 @@ pub struct Module {
     /// Consensus rounds
     consensus_rounds: u32,
 
+    // MAPF-HET Integration: Capability-based coordination
+    /// This module's current capabilities
+    capabilities: Capability,
+
     // Callbacks
     callbacks: ModuleCallbacks,
 }
@@ -217,6 +230,7 @@ impl Module {
             field_updates: 0,
             topology_changes: 0,
             consensus_rounds: 0,
+            capabilities: 0,
             callbacks: ModuleCallbacks::default(),
         }
     }
@@ -368,39 +382,59 @@ impl Module {
         }
     }
 
-    /// Select task based on gradients and priority
+    /// Select task based on gradients, priority, deadlines, and capabilities
+    ///
+    /// MAPF-HET Integration: Task selection considers:
+    /// 1. Capability matching (tasks require certain module capabilities)
+    /// 2. Deadline criticality (critical tasks get priority boost)
+    /// 3. Standard priority ordering
     fn select_task(&self) -> Option<TaskId> {
         let load_gradient = self.gradients[FieldComponent::Load as usize];
 
-        // If neighbors are overloaded, prefer higher priority tasks
-        // If we're overloaded, prefer lower priority or idle
-        let priority_boost = if load_gradient > Fixed::ZERO {
-            // Neighbors overloaded - I should do more
-            0i8
-        } else if load_gradient < Fixed::from_num(-0.2) {
-            // I'm overloaded - throttle
-            return None; // Go idle
-        } else {
-            0i8
-        };
+        // If we're significantly overloaded, throttle
+        if load_gradient < Fixed::from_num(-0.2) {
+            return None;
+        }
 
-        // Find highest priority ready task
-        let mut best: Option<(TaskId, u8)> = None;
+        // Find best task considering capabilities, deadlines, and priority
+        let mut best: Option<(TaskId, u8, bool)> = None; // (id, priority, is_critical)
 
         for task in self.tasks.iter() {
-            if task.state == TaskState::Ready {
-                let effective_priority = (task.priority as i8 + priority_boost).max(0) as u8;
-                match best {
-                    None => best = Some((task.id, effective_priority)),
-                    Some((_, best_prio)) if effective_priority < best_prio => {
-                        best = Some((task.id, effective_priority));
+            if task.state != TaskState::Ready {
+                continue;
+            }
+
+            // MAPF-HET: Check capability requirements
+            if task.required_caps != 0 && !can_perform(self.capabilities, task.required_caps) {
+                continue;
+            }
+
+            // MAPF-HET: Check if task has critical deadline
+            let is_critical = task.deadline.as_ref().map_or(false, |d| d.critical);
+
+            // Priority rules:
+            // 1. Critical deadline tasks always beat non-critical
+            // 2. Among critical tasks, lower priority number wins
+            // 3. Among non-critical tasks, lower priority number wins
+            let select_this_task = match best {
+                None => true,
+                Some((_, best_prio, best_critical)) => {
+                    if is_critical && !best_critical {
+                        true // Critical beats non-critical
+                    } else if is_critical == best_critical {
+                        task.priority < best_prio // Same criticality - compare priority
+                    } else {
+                        false
                     }
-                    _ => {}
                 }
+            };
+
+            if select_this_task {
+                best = Some((task.id, task.priority, is_critical));
             }
         }
 
-        best.map(|(id, _)| id)
+        best.map(|(id, _, _)| id)
     }
 
     /// Run a task
@@ -451,6 +485,97 @@ impl Module {
     /// Get all gradients
     pub fn gradients(&self) -> &[Fixed; FIELD_COUNT] {
         &self.gradients
+    }
+
+    // ========================================================================
+    // Deadline / Slack Operations (MAPF-HET)
+    // ========================================================================
+
+    /// Compute slack for all tasks with deadlines
+    ///
+    /// Updates the slack field for each task that has a deadline:
+    /// - slack = deadline - (now + duration_estimate)
+    /// - critical = slack < SLACK_THRESHOLD_US
+    ///
+    /// Also updates the module's FieldComponent::Slack with the minimum
+    /// slack across all deadline-constrained tasks.
+    pub fn compute_slack(&mut self, now: TimeUs) {
+        let mut min_slack_us: i64 = SLACK_NORMALIZE_US as i64;
+        let mut has_any_deadline = false;
+
+        for task in self.tasks.iter_mut() {
+            if let Some(ref mut deadline) = task.deadline {
+                has_any_deadline = true;
+                deadline.compute_slack(now);
+
+                // Track minimum slack
+                let slack_us = (deadline.deadline as i64)
+                    .saturating_sub(now as i64)
+                    .saturating_sub(deadline.duration_est as i64);
+
+                if slack_us < min_slack_us {
+                    min_slack_us = slack_us;
+                }
+            }
+        }
+
+        // Update slack field component
+        if has_any_deadline {
+            let slack_normalized = (min_slack_us as f32 / SLACK_NORMALIZE_US as f32)
+                .clamp(0.0, 1.0);
+            self.my_field.set(FieldComponent::Slack, Fixed::from_num(slack_normalized));
+        } else {
+            self.my_field.set(FieldComponent::Slack, Fixed::ONE);
+        }
+    }
+
+    /// Set deadline for a task
+    pub fn set_task_deadline(
+        &mut self,
+        task_id: TaskId,
+        deadline: TimeUs,
+        duration_est: TimeUs,
+    ) -> Result<()> {
+        if let Some(task) = self.tasks.get_mut(task_id as usize) {
+            task.deadline = Some(Deadline::new(deadline, duration_est));
+            Ok(())
+        } else {
+            Err(Error::NotFound)
+        }
+    }
+
+    /// Clear deadline for a task
+    pub fn clear_task_deadline(&mut self, task_id: TaskId) -> Result<()> {
+        if let Some(task) = self.tasks.get_mut(task_id as usize) {
+            task.deadline = None;
+            Ok(())
+        } else {
+            Err(Error::NotFound)
+        }
+    }
+
+    // ========================================================================
+    // Capability Operations (MAPF-HET)
+    // ========================================================================
+
+    /// Set module capabilities
+    pub fn set_capabilities(&mut self, caps: Capability) {
+        self.capabilities = caps;
+    }
+
+    /// Get module capabilities
+    pub fn capabilities(&self) -> Capability {
+        self.capabilities
+    }
+
+    /// Set required capabilities for a task
+    pub fn set_task_capabilities(&mut self, task_id: TaskId, caps: Capability) -> Result<()> {
+        if let Some(task) = self.tasks.get_mut(task_id as usize) {
+            task.required_caps = caps;
+            Ok(())
+        } else {
+            Err(Error::NotFound)
+        }
     }
 
     // ========================================================================

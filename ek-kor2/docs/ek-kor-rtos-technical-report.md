@@ -267,7 +267,41 @@ Topology rebuild selects replacement neighbors using the same logical distance m
 
 Load redistribution uses the potential field mechanism. Failed node's load creates an attractive potential, and surviving neighbors absorb load proportional to their available capacity. The process completes within seconds without central coordination.
 
-### 5.7 Differentiable Symbolic Policy Learning [Research]
+### 5.7 Network Partition Handling [Production]
+
+Network partitions represent one of the most challenging distributed systems scenarios. When communication failures divide a segment into isolated groups, the system must detect the partition, prevent conflicting decisions (split-brain), and gracefully recover when connectivity is restored.
+
+The partition handling subsystem integrates with the threshold consensus and topological coordination features to provide complete fault tolerance.
+
+**Partition Detection**
+
+Detection relies on three complementary mechanisms operating concurrently. Heartbeat-based suspicion tracks consecutive missed heartbeats per node, triggering suspicion after three misses. The suspicion aggregation ratio (suspected nodes / total nodes) indicates partition likelihood when exceeding 0.3. Quorum monitoring continuously tracks whether the visible node count meets quorum requirements (N/2 + 1), providing the primary criterion for majority/minority determination. CAN arbitration analysis monitors which node IDs participate in bus arbitration, detecting when high-priority nodes that should consistently win arbitration are absent.
+
+The partition detector state machine transitions through four states: HEALTHY, SUSPECTING, PARTITIONED (either MAJORITY or MINORITY), and RECONCILING.
+
+**Split-Brain Prevention**
+
+The fundamental principle preventing split-brain is quorum-based decision authority. Only the partition containing a majority of nodes may continue making consensus decisions. The minority partition enters a freeze mode with specific behavioral constraints.
+
+Minority partition behavior restricts operation to local droop-only power control, suspends leader election and consensus voting, maintains last-known power setpoints without adjustment, and continues local safety functions (thermal protection, fault isolation). The implementation adds a partition role field to the threshold consensus structure, checked before any decision is committed.
+
+Majority partition behavior allows continued operation with reduced capacity, using the existing threshold consensus mechanism with adjusted thresholds reflecting the smaller active population. All decisions are logged with partition epoch numbers for later reconciliation.
+
+**Epoch-Based Stale Detection**
+
+Each partition event increments a global epoch counter included in all critical messages. This enables detection of stale messages from before the partition and identification of nodes with outdated state requiring synchronization. The epoch comparison determines leadership precedence during reconciliation, with the highest epoch indicating the node that remained in the majority partition.
+
+**Reconciliation Protocol**
+
+When a partition heals, a three-phase reconciliation protocol executes. In the leader resolution phase, competing leader claims are resolved by epoch comparison, with the highest epoch leader continuing as the unified leader. The state synchronization phase has minority partition nodes request state deltas from the majority, applying committed decisions they missed during isolation. The load reintegration phase gradually ramps reintegrated nodes back to full power, preventing grid transients through a 10-second ramp with 100ms steps.
+
+The reconciliation messages use CAN-FD frames with identifiers in the 0x018-0x01B range, carrying partition state, epoch information, and compressed state deltas.
+
+**Safety Integration**
+
+Partition handling interfaces with the L2 safety layer through gateway-mediated alerts. When a segment enters partitioned state, the gateway notifies L2, which may take protective action if the partition affects grid stability. The L2 layer maintains independent monitoring and can force safe shutdown if partition behavior threatens safety constraints.
+
+### 5.8 Differentiable Symbolic Policy Learning [Research]
 
 > **Note:** This feature requires offline training infrastructure. Training is performed on development workstations, not on embedded targets. Only the inference (compiled decision trees/rule bases) runs on the STM32G474.
 

@@ -383,6 +383,218 @@ PEER RESPONSE
 5. Log event for maintenance
 ```
 
+### Topological Neighbor Selection Algorithm
+
+```
+FORMAL NEIGHBOR SELECTION FOR k-TOPOLOGY
+────────────────────────────────────────
+
+The k=7 topological coordination requires each module to select
+exactly k neighbors from the segment. This selection MUST optimize
+for network properties while ensuring convergence to a stable topology.
+
+
+LOGICAL DISTANCE METRIC DEFINITION
+──────────────────────────────────
+
+Logical distance d(i,j) between modules i and j is computed as:
+
+    d(i,j) = w₁ × d_can(i,j) + w₂ × d_latency(i,j) + w₃ × d_error(i,j)
+
+Where:
+
+1. CAN Address Distance:
+   d_can(i,j) = min(|CAN_ID_i - CAN_ID_j|, N - |CAN_ID_i - CAN_ID_j|)
+
+   This creates a "ring" topology where IDs wrap around.
+   Example with N=64 nodes:
+   - d_can(1, 5) = 4
+   - d_can(1, 63) = min(62, 2) = 2  (wraps around)
+
+2. Message Latency Distance:
+   d_latency(i,j) = avg_rtt(i,j) / MAX_EXPECTED_RTT
+
+   Measured via PING messages over CAN-FD.
+   Normalized to [0, 1] range.
+
+3. Error Rate Distance:
+   d_error(i,j) = (missed_msgs(i,j) + crc_errors(i,j)) / total_msgs(i,j)
+
+   Historical error rate between nodes.
+   Higher errors = higher distance = less likely neighbor.
+
+
+Default weights (tunable):
+   w₁ = 0.5  # CAN topology
+   w₂ = 0.3  # Latency
+   w₃ = 0.2  # Reliability
+
+
+NEIGHBOR SELECTION ALGORITHM
+────────────────────────────
+
+Goal: Select k neighbors that minimize network diameter while
+      maximizing fault tolerance.
+
+algorithm SelectNeighbors(self_id, all_nodes, k):
+    candidates = all_nodes - {self_id}
+    selected = []
+
+    # Phase 1: Select geographically diverse neighbors
+    # Pick neighbors spread across the CAN ID space
+    for i in range(k):
+        target_position = (self_id + i × (N / k)) mod N
+        nearest = argmin(candidates, key=λn: d_can(n, target_position))
+        selected.append(nearest)
+        candidates.remove(nearest)
+
+    # Phase 2: Quality refinement
+    # Replace poor-quality selections with better alternatives
+    for i, neighbor in enumerate(selected):
+        quality = 1 / (d_latency(self_id, neighbor) + d_error(self_id, neighbor) + ε)
+
+        # Check if any remaining candidate is significantly better
+        for candidate in candidates:
+            candidate_quality = 1 / (d_latency(self_id, candidate) + d_error(self_id, candidate) + ε)
+
+            # Only replace if quality improvement > 20% AND
+            # replacement doesn't reduce topological diversity
+            if candidate_quality > 1.2 × quality:
+                if maintains_diversity(selected, i, candidate):
+                    selected[i] = candidate
+                    candidates.remove(candidate)
+                    candidates.add(neighbor)
+                    break
+
+    return selected
+
+
+function maintains_diversity(selected, replace_idx, new_neighbor):
+    # Ensure neighbors are spread across at least 3 CAN ID quadrants
+    quadrant_count = count_quadrants(selected[:replace_idx] +
+                                      [new_neighbor] +
+                                      selected[replace_idx+1:])
+    return quadrant_count >= 3
+
+
+ADAPTIVE k VALUE
+────────────────
+
+For small networks, k=7 may be suboptimal or impossible.
+Adaptive k calculation:
+
+function compute_adaptive_k(segment_size):
+    if segment_size <= 3:
+        # Fully connected mesh
+        return segment_size - 1
+
+    if segment_size <= 7:
+        # k = n-2 ensures good connectivity
+        return segment_size - 2
+
+    if segment_size <= 15:
+        # k = 5 is sufficient
+        return 5
+
+    if segment_size <= 30:
+        # k = 6 balances bandwidth and connectivity
+        return 6
+
+    # Default for large segments
+    return 7
+
+Theoretical basis (from starling flock research):
+- k ≈ 6-7 provides scale-free correlation
+- k < 6 may cause coordination fragmentation
+- k > 7 wastes bandwidth with minimal benefit
+
+
+TOPOLOGY REFORMATION TRIGGERS
+─────────────────────────────
+
+Neighbor lists must be rebuilt when:
+
+1. Node failure (heartbeat timeout)
+2. Node addition (JOIN_REQUEST received)
+3. Quality degradation (error rate > threshold)
+4. Periodic refresh (every 60 seconds)
+5. Partition heal (reconciliation)
+
+Reformation algorithm:
+
+function on_topology_trigger(trigger_type):
+    # Rate limit reformations
+    if time_since_last_reformation < MIN_REFORMATION_INTERVAL:
+        queue_reformation(trigger_type)
+        return
+
+    # Announce reformation intent
+    broadcast(TOPOLOGY_REFORMATION_START(self.id, trigger_type))
+
+    # Collect current network state
+    active_nodes = discover_active_nodes()
+
+    # Compute new neighbors
+    new_k = compute_adaptive_k(len(active_nodes))
+    new_neighbors = SelectNeighbors(self.id, active_nodes, new_k)
+
+    # Validate selection with neighbors
+    for neighbor in new_neighbors:
+        send(neighbor, NEIGHBOR_PROPOSAL(self.id))
+
+    # Wait for acknowledgments
+    acks = await_acks(new_neighbors, timeout=NEIGHBOR_ACK_TIMEOUT)
+
+    # Finalize if majority acknowledge
+    if len(acks) >= new_k / 2 + 1:
+        commit_neighbor_list(new_neighbors)
+        broadcast(TOPOLOGY_REFORMATION_COMPLETE(self.id, new_neighbors))
+    else:
+        # Retry with fallback neighbors
+        retry_reformation_with_fallbacks()
+
+
+CONVERGENCE GUARANTEE
+─────────────────────
+
+Theorem: The SelectNeighbors algorithm converges to a stable topology
+         within O(log N) reformation rounds for N nodes.
+
+Proof sketch:
+1. Phase 1 ensures geometric diversity (no clustering)
+2. Phase 2 quality refinement is monotonic (quality only increases)
+3. Rate limiting prevents oscillation
+4. Mutual acknowledgment ensures symmetric neighbor relationships
+
+Convergence metrics (logged for verification):
+- topology_diameter: Max hops between any two nodes
+- avg_neighbor_quality: Mean 1/d(i,j) for all neighbor pairs
+- reformation_count: Total reformations since startup
+- convergence_time: Time from startup to stable topology
+
+
+EXAMPLE: 64-Module Segment
+──────────────────────────
+
+Module 0 neighbor selection with k=7:
+
+Phase 1 (geometric spread):
+- Target positions: 0, 9, 18, 27, 36, 45, 54 (spaced by N/k = 64/7 ≈ 9)
+- Initial selection: [9, 18, 27, 36, 45, 54, 63]
+
+Phase 2 (quality refinement):
+- Module 27 has high error rate (0.05)
+- Module 28 has low error rate (0.001) and similar position
+- Replace 27 → 28
+
+Final neighbors: [9, 18, 28, 36, 45, 54, 63]
+
+Network properties achieved:
+- Diameter: 4 hops (any node reachable in ≤4 hops)
+- Redundancy: 3 independent paths between most node pairs
+- Fault tolerance: 2 neighbor failures survivable
+```
+
 ### Self-Healing
 
 ```
@@ -499,6 +711,231 @@ Properties:
 
 Convergence: Typically 5-20 iterations
 Communication per iteration: O(n) messages
+```
+
+### Byzantine Fault Tolerance
+
+```
+BYZANTINE FAULT MODEL
+─────────────────────
+
+A Byzantine fault occurs when a module behaves arbitrarily:
+• Sends incorrect data (sensor failure, firmware bug)
+• Sends conflicting data to different peers (equivocation)
+• Fails to follow protocol (malicious or corrupted)
+• Colludes with other faulty modules (coordinated attack)
+
+Unlike crash faults (module simply stops), Byzantine faults are
+unpredictable and potentially malicious.
+
+
+FORMAL BOUNDS
+─────────────
+
+For Byzantine fault tolerance with f faulty nodes:
+
+    N ≥ 3f + 1
+
+Where:
+• N = total number of nodes
+• f = maximum number of Byzantine (faulty) nodes
+
+For ROJ with k=7 neighbors:
+• N = 7 modules in consensus group
+• f = 2 Byzantine faults tolerated
+• Requires 5 honest votes for consensus (7 - 2 = 5)
+
+This satisfies: 7 ≥ 3(2) + 1 = 7 ✓
+
+
+BYZANTINE BEHAVIOR DETECTION
+────────────────────────────
+
+1. EQUIVOCATION DETECTION
+
+   Equivocation: Module sends different values to different peers
+   for the same state.
+
+   Detection mechanism:
+
+   function on_neighbor_state_received(sender, state, sequence):
+       # Store state announcement
+       state_cache[sender][sequence] = {
+           state: state,
+           received_from: [current_reporter],
+           timestamp: now()
+       }
+
+       # Share announcements with k-neighbors
+       for neighbor in my_neighbors:
+           share_state_observation(neighbor, sender, state, sequence)
+
+   function on_state_observation_shared(reporter, about, state, seq):
+       if seq in state_cache[about]:
+           existing = state_cache[about][seq]
+
+           # Equivocation detected!
+           if existing.state != state:
+               log_equivocation(
+                   byzantine_module=about,
+                   state_1=existing.state,
+                   reporter_1=existing.received_from,
+                   state_2=state,
+                   reporter_2=reporter
+               )
+               initiate_quarantine(about)
+
+   Equivocation is unforgeable proof of Byzantine behavior.
+
+
+2. SIGNATURE VERIFICATION FOR CRITICAL MESSAGES
+
+   Critical messages (power commands, leader election, emergency)
+   MUST be signed to prevent impersonation.
+
+   Message structure with signature:
+
+   SIGNED_MESSAGE = {
+       payload: [original message bytes],
+       sender_id: u16,
+       sequence: u32,
+       mac: [16 bytes]  # Chaskey MAC with shared key
+   }
+
+   Verification:
+
+   function verify_signed_message(msg):
+       expected_mac = chaskey_mac(
+           key=shared_segment_key,
+           data=msg.payload || msg.sender_id || msg.sequence
+       )
+
+       if msg.mac != expected_mac:
+           log_invalid_signature(msg.sender_id)
+           increment_byzantine_suspicion(msg.sender_id)
+           return REJECT
+
+       if msg.sequence <= last_seen_sequence[msg.sender_id]:
+           # Replay attack detection
+           log_replay_attempt(msg.sender_id)
+           return REJECT
+
+       last_seen_sequence[msg.sender_id] = msg.sequence
+       return ACCEPT
+
+
+3. BEHAVIOR CONSISTENCY CHECKING
+
+   Monitor for statistically unlikely behavior patterns:
+
+   byzantine_indicators = {
+       inconsistent_power_reports: 0,
+       impossible_state_transitions: 0,
+       protocol_violations: 0,
+       timing_anomalies: 0,
+       selective_communication: 0
+   }
+
+   Anomaly detection rules:
+
+   # Power report consistency
+   if abs(reported_power - measured_bus_contribution) > THRESHOLD:
+       byzantine_indicators.inconsistent_power_reports++
+
+   # State transition validity
+   if transition(old_state, new_state) NOT IN valid_transitions:
+       byzantine_indicators.impossible_state_transitions++
+
+   # Protocol compliance
+   if message_type NOT IN expected_for_current_state:
+       byzantine_indicators.protocol_violations++
+
+   # Timing (heartbeats should be regular)
+   jitter = stddev(heartbeat_intervals)
+   if jitter > ACCEPTABLE_JITTER:
+       byzantine_indicators.timing_anomalies++
+
+   # Selective communication (talking to some, not others)
+   if neighbor reports hearing X but I don't:
+       byzantine_indicators.selective_communication++
+
+   # Aggregate suspicion
+   suspicion_score = weighted_sum(byzantine_indicators)
+   if suspicion_score > BYZANTINE_THRESHOLD:
+       initiate_quarantine_vote(module_id)
+
+
+QUARANTINE PROTOCOL
+───────────────────
+
+When Byzantine behavior confirmed, module is quarantined:
+
+function initiate_quarantine_vote(suspect_id):
+    # Require supermajority to quarantine (prevent false positives)
+    proposal = QUARANTINE_PROPOSAL(
+        suspect_id=suspect_id,
+        evidence=collect_evidence(suspect_id),
+        proposer=self.id,
+        timestamp=now()
+    )
+
+    broadcast_to_segment(proposal)
+    await_votes(timeout=QUARANTINE_VOTE_TIMEOUT)
+
+function on_quarantine_proposal(proposal):
+    # Verify evidence locally
+    if verify_evidence(proposal.evidence):
+        vote = APPROVE
+    else:
+        vote = REJECT
+
+    send_vote(proposal.proposer, vote)
+
+function count_quarantine_votes(votes):
+    approve_count = count(v for v in votes if v == APPROVE)
+    total_voters = len(votes)
+
+    # 2/3 supermajority required
+    if approve_count >= (2 * total_voters / 3):
+        execute_quarantine(suspect_id)
+    else:
+        dismiss_proposal()
+
+function execute_quarantine(module_id):
+    quarantined_modules.add(module_id)
+
+    # Stop accepting messages from quarantined module
+    message_filter.block(module_id)
+
+    # Remove from neighbor lists
+    for node in segment:
+        node.remove_neighbor(module_id)
+
+    # Redistribute load away from quarantined module
+    redistribute_load_excluding(module_id)
+
+    # Alert L2 supervisor
+    send_quarantine_alert_to_l2(module_id, evidence)
+
+
+QUARANTINE RECOVERY
+───────────────────
+
+Quarantined modules can rejoin after operator intervention:
+
+1. Module reboots with fresh firmware
+2. Self-test passes
+3. Module broadcasts REJOIN_REQUEST
+4. L2 supervisor validates and authorizes
+5. Segment members receive L2 authorization
+6. Module begins probationary period (reduced trust)
+7. After probation, full trust restored
+
+Probationary rules:
+• Messages require extra validation
+• Cannot participate in leader election
+• Power commands capped at 50%
+• Duration: 24 hours or 1000 successful transactions
 ```
 
 ### Emergent Behavior
@@ -1118,6 +1555,394 @@ Tags decay exponentially with configurable half-life. TTL expiry removes the tag
 For complete specification, see:
 - `tehnika/inzenjersko/en/rojno-jezgro/00-core-spec.md` (EK-TECH-027)
 - `tehnika/inzenjersko/en/rojno-jezgro/01-detaljni-dokument.md` (EK-TECH-028)
+
+---
+
+## 11. Network Partition Handling
+
+Network partitions occur when communication failures divide a ROJ network into isolated groups that cannot communicate with each other. This section defines formal algorithms for detecting partitions, preventing split-brain scenarios, and recovering when partitions heal.
+
+### 11.1 Partition Detection Algorithm
+
+```
+PARTITION DETECTION FUNDAMENTALS
+────────────────────────────────
+
+A network partition exists when:
+• Subset P₁ of nodes can communicate with each other
+• Subset P₂ of nodes can communicate with each other
+• No node in P₁ can communicate with any node in P₂
+• P₁ ∪ P₂ = All nodes, P₁ ∩ P₂ = ∅
+
+DETECTION MECHANISMS:
+
+1. HEARTBEAT-BASED SUSPICION
+   ────────────────────────────
+   Each module maintains:
+   • received_heartbeats[]: timestamp of last heartbeat per known node
+   • suspicion_count[]: consecutive missed heartbeats per node
+   • partition_suspicion_level: aggregate partition likelihood
+
+   Algorithm (executed every heartbeat_interval):
+
+   for each known_node in network:
+       elapsed = current_time - received_heartbeats[known_node]
+       if elapsed > heartbeat_timeout:
+           suspicion_count[known_node]++
+           if suspicion_count[known_node] >= SUSPICION_THRESHOLD (default: 3):
+               mark_node_suspected(known_node)
+       else:
+           suspicion_count[known_node] = 0
+           mark_node_healthy(known_node)
+
+   # Aggregate suspicion into partition likelihood
+   suspected_count = count(nodes where suspicion_count >= THRESHOLD)
+   total_known = count(known_nodes)
+   partition_suspicion_level = suspected_count / total_known
+
+   if partition_suspicion_level > PARTITION_THRESHOLD (default: 0.3):
+       initiate_partition_protocol()
+
+
+2. QUORUM LOSS DETECTION
+   ──────────────────────
+
+   Quorum Q = floor(N/2) + 1 for N total nodes
+
+   active_nodes = count(nodes responding within timeout)
+
+   if active_nodes < Q:
+       # We may be in minority partition
+       partition_state = MINORITY_SUSPECTED
+       disable_decisions()  # Cannot make consensus decisions
+   else if active_nodes >= Q:
+       partition_state = QUORUM_PRESENT
+       enable_decisions()
+
+
+3. CAN ARBITRATION PATTERN ANALYSIS
+   ─────────────────────────────────
+
+   CAN-FD provides implicit partition detection through arbitration:
+
+   • In unified network: arbitration resolves priority normally
+   • In partitioned segment: only local nodes participate
+
+   Detection heuristic:
+
+   observed_arbitration_winners[] # IDs that won arbitration recently
+   expected_high_priority_ids[]   # IDs that should win often
+
+   if expected_high_priority_ids NOT IN observed_arbitration_winners:
+       # High-priority nodes unreachable = possible partition
+       segment_partition_suspected = true
+
+
+4. PARTITION ANNOUNCEMENT PROTOCOL
+   ────────────────────────────────
+
+   When partition suspected, broadcast PARTITION_SUSPECTED message:
+
+   Message ID: 0x018 (high priority)
+   Payload:
+   | Byte | Field              | Description                    |
+   |------|--------------------|---------------------------------|
+   | 0-1  | Sender ID          | Module detecting partition     |
+   | 2    | Suspicion Level    | 0-100 partition likelihood     |
+   | 3    | Visible Node Count | Nodes this module can see      |
+   | 4    | Expected Nodes     | Total nodes expected           |
+   | 5    | Partition Epoch    | Incrementing partition counter |
+   | 6-7  | Reserved           | Future use                     |
+
+   Receiving modules:
+   • Correlate with own suspicion level
+   • If consensus on partition: transition to PARTITIONED state
+```
+
+### 11.2 Split-Brain Prevention
+
+```
+SPLIT-BRAIN PROBLEM
+───────────────────
+
+Split-brain occurs when partitioned groups independently:
+• Elect separate leaders
+• Make conflicting decisions
+• Diverge in state
+
+Example catastrophic scenario:
+• Partition creates two groups of 50 modules each
+• Both groups elect a leader
+• Both groups independently adjust grid power
+• On partition heal: conflicting power levels cause grid instability
+
+
+PREVENTION STRATEGY: MINORITY PARTITION FREEZE
+
+Core principle: Only the partition containing a QUORUM may make decisions.
+Minority partitions enter read-only freeze mode.
+
+
+MINORITY PARTITION BEHAVIOR
+───────────────────────────
+
+function on_partition_detected():
+    visible_nodes = get_reachable_nodes()
+
+    # Check if we have quorum
+    if len(visible_nodes) >= QUORUM:
+        partition_role = MAJORITY
+        enable_consensus_decisions()
+        enable_power_changes()
+    else:
+        partition_role = MINORITY
+        # CRITICAL: Freeze all non-local decisions
+        disable_consensus_decisions()
+        freeze_power_levels()  # Maintain last known good state
+        enter_read_only_mode()
+
+    # Continue local safety functions regardless
+    continue_local_safety()  # Thermal protection, fault detection
+
+Freeze mode rules:
+• Power output: Hold at last commanded level (droop-only control)
+• Leader election: Suspended (no new leader in minority)
+• Load balancing: Local droop only, no ROJ optimization
+• Fault response: Local isolation only, no redistributions
+
+
+MAJORITY PARTITION BEHAVIOR
+───────────────────────────
+
+function majority_partition_operation():
+    # Continue normal operation with reduced capacity
+    recalculate_capacity(visible_nodes)
+    redistribute_load_among_visible()
+
+    # Adjust thresholds for smaller network
+    update_consensus_thresholds(len(visible_nodes))
+
+    # Log for reconciliation later
+    log_all_decisions(partition_epoch)
+
+
+EPOCH/TERM NUMBERING FOR STALE DETECTION
+────────────────────────────────────────
+
+Each partition event increments a global epoch:
+
+partition_epoch: u32 = 0  # Monotonically increasing
+
+On partition detection:
+    partition_epoch++
+    broadcast_epoch_update(partition_epoch)
+
+On message receipt:
+    if message.epoch < local_epoch:
+        # Stale message from before partition
+        discard_message()
+        send_epoch_correction(sender, local_epoch)
+
+    if message.epoch > local_epoch:
+        # We are behind - request state sync
+        request_state_sync(sender)
+
+Leader messages include epoch:
+    LEADER_HEARTBEAT = {
+        leader_id: u16,
+        term: u32,
+        epoch: u32,  # Partition epoch
+        committed_index: u32,
+        ...
+    }
+
+Stale leader detection:
+    if incoming_leader_heartbeat.epoch < local_epoch:
+        # Leader from old partition - ignore
+        ignore_heartbeat()
+```
+
+### 11.3 Partition Recovery and Reconciliation
+
+```
+PARTITION HEALING DETECTION
+───────────────────────────
+
+Partition heals when:
+• Previously unreachable nodes respond to heartbeats
+• CAN arbitration shows previously missing high-priority IDs
+• Received messages from nodes marked as suspected
+
+function on_suspected_node_responds(node_id):
+    if node_id in suspected_nodes:
+        suspected_nodes.remove(node_id)
+
+        # Check if this heals a partition
+        if partition_state == PARTITIONED:
+            visible_now = get_reachable_nodes()
+            if len(visible_now) > len(partition_visible) + HEAL_THRESHOLD:
+                initiate_reconciliation()
+
+
+RECONCILIATION PROTOCOL
+───────────────────────
+
+Phase 1: LEADER RESOLUTION
+
+    # Both partitions may have elected leaders
+    # Resolve using epoch comparison
+
+    leader_candidates = collect_leader_claims()
+
+    # Highest epoch wins (was in majority partition)
+    winning_leader = max(leader_candidates, key=lambda l: l.epoch)
+
+    # If epoch tie, use higher term; if term tie, use lower ID
+    if epoch_tie:
+        winning_leader = max(candidates, key=lambda l: (l.term, -l.id))
+
+    broadcast_leader_resolution(winning_leader)
+
+Phase 2: STATE SYNCHRONIZATION
+
+    # Minority partition nodes catch up to majority state
+
+    function sync_state_from_majority():
+        # Request committed state from winning leader
+        request = STATE_SYNC_REQUEST(
+            my_last_epoch,
+            my_last_committed_index
+        )
+        send_to(winning_leader, request)
+
+        # Receive and apply state updates
+        state_updates = receive_state_sync()
+        for update in state_updates:
+            if update.epoch > local_epoch:
+                apply_state_update(update)
+                local_epoch = update.epoch
+                local_committed = update.committed_index
+
+Phase 3: LOAD REDISTRIBUTION
+
+    # Gradually reintegrate minority partition capacity
+
+    function reintegrate_partition():
+        # Minority nodes announce rejoining
+        broadcast(PARTITION_REJOIN(self.id, self.capacity))
+
+        # Wait for acknowledgment from leader
+        ack = await_leader_ack()
+
+        # Ramp power back gradually (prevent grid transients)
+        for step in range(REINTEGRATION_STEPS):
+            target_power = (step / REINTEGRATION_STEPS) * normal_power
+            set_power_limit(target_power)
+            await delay(REINTEGRATION_INTERVAL)  # 100ms per step
+
+        # Resume normal ROJ participation
+        partition_state = HEALTHY
+        enable_full_operation()
+
+
+RECONCILIATION MESSAGE TYPES
+────────────────────────────
+
+PARTITION_HEAL (0x019):
+| Byte | Field           | Description                        |
+|------|-----------------|-------------------------------------|
+| 0-1  | Sender ID       | Module detecting heal               |
+| 2-3  | Partition A ID  | Representative of first partition  |
+| 4-5  | Partition B ID  | Representative of second partition |
+| 6    | Heal Confidence | 0-100 confidence heal is complete  |
+| 7    | Reserved        |                                     |
+
+STATE_SYNC_REQUEST (0x01A):
+| Byte | Field              | Description                     |
+|------|--------------------|----------------------------------|
+| 0-1  | Requester ID       | Node requesting sync             |
+| 2-5  | Last Known Epoch   | Requester's last epoch           |
+| 6-9  | Last Committed Idx | Requester's commit index         |
+| 10-11| Reserved           |                                  |
+
+STATE_SYNC_RESPONSE (0x01B):
+| Byte  | Field              | Description                    |
+|-------|--------------------|---------------------------------|
+| 0-1   | Responder ID       | Leader/majority node            |
+| 2-5   | Current Epoch      | Current partition epoch         |
+| 6-9   | Committed Index    | Current commit index            |
+| 10-13 | State Hash         | Hash for integrity check        |
+| 14-63 | State Deltas       | Compressed state updates        |
+
+
+SAFETY DURING RECONCILIATION
+────────────────────────────
+
+Critical constraint: Grid stability during reconciliation
+
+Rules:
+• Total system power change rate: ≤ 10% per second
+• Reintegrating modules: Start at 0%, ramp over 10 seconds
+• Conflicting setpoints: Resolve to LOWER power (fail-safe)
+• If reconciliation fails: Both partitions freeze, alert operator
+
+Emergency override:
+    if reconciliation_timeout_exceeded:
+        enter_safe_state()
+        alert_l2_supervisor()
+        await_manual_intervention()
+```
+
+### 11.4 Partition Handling State Machine
+
+```
+PARTITION STATE MACHINE (per module)
+────────────────────────────────────
+
+         ┌─────────────────┐
+         │     HEALTHY     │ ←── Normal operation
+         └────────┬────────┘
+                  │ Heartbeat loss / suspicion
+                  ▼
+         ┌─────────────────┐
+         │    SUSPECTING   │ ←── Monitoring, not yet partitioned
+         └────────┬────────┘
+                  │ Suspicion confirmed / quorum check
+        ┌─────────┴─────────┐
+        ▼                   ▼
+┌───────────────┐   ┌───────────────┐
+│   MAJORITY    │   │   MINORITY    │
+│   PARTITION   │   │   PARTITION   │
+│ (full ops)    │   │ (frozen)      │
+└───────┬───────┘   └───────┬───────┘
+        │                   │
+        │ Partition heal detected
+        │                   │
+        └─────────┬─────────┘
+                  ▼
+         ┌─────────────────┐
+         │  RECONCILING    │ ←── State sync in progress
+         └────────┬────────┘
+                  │ Reconciliation complete
+                  ▼
+         ┌─────────────────┐
+         │     HEALTHY     │
+         └─────────────────┘
+
+
+State transition table:
+
+| From       | Event                    | To          | Action                    |
+|------------|--------------------------|-------------|---------------------------|
+| HEALTHY    | suspicion > threshold    | SUSPECTING  | Start partition protocol  |
+| SUSPECTING | quorum present           | MAJORITY    | Continue with majority    |
+| SUSPECTING | quorum lost              | MINORITY    | Freeze operations         |
+| MAJORITY   | heal detected            | RECONCILING | Start reconciliation      |
+| MINORITY   | heal detected            | RECONCILING | Request state sync        |
+| RECONCILING| sync complete            | HEALTHY     | Resume normal operation   |
+| RECONCILING| sync timeout             | MINORITY    | Retry or freeze           |
+| ANY        | manual reset             | HEALTHY     | Operator intervention     |
+```
 
 ---
 

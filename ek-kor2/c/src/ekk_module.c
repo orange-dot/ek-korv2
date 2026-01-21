@@ -474,6 +474,140 @@ ekk_fixed_t ekk_module_get_gradient(const ekk_module_t *mod,
 }
 
 /* ============================================================================
+ * DEADLINE / SLACK OPERATIONS (MAPF-HET)
+ * ============================================================================ */
+
+/**
+ * Normalization constant for slack field (100 seconds)
+ * Slack values are normalized to [0, 1] where:
+ * - 0.0 = critical (at deadline or past due)
+ * - 1.0 = maximum slack (100+ seconds)
+ */
+#define EKK_SLACK_NORMALIZE_US      100000000
+
+ekk_error_t ekk_module_compute_slack(ekk_module_t *mod, ekk_time_us_t now)
+{
+    if (mod == NULL) {
+        return EKK_ERR_INVALID_ARG;
+    }
+
+    int64_t min_slack_us = (int64_t)EKK_SLACK_NORMALIZE_US;  /* Start at max */
+    bool has_any_deadline = false;
+
+    /* Iterate all tasks and compute slack for those with deadlines */
+    for (uint32_t i = 0; i < mod->task_count; i++) {
+        ekk_internal_task_t *task = &mod->tasks[i];
+
+        if (!task->has_deadline) {
+            continue;
+        }
+
+        has_any_deadline = true;
+
+        /* Compute slack: deadline - (now + duration_estimate) */
+        int64_t completion_time = (int64_t)now + (int64_t)task->deadline.duration_est;
+        int64_t slack_us = (int64_t)task->deadline.deadline - completion_time;
+
+        /* Update deadline struct */
+        task->deadline.slack = EKK_FLOAT_TO_FIXED(
+            (float)slack_us / (float)EKK_SLACK_NORMALIZE_US
+        );
+        task->deadline.critical = (slack_us < EKK_SLACK_THRESHOLD_US);
+
+        /* Track minimum slack */
+        if (slack_us < min_slack_us) {
+            min_slack_us = slack_us;
+        }
+    }
+
+    /* Update the slack field component */
+    if (has_any_deadline) {
+        /* Normalize to [0, 1] range and clamp */
+        float slack_normalized = (float)min_slack_us / (float)EKK_SLACK_NORMALIZE_US;
+        if (slack_normalized < 0.0f) slack_normalized = 0.0f;
+        if (slack_normalized > 1.0f) slack_normalized = 1.0f;
+
+        mod->my_field.components[EKK_FIELD_SLACK] = EKK_FLOAT_TO_FIXED(slack_normalized);
+    } else {
+        /* No deadlines - maximum slack (1.0) */
+        mod->my_field.components[EKK_FIELD_SLACK] = EKK_FIXED_ONE;
+    }
+
+    return EKK_OK;
+}
+
+ekk_error_t ekk_module_set_task_deadline(ekk_module_t *mod,
+                                          ekk_task_id_t task_id,
+                                          ekk_time_us_t deadline,
+                                          ekk_time_us_t duration_est)
+{
+    if (mod == NULL || task_id >= mod->task_count) {
+        return EKK_ERR_INVALID_ARG;
+    }
+
+    ekk_internal_task_t *task = &mod->tasks[task_id];
+    task->has_deadline = true;
+    task->deadline.deadline = deadline;
+    task->deadline.duration_est = duration_est;
+    task->deadline.slack = 0;
+    task->deadline.critical = false;
+
+    return EKK_OK;
+}
+
+ekk_error_t ekk_module_clear_task_deadline(ekk_module_t *mod,
+                                            ekk_task_id_t task_id)
+{
+    if (mod == NULL || task_id >= mod->task_count) {
+        return EKK_ERR_INVALID_ARG;
+    }
+
+    ekk_internal_task_t *task = &mod->tasks[task_id];
+    task->has_deadline = false;
+    task->deadline.deadline = 0;
+    task->deadline.duration_est = 0;
+    task->deadline.slack = 0;
+    task->deadline.critical = false;
+
+    return EKK_OK;
+}
+
+/* ============================================================================
+ * CAPABILITY OPERATIONS (MAPF-HET)
+ * ============================================================================ */
+
+ekk_error_t ekk_module_set_capabilities(ekk_module_t *mod, ekk_capability_t caps)
+{
+    if (mod == NULL) {
+        return EKK_ERR_INVALID_ARG;
+    }
+
+    mod->capabilities = caps;
+    return EKK_OK;
+}
+
+ekk_capability_t ekk_module_get_capabilities(const ekk_module_t *mod)
+{
+    if (mod == NULL) {
+        return 0;
+    }
+
+    return mod->capabilities;
+}
+
+ekk_error_t ekk_module_set_task_capabilities(ekk_module_t *mod,
+                                              ekk_task_id_t task_id,
+                                              ekk_capability_t caps)
+{
+    if (mod == NULL || task_id >= mod->task_count) {
+        return EKK_ERR_INVALID_ARG;
+    }
+
+    mod->tasks[task_id].required_caps = caps;
+    return EKK_OK;
+}
+
+/* ============================================================================
  * CONSENSUS SHORTCUTS
  * ============================================================================ */
 
@@ -520,6 +654,7 @@ EKK_WEAK ekk_task_id_t ekk_module_select_task(ekk_module_t *mod)
     ekk_time_us_t now = ekk_hal_time_us();
     ekk_task_id_t best_task = 0xFF;
     uint8_t best_priority = 0xFF;
+    bool best_is_critical = false;
 
     for (uint32_t i = 0; i < mod->task_count; i++) {
         ekk_internal_task_t *task = &mod->tasks[i];
@@ -534,10 +669,37 @@ EKK_WEAK ekk_task_id_t ekk_module_select_task(ekk_module_t *mod)
             continue;
         }
 
-        /* Select highest priority (lowest number) ready task */
-        if (task->priority < best_priority) {
+        /* MAPF-HET: Check capability requirements */
+        if (task->required_caps != 0) {
+            if (!ekk_can_perform(mod->capabilities, task->required_caps)) {
+                continue;  /* Module lacks required capabilities */
+            }
+        }
+
+        /* MAPF-HET: Critical deadline tasks get priority boost */
+        bool is_critical = task->has_deadline && task->deadline.critical;
+
+        /* Priority rules:
+         * 1. Critical deadline tasks always beat non-critical
+         * 2. Among critical tasks, lower priority number wins
+         * 3. Among non-critical tasks, lower priority number wins
+         */
+        bool select_this_task = false;
+
+        if (is_critical && !best_is_critical) {
+            /* Critical beats non-critical */
+            select_this_task = true;
+        } else if (is_critical == best_is_critical) {
+            /* Same criticality - compare priority */
+            if (task->priority < best_priority) {
+                select_this_task = true;
+            }
+        }
+
+        if (select_this_task) {
             best_priority = task->priority;
             best_task = task->id;
+            best_is_critical = is_critical;
         }
     }
 

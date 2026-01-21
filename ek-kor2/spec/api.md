@@ -23,12 +23,14 @@ Language-agnostic specification for both C and Rust implementations.
 | `K_NEIGHBORS` | 7 | Number of topological neighbors |
 | `MAX_MODULES` | 256 | Maximum modules in cluster |
 | `MAX_TASKS_PER_MODULE` | 8 | Maximum internal tasks per module |
-| `FIELD_COUNT` | 5 | Number of field components |
+| `FIELD_COUNT` | 6 | Number of field components (including Slack) |
 | `FIELD_DECAY_TAU_US` | 100000 | Field decay time constant (100ms) |
 | `HEARTBEAT_PERIOD_US` | 10000 | Heartbeat period (10ms) |
 | `HEARTBEAT_TIMEOUT_COUNT` | 5 | Missed heartbeats before dead |
 | `VOTE_TIMEOUT_US` | 50000 | Vote collection timeout (50ms) |
 | `MAX_BALLOTS` | 4 | Maximum concurrent ballots |
+| `SLACK_THRESHOLD_US` | 10000000 | Critical slack threshold (10 seconds) |
+| `SLACK_NORMALIZE_US` | 100000000 | Slack normalization constant (100 seconds) |
 
 ### Special Values
 
@@ -119,6 +121,7 @@ Conversion:
 | 2 | Power | Power consumption (normalized) |
 | 3 | Custom0 | Application-defined |
 | 4 | Custom1 | Application-defined |
+| 5 | Slack | Deadline slack (MAPF-HET, 0.0=critical, 1.0=max) |
 
 #### Error
 
@@ -137,6 +140,55 @@ Conversion:
 | -10 | FieldExpired | Field too old |
 | -11 | HalFailure | HAL error |
 
+### Capability Type (MAPF-HET)
+
+Type: `uint16` bitmask
+
+#### Standard Capability Flags
+
+| Bit | Name | Description |
+|-----|------|-------------|
+| 0 | THERMAL_OK | Within thermal limits |
+| 1 | POWER_HIGH | High power mode available |
+| 2 | GATEWAY | Can aggregate/route messages |
+| 3 | V2G | Bidirectional power capable |
+| 4-7 | Reserved | Reserved for future use |
+| 8-11 | CUSTOM_0-3 | Application-defined |
+
+#### can_perform Function
+
+```
+can_perform(have: Capability, need: Capability) -> bool
+```
+
+**Formula:** `(have & need) == need`
+
+**Usage:** Task assignment - module can only execute task if it has all required capabilities.
+
+### Deadline Type (MAPF-HET)
+
+#### Deadline Structure
+
+| Field | Type | Description |
+|-------|------|-------------|
+| deadline | TimeUs | Absolute deadline timestamp |
+| duration_est | TimeUs | Estimated task duration |
+| slack | Fixed | Computed slack (normalized 0.0-1.0) |
+| critical | bool | True if slack < SLACK_THRESHOLD_US |
+
+#### Slack Computation
+
+```
+slack_us = deadline - (now + duration_est)
+critical = slack_us < SLACK_THRESHOLD_US
+slack_normalized = clamp(slack_us / SLACK_NORMALIZE_US, 0.0, 1.0)
+```
+
+**Interpretation:**
+- `slack_normalized = 0.0`: At or past deadline (critical)
+- `slack_normalized = 1.0`: Maximum slack (100+ seconds)
+- `critical = true`: Less than 10 seconds remaining
+
 ---
 
 ## Field Module
@@ -147,7 +199,7 @@ Conversion:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| components | Fixed[5] | Field values for each component |
+| components | Fixed[6] | Field values for each component (includes Slack) |
 | timestamp | TimeUs | When published |
 | source | ModuleId | Publishing module |
 | sequence | uint8 | Monotonic sequence number |
@@ -273,6 +325,7 @@ gradient = neighbor_aggregate.components[component] - my_field.components[compon
 | last_field | Field | Last received field |
 | logical_distance | int32 | Distance metric |
 | missed_heartbeats | uint8 | Consecutive missed |
+| capabilities | Capability | Neighbor's capabilities (MAPF-HET) |
 
 ### Functions
 
@@ -675,6 +728,130 @@ module_get_gradient(
     mod: &Module,
     component: FieldComponent
 ) -> Fixed
+```
+
+### Deadline / Slack Operations (MAPF-HET)
+
+#### module_compute_slack
+
+Compute slack for all tasks with deadlines.
+
+```
+module_compute_slack(
+    mod: &mut Module,
+    now: TimeUs
+) -> Error
+```
+
+**Algorithm:**
+```
+min_slack = MAX_VALUE
+for each task with deadline:
+    task.slack = deadline - (now + duration_est)
+    task.critical = slack < SLACK_THRESHOLD_US
+    min_slack = min(min_slack, task.slack)
+
+mod.my_field.components[Slack] = normalize(min_slack)
+```
+
+**Effect:** Updates:
+- Each task's `deadline.slack` and `deadline.critical`
+- Module's `my_field.components[Slack]` with minimum slack
+
+#### module_set_task_deadline
+
+Set deadline for a task.
+
+```
+module_set_task_deadline(
+    mod: &mut Module,
+    task_id: TaskId,
+    deadline: TimeUs,
+    duration_est: TimeUs
+) -> Error
+```
+
+**Errors:** `NotFound` if task_id invalid
+
+#### module_clear_task_deadline
+
+Clear deadline for a task.
+
+```
+module_clear_task_deadline(
+    mod: &mut Module,
+    task_id: TaskId
+) -> Error
+```
+
+### Capability Operations (MAPF-HET)
+
+#### module_set_capabilities
+
+Set module's current capabilities.
+
+```
+module_set_capabilities(
+    mod: &mut Module,
+    caps: Capability
+) -> Error
+```
+
+**Usage:** Call when thermal state changes, configuration updates, etc.
+
+#### module_get_capabilities
+
+Get module's current capabilities.
+
+```
+module_get_capabilities(
+    mod: &Module
+) -> Capability
+```
+
+#### module_set_task_capabilities
+
+Set required capabilities for a task.
+
+```
+module_set_task_capabilities(
+    mod: &mut Module,
+    task_id: TaskId,
+    caps: Capability
+) -> Error
+```
+
+**Effect:** Task will only be selected if `can_perform(module.capabilities, task.required_caps)` is true.
+
+---
+
+## Task Selection with MAPF-HET
+
+The enhanced task selection algorithm considers deadlines and capabilities:
+
+```
+select_task(mod):
+    best = None
+
+    for each ready task:
+        # Capability check (MAPF-HET)
+        if task.required_caps != 0:
+            if not can_perform(mod.capabilities, task.required_caps):
+                continue
+
+        # Critical deadline check (MAPF-HET)
+        is_critical = task.has_deadline and task.deadline.critical
+
+        # Selection rules:
+        # 1. Critical tasks beat non-critical
+        # 2. Among same criticality, lower priority wins
+        if is_critical and not best.is_critical:
+            best = task
+        elif is_critical == best.is_critical:
+            if task.priority < best.priority:
+                best = task
+
+    return best
 ```
 
 ---

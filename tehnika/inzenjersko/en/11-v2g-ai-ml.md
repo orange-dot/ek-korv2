@@ -900,7 +900,492 @@ bool Anomaly_Detect(AnomalyDetector* det, float* features, int n_features) {
 
 ---
 
-## 7. References
+## 7. Charger Placement Optimization
+
+This section formalizes the optimal placement of EK3 charger modules within a distribution grid, considering power flow constraints, grid capacity, and coverage requirements.
+
+### 7.1 Problem Formulation
+
+```
+CHARGER PLACEMENT OPTIMIZATION
+══════════════════════════════
+
+OBJECTIVE:
+Minimize total infrastructure cost while meeting charging demand
+and respecting grid constraints.
+
+DECISION VARIABLES:
+────────────────────
+x_i ∈ {0,1}     Binary: Install charger at candidate location i
+n_i ∈ ℤ⁺       Integer: Number of EK3 modules at location i
+y_ij ∈ {0,1}   Binary: Upgrade grid line from i to j
+z_k ∈ {0,1}    Binary: Upgrade transformer at substation k
+
+PARAMETERS:
+───────────
+C_site_i       Fixed site installation cost at location i
+C_module       Per-module cost (EK3 = €850 at scale)
+C_line_ij      Grid line upgrade cost from i to j
+C_transformer_k Transformer upgrade cost at substation k
+P_module       Power per EK3 module (3.3 kW)
+D_j            Charging demand at zone j (kW)
+S_line_ij      Line capacity (kW) from i to j
+S_trans_k      Transformer capacity (kW) at substation k
+R_ij           Line resistance (Ohms)
+X_ij           Line reactance (Ohms)
+V_nom          Nominal voltage (400V for LV)
+```
+
+### 7.2 Mathematical Model (MILP)
+
+```
+OBJECTIVE FUNCTION
+──────────────────
+
+minimize:
+    Σ_i [ C_site_i × x_i + C_module × n_i × P_module ] +
+    Σ_ij [ C_line_ij × y_ij ] +
+    Σ_k [ C_transformer_k × z_k ]
+
+Subject to:
+
+CONSTRAINT 1: DEMAND COVERAGE
+─────────────────────────────
+For each demand zone j:
+    Σ_i [ a_ij × n_i × P_module ] ≥ D_j × coverage_factor
+
+Where:
+    a_ij = 1 if location i can serve zone j (distance < max_distance)
+    coverage_factor ∈ [0.8, 1.2] (planning margin)
+
+
+CONSTRAINT 2: POWER FLOW (DC Approximation)
+───────────────────────────────────────────
+Power balance at each bus i:
+    P_gen_i - P_load_i - n_i × P_module = Σ_j P_flow_ij
+
+Where P_flow_ij = (θ_i - θ_j) / X_ij  (DC power flow)
+
+Power flow limits:
+    |P_flow_ij| ≤ S_line_ij + y_ij × S_upgrade_ij
+
+
+CONSTRAINT 3: VOLTAGE BOUNDS
+────────────────────────────
+For each bus i:
+    V_min ≤ V_i ≤ V_max
+
+Where V_min = 0.9 × V_nom, V_max = 1.1 × V_nom
+
+Voltage drop approximation:
+    V_i - V_j ≈ (R_ij × P_ij + X_ij × Q_ij) / V_nom
+
+
+CONSTRAINT 4: TRANSFORMER CAPACITY
+──────────────────────────────────
+For each transformer k serving buses S_k:
+    Σ_i∈S_k (P_load_i + n_i × P_module) ≤ S_trans_k + z_k × S_trans_upgrade_k
+
+
+CONSTRAINT 5: MODULE COUNT BOUNDS
+─────────────────────────────────
+If location i selected:
+    n_min × x_i ≤ n_i ≤ n_max × x_i
+
+Where n_min = 7 (minimum viable installation)
+      n_max = 303 (1 MW max per site)
+
+
+CONSTRAINT 6: BUDGET CONSTRAINT (Optional)
+──────────────────────────────────────────
+Total cost ≤ Budget_max
+```
+
+### 7.3 MILP Implementation (Python/PuLP)
+
+```python
+from pulp import *
+import numpy as np
+
+def optimize_charger_placement(
+    candidate_sites,      # List of candidate locations
+    demand_zones,         # List of demand zones with load requirements
+    grid_topology,        # Network topology (buses, lines)
+    transformers,         # Transformer locations and capacities
+    cost_params,          # Cost parameters
+    constraints           # Constraint parameters
+):
+    """
+    Optimize charger placement using MILP.
+
+    Returns optimal locations, module counts, and required grid upgrades.
+    """
+
+    n_sites = len(candidate_sites)
+    n_zones = len(demand_zones)
+    n_lines = len(grid_topology['lines'])
+    n_trans = len(transformers)
+
+    # Create problem
+    prob = LpProblem("Charger_Placement", LpMinimize)
+
+    # Decision variables
+    # x[i] = 1 if we install at site i
+    x = [LpVariable(f"x_{i}", cat='Binary') for i in range(n_sites)]
+
+    # n[i] = number of modules at site i
+    n = [LpVariable(f"n_{i}", lowBound=0, cat='Integer') for i in range(n_sites)]
+
+    # y[l] = 1 if we upgrade line l
+    y = [LpVariable(f"y_{l}", cat='Binary') for l in range(n_lines)]
+
+    # z[k] = 1 if we upgrade transformer k
+    z = [LpVariable(f"z_{k}", cat='Binary') for k in range(n_trans)]
+
+    # Power flow variables
+    P_flow = {}
+    for l, line in enumerate(grid_topology['lines']):
+        i, j = line['from'], line['to']
+        P_flow[i, j] = LpVariable(f"P_{i}_{j}", lowBound=-1e6, upBound=1e6)
+
+    # Voltage angle variables (for DC power flow)
+    theta = [LpVariable(f"theta_{i}") for i in range(len(grid_topology['buses']))]
+
+    # === OBJECTIVE FUNCTION ===
+    # Site costs
+    site_cost = lpSum([
+        cost_params['site_fixed'][i] * x[i] +
+        cost_params['module_cost'] * n[i] * cost_params['module_power']
+        for i in range(n_sites)
+    ])
+
+    # Line upgrade costs
+    line_cost = lpSum([
+        grid_topology['lines'][l]['upgrade_cost'] * y[l]
+        for l in range(n_lines)
+    ])
+
+    # Transformer upgrade costs
+    trans_cost = lpSum([
+        transformers[k]['upgrade_cost'] * z[k]
+        for k in range(n_trans)
+    ])
+
+    prob += site_cost + line_cost + trans_cost
+
+    # === CONSTRAINTS ===
+
+    # 1. Demand coverage
+    for j, zone in enumerate(demand_zones):
+        # Sum of power from sites that can serve this zone
+        coverage = lpSum([
+            zone['coverage_matrix'][i] * n[i] * cost_params['module_power']
+            for i in range(n_sites)
+        ])
+        prob += coverage >= zone['demand'] * constraints['coverage_factor']
+
+    # 2. Module count bounds (link x and n)
+    for i in range(n_sites):
+        prob += n[i] >= constraints['min_modules'] * x[i]
+        prob += n[i] <= constraints['max_modules'] * x[i]
+
+    # 3. Power flow limits
+    for l, line in enumerate(grid_topology['lines']):
+        i, j = line['from'], line['to']
+        base_capacity = line['capacity']
+        upgrade_capacity = line['upgrade_capacity']
+
+        # P_flow = (theta_i - theta_j) / X (DC power flow)
+        prob += P_flow[i, j] == (theta[i] - theta[j]) / line['reactance']
+
+        # Line capacity constraint
+        prob += P_flow[i, j] <= base_capacity + upgrade_capacity * y[l]
+        prob += P_flow[i, j] >= -(base_capacity + upgrade_capacity * y[l])
+
+    # 4. Power balance at each bus
+    for b, bus in enumerate(grid_topology['buses']):
+        # Net injection at bus
+        generation = bus.get('generation', 0)
+        load = bus.get('load', 0)
+
+        # Charger load at this bus
+        charger_load = lpSum([
+            n[i] * cost_params['module_power']
+            for i in range(n_sites)
+            if candidate_sites[i]['bus'] == b
+        ])
+
+        # Sum of flows out of this bus
+        flow_out = lpSum([
+            P_flow[b, j] for (bi, j) in P_flow.keys() if bi == b
+        ])
+        flow_in = lpSum([
+            P_flow[i, b] for (i, bj) in P_flow.keys() if bj == b
+        ])
+
+        prob += generation - load - charger_load == flow_out - flow_in
+
+    # 5. Transformer capacity
+    for k, trans in enumerate(transformers):
+        served_buses = trans['served_buses']
+
+        total_load = lpSum([
+            grid_topology['buses'][b].get('load', 0) +
+            lpSum([
+                n[i] * cost_params['module_power']
+                for i in range(n_sites)
+                if candidate_sites[i]['bus'] == b
+            ])
+            for b in served_buses
+        ])
+
+        base_cap = trans['capacity']
+        upgrade_cap = trans['upgrade_capacity']
+
+        prob += total_load <= base_cap + upgrade_cap * z[k]
+
+    # 6. Reference bus (fix one angle to 0)
+    prob += theta[0] == 0
+
+    # === SOLVE ===
+    prob.solve(PULP_CBC_CMD(msg=1, timeLimit=300))
+
+    if prob.status != LpStatusOptimal:
+        return None
+
+    # === EXTRACT RESULTS ===
+    result = {
+        'status': 'optimal',
+        'total_cost': value(prob.objective),
+        'sites': [],
+        'line_upgrades': [],
+        'transformer_upgrades': []
+    }
+
+    for i in range(n_sites):
+        if value(x[i]) > 0.5:
+            result['sites'].append({
+                'location': candidate_sites[i],
+                'modules': int(value(n[i])),
+                'power_kw': int(value(n[i])) * cost_params['module_power']
+            })
+
+    for l in range(n_lines):
+        if value(y[l]) > 0.5:
+            result['line_upgrades'].append(grid_topology['lines'][l])
+
+    for k in range(n_trans):
+        if value(z[k]) > 0.5:
+            result['transformer_upgrades'].append(transformers[k])
+
+    return result
+
+
+# Example usage
+def example_placement_optimization():
+    """Example: Optimize charger placement for bus depot."""
+
+    # Candidate sites
+    candidate_sites = [
+        {'id': 'DEPOT_MAIN', 'bus': 0, 'coordinates': (44.8, 20.4)},
+        {'id': 'DEPOT_SOUTH', 'bus': 3, 'coordinates': (44.75, 20.42)},
+        {'id': 'TERMINUS_A', 'bus': 5, 'coordinates': (44.82, 20.38)},
+        {'id': 'TERMINUS_B', 'bus': 7, 'coordinates': (44.78, 20.45)},
+    ]
+
+    # Demand zones (bus routes/schedules)
+    demand_zones = [
+        {
+            'id': 'ZONE_NORTH',
+            'demand': 500,  # kW peak demand
+            'coverage_matrix': [1, 0, 1, 0]  # Which sites can serve
+        },
+        {
+            'id': 'ZONE_SOUTH',
+            'demand': 400,
+            'coverage_matrix': [1, 1, 0, 1]
+        }
+    ]
+
+    # Simplified grid topology
+    grid_topology = {
+        'buses': [
+            {'id': 0, 'generation': 0, 'load': 100},
+            {'id': 1, 'generation': 0, 'load': 50},
+            # ... more buses
+        ],
+        'lines': [
+            {'from': 0, 'to': 1, 'reactance': 0.1, 'capacity': 200,
+             'upgrade_cost': 50000, 'upgrade_capacity': 200},
+            # ... more lines
+        ]
+    }
+
+    transformers = [
+        {'id': 'T1', 'served_buses': [0, 1, 2], 'capacity': 500,
+         'upgrade_cost': 100000, 'upgrade_capacity': 500}
+    ]
+
+    cost_params = {
+        'module_cost': 850,     # EUR per module
+        'module_power': 3.3,    # kW per module
+        'site_fixed': [10000, 15000, 8000, 12000]  # Site-specific fixed costs
+    }
+
+    constraints = {
+        'coverage_factor': 1.1,  # 10% margin
+        'min_modules': 7,        # Minimum 23 kW
+        'max_modules': 303       # Maximum 1 MW
+    }
+
+    result = optimize_charger_placement(
+        candidate_sites, demand_zones, grid_topology,
+        transformers, cost_params, constraints
+    )
+
+    print(f"Total cost: €{result['total_cost']:,.0f}")
+    for site in result['sites']:
+        print(f"  {site['location']['id']}: {site['modules']} modules "
+              f"({site['power_kw']} kW)")
+```
+
+### 7.4 Multi-Objective Extension
+
+```
+PARETO FRONTIER ANALYSIS
+════════════════════════
+
+In practice, charger placement involves multiple competing objectives:
+
+OBJECTIVES:
+───────────
+f₁: Minimize total cost (infrastructure + operations)
+f₂: Maximize coverage (minimize average distance to charger)
+f₃: Minimize grid impact (voltage deviations, losses)
+f₄: Maximize reliability (N-1 redundancy)
+
+PARETO FORMULATION:
+───────────────────
+
+minimize: F(x) = [f₁(x), f₂(x), f₃(x), f₄(x)]
+
+subject to: x ∈ Feasible region (constraints as above)
+
+A solution x* is Pareto optimal if there is no other feasible x
+such that f_i(x) ≤ f_i(x*) for all i, with at least one strict inequality.
+
+
+SOLUTION APPROACH: ε-Constraint Method
+──────────────────────────────────────
+
+1. Choose primary objective (minimize cost)
+2. Convert others to constraints:
+
+   minimize: f₁(x) = Total_Cost
+
+   subject to:
+     f₂(x) ≤ ε₂  (coverage > threshold)
+     f₃(x) ≤ ε₃  (grid impact < limit)
+     f₄(x) ≥ ε₄  (reliability > minimum)
+
+3. Vary ε values to trace Pareto frontier
+
+4. Present trade-off curves to decision maker:
+
+   Cost vs Coverage Trade-off
+   ──────────────────────────
+   €500k │         ╭─────────
+         │        ╱
+   €400k │      ╱
+         │    ╱
+   €300k │──╯     Pareto Frontier
+         └────────────────────────
+              70%   80%   90%  100%
+                   Coverage
+
+
+WEIGHTED SUM APPROACH (simpler):
+────────────────────────────────
+
+minimize: w₁×f₁ + w₂×f₂ + w₃×f₃ + w₄×f₄
+
+Where weights w_i reflect stakeholder priorities.
+
+Example weights:
+  - Cost-focused:     [0.5, 0.2, 0.2, 0.1]
+  - Coverage-focused: [0.2, 0.5, 0.2, 0.1]
+  - Grid-focused:     [0.2, 0.2, 0.5, 0.1]
+```
+
+### 7.5 Sensitivity Analysis
+
+```python
+def sensitivity_analysis(base_result, candidate_sites, demand_zones,
+                         grid_topology, transformers, cost_params, constraints):
+    """Perform sensitivity analysis on key parameters."""
+
+    sensitivity = {}
+
+    # 1. Module cost sensitivity
+    module_costs = [700, 850, 1000, 1200]  # EUR
+    cost_sensitivity = []
+    for mc in module_costs:
+        params = cost_params.copy()
+        params['module_cost'] = mc
+        result = optimize_charger_placement(
+            candidate_sites, demand_zones, grid_topology,
+            transformers, params, constraints
+        )
+        cost_sensitivity.append({
+            'module_cost': mc,
+            'total_cost': result['total_cost'],
+            'total_modules': sum(s['modules'] for s in result['sites'])
+        })
+    sensitivity['module_cost'] = cost_sensitivity
+
+    # 2. Demand growth sensitivity
+    demand_factors = [0.8, 1.0, 1.2, 1.5]
+    demand_sensitivity = []
+    for factor in demand_factors:
+        zones = [{**z, 'demand': z['demand'] * factor} for z in demand_zones]
+        result = optimize_charger_placement(
+            candidate_sites, zones, grid_topology,
+            transformers, cost_params, constraints
+        )
+        demand_sensitivity.append({
+            'demand_factor': factor,
+            'total_cost': result['total_cost'],
+            'total_modules': sum(s['modules'] for s in result['sites'])
+        })
+    sensitivity['demand_growth'] = demand_sensitivity
+
+    # 3. Grid upgrade cost sensitivity
+    upgrade_factors = [0.5, 1.0, 1.5, 2.0]
+    upgrade_sensitivity = []
+    for factor in upgrade_factors:
+        topology = grid_topology.copy()
+        topology['lines'] = [
+            {**l, 'upgrade_cost': l['upgrade_cost'] * factor}
+            for l in grid_topology['lines']
+        ]
+        result = optimize_charger_placement(
+            candidate_sites, demand_zones, topology,
+            transformers, cost_params, constraints
+        )
+        upgrade_sensitivity.append({
+            'upgrade_factor': factor,
+            'total_cost': result['total_cost'],
+            'n_line_upgrades': len(result['line_upgrades']),
+            'n_trans_upgrades': len(result['transformer_upgrades'])
+        })
+    sensitivity['grid_upgrade'] = upgrade_sensitivity
+
+    return sensitivity
+```
+
+---
+
+## 8. References
 
 - **TensorFlow Lite for Microcontrollers** - Edge ML deployment
 - **ENTSO-E Transparency Platform** - European grid data
