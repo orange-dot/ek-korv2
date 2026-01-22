@@ -11,6 +11,11 @@ ek-kor2/
 ├── README.md                 # This file
 ├── DEVELOPMENT.md            # Development guide
 │
+├── docs/                     # DOCUMENTATION
+│   ├── test-vector-system.md # Cross-language validation guide
+│   ├── ekkl-language.md      # EKKL DSL reference
+│   └── ek-kor-rtos-technical-report.md
+│
 ├── spec/                     # LANGUAGE-AGNOSTIC SPECIFICATION
 │   ├── api.md                # API specification
 │   ├── state-machines.md     # State machine definitions
@@ -84,6 +89,12 @@ cd rust && cargo test
 # Run cross-language comparison
 python tools/run_tests.py
 ```
+
+## Documentation
+
+- [Test Vector System](docs/test-vector-system.md) - Cross-language validation architecture
+- [EKKL Language](docs/ekkl-language.md) - Deterministic DSL for test vector oracles
+- [Technical Report](docs/ek-kor-rtos-technical-report.md) - RTOS design and implementation
 
 ## Module Development Order
 
