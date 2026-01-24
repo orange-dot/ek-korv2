@@ -1,0 +1,16 @@
+# ninja log v5
+64	159	1769069608311870400	CMakeFiles/ekk_startup.dir/startup_stm32g474.c.o	c439fe7b4e208c4c
+41	190	1769069608342613500	CMakeFiles/ekk.dir/src/ekk_types.c.o	32921e80d839d2da
+44	205	1769069608348997400	CMakeFiles/ekk.dir/src/ekk_field.c.o	275beb35cb6fe28b
+46	216	1769069608359987100	CMakeFiles/ekk.dir/src/ekk_topology.c.o	1693ea61b653f97f
+48	226	1769069608361011800	CMakeFiles/ekk.dir/src/ekk_consensus.c.o	e2925c56dfe20bbd
+50	234	1769069608345154100	CMakeFiles/ekk.dir/src/ekk_heartbeat.c.o	271fb07904f4bae9
+54	244	1769069608357787100	CMakeFiles/ekk.dir/src/ekk_init.c.o	264692bf14cff86
+56	257	1769069608346657200	CMakeFiles/ekk.dir/src/ekk_spsc.c.o	a8c5bc56959db855
+59	270	1769069608364934700	CMakeFiles/ekk.dir/src/ekk_auth.c.o	1e2180182f78a28b
+52	283	1769069608368435000	CMakeFiles/ekk.dir/src/ekk_module.c.o	1d27db6e17507010
+61	297	1769069608405654300	CMakeFiles/ekk.dir/src/hal/ekk_hal_stm32g474.c.o	c60b2048e106a4c1
+67	315	1769069608423087500	CMakeFiles/hax_demo.dir/examples/hax_demo.c.o	ecd448f085889976
+173	321	1769069608417876800	libekk_startup.a	73169682e41dcbfa
+307	481	1769069608639918600	libekk.a	85851370a5c20986
+482	925	1769069608958595300	hax_demo.elf	8dc066e338187dff

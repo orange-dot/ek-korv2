@@ -1,0 +1,16 @@
+/workspace/c/build/CMakeFiles/ekk.dir
+/workspace/c/build/CMakeFiles/example_basic.dir
+/workspace/c/build/CMakeFiles/example_multi_module.dir
+/workspace/c/build/CMakeFiles/example_consensus.dir
+/workspace/c/build/CMakeFiles/hax_demo.dir
+/workspace/c/build/CMakeFiles/test_ekk.dir
+/workspace/c/build/CMakeFiles/test_harness.dir
+/workspace/c/build/CMakeFiles/bench_spsc.dir
+/workspace/c/build/CMakeFiles/bench_auth.dir
+/workspace/c/build/CMakeFiles/test.dir
+/workspace/c/build/CMakeFiles/edit_cache.dir
+/workspace/c/build/CMakeFiles/rebuild_cache.dir
+/workspace/c/build/CMakeFiles/list_install_components.dir
+/workspace/c/build/CMakeFiles/install.dir
+/workspace/c/build/CMakeFiles/install/local.dir
+/workspace/c/build/CMakeFiles/install/strip.dir

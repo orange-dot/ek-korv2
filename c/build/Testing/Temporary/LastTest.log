@@ -1,0 +1,2678 @@
+Start testing: Jan 22 08:12 UTC
+----------------------------------------------------------
+1/2 Testing: test_ekk
+1/2 Test: test_ekk
+Command: "/workspace/c/build/test_ekk"
+Directory: /workspace/c/build
+"test_ekk" start time: Jan 22 08:12 UTC
+Output:
+----------------------------------------------------------
+EK-KOR v2 Test Suite
+====================
+
+EK-KOR v2.0.0 initialized
+  Platform: Linux (POSIX HAL)
+  k-neighbors: 7
+  Max modules: 256
+PASS: test_init
+PASS: test_fixed_point
+PASS: test_field_operations
+PASS: test_topology
+PASS: test_consensus
+PASS: test_heartbeat
+PASS: test_module_create
+PASS: test_module_lifecycle
+PASS: test_task_management
+
+====================
+All tests PASSED
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"test_ekk" end time: Jan 22 08:12 UTC
+"test_ekk" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: test_vectors
+2/2 Test: test_vectors
+Command: "/workspace/c/build/test_harness" "/workspace/c/../spec/test-vectors/auth_001_chaskey.json" "/workspace/c/../spec/test-vectors/capability_001_can_perform.json" "/workspace/c/../spec/test-vectors/consensus_001_propose_basic.json" "/workspace/c/../spec/test-vectors/consensus_002_vote_approved.json" "/workspace/c/../spec/test-vectors/consensus_003_vote_rejected.json" "/workspace/c/../spec/test-vectors/consensus_004_inhibit.json" "/workspace/c/../spec/test-vectors/consensus_005_timeout.json" "/workspace/c/../spec/test-vectors/deadline_001_slack_computation.json" "/workspace/c/../spec/test-vectors/deadline_002_critical_slack.json" "/workspace/c/../spec/test-vectors/field_001_publish_basic.json" "/workspace/c/../spec/test-vectors/field_002_publish_invalid_id.json" "/workspace/c/../spec/test-vectors/field_003_sample_fresh.json" "/workspace/c/../spec/test-vectors/field_004_sample_with_decay.json" "/workspace/c/../spec/test-vectors/field_005_sample_expired.json" "/workspace/c/../spec/test-vectors/field_006_gradient_positive.json" "/workspace/c/../spec/test-vectors/field_007_gradient_negative.json" "/workspace/c/../spec/test-vectors/field_008_slack_gradient.json" "/workspace/c/../spec/test-vectors/gossip_001_basic_propagation.json" "/workspace/c/../spec/test-vectors/gossip_002_duplicate_detection.json" "/workspace/c/../spec/test-vectors/gossip_003_gap_detection.json" "/workspace/c/../spec/test-vectors/gossip_004_version_vector_merge.json" "/workspace/c/../spec/test-vectors/gossip_005_lww_conflict.json" "/workspace/c/../spec/test-vectors/gossip_006_hop_limit.json" "/workspace/c/../spec/test-vectors/gossip_007_anti_entropy.json" "/workspace/c/../spec/test-vectors/heartbeat_001_basic.json" "/workspace/c/../spec/test-vectors/heartbeat_002_suspect.json" "/workspace/c/../spec/test-vectors/heartbeat_003_dead.json" "/workspace/c/../spec/test-vectors/heartbeat_004_recovery.json" "/workspace/c/../spec/test-vectors/q15_001_conversion.json" "/workspace/c/../spec/test-vectors/spsc_001_basic.json" "/workspace/c/../spec/test-vectors/topology_001_discovery_basic.json" "/workspace/c/../spec/test-vectors/topology_002_k_neighbor_limit.json" "/workspace/c/../spec/test-vectors/topology_003_neighbor_lost.json" "/workspace/c/../spec/test-vectors/topology_004_physical_distance.json"
+Directory: /workspace/c/build
+"test_vectors" start time: Jan 22 08:12 UTC
+Output:
+----------------------------------------------------------
+test_harness starting, argc=35
+Initializing EK-KOR HAL...
+ekk_hal_init returned: 0
+Initializing EK-KOR field region...
+ekk_field_init returned: 0
+Processing 34 test files...
+Running test file: /workspace/c/../spec/test-vectors/auth_001_chaskey.json
+  read_file(/workspace/c/../spec/test-vectors/auth_001_chaskey.json)...
+  Parsing JSON (4266 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: 0x61405fadd620
+    run_single_test: extracting fields...
+    Test: id=chaskey_empty_message, module=auth, function=ekk_auth_compute
+    Looking for handler: module=auth, function=ekk_auth_compute
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      FOUND handler at index 21
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fadd800, expected=0x61405fadda30
+    Calling handler...
+    Handler returned: passed=0
+    run_single_test: extracting fields...
+    Test: id=chaskey_one_block, module=auth, function=ekk_auth_compute
+    Looking for handler: module=auth, function=ekk_auth_compute
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      FOUND handler at index 21
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405faddd30, expected=0x61405faddf70
+    Calling handler...
+    Handler returned: passed=0
+    run_single_test: extracting fields...
+    Test: id=chaskey_partial_block, module=auth, function=ekk_auth_compute
+    Looking for handler: module=auth, function=ekk_auth_compute
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      FOUND handler at index 21
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fade260, expected=0x61405fadf5e0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=chaskey_verify_valid, module=auth, function=ekk_auth_verify
+    Looking for handler: module=auth, function=ekk_auth_verify
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      FOUND handler at index 22
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fadf8d0, expected=0x61405fadfb70
+    Calling handler...
+    Handler returned: passed=0
+    run_single_test: extracting fields...
+    Test: id=chaskey_verify_invalid, module=auth, function=ekk_auth_verify
+    Looking for handler: module=auth, function=ekk_auth_verify
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      FOUND handler at index 22
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fadfdc0, expected=0x61405fae0060
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=chaskey_verify_wrong_key, module=auth, function=ekk_auth_verify
+    Looking for handler: module=auth, function=ekk_auth_verify
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      FOUND handler at index 22
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae0360, expected=0x61405fae0600
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=chaskey_incremental, module=auth, function=incremental
+    Looking for handler: module=auth, function=incremental
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      FOUND handler at index 24
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae0990, expected=0x61405fae0cf0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=chaskey_message_auth, module=auth, function=ekk_auth_message
+    Looking for handler: module=auth, function=ekk_auth_message
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      FOUND handler at index 25
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae0f80, expected=0x61405fae1200
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=auth_required_vote, module=auth, function=ekk_auth_is_required
+    Looking for handler: module=auth, function=ekk_auth_is_required
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      FOUND handler at index 23
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae1490, expected=0x61405fae1600
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=auth_required_heartbeat, module=auth, function=ekk_auth_is_required
+    Looking for handler: module=auth, function=ekk_auth_is_required
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      FOUND handler at index 23
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae1860, expected=0x61405fae19d0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=keyring_set_get, module=auth, function=keyring
+    Looking for handler: module=auth, function=keyring
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      FOUND handler at index 26
+    Processing setup...
+    Setup complete, getting input/expected...
+    Processing steps array...
+  Printing results...
+[{
+		"id":	"chaskey_empty_message",
+		"module":	"auth",
+		"function":	"ekk_auth_compute",
+		"tag_hex":	"7bc92e6ff6a16508",
+		"error":	"Tag mismatch",
+		"expected":	"dd6ce07032c11bc2",
+		"passed":	false
+	}, {
+		"id":	"chaskey_one_block",
+		"module":	"auth",
+		"function":	"ekk_auth_compute",
+		"tag_hex":	"a487f6615a30744a",
+		"error":	"Tag mismatch",
+		"expected":	"792e5db4a16e1ad4",
+		"passed":	false
+	}, {
+		"id":	"chaskey_partial_block",
+		"module":	"auth",
+		"function":	"ekk_auth_compute",
+		"tag_hex":	"a54e226b719b2426",
+		"passed":	true
+	}, {
+		"id":	"chaskey_verify_valid",
+		"module":	"auth",
+		"function":	"ekk_auth_verify",
+		"result":	false,
+		"error":	"Verification result mismatch",
+		"passed":	false
+	}, {
+		"id":	"chaskey_verify_invalid",
+		"module":	"auth",
+		"function":	"ekk_auth_verify",
+		"result":	false,
+		"passed":	true
+	}, {
+		"id":	"chaskey_verify_wrong_key",
+		"module":	"auth",
+		"function":	"ekk_auth_verify",
+		"result":	false,
+		"passed":	true
+	}, {
+		"id":	"chaskey_incremental",
+		"module":	"auth",
+		"function":	"incremental",
+		"return":	"OK",
+		"note":	"Incremental auth - not yet implemented",
+		"passed":	true
+	}, {
+		"id":	"chaskey_message_auth",
+		"module":	"auth",
+		"function":	"ekk_auth_message",
+		"return":	"OK",
+		"note":	"Auth message - simplified",
+		"passed":	true
+	}, {
+		"id":	"auth_required_vote",
+		"module":	"auth",
+		"function":	"ekk_auth_is_required",
+		"result":	true,
+		"passed":	true
+	}, {
+		"id":	"auth_required_heartbeat",
+		"module":	"auth",
+		"function":	"ekk_auth_is_required",
+		"result":	false,
+		"passed":	true
+	}, {
+		"id":	"keyring_set_get",
+		"module":	"auth",
+		"function":	"keyring",
+		"passed":	true,
+		"steps_completed":	7
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/auth_001_chaskey.json
+Running test file: /workspace/c/../spec/test-vectors/capability_001_can_perform.json
+  read_file(/workspace/c/../spec/test-vectors/capability_001_can_perform.json)...
+  Parsing JSON (1679 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=capability_001, module=capability, function=can_perform
+    Looking for handler: module=capability, function=can_perform
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"capability_001",
+		"module":	"capability",
+		"function":	"can_perform",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/capability_001_can_perform.json
+Running test file: /workspace/c/../spec/test-vectors/consensus_001_propose_basic.json
+  read_file(/workspace/c/../spec/test-vectors/consensus_001_propose_basic.json)...
+  Parsing JSON (780 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=consensus_001, module=consensus, function=consensus_propose
+    Looking for handler: module=consensus, function=consensus_propose
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      FOUND handler at index 8
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae36c0, expected=0x61405fadda10
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"consensus_001",
+		"module":	"consensus",
+		"function":	"consensus_propose",
+		"return":	"OK",
+		"ballot_id":	1,
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/consensus_001_propose_basic.json
+Running test file: /workspace/c/../spec/test-vectors/consensus_002_vote_approved.json
+  read_file(/workspace/c/../spec/test-vectors/consensus_002_vote_approved.json)...
+  Parsing JSON (1793 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=consensus_002, module=consensus, function=consensus_on_vote
+    Looking for handler: module=consensus, function=consensus_on_vote
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      FOUND handler at index 10
+    Processing setup...
+    Setup complete, getting input/expected...
+    Processing steps array...
+  Test FAILED
+  Printing results...
+[{
+		"id":	"consensus_002",
+		"module":	"consensus",
+		"function":	"consensus_on_vote",
+		"error":	"Step 5 failed",
+		"passed":	false,
+		"steps_completed":	5
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/consensus_002_vote_approved.json
+Running test file: /workspace/c/../spec/test-vectors/consensus_003_vote_rejected.json
+  read_file(/workspace/c/../spec/test-vectors/consensus_003_vote_rejected.json)...
+  Parsing JSON (1292 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=consensus_003, module=consensus, function=consensus_on_vote
+    Looking for handler: module=consensus, function=consensus_on_vote
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      FOUND handler at index 10
+    Processing setup...
+    Setup complete, getting input/expected...
+    Processing steps array...
+  Test FAILED
+  Printing results...
+[{
+		"id":	"consensus_003",
+		"module":	"consensus",
+		"function":	"consensus_on_vote",
+		"error":	"Step 7 failed",
+		"passed":	false,
+		"steps_completed":	7
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/consensus_003_vote_rejected.json
+Running test file: /workspace/c/../spec/test-vectors/consensus_004_inhibit.json
+  read_file(/workspace/c/../spec/test-vectors/consensus_004_inhibit.json)...
+  Parsing JSON (762 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=consensus_004, module=consensus, function=consensus_inhibit
+    Looking for handler: module=consensus, function=consensus_inhibit
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      FOUND handler at index 12
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae16d0, expected=0x61405fadd480
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"consensus_004",
+		"module":	"consensus",
+		"function":	"consensus_inhibit",
+		"return":	"OK",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/consensus_004_inhibit.json
+Running test file: /workspace/c/../spec/test-vectors/consensus_005_timeout.json
+  read_file(/workspace/c/../spec/test-vectors/consensus_005_timeout.json)...
+  Parsing JSON (868 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=consensus_005, module=consensus, function=consensus_tick
+    Looking for handler: module=consensus, function=consensus_tick
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      FOUND handler at index 11
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae1b60, expected=0x61405fae1c60
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"consensus_005",
+		"module":	"consensus",
+		"function":	"consensus_tick",
+		"completed":	3,
+		"return":	"OK",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/consensus_005_timeout.json
+Running test file: /workspace/c/../spec/test-vectors/deadline_001_slack_computation.json
+  read_file(/workspace/c/../spec/test-vectors/deadline_001_slack_computation.json)...
+  Parsing JSON (664 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=deadline_001, module=deadline, function=compute_slack
+    Looking for handler: module=deadline, function=compute_slack
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"deadline_001",
+		"module":	"deadline",
+		"function":	"compute_slack",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/deadline_001_slack_computation.json
+Running test file: /workspace/c/../spec/test-vectors/deadline_002_critical_slack.json
+  read_file(/workspace/c/../spec/test-vectors/deadline_002_critical_slack.json)...
+  Parsing JSON (681 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=deadline_002, module=deadline, function=compute_slack
+    Looking for handler: module=deadline, function=compute_slack
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"deadline_002",
+		"module":	"deadline",
+		"function":	"compute_slack",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/deadline_002_critical_slack.json
+Running test file: /workspace/c/../spec/test-vectors/field_001_publish_basic.json
+  read_file(/workspace/c/../spec/test-vectors/field_001_publish_basic.json)...
+  Parsing JSON (964 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=field_001, module=field, function=field_publish
+    Looking for handler: module=field, function=field_publish
+      Checking: field/field_publish
+      FOUND handler at index 0
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fadda80, expected=0x61405fae0e80
+    Calling handler...
+      test_field_publish: start
+      module_id=42
+      field_obj=0x61405fae36c0
+      timestamp=1000000
+      Populating field from JSON...
+      Calling ekk_field_publish...
+      ekk_field_publish returned: 0
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"field_001",
+		"module":	"field",
+		"function":	"field_publish",
+		"return":	"OK",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/field_001_publish_basic.json
+Running test file: /workspace/c/../spec/test-vectors/field_002_publish_invalid_id.json
+  read_file(/workspace/c/../spec/test-vectors/field_002_publish_invalid_id.json)...
+  Parsing JSON (509 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=field_002, module=field, function=field_publish
+    Looking for handler: module=field, function=field_publish
+      Checking: field/field_publish
+      FOUND handler at index 0
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae32a0, expected=0x61405fae1910
+    Calling handler...
+      test_field_publish: start
+      module_id=0
+      field_obj=0x61405fadd590
+      timestamp=1000000
+      Populating field from JSON...
+      Calling ekk_field_publish...
+      ekk_field_publish returned: -1
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"field_002",
+		"module":	"field",
+		"function":	"field_publish",
+		"return":	"ERR_INVALID_ARG",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/field_002_publish_invalid_id.json
+Running test file: /workspace/c/../spec/test-vectors/field_003_sample_fresh.json
+  read_file(/workspace/c/../spec/test-vectors/field_003_sample_fresh.json)...
+  Parsing JSON (713 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=field_003, module=field, function=field_sample
+    Looking for handler: module=field, function=field_sample
+      Checking: field/field_publish
+      Checking: field/field_sample
+      FOUND handler at index 1
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae31c0, expected=0x61405fae4c30
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"field_003",
+		"module":	"field",
+		"function":	"field_sample",
+		"return":	"OK",
+		"field":	{
+			"load":	0.5,
+			"thermal":	0.29998779296875,
+			"power":	0.79998779296875,
+			"source":	42
+		},
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/field_003_sample_fresh.json
+Running test file: /workspace/c/../spec/test-vectors/field_004_sample_with_decay.json
+  read_file(/workspace/c/../spec/test-vectors/field_004_sample_with_decay.json)...
+  Parsing JSON (886 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=field_004, module=field, function=field_sample
+    Looking for handler: module=field, function=field_sample
+      Checking: field/field_publish
+      Checking: field/field_sample
+      FOUND handler at index 1
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae4c30, expected=0x61405fae0e10
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"field_004",
+		"module":	"field",
+		"function":	"field_sample",
+		"return":	"OK",
+		"field":	{
+			"load":	0.399993896484375,
+			"thermal":	0.399993896484375,
+			"power":	0.399993896484375,
+			"source":	42
+		},
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/field_004_sample_with_decay.json
+Running test file: /workspace/c/../spec/test-vectors/field_005_sample_expired.json
+  read_file(/workspace/c/../spec/test-vectors/field_005_sample_expired.json)...
+  Parsing JSON (618 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=field_005, module=field, function=field_sample
+    Looking for handler: module=field, function=field_sample
+      Checking: field/field_publish
+      Checking: field/field_sample
+      FOUND handler at index 1
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae1320, expected=0x61405fae4a20
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"field_005",
+		"module":	"field",
+		"function":	"field_sample",
+		"return":	"ERR_FIELD_EXPIRED",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/field_005_sample_expired.json
+Running test file: /workspace/c/../spec/test-vectors/field_006_gradient_positive.json
+  read_file(/workspace/c/../spec/test-vectors/field_006_gradient_positive.json)...
+  Parsing JSON (565 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=field_006, module=field, function=field_gradient
+    Looking for handler: module=field, function=field_gradient
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      FOUND handler at index 2
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae45c0, expected=0x61405fae36c0
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"field_006",
+		"module":	"field",
+		"function":	"field_gradient",
+		"gradient":	0.4000091552734375,
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/field_006_gradient_positive.json
+Running test file: /workspace/c/../spec/test-vectors/field_007_gradient_negative.json
+  read_file(/workspace/c/../spec/test-vectors/field_007_gradient_negative.json)...
+  Parsing JSON (577 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=field_007, module=field, function=field_gradient
+    Looking for handler: module=field, function=field_gradient
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      FOUND handler at index 2
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405faddaa0, expected=0x61405fae4c30
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"field_007",
+		"module":	"field",
+		"function":	"field_gradient",
+		"gradient":	-0.5,
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/field_007_gradient_negative.json
+Running test file: /workspace/c/../spec/test-vectors/field_008_slack_gradient.json
+  read_file(/workspace/c/../spec/test-vectors/field_008_slack_gradient.json)...
+  Parsing JSON (698 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=field_008, module=field, function=field_gradient
+    Looking for handler: module=field, function=field_gradient
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      FOUND handler at index 2
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405faddaa0, expected=0x61405fae1320
+    Calling handler...
+    Handler returned: passed=0
+  Test FAILED
+  Printing results...
+[{
+		"id":	"field_008",
+		"module":	"field",
+		"function":	"field_gradient",
+		"gradient":	0,
+		"error":	"Gradient mismatch",
+		"passed":	false
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/field_008_slack_gradient.json
+Running test file: /workspace/c/../spec/test-vectors/gossip_001_basic_propagation.json
+  read_file(/workspace/c/../spec/test-vectors/gossip_001_basic_propagation.json)...
+  Parsing JSON (1154 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=gossip_001, module=gossip, function=ekk_gossip_tick
+    Looking for handler: module=gossip, function=ekk_gossip_tick
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"gossip_001",
+		"module":	"gossip",
+		"function":	"ekk_gossip_tick",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/gossip_001_basic_propagation.json
+Running test file: /workspace/c/../spec/test-vectors/gossip_002_duplicate_detection.json
+  read_file(/workspace/c/../spec/test-vectors/gossip_002_duplicate_detection.json)...
+  Parsing JSON (1055 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=gossip_002, module=gossip, function=ekk_gossip_handle_event
+    Looking for handler: module=gossip, function=ekk_gossip_handle_event
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"gossip_002",
+		"module":	"gossip",
+		"function":	"ekk_gossip_handle_event",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/gossip_002_duplicate_detection.json
+Running test file: /workspace/c/../spec/test-vectors/gossip_003_gap_detection.json
+  read_file(/workspace/c/../spec/test-vectors/gossip_003_gap_detection.json)...
+  Parsing JSON (1198 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=gossip_003, module=gossip, function=ekk_gossip_handle_event
+    Looking for handler: module=gossip, function=ekk_gossip_handle_event
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"gossip_003",
+		"module":	"gossip",
+		"function":	"ekk_gossip_handle_event",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/gossip_003_gap_detection.json
+Running test file: /workspace/c/../spec/test-vectors/gossip_004_version_vector_merge.json
+  read_file(/workspace/c/../spec/test-vectors/gossip_004_version_vector_merge.json)...
+  Parsing JSON (1526 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=gossip_004, module=gossip, function=ekk_vv_merge
+    Looking for handler: module=gossip, function=ekk_vv_merge
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"gossip_004",
+		"module":	"gossip",
+		"function":	"ekk_vv_merge",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/gossip_004_version_vector_merge.json
+Running test file: /workspace/c/../spec/test-vectors/gossip_005_lww_conflict.json
+  read_file(/workspace/c/../spec/test-vectors/gossip_005_lww_conflict.json)...
+  Parsing JSON (1561 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=gossip_005, module=gossip, function=ekk_lww_is_newer
+    Looking for handler: module=gossip, function=ekk_lww_is_newer
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"gossip_005",
+		"module":	"gossip",
+		"function":	"ekk_lww_is_newer",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/gossip_005_lww_conflict.json
+Running test file: /workspace/c/../spec/test-vectors/gossip_006_hop_limit.json
+  read_file(/workspace/c/../spec/test-vectors/gossip_006_hop_limit.json)...
+  Parsing JSON (1496 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=gossip_006, module=gossip, function=ekk_gossip_handle_event
+    Looking for handler: module=gossip, function=ekk_gossip_handle_event
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"gossip_006",
+		"module":	"gossip",
+		"function":	"ekk_gossip_handle_event",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/gossip_006_hop_limit.json
+Running test file: /workspace/c/../spec/test-vectors/gossip_007_anti_entropy.json
+  read_file(/workspace/c/../spec/test-vectors/gossip_007_anti_entropy.json)...
+  Parsing JSON (1388 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=gossip_007, module=gossip, function=ekk_gossip_sync
+    Looking for handler: module=gossip, function=ekk_gossip_sync
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+    No handler found
+  Test FAILED
+  Printing results...
+[{
+		"id":	"gossip_007",
+		"module":	"gossip",
+		"function":	"ekk_gossip_sync",
+		"passed":	false,
+		"error":	"No handler for test"
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/gossip_007_anti_entropy.json
+Running test file: /workspace/c/../spec/test-vectors/heartbeat_001_basic.json
+  read_file(/workspace/c/../spec/test-vectors/heartbeat_001_basic.json)...
+  Parsing JSON (529 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=heartbeat_001, module=heartbeat, function=heartbeat_received
+    Looking for handler: module=heartbeat, function=heartbeat_received
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      FOUND handler at index 6
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae04e0, expected=0x61405fae4c30
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"heartbeat_001",
+		"module":	"heartbeat",
+		"function":	"heartbeat_received",
+		"return":	"OK",
+		"health":	"Alive",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/heartbeat_001_basic.json
+Running test file: /workspace/c/../spec/test-vectors/heartbeat_002_suspect.json
+  read_file(/workspace/c/../spec/test-vectors/heartbeat_002_suspect.json)...
+  Parsing JSON (701 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=heartbeat_002, module=heartbeat, function=heartbeat_tick
+    Looking for handler: module=heartbeat, function=heartbeat_tick
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      FOUND handler at index 7
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae4a20, expected=0x61405fae1320
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"heartbeat_002",
+		"module":	"heartbeat",
+		"function":	"heartbeat_tick",
+		"changed_count":	1,
+		"return":	"OK",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/heartbeat_002_suspect.json
+Running test file: /workspace/c/../spec/test-vectors/heartbeat_003_dead.json
+  read_file(/workspace/c/../spec/test-vectors/heartbeat_003_dead.json)...
+  Parsing JSON (734 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=heartbeat_003, module=heartbeat, function=heartbeat_tick
+    Looking for handler: module=heartbeat, function=heartbeat_tick
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      FOUND handler at index 7
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae0e10, expected=0x61405fae4570
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"heartbeat_003",
+		"module":	"heartbeat",
+		"function":	"heartbeat_tick",
+		"changed_count":	1,
+		"return":	"OK",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/heartbeat_003_dead.json
+Running test file: /workspace/c/../spec/test-vectors/heartbeat_004_recovery.json
+  read_file(/workspace/c/../spec/test-vectors/heartbeat_004_recovery.json)...
+  Parsing JSON (971 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=heartbeat_004, module=heartbeat, function=heartbeat_received
+    Looking for handler: module=heartbeat, function=heartbeat_received
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      FOUND handler at index 6
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae2a00, expected=0x61405fae2f10
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"heartbeat_004",
+		"module":	"heartbeat",
+		"function":	"heartbeat_received",
+		"return":	"OK",
+		"health":	"Alive",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/heartbeat_004_recovery.json
+Running test file: /workspace/c/../spec/test-vectors/q15_001_conversion.json
+  read_file(/workspace/c/../spec/test-vectors/q15_001_conversion.json)...
+  Parsing JSON (3095 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: 0x61405fadf450
+    run_single_test: extracting fields...
+    Test: id=q15_convert_zero, module=types, function=ekk_fixed_to_q15
+    Looking for handler: module=types, function=ekk_fixed_to_q15
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      FOUND handler at index 28
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae04e0, expected=0x61405fadfc10
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_convert_half, module=types, function=ekk_fixed_to_q15
+    Looking for handler: module=types, function=ekk_fixed_to_q15
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      FOUND handler at index 28
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae1910, expected=0x61405fae4c80
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_convert_one, module=types, function=ekk_fixed_to_q15
+    Looking for handler: module=types, function=ekk_fixed_to_q15
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      FOUND handler at index 28
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fadfb60, expected=0x61405fae16d0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_convert_neg_half, module=types, function=ekk_fixed_to_q15
+    Looking for handler: module=types, function=ekk_fixed_to_q15
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      FOUND handler at index 28
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae11e0, expected=0x61405fae2ef0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_convert_neg_one, module=types, function=ekk_fixed_to_q15
+    Looking for handler: module=types, function=ekk_fixed_to_q15
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      FOUND handler at index 28
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae2c80, expected=0x61405fae2d80
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_convert_saturate_positive, module=types, function=ekk_fixed_to_q15
+    Looking for handler: module=types, function=ekk_fixed_to_q15
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      FOUND handler at index 28
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae1e40, expected=0x61405fae1fb0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_convert_saturate_negative, module=types, function=ekk_fixed_to_q15
+    Looking for handler: module=types, function=ekk_fixed_to_q15
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      FOUND handler at index 28
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae2250, expected=0x61405fae23c0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_to_fixed_zero, module=types, function=ekk_q15_to_fixed
+    Looking for handler: module=types, function=ekk_q15_to_fixed
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      FOUND handler at index 29
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae2680, expected=0x61405fae2780
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_to_fixed_half, module=types, function=ekk_q15_to_fixed
+    Looking for handler: module=types, function=ekk_q15_to_fixed
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      FOUND handler at index 29
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405faddcc0, expected=0x61405fadddc0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_mul_half_half, module=types, function=ekk_q15_mul
+    Looking for handler: module=types, function=ekk_q15_mul
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      FOUND handler at index 30
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405faddff0, expected=0x61405fade1d0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_add_sat_overflow, module=types, function=ekk_q15_add_sat
+    Looking for handler: module=types, function=ekk_q15_add_sat
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      FOUND handler at index 31
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fade4b0, expected=0x61405fade620
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=q15_sub_sat_underflow, module=types, function=ekk_q15_sub_sat
+    Looking for handler: module=types, function=ekk_q15_sub_sat
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      Checking: auth/ekk_auth_compute
+      Checking: auth/ekk_auth_verify
+      Checking: auth/ekk_auth_is_required
+      Checking: auth/incremental
+      Checking: auth/ekk_auth_message
+      Checking: auth/keyring
+      Checking: types/q15_convert
+      Checking: types/ekk_fixed_to_q15
+      Checking: types/ekk_q15_to_fixed
+      Checking: types/ekk_q15_mul
+      Checking: types/ekk_q15_add_sat
+      Checking: types/ekk_q15_sub_sat
+      FOUND handler at index 32
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fade8e0, expected=0x61405fadea50
+    Calling handler...
+    Handler returned: passed=1
+  Printing results...
+[{
+		"id":	"q15_convert_zero",
+		"module":	"types",
+		"function":	"ekk_fixed_to_q15",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_convert_half",
+		"module":	"types",
+		"function":	"ekk_fixed_to_q15",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_convert_one",
+		"module":	"types",
+		"function":	"ekk_fixed_to_q15",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_convert_neg_half",
+		"module":	"types",
+		"function":	"ekk_fixed_to_q15",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_convert_neg_one",
+		"module":	"types",
+		"function":	"ekk_fixed_to_q15",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_convert_saturate_positive",
+		"module":	"types",
+		"function":	"ekk_fixed_to_q15",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_convert_saturate_negative",
+		"module":	"types",
+		"function":	"ekk_fixed_to_q15",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_to_fixed_zero",
+		"module":	"types",
+		"function":	"ekk_q15_to_fixed",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_to_fixed_half",
+		"module":	"types",
+		"function":	"ekk_q15_to_fixed",
+		"result":	0,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_mul_half_half",
+		"module":	"types",
+		"function":	"ekk_q15_mul",
+		"result":	8192,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_add_sat_overflow",
+		"module":	"types",
+		"function":	"ekk_q15_add_sat",
+		"result":	32767,
+		"return":	"OK",
+		"passed":	true
+	}, {
+		"id":	"q15_sub_sat_underflow",
+		"module":	"types",
+		"function":	"ekk_q15_sub_sat",
+		"result":	-32768,
+		"return":	"OK",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/q15_001_conversion.json
+Running test file: /workspace/c/../spec/test-vectors/spsc_001_basic.json
+  read_file(/workspace/c/../spec/test-vectors/spsc_001_basic.json)...
+  Parsing JSON (3158 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: 0x61405fae5140
+    run_single_test: extracting fields...
+    Test: id=spsc_init, module=spsc, function=ekk_spsc_init
+    Looking for handler: module=spsc, function=ekk_spsc_init
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      FOUND handler at index 14
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae36c0, expected=0x61405fae1320
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_init_not_power_of_2, module=spsc, function=ekk_spsc_init
+    Looking for handler: module=spsc, function=ekk_spsc_init
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      FOUND handler at index 14
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae4ec0, expected=0x61405fae2a00
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_empty_initial, module=spsc, function=ekk_spsc_is_empty
+    Looking for handler: module=spsc, function=ekk_spsc_is_empty
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      FOUND handler at index 17
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=(nil), expected=0x61405fae11a0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_push_one, module=spsc, function=ekk_spsc_push
+    Looking for handler: module=spsc, function=ekk_spsc_push
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      FOUND handler at index 15
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae2f40, expected=0x61405fae2c10
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_pop_one, module=spsc, function=ekk_spsc_pop
+    Looking for handler: module=spsc, function=ekk_spsc_pop
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      FOUND handler at index 16
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=(nil), expected=0x61405fae0c50
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_pop_empty, module=spsc, function=ekk_spsc_pop
+    Looking for handler: module=spsc, function=ekk_spsc_pop
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      FOUND handler at index 16
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=(nil), expected=0x61405fade820
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_fill_to_capacity, module=spsc, function=ekk_spsc_push
+    Looking for handler: module=spsc, function=ekk_spsc_push
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      FOUND handler at index 15
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fadeae0, expected=0x61405fae1db0
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_push_when_full, module=spsc, function=ekk_spsc_push
+    Looking for handler: module=spsc, function=ekk_spsc_push
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      FOUND handler at index 15
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=(nil), expected=0x61405fae2190
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_fifo_order, module=spsc, function=sequence
+    Looking for handler: module=spsc, function=sequence
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      Checking: spsc/sequence
+      FOUND handler at index 20
+    Processing setup...
+    Setup complete, getting input/expected...
+    Processing steps array...
+    run_single_test: extracting fields...
+    Test: id=spsc_peek_no_consume, module=spsc, function=ekk_spsc_pop_peek
+    Looking for handler: module=spsc, function=ekk_spsc_pop_peek
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      FOUND handler at index 18
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=(nil), expected=0x61405fae5950
+    Calling handler...
+    Handler returned: passed=1
+    run_single_test: extracting fields...
+    Test: id=spsc_peek_release, module=spsc, function=ekk_spsc_pop_release
+    Looking for handler: module=spsc, function=ekk_spsc_pop_release
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      Checking: heartbeat/heartbeat_received
+      Checking: heartbeat/heartbeat_tick
+      Checking: consensus/consensus_propose
+      Checking: consensus/consensus_vote
+      Checking: consensus/consensus_on_vote
+      Checking: consensus/consensus_tick
+      Checking: consensus/consensus_inhibit
+      Checking: consensus/consensus_get_result
+      Checking: spsc/ekk_spsc_init
+      Checking: spsc/ekk_spsc_push
+      Checking: spsc/ekk_spsc_pop
+      Checking: spsc/ekk_spsc_is_empty
+      Checking: spsc/ekk_spsc_pop_peek
+      Checking: spsc/ekk_spsc_pop_release
+      FOUND handler at index 19
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=(nil), expected=0x61405fae5d30
+    Calling handler...
+    Handler returned: passed=1
+  Printing results...
+[{
+		"id":	"spsc_init",
+		"module":	"spsc",
+		"function":	"ekk_spsc_init",
+		"result":	"OK",
+		"head":	0,
+		"tail":	0,
+		"mask":	7,
+		"passed":	true
+	}, {
+		"id":	"spsc_init_not_power_of_2",
+		"module":	"spsc",
+		"function":	"ekk_spsc_init",
+		"result":	"ERR_INVALID_ARG",
+		"passed":	true
+	}, {
+		"id":	"spsc_empty_initial",
+		"module":	"spsc",
+		"function":	"ekk_spsc_is_empty",
+		"result":	true,
+		"passed":	true
+	}, {
+		"id":	"spsc_push_one",
+		"module":	"spsc",
+		"function":	"ekk_spsc_push",
+		"push_result":	"OK",
+		"pop_result":	"OK",
+		"passed":	true
+	}, {
+		"id":	"spsc_pop_one",
+		"module":	"spsc",
+		"function":	"ekk_spsc_pop",
+		"push_result":	"OK",
+		"pop_result":	"OK",
+		"passed":	true
+	}, {
+		"id":	"spsc_pop_empty",
+		"module":	"spsc",
+		"function":	"ekk_spsc_pop",
+		"push_result":	"OK",
+		"pop_result":	"OK",
+		"passed":	true
+	}, {
+		"id":	"spsc_fill_to_capacity",
+		"module":	"spsc",
+		"function":	"ekk_spsc_push",
+		"push_result":	"OK",
+		"pop_result":	"OK",
+		"passed":	true
+	}, {
+		"id":	"spsc_push_when_full",
+		"module":	"spsc",
+		"function":	"ekk_spsc_push",
+		"push_result":	"OK",
+		"pop_result":	"OK",
+		"passed":	true
+	}, {
+		"id":	"spsc_fifo_order",
+		"module":	"spsc",
+		"function":	"sequence",
+		"passed":	true,
+		"steps_completed":	6
+	}, {
+		"id":	"spsc_peek_no_consume",
+		"module":	"spsc",
+		"function":	"ekk_spsc_pop_peek",
+		"return":	"OK",
+		"note":	"Peek test - returns pointer to item",
+		"passed":	true
+	}, {
+		"id":	"spsc_peek_release",
+		"module":	"spsc",
+		"function":	"ekk_spsc_pop_release",
+		"return":	"OK",
+		"note":	"Release test - removes peeked item",
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/spsc_001_basic.json
+Running test file: /workspace/c/../spec/test-vectors/topology_001_discovery_basic.json
+  read_file(/workspace/c/../spec/test-vectors/topology_001_discovery_basic.json)...
+  Parsing JSON (768 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=topology_001, module=topology, function=topology_on_discovery
+    Looking for handler: module=topology, function=topology_on_discovery
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      FOUND handler at index 3
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae1ab0, expected=0x61405fae8220
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"topology_001",
+		"module":	"topology",
+		"function":	"topology_on_discovery",
+		"return":	"OK",
+		"neighbor_count":	1,
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/topology_001_discovery_basic.json
+Running test file: /workspace/c/../spec/test-vectors/topology_002_k_neighbor_limit.json
+  read_file(/workspace/c/../spec/test-vectors/topology_002_k_neighbor_limit.json)...
+  Parsing JSON (1497 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=topology_002, module=topology, function=topology_reelect
+    Looking for handler: module=topology, function=topology_reelect
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      FOUND handler at index 5
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae67b0, expected=0x61405fae6800
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"topology_002",
+		"module":	"topology",
+		"function":	"topology_reelect",
+		"neighbor_count":	7,
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/topology_002_k_neighbor_limit.json
+Running test file: /workspace/c/../spec/test-vectors/topology_003_neighbor_lost.json
+  read_file(/workspace/c/../spec/test-vectors/topology_003_neighbor_lost.json)...
+  Parsing JSON (941 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=topology_003, module=topology, function=topology_on_neighbor_lost
+    Looking for handler: module=topology, function=topology_on_neighbor_lost
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      FOUND handler at index 4
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae1150, expected=0x61405fae1230
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"topology_003",
+		"module":	"topology",
+		"function":	"topology_on_neighbor_lost",
+		"return":	"OK",
+		"neighbor_count":	7,
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/topology_003_neighbor_lost.json
+Running test file: /workspace/c/../spec/test-vectors/topology_004_physical_distance.json
+  read_file(/workspace/c/../spec/test-vectors/topology_004_physical_distance.json)...
+  Parsing JSON (1176 bytes)...
+  JSON parsed successfully
+  Output array created
+  tests array: (nil)
+  Running single test...
+    run_single_test: extracting fields...
+    Test: id=topology_004, module=topology, function=topology_reelect
+    Looking for handler: module=topology, function=topology_reelect
+      Checking: field/field_publish
+      Checking: field/field_sample
+      Checking: field/field_gradient
+      Checking: topology/topology_on_discovery
+      Checking: topology/topology_on_neighbor_lost
+      Checking: topology/topology_reelect
+      FOUND handler at index 5
+    Processing setup...
+    Setup complete, getting input/expected...
+    input=0x61405fae2fd0, expected=0x61405fae2c10
+    Calling handler...
+    Handler returned: passed=1
+  Test PASSED
+  Printing results...
+[{
+		"id":	"topology_004",
+		"module":	"topology",
+		"function":	"topology_reelect",
+		"neighbor_count":	4,
+		"passed":	true
+	}]
+Finished test file: /workspace/c/../spec/test-vectors/topology_004_physical_distance.json
+
+=== SUMMARY ===
+Passed: 49
+Failed: 16
+Total:  65
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Failed.
+"test_vectors" end time: Jan 22 08:12 UTC
+"test_vectors" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jan 22 08:12 UTC
