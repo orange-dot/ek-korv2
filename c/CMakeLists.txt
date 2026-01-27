@@ -47,6 +47,10 @@ add_library(ekk STATIC
     src/ekk_init.c
     src/ekk_spsc.c
     src/ekk_auth.c
+    # JEZGRO Microkernel
+    src/jezgro/jezgro_mpu.c
+    src/jezgro/jezgro_ipc.c
+    src/jezgro/jezgro_reincarnation.c
 )
 
 target_include_directories(ekk
@@ -199,6 +203,16 @@ if(EKK_BUILD_EXAMPLES AND EKK_PLATFORM STREQUAL "posix")
     # HAX Demo - Visual multi-module demonstration
     add_executable(hax_demo examples/hax_demo.c)
     target_link_libraries(hax_demo PRIVATE ekk)
+
+    # Raft CAN-FD simulation harness (host-side)
+    add_executable(raft_canfd_sim
+        sim/raft_canfd_sim.c
+        src/ekk_raft.c
+        src/ekk_partition.c
+        src/ekk_types.c
+    )
+    target_include_directories(raft_canfd_sim PRIVATE include)
+    target_compile_features(raft_canfd_sim PRIVATE c_std_99)
 endif()
 
 # ============================================================================

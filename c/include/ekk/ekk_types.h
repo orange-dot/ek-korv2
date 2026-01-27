@@ -262,6 +262,8 @@ typedef enum {
     EKK_ERR_NEIGHBOR_LOST   = -9,
     EKK_ERR_FIELD_EXPIRED   = -10,
     EKK_ERR_HAL_FAILURE     = -11,
+    EKK_ERR_NOT_SUPPORTED   = -12,  /**< Feature not supported on platform */
+    EKK_ERR_LIMIT           = -13,  /**< Resource limit exceeded */
 } ekk_error_t;
 
 /* ============================================================================
